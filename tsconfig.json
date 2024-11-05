@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+      "module": "ES2022",
+      "target": "ES2022",
+      "noImplicitAny": true,
+      "removeComments": true,
+      "preserveConstEnums": true,
+      "sourceMap": false
+    },
+    "compileOnSave": true,
+    "include": [
+      "static/scripts/*.ts"
+    ]
+}
