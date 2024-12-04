@@ -49,16 +49,16 @@ class User(db.Model):
     last_logged_in = db.Column(db.DateTime, nullable=False)
     num_reports = db.Column(db.Integer, nullable=False)
     password_hash = db.Column(db.LargeBinary, nullable=False)
-    
+
     @property
     def password(self):
         raise AttributeError("password is a write-only attribute")
     @password.setter
     def password(self, pwd: str) -> None:
-        self.passwordHash = pwd_hasher.hash(pwd)
+        self.password_hash = pwd_hasher.hash(pwd)
     # add a verify_password convenience method
     def verify_password(self, pwd: str) -> bool:
-        return pwd_hasher.check(pwd, self.passwordHash)
+        return pwd_hasher.check(pwd, self.password_hash)
 
 class UserBlock(db.Model):
     __tablename__ = 'UserBlock'
