@@ -1,5 +1,5 @@
 from __future__ import annotations
-from flask import Flask, request, render_template, redirect, url_for, abort, current_app, flash, session, request
+from flask import Flask, request, render_template, redirect, url_for, abort, current_app, flash, session
 from flask_sqlalchemy import SQLAlchemy
 import os, sys
 from flask_login import UserMixin, LoginManager, login_required
@@ -8,23 +8,21 @@ from flask_login import login_user, logout_user, current_user
 from hashing_examples import UpdatedHasher
 from loginforms import RegisterForm, LoginForm
 
-script_dir = os.path.abspath(os.path.dirname(__file__))
-sys.path.append(script_dir)
+#script_dir = os.path.abspath(os.path.dirname(__file__))
+#sys.path.append(script_dir)
 
+#scriptdir = os.path.abspath(os.path.dirname(__file__))
+#dbpath = os.path.join(scriptdir, 'database.sqlite3')
 app = Flask(__name__)
-
-scriptdir = os.path.abspath(os.path.dirname(__file__))
-dbpath = os.path.join(scriptdir, 'database.sqlite3')
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{dbpath}"
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+app.config['SECRET_KEY'] = 'idontknowwhattowriteforagoodkey'
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://username:intellectuallychallengeddata@10.18.101.49:3306/sys"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-app.config['SECRET_KEY'] = 'idontknowwhattowriteforagoodkey'
-
 # open and read the contents of the pepper file into your pepper key
 # NOTE: you should really generate your own and not use the one from the starter
+scriptdir = os.path.abspath(os.path.dirname(__file__))
 pepfile = os.path.join(scriptdir, "pepper.bin")
 with open(pepfile, 'rb') as fin:
   pepper_key = fin.read()
@@ -32,23 +30,13 @@ with open(pepfile, 'rb') as fin:
 # create a new instance of UpdatedHasher using that pepper key
 pwd_hasher = UpdatedHasher(pepper_key)
 
-# Configure the Flask Application
-app = Flask(__name__)
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-app.config['SECRET_KEY'] = 'correcthorsebatterystaple'
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{dbpath}"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# Getting the database object handle from the app
-db = SQLAlchemy(app)
-
 class User(UserMixin, db.Model):
-    __tablename__ = 'Users'
+    __tablename__ = 'User'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.Unicode, nullable=False)
-    email = db.Column(db.Unicode, nullable=False)
+    email_address = db.Column(db.Unicode, nullable=False)
     passwordHash = db.Column(db.LargeBinary)
-    isAdmin = db.Column(db.Boolean)
+    is_admin = db.Column(db.Boolean)
     #profilePicture = db.Column(db.Unicode)
     #experience = db.Column(db.Integer)
     #level = db.Column(db.Integer)
@@ -120,16 +108,16 @@ def load_user(uid: int) -> User|None:
 
 # remember that all database operations must occur within an app context
 with app.app_context():
-    db.drop_all()
-    db.create_all() # this is only needed if the database doesn't already exist
+    pass
+    #db.create_all() # this is only needed if the database doesn't already exist
     # create admin accounts at runtime
-    user1 = User(username='David', email='david@gcc.edu', password='password', isAdmin=True) # type:ignore
-    user2 = User(username='Jackson', email='jackson@gcc.edu', password='password', isAdmin=True) # type:ignore
-    user3 = User(username='Andrew', email='andrew@gcc.edu', password='password', isAdmin=True) # type:ignore
-    user4 = User(username='Jeff', email='jeff@gcc.edu', password='password', isAdmin=True) # type:ignore
-    user5 = User(username='Kate', email='kate@gcc.edu', password='password', isAdmin=True) # type:ignore
-    db.session.add_all((user1, user2, user3, user4, user5))
-    db.session.commit()
+    #user1 = User(username='David', email='david@gcc.edu', password='password', isAdmin=True) # type:ignore
+    #user2 = User(username='Jackson', email='jackson@gcc.edu', password='password', isAdmin=True) # type:ignore
+    #user3 = User(username='Andrew', email='andrew@gcc.edu', password='password', isAdmin=True) # type:ignore
+    #user4 = User(username='Jeff', email='jeff@gcc.edu', password='password', isAdmin=True) # type:ignore
+    #user5 = User(username='Kate', email='kate@gcc.edu', password='password', isAdmin=True) # type:ignore
+    #db.session.add_all((user1, user2, user3, user4, user5))
+    #db.session.commit()
 
 @app.get('/register/')
 def get_register():
@@ -141,7 +129,7 @@ def post_register():
     form = RegisterForm()
     if form.validate():
         # check if there is already a user with this email address
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email_address=form.email.data).first()
         if user is not None:
             flash('There is already an account with that email address')
             return redirect(url_for('get_register'))
@@ -149,7 +137,7 @@ def post_register():
         user = User.query.filter_by(username=form.username.data).first()
         # if the email and username address is free, create a new user and send to login
         if user is None:
-            user = User(username=form.username.data, email=form.email.data, password=form.password.data, isAdmin=False) # type:ignore
+            user = User(username=form.username.data, email_address=form.email.data, password=form.password.data, is_Admin=False) # type:ignore
             db.session.add(user)
             db.session.commit()
             return redirect(url_for('get_login'))
@@ -173,7 +161,7 @@ def post_login():
     form = LoginForm()
     if form.validate():
         # try to get the user associated with this email address
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email_address=form.email.data).first()
         # if this user exists and the password matches
         if user is not None and user.verify_password(form.password.data):
             # log this user in through the login_manager
