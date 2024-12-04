@@ -30,26 +30,25 @@ with open(pepfile, 'rb') as fin:
 # create a new instance of UpdatedHasher using that pepper key
 pwd_hasher = UpdatedHasher(pepper_key)
 
-class User(UserMixin, db.Model):
+#class models for the database tables
+class User(db.Model):
     __tablename__ = 'User'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.Unicode, nullable=False)
-    email_address = db.Column(db.Unicode, nullable=False)
-    passwordHash = db.Column(db.LargeBinary)
-    is_admin = db.Column(db.Boolean)
-    #profilePicture = db.Column(db.Unicode)
-    #experience = db.Column(db.Integer)
-    #level = db.Column(db.Integer)
-    #floor = db.Column(db.Unicode)
-    #side = db.Column(db.Unicode)
-    #completedRecipes = db.Column(db.relationship('Recipe'))
-    #blockedUsers = db.Column(db.relationship('User'))
-    #friends = db.Column(db.relationship('User'))
-    #dietaryRestrictions = db.Column(db.relationship('DietaryRestriction'))
-    #completedAchievements = db.Column(db.relationship('Achievement'))
-    #joinedGroups = db.Column(db.relationship('Group'))
-    #preferredCuisines = db.Column(db.relationship('Cuisine'))
-    # make a write-only password property that just updates the stored hash
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    fname = db.Column(db.String(50), nullable=False)
+    lname = db.Column(db.String(50), nullable=False)
+    email_address = db.Column(db.String(50), nullable=False)
+    username = db.Column(db.String(50), nullable=False)
+    profile_picture = db.Column(db.Text)
+    xp_points = db.Column(db.Integer, nullable=False)
+    user_level = db.Column(db.Integer, nullable=False)
+    is_admin = db.Column(db.Boolean, nullable=False)
+    num_recipes_completed = db.Column(db.Integer, nullable=False)
+    colonial_floor = db.Column(db.Enum('1', '2', '3', '4', 'ADMIN'), nullable=False)
+    colonial_side = db.Column(db.Enum('Mens', 'Womens', 'ADMIN'), nullable=False)
+    date_created = db.Column(db.DateTime, nullable=False)
+    last_logged_in = db.Column(db.DateTime, nullable=False)
+    num_reports = db.Column(db.Integer, nullable=False)
+    password_hash = db.Column(db.LargeBinary, nullable=False)
     @property
     def password(self):
         raise AttributeError("password is a write-only attribute")
@@ -60,40 +59,183 @@ class User(UserMixin, db.Model):
     def verify_password(self, pwd: str) -> bool:
         return pwd_hasher.check(pwd, self.passwordHash)
 
-"""
+class UserBlock(db.Model):
+    __tablename__ = 'UserBlock'
+    blocked_user = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    blocked_by = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+
+
+class Friendship(db.Model):
+    __tablename__ = 'Friendship'
+    user1 = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    user2 = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+
+class DietaryRestriction(db.Model):
+    __tablename__ = 'DietaryRestriction'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.Text, nullable=False)
+
+class UserDietaryRestriction(db.Model):
+    __tablename__ = 'UserDietaryRestriction'
+    user_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    restriction_id = db.Column(db.Integer, db.ForeignKey('DietaryRestriction.id'), primary_key=True)
+
+class Cuisine(db.Model):
+    __tablename__ = 'Cuisine'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.Text, nullable=False)
+
+class UserCuisinePreference(db.Model):
+    __tablename__ = 'UserCuisinePreference'
+    user_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    cuisine_id = db.Column(db.Integer, db.ForeignKey('Cuisine.id'), primary_key=True)
+
+class UserGroup(db.Model):
+    __tablename__ = 'UserGroup'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    image = db.Column(db.Text)
+    description = db.Column(db.Text, nullable=False)
+    is_public = db.Column(db.Boolean, nullable=False)
+    num_reports = db.Column(db.Integer, nullable=False)
+
+class GroupMember(db.Model):
+    __tablename__ = 'GroupMember'
+    group_id = db.Column(db.Integer, db.ForeignKey('UserGroup.id'), primary_key=True)
+    member_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+
+class GroupBannedMember(db.Model):
+    __tablename__ = 'GroupBannedMember'
+    group_id = db.Column(db.Integer, db.ForeignKey('UserGroup.id'), primary_key=True)
+    banned_member_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+
+class Message(db.Model):
+    __tablename__ = 'Message'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    group_id = db.Column(db.Integer, db.ForeignKey('UserGroup.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    is_reported = db.Column(db.Boolean, nullable=False)
+    text = db.Column(db.Text, nullable=False)
+
+class Achievement(db.Model):
+    __tablename__ = 'Achievement'
+    id = db.Column(db.Integer, primary_key=True)
+    image = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    completion_requirement = db.Column(db.Text, nullable=False)
+
+class UserAchievement(db.Model):
+    __tablename__ = 'UserAchievement'
+    achievement_id = db.Column(db.Integer, db.ForeignKey('Achievement.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+
 class Recipe(db.Model):
-    __tablename__ = 'Recipes'
+    __tablename__ = 'Recipe'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    difficulty = db.Column(db.Enum('1', '2', '3', '4', '5'), nullable=False)
+    xp_amount = db.Column(db.Integer, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    rating = db.Column(db.Float, nullable=False)
+    image = db.Column(db.Text, nullable=False)
+
+class RecipeStep(db.Model):
+    __tablename__ = 'RecipeStep'
+    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), primary_key=True)
+    step_number = db.Column(db.Integer, primary_key=True)
+    step_description = db.Column(db.Text, nullable=False)
+
+class CookedRecipe(db.Model):
+    __tablename__ = 'CookedRecipe'
+    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), primary_key=True)
+    completed_by = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    date_completed = db.Column(db.DateTime, nullable=False)
+
+class RecipeCuisine(db.Model):
+    __tablename__ = 'RecipeCuisine'
+    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), primary_key=True)
+    cuisine_id = db.Column(db.Integer, db.ForeignKey('Cuisine.id'), primary_key=True)
+
+class Review(db.Model):
+    __tablename__ = 'Review'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    image = db.Column(db.Text)
+    rating = db.Column(db.Enum('1', '2', '3', '4', '5'), nullable=False)
+    difficulty = db.Column(db.Enum('1', '2', '3', '4', '5'), nullable=False)
+    num_reports = db.Column(db.Integer, nullable=False)
+
+class Challenge(db.Model):
+    __tablename__ = 'Challenge'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.Text, nullable=False)
+    creator = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    image = db.Column(db.Text)
+    difficulty = db.Column(db.Enum('1', '2', '3', '4', '5'), nullable=False)
+    theme = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    location = db.Column(db.Text, nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime, nullable=False)
+    is_complete = db.Column(db.Boolean, nullable=False)
+    num_reports = db.Column(db.Integer, nullable=False)
+
+class ChallengeResult(db.Model):
+    __tablename__ = 'ChallengeResult'
+    challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    challenge_rank = db.Column(db.Integer, nullable=False)
+
+class ChallengeVote(db.Model):
+    __tablename__ = 'ChallengeVote'
+    challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id'), primary_key=True)
+    given_to = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    given_by = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+
+class ChallengeParticipant(db.Model):
+    __tablename__ = 'ChallengeParticipant'
+    challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+
+class RecommendedChallengeRecipe(db.Model):
+    __tablename__ = 'RecommendedChallengeRecipe'
+    challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id'), primary_key=True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), primary_key=True)
 
 class Ingredient(db.Model):
     __tablename__ = 'Ingredient'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    ingredient_name = db.Column(db.Text, nullable=False)
 
-class Review(db.Model):
-    __tablename__ = 'Reviews'
+class RecipeIngredient(db.Model):
+    __tablename__ = 'RecipeIngredient'
+    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), primary_key=True)
+    ingredient_id = db.Column(db.Integer, db.ForeignKey('Ingredient.id'), primary_key=True)
+    ingredient_name = db.Column(db.Text)
+    quantity = db.Column(db.Integer, nullable=False)
+    unit = db.Column(db.String(50), nullable=False)
 
-class Achievement(db.Model):
-    __tablename__ = 'Achievements'
-
-class Challenge(db.Model):
-    __tablename__ = 'Challenges'
-
-class Cuisine(db.Model):
-    __tablename__ = 'Cuisines'
-
-class CompletionRequirement(db.Model):
-    __tablename__ = 'CompletionRequirements'
-
-class Group(db.Model):
-    __tablename__ = 'Groups'
-
-class DietaryRestriction(db.Model):
-    __tablename__ = 'DietaryRestrictions'
+class Substitution(db.Model):
+    __tablename__ = 'Substitution'
+    substituted = db.Column(db.Integer, db.ForeignKey('Ingredient.id'), primary_key=True)
+    substituted_by = db.Column(db.Integer, db.ForeignKey('Ingredient.id'), primary_key=True)
 
 class ShoppingList(db.Model):
-    __tablename__ = 'ShoppingLists'
+    __tablename__ = 'ShoppingList'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+
+class ShoppingListItem(db.Model):
+    __tablename__ = 'ShoppingListItem'
+    shopping_list_id = db.Column(db.Integer, db.ForeignKey('ShoppingList.id'), primary_key=True)
+    ingredient_id = db.Column(db.Integer, db.ForeignKey('Ingredient.id'), primary_key=True)
+    ingredient_quantity = db.Column(db.Integer, nullable=False)
+    ingredient_quantity_unit = db.Column(db.Text)
 
 class RecipeList(db.Model):
-    __tablename__ = 'RecipeLists'
-"""
+    __tablename__ = 'RecipeList'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.Text, nullable=False)
+    belongs_to = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
 
 # Prepare and connect the LoginManager to this app
 login_manager = LoginManager()
@@ -107,17 +249,10 @@ def load_user(uid: int) -> User|None:
     return User.query.get(int(uid))
 
 # remember that all database operations must occur within an app context
-with app.app_context():
-    pass
+# with app.app_context():
+#     pass
     #db.create_all() # this is only needed if the database doesn't already exist
-    # create admin accounts at runtime
-    #user1 = User(username='David', email='david@gcc.edu', password='password', isAdmin=True) # type:ignore
-    #user2 = User(username='Jackson', email='jackson@gcc.edu', password='password', isAdmin=True) # type:ignore
-    #user3 = User(username='Andrew', email='andrew@gcc.edu', password='password', isAdmin=True) # type:ignore
-    #user4 = User(username='Jeff', email='jeff@gcc.edu', password='password', isAdmin=True) # type:ignore
-    #user5 = User(username='Kate', email='kate@gcc.edu', password='password', isAdmin=True) # type:ignore
-    #db.session.add_all((user1, user2, user3, user4, user5))
-    #db.session.commit()
+   
 
 @app.get('/register/')
 def get_register():
