@@ -49,6 +49,7 @@ class User(db.Model):
     last_logged_in = db.Column(db.DateTime, nullable=False)
     num_reports = db.Column(db.Integer, nullable=False)
     password_hash = db.Column(db.LargeBinary, nullable=False)
+    
     @property
     def password(self):
         raise AttributeError("password is a write-only attribute")
