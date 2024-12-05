@@ -2,6 +2,7 @@ from __future__ import annotations
 from flask import Flask, request, render_template, redirect, url_for, abort, current_app, flash, session
 from flask_sqlalchemy import SQLAlchemy
 import os, sys
+from datetime import datetime
 from flask_login import UserMixin, LoginManager, login_required
 from flask_login import login_user, logout_user, current_user
 
@@ -31,11 +32,11 @@ with open(pepfile, 'rb') as fin:
 pwd_hasher = UpdatedHasher(pepper_key)
 
 #class models for the database tables
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'User'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    fname = db.Column(db.String(50), nullable=False)
-    lname = db.Column(db.String(50), nullable=False)
+    fname = db.Column(db.String(50))
+    lname = db.Column(db.String(50))
     email_address = db.Column(db.String(50), nullable=False)
     username = db.Column(db.String(50), nullable=False)
     profile_picture = db.Column(db.Text)
@@ -43,10 +44,10 @@ class User(db.Model):
     user_level = db.Column(db.Integer, nullable=False)
     is_admin = db.Column(db.Boolean, nullable=False)
     num_recipes_completed = db.Column(db.Integer, nullable=False)
-    colonial_floor = db.Column(db.Enum('1', '2', '3', '4', 'ADMIN'), nullable=False)
-    colonial_side = db.Column(db.Enum('Mens', 'Womens', 'ADMIN'), nullable=False)
+    colonial_floor = db.Column(db.Enum('1', '2', '3', '4', 'ADMIN'))
+    colonial_side = db.Column(db.Enum('Mens', 'Womens', 'ADMIN'))
     date_created = db.Column(db.DateTime, nullable=False)
-    last_logged_in = db.Column(db.DateTime, nullable=False)
+    last_logged_in = db.Column(db.DateTime)
     num_reports = db.Column(db.Integer, nullable=False)
     password_hash = db.Column(db.LargeBinary, nullable=False)
 
@@ -273,7 +274,10 @@ def post_register():
         user = User.query.filter_by(username=form.username.data).first()
         # if the email and username address is free, create a new user and send to login
         if user is None:
-            user = User(username=form.username.data, email_address=form.email.data, password=form.password.data, is_Admin=False) # type:ignore
+            user = User(username=form.username.data, email_address=form.email.data, password=form.password.data, # type:ignore
+                        xp_points=0, is_admin=False, num_recipes_completed=0, date_created=datetime.utcnow(),  # type:ignore
+                        num_reports=0, user_level=1, fname="", lname="", colonial_floor="1", colonial_side="Mens",  # type:ignore
+                        last_logged_in = datetime.utcnow()) # type:ignore
             db.session.add(user)
             db.session.commit()
             return redirect(url_for('get_login'))
