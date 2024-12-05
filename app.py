@@ -9,6 +9,9 @@ from flask_login import login_user, logout_user, current_user
 from hashing_examples import UpdatedHasher
 from loginforms import RegisterForm, LoginForm
 
+from sqlalchemy.dialects.mysql import JSON
+import pandas
+
 #script_dir = os.path.abspath(os.path.dirname(__file__))
 #sys.path.append(script_dir)
 
@@ -133,11 +136,13 @@ class UserAchievement(db.Model):
 class Recipe(db.Model):
     __tablename__ = 'Recipe'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    recipe_name = db.Column(db.Text, nullable=False)
     difficulty = db.Column(db.Enum('1', '2', '3', '4', '5'), nullable=False)
     xp_amount = db.Column(db.Integer, nullable=False)
     description = db.Column(db.Text, nullable=False)
     rating = db.Column(db.Float, nullable=False)
     image = db.Column(db.Text, nullable=False)
+    ingredients = db.relationship('Ingredient', backref='recipe', lazy=True)
 
 class RecipeStep(db.Model):
     __tablename__ = 'RecipeStep'
@@ -207,6 +212,7 @@ class Ingredient(db.Model):
     __tablename__ = 'Ingredient'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ingredient_name = db.Column(db.Text, nullable=False)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), nullable=False)
 
 class RecipeIngredient(db.Model):
     __tablename__ = 'RecipeIngredient'
@@ -250,10 +256,34 @@ login_manager.session_protection = "strong"
 def load_user(uid: int) -> User|None:
     return User.query.get(int(uid))
 
-# remember that all database operations must occur within an app context
-# with app.app_context():
-#     pass
-    #db.create_all() # this is only needed if the database doesn't already exist
+
+with app.app_context():
+    # Uncomment these if you make any changes to the object classes
+    # WARNING: THIS WILL DELETE ALL CURRENTLY STORED OBJECTS
+    #db.drop_all()
+    #db.create_all()
+
+    # uncomment to read in recipes (full_dataset.csv must be in root)
+    """
+    data = pandas.read_csv('full_dataset.csv')
+
+    # NOTE: remove this to read in the full dataset
+    data = data.head(20)
+
+    for index, row in data.iterrows(): # type:ignore
+        recipe = Recipe(
+            recipe_name=row['title'], difficulty='3', xp_amount=50, description=" ".join(eval(row['directions'])), rating=0.0, image='') # type:ignore
+        db.session.add(recipe)
+        db.session.commit()
+        if not recipe.id:
+            print("here")
+            print(recipe.recipe_name)
+        ingredients = eval(row['NER'])
+        for ingredient_name in ingredients:
+            ingredient = Ingredient(ingredient_name=ingredient_name, recipe_id=recipe.id) # type:ignore
+            db.session.add(ingredient)
+        db.session.commit()
+    """
    
 
 @app.get('/register/')

@@ -1,4 +1,5 @@
 # Database Files #
 *.sqlite3
 *.pyc
+*.csv
 /__pycache__
