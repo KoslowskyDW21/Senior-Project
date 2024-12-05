@@ -142,7 +142,6 @@ class Recipe(db.Model):
     description = db.Column(db.Text, nullable=False)
     rating = db.Column(db.Float, nullable=False)
     image = db.Column(db.Text, nullable=False)
-    ingredients = db.relationship('Ingredient', backref='recipe', lazy=True)
 
 class RecipeStep(db.Model):
     __tablename__ = 'RecipeStep'
@@ -212,7 +211,6 @@ class Ingredient(db.Model):
     __tablename__ = 'Ingredient'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ingredient_name = db.Column(db.Text, nullable=False)
-    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), nullable=False)
 
 class RecipeIngredient(db.Model):
     __tablename__ = 'RecipeIngredient'
@@ -272,17 +270,32 @@ with app.app_context():
 
     for index, row in data.iterrows(): # type:ignore
         recipe = Recipe(
-            recipe_name=row['title'], difficulty='3', xp_amount=50, description=" ".join(eval(row['directions'])), rating=0.0, image='') # type:ignore
+            recipe_name=row['title'], difficulty='3', xp_amount=50, description="No description provided", rating=0.0, image='') # type:ignore
         db.session.add(recipe)
         db.session.commit()
-        if not recipe.id:
-            print("here")
-            print(recipe.recipe_name)
+
         ingredients = eval(row['NER'])
         for ingredient_name in ingredients:
-            ingredient = Ingredient(ingredient_name=ingredient_name, recipe_id=recipe.id) # type:ignore
-            db.session.add(ingredient)
-        db.session.commit()
+            existing_ingredient = Ingredient.query.filter_by(ingredient_name=ingredient_name).first()
+            if not existing_ingredient:
+                existing_ingredient = Ingredient(ingredient_name=ingredient_name) # type:ignore
+                db.session.add(existing_ingredient)
+                db.session.commit()
+
+            existing_recipe_ingredient = RecipeIngredient.query.filter_by(recipe_id=recipe.id, ingredient_id=existing_ingredient.id).first() 
+            if not existing_recipe_ingredient:
+                new_ingredient = RecipeIngredient(recipe_id=recipe.id, ingredient_id=existing_ingredient.id, ingredient_name=ingredient_name, quantity=-1, unit="temp") # type:ignore
+                db.session.add(new_ingredient)
+                db.session.commit()
+            else:
+                # NOTE: for some reason there occasionally is a duplicate RecipeIngredient, so this passes over it without crashing
+                print("Ingredient already exists in this recipe")
+
+        steps = eval(row['directions'])
+        for step_number, step_description in enumerate(steps, start=1):
+            recipe_step = RecipeStep(recipe_id=recipe.id, step_number=step_number, step_description=step_description) # type:ignore
+            db.session.add(recipe_step)
+    db.session.commit()
     """
    
 
