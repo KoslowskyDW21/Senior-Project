@@ -374,3 +374,20 @@ def get_logout():
 @app.get('/')
 def index():
     return render_template('home.html', current_user=current_user)
+
+@app.get("/profile/<int:id>/")
+def get_profile_page(id):
+    print("searching for user " + str(id))
+    user = User.query.filter_by(id=id).first()
+    if user is not None:
+        return render_template('profile.html', user=user)
+    return "<h1>404: profile not found</h1>", 404
+    
+
+@app.get("/recipe/<int:id>/")
+def get_recipe_page(id):
+    print("searching for recipe " + str(id))
+    recipe = Recipe.query.filter_by(id=id).first()
+    if recipe is not None:
+        return render_template("recipe.html", recipe=recipe)
+    return "<h1>404: recipe not found</h1>", 404
