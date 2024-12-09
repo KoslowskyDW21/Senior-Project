@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login</title>
 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
 </head>
@@ -28,6 +29,55 @@
     {% else %}
       <h1>Not logged in</h1>
     {% endif %}
+    <br>
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+          <a href="/recipe/{{recipe.id}}" class="text-decoration-none text-dark">
+            <div class="card">
+              <div class="card-header">
+                {{recipe.recipe_name}}
+              </div>
+              <div class="card-body">
+                <img src={{recipe.image}} alt="...">
+                <p class="card-text">{{recipe.description}}</p>
+                {% if recipe.difficulty == 1 %}
+                <i class="bi-diamond-fill"></i>
+                <i class="bi-diamond"></i>
+                <i class="bi-diamond"></i>
+                <i class="bi-diamond"></i>
+                <i class="bi-diamond"></i>
+                {% elif recipe.difficulty == 2 %}
+                <i class="bi-diamond-fill"></i>
+                <i class="bi-diamond-fill"></i>
+                <i class="bi-diamond"></i>
+                <i class="bi-diamond"></i>
+                <i class="bi-diamond"></i>
+                {% elif recipe.difficulty == 3 %}
+                <i class="bi-diamond-fill"></i>
+                <i class="bi-diamond-fill"></i>
+                <i class="bi-diamond-fill"></i>
+                <i class="bi-diamond"></i>
+                <i class="bi-diamond"></i>
+                {% elif recipe.difficulty == 4 %}
+                <i class="bi-diamond-fill"></i>
+                <i class="bi-diamond-fill"></i>
+                <i class="bi-diamond-fill"></i>
+                <i class="bi-diamond-fill"></i>
+                <i class="bi-diamond"></i>
+                {% else %}
+                <i class="bi-diamond-fill"></i>
+                <i class="bi-diamond-fill"></i>
+                <i class="bi-diamond-fill"></i>
+                <i class="bi-diamond-fill"></i>
+                <i class="bi-diamond-fill"></i>
+                {% endif %}
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
   </main>
   <footer>
     <br>
