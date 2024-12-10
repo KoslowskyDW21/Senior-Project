@@ -1,7 +1,7 @@
 from __future__ import annotations
 from flask import Flask, request, render_template, redirect, url_for, abort, current_app, flash, session
 from flask_sqlalchemy import SQLAlchemy
-import os, sys, string
+import os, sys, string, random
 from datetime import datetime
 from flask_login import UserMixin, LoginManager, login_required
 from flask_login import login_user, logout_user, current_user
@@ -358,11 +358,12 @@ def save_recipes_to_db(recipes):
         return
     for recipe_data in recipes:
         # Recipe
+        difficulty = random.randint(1, 5)
         recipe = Recipe(
             recipe_name=recipe_data["strMeal"],  # type: ignore
-            difficulty='3',  # type: ignore
-            xp_amount=100,  # type: ignore
-            rating=4.5,  # type: ignore
+            difficulty=str(difficulty),  # type: ignore
+            xp_amount=100*difficulty,  # type: ignore
+            rating=0,  # type: ignore
             image=recipe_data["strMealThumb"]  # type: ignore
         )
         db.session.add(recipe)
