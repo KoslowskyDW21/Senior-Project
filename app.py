@@ -1,7 +1,7 @@
 from __future__ import annotations
 from flask import Flask, request, render_template, redirect, url_for, abort, current_app, flash, session
 from flask_sqlalchemy import SQLAlchemy
-import os, sys
+import os, sys, string
 from datetime import datetime
 from flask_login import UserMixin, LoginManager, login_required
 from flask_login import login_user, logout_user, current_user
@@ -10,7 +10,7 @@ from hashing_examples import UpdatedHasher
 from loginforms import RegisterForm, LoginForm
 
 from sqlalchemy.dialects.mysql import JSON
-import pandas
+import requests
 
 #script_dir = os.path.abspath(os.path.dirname(__file__))
 #sys.path.append(script_dir)
@@ -139,7 +139,6 @@ class Recipe(db.Model):
     recipe_name = db.Column(db.Text, nullable=False)
     difficulty = db.Column(db.Enum('1', '2', '3', '4', '5'), nullable=False)
     xp_amount = db.Column(db.Integer, nullable=False)
-    description = db.Column(db.Text, nullable=False)
     rating = db.Column(db.Float, nullable=False)
     image = db.Column(db.Text, nullable=False)
 
@@ -178,7 +177,6 @@ class Challenge(db.Model):
     image = db.Column(db.Text)
     difficulty = db.Column(db.Enum('1', '2', '3', '4', '5'), nullable=False)
     theme = db.Column(db.Text, nullable=False)
-    description = db.Column(db.Text, nullable=False)
     location = db.Column(db.Text, nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime, nullable=False)
@@ -217,8 +215,7 @@ class RecipeIngredient(db.Model):
     recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), primary_key=True)
     ingredient_id = db.Column(db.Integer, db.ForeignKey('Ingredient.id'), primary_key=True)
     ingredient_name = db.Column(db.Text)
-    quantity = db.Column(db.Integer, nullable=False)
-    unit = db.Column(db.String(50), nullable=False)
+    measure = db.Column(db.String(100), nullable=False, primary_key=True)
 
 class Substitution(db.Model):
     __tablename__ = 'Substitution'
@@ -253,51 +250,6 @@ login_manager.session_protection = "strong"
 @login_manager.user_loader
 def load_user(uid: int) -> User|None:
     return User.query.get(int(uid))
-
-
-with app.app_context():
-    # Uncomment these if you make any changes to the object classes
-    # WARNING: THIS WILL DELETE ALL CURRENTLY STORED OBJECTS
-    #db.drop_all()
-    #db.create_all()
-
-    # uncomment to read in recipes (full_dataset.csv must be in root)
-    """
-    data = pandas.read_csv('full_dataset.csv')
-
-    # NOTE: remove this to read in the full dataset
-    data = data.head(20)
-
-    for index, row in data.iterrows(): # type:ignore
-        recipe = Recipe(
-            recipe_name=row['title'], difficulty='3', xp_amount=50, description="No description provided", rating=0.0, image='') # type:ignore
-        db.session.add(recipe)
-        db.session.commit()
-
-        ingredients = eval(row['NER'])
-        for ingredient_name in ingredients:
-            existing_ingredient = Ingredient.query.filter_by(ingredient_name=ingredient_name).first()
-            if not existing_ingredient:
-                existing_ingredient = Ingredient(ingredient_name=ingredient_name) # type:ignore
-                db.session.add(existing_ingredient)
-                db.session.commit()
-
-            existing_recipe_ingredient = RecipeIngredient.query.filter_by(recipe_id=recipe.id, ingredient_id=existing_ingredient.id).first() 
-            if not existing_recipe_ingredient:
-                new_ingredient = RecipeIngredient(recipe_id=recipe.id, ingredient_id=existing_ingredient.id, ingredient_name=ingredient_name, quantity=-1, unit="temp") # type:ignore
-                db.session.add(new_ingredient)
-                db.session.commit()
-            else:
-                # NOTE: for some reason there occasionally is a duplicate RecipeIngredient, so this passes over it without crashing
-                print("Ingredient already exists in this recipe")
-
-        steps = eval(row['directions'])
-        for step_number, step_description in enumerate(steps, start=1):
-            recipe_step = RecipeStep(recipe_id=recipe.id, step_number=step_number, step_description=step_description) # type:ignore
-            db.session.add(recipe_step)
-    db.session.commit()
-    """
-   
 
 @app.get('/register/')
 def get_register():
@@ -391,3 +343,102 @@ def get_recipe_page(id):
     if recipe is not None:
         return render_template("recipe.html", recipe=recipe)
     return "<h1>404: recipe not found</h1>", 404
+
+
+
+def fetch_recipes(api_url):
+    response = requests.get(api_url)
+    if response.status_code == 200:
+        return response.json().get("meals", [])
+    else:
+        raise Exception(f"Failed to fetch data: {response.status_code}")
+
+def save_recipes_to_db(recipes):
+    if not recipes:
+        return
+    for recipe_data in recipes:
+        # Recipe
+        recipe = Recipe(
+            recipe_name=recipe_data["strMeal"],  # type: ignore
+            difficulty='3',  # type: ignore
+            xp_amount=100,  # type: ignore
+            rating=4.5,  # type: ignore
+            image=recipe_data["strMealThumb"]  # type: ignore
+        )
+        db.session.add(recipe)
+        db.session.flush()
+
+        # RecipeSteps
+        steps = recipe_data["strInstructions"].split('. ')
+        for i, step in enumerate(steps, start=1):
+            if step.strip():
+                recipe_step = RecipeStep(
+                    recipe_id=recipe.id,  # type: ignore
+                    step_number=i,  # type: ignore
+                    step_description=step.strip()  # type: ignore
+                )
+                db.session.add(recipe_step)
+
+        # Ingredients
+        for i in range(1, 21):
+            ingredient_name = recipe_data.get(f"strIngredient{i}")
+            # End early if ingredient is empty
+            if not ingredient_name or ingredient_name == "":
+                break
+            measure = recipe_data.get(f"strMeasure{i}")
+            if ingredient_name and ingredient_name.strip():
+                # Ensure Ingredient exists
+                ingredient = Ingredient.query.filter_by(ingredient_name=ingredient_name.strip()).first()
+                if not ingredient:
+                    ingredient = Ingredient(ingredient_name=ingredient_name.strip()) # type: ignore
+                    db.session.add(ingredient)
+                    db.session.flush()
+
+                # RecipeIngredients
+                recipe_ingredient = RecipeIngredient(
+                    recipe_id=recipe.id,  # type: ignore
+                    ingredient_id=ingredient.id, # type: ignore
+                    ingredient_name=ingredient_name.strip(), # type: ignore
+                    measure=measure  # type: ignore
+                )
+                db.session.merge(recipe_ingredient)
+
+        # Cuisines
+        cuisine_name = recipe_data.get("strArea")
+        if cuisine_name:
+            # Ensure Cuisine exists
+            cuisine = Cuisine.query.filter_by(name=cuisine_name.strip()).first()
+            if not cuisine:
+                cuisine = Cuisine(name=cuisine_name.strip()) # type: ignore
+                db.session.add(cuisine)
+                db.session.flush()
+
+            # RecipeCuisines
+            recipe_cuisine = RecipeCuisine(
+                recipe_id=recipe.id,  # type: ignore
+                cuisine_id=cuisine.id # type: ignore
+            )
+            db.session.add(recipe_cuisine)
+
+    db.session.commit()
+
+# uncomment to repopulate database
+# WARNING: THIS WILL DROP ALL TABLES IN THE DATABASE
+"""
+with app.app_context():
+    db.drop_all()
+    db.create_all()
+
+    # Create admin at runtime
+    admin = User(fname = "John", lname = "Smith", email_address = "admin@gmail.com", # type: ignore
+    username = "ADMIN", profile_picture = "", xp_points = 0, user_level = 1, # type: ignore
+    is_admin = True, num_recipes_completed = 0, colonial_floor = 'ADMIN', # type: ignore
+    colonial_side = 'ADMIN', date_created = datetime.utcnow(), last_logged_in = datetime.utcnow(), # type: ignore
+    num_reports = 0, password = "password") # type: ignore
+    db.session.add(admin)
+
+    for char in string.ascii_lowercase:
+        url = f"https://www.themealdb.com/api/json/v1/1/search.php?f={char}"
+        recipes = fetch_recipes(url)
+        save_recipes_to_db(recipes)
+"""
