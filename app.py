@@ -10,6 +10,8 @@ from hashing_examples import UpdatedHasher
 from loginforms import RegisterForm, LoginForm
 
 from sqlalchemy.sql import text
+from sqlalchemy.dialects import mysql
+from sqlalchemy import delete
 
 from sqlalchemy.dialects.mysql import JSON
 import requests
@@ -146,7 +148,7 @@ class Recipe(db.Model):
 
 class RecipeStep(db.Model):
     __tablename__ = 'RecipeStep'
-    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id', ondelete="CASCADE"), primary_key=True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), primary_key=True)
     step_number = db.Column(db.Integer, primary_key=True)
     step_description = db.Column(db.Text, nullable=False)
 
@@ -348,9 +350,9 @@ def get_recipe_page(id):
 
 @app.get("/addrecipe/")
 def addrecipe():
-        #if(current_user.is_admin):
+        if(current_user.is_admin):
             return render_template('addrecipe.html')
-        #return  "<h1>401: unauthorized access"
+        return  "<h1>401: unauthorized access"
 
 @app.post("/addrecipe/")
 def post_addrecipe():
@@ -379,23 +381,16 @@ def get_delete(recipe_id):
 
 @app.get("/del/")
 def deleteHim():
-    #if(current_user.is_admin):
+    if(current_user.is_admin): 
         return render_template('deleterecipe.html')
-    #return  "<h1>401: unauthorized access"
+    return  "<h1>401: unauthorized access"
 
 @app.post("/del/")
 def delete_recipe():
-    numRows = db.session.query(Recipe).filter(Recipe.id == request.form.get("id")).delete()
-    try:
-        db.session.flush
-    except:
-        print("we are alone in the vast cosmos of COMP451")
-    try:
-        db.session.commit
-    except:
-        print("life is meaningless and so is COMP451")
-    if(numRows > 0):
-        flash('recipe deleted successfully')
+    recipe = Recipe.query.filter(Recipe.id==request.form.get("id")).one()
+    db.session.delete(recipe)
+    db.session.commit()
+    flash('recipe deleted successfully')
     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
     
 
