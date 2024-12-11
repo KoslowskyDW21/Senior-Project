@@ -1,5 +1,5 @@
 from __future__ import annotations
-from flask import Flask, request, render_template, redirect, url_for, abort, current_app, flash, session
+from flask import Flask, request, jsonify, render_template, redirect, url_for, abort, current_app, flash, session
 from flask_sqlalchemy import SQLAlchemy
 import os, sys, string, random
 from datetime import datetime
@@ -370,6 +370,13 @@ def post_addrecipe():
     flash('recipe added successfully')
     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
 
+@app.get("/api/del/<int:recipe_id>/")
+def get_delete(recipe_id):
+    return jsonify ({
+        "id": recipe_id,
+        "isAdmin": current_user.is_admin
+    })
+
 @app.get("/del/")
 def deleteHim():
     #if(current_user.is_admin):
@@ -391,8 +398,6 @@ def delete_recipe():
         flash('recipe deleted successfully')
     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
     
-    
-
 
 def fetch_recipes(api_url):
     response = requests.get(api_url)

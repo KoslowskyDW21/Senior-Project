@@ -16,6 +16,11 @@
     <p>Difficulty: {{recipe.difficulty}}</p>
     <p>Rating: {{recipe.rating}}</p>
 
+    <div id="delete-recipe">
+      <input id="recipeID" type="hidden" value="{{recipe.id}}">
+      <button id="delete-button">Delete this Recipe</button>
+    </div>
+
     <button id="home-button"><a href="/">Home</button> <!--Make sure this is good practice, ADD BOOTSTRAP-->
 </body>
 </html>
