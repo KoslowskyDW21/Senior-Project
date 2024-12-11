@@ -345,7 +345,7 @@ def get_recipe_page(id):
     print("searching for recipe " + str(id))
     recipe = Recipe.query.filter_by(id=id).first()
     if recipe is not None:
-        return render_template("recipe.html", recipe=recipe)
+        return render_template("recipe.html", recipe=recipe, admin = current_user.is_admin)
     return "<h1>404: recipe not found</h1>", 404
 
 @app.get("/addrecipe/")
@@ -372,27 +372,23 @@ def post_addrecipe():
     flash('recipe added successfully')
     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
 
-@app.get("/api/del/<int:recipe_id>/")
-def get_delete(recipe_id):
+#@app.get("/api/del/<int:recipe_id>/")
+#def get_delete(recipe_id):
     return jsonify ({
         "id": recipe_id,
         "isAdmin": current_user.is_admin
     })
 
-@app.get("/del/")
-def deleteHim():
+@app.get("/del/<int:rid>")
+def deleteHim(rid):
     if(current_user.is_admin): 
-        return render_template('deleterecipe.html')
+        recipe = Recipe.query.filter(Recipe.id==rid).one()
+        db.session.delete(recipe)
+        db.session.commit()
+        flash('recipe deleted successfully')
+        return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
     return  "<h1>401: unauthorized access"
 
-@app.post("/del/")
-def delete_recipe():
-    recipe = Recipe.query.filter(Recipe.id==request.form.get("id")).one()
-    db.session.delete(recipe)
-    db.session.commit()
-    flash('recipe deleted successfully')
-    return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
-    
 
 def fetch_recipes(api_url):
     response = requests.get(api_url)
