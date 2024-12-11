@@ -9,6 +9,8 @@ from flask_login import login_user, logout_user, current_user
 from hashing_examples import UpdatedHasher
 from loginforms import RegisterForm, LoginForm
 
+from sqlalchemy.sql import text
+
 from sqlalchemy.dialects.mysql import JSON
 import requests
 
@@ -144,7 +146,7 @@ class Recipe(db.Model):
 
 class RecipeStep(db.Model):
     __tablename__ = 'RecipeStep'
-    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), primary_key=True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id', ondelete="CASCADE"), primary_key=True)
     step_number = db.Column(db.Integer, primary_key=True)
     step_description = db.Column(db.Text, nullable=False)
 
@@ -162,7 +164,7 @@ class RecipeCuisine(db.Model):
 class Review(db.Model):
     __tablename__ = 'Review'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), nullable=False)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id', ondelete="CASCADE"), nullable=False)
     text = db.Column(db.Text, nullable=False)
     image = db.Column(db.Text)
     rating = db.Column(db.Enum('1', '2', '3', '4', '5'), nullable=False)
@@ -212,7 +214,7 @@ class Ingredient(db.Model):
 
 class RecipeIngredient(db.Model):
     __tablename__ = 'RecipeIngredient'
-    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), primary_key=True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id', ondelete="CASCADE"), primary_key=True)
     ingredient_id = db.Column(db.Integer, db.ForeignKey('Ingredient.id'), primary_key=True)
     ingredient_name = db.Column(db.Text)
     measure = db.Column(db.String(100), nullable=False, primary_key=True)
@@ -344,6 +346,52 @@ def get_recipe_page(id):
         return render_template("recipe.html", recipe=recipe)
     return "<h1>404: recipe not found</h1>", 404
 
+@app.get("/addrecipe/")
+def addrecipe():
+        #if(current_user.is_admin):
+            return render_template('addrecipe.html')
+        #return  "<h1>401: unauthorized access"
+
+@app.post("/addrecipe/")
+def post_addrecipe():
+    diff = request.form.get("diff")
+    if(diff is None):
+        diff = 1
+    recipe = Recipe(
+            recipe_name= request.form.get('recipe'),  # type: ignore
+            difficulty=str(diff),  # type: ignore
+            xp_amount=100*int(diff),  # type: ignore
+            rating=request.form.get("rat"),  # type: ignore
+            image=request.form.get("img") # type: ignore
+        )
+    db.session.add(recipe)
+    db.session.flush()
+    db.session.commit()
+    flash('recipe added successfully')
+    return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
+
+@app.get("/del/")
+def deleteHim():
+    #if(current_user.is_admin):
+        return render_template('deleterecipe.html')
+    #return  "<h1>401: unauthorized access"
+
+@app.post("/del/")
+def delete_recipe():
+    numRows = db.session.query(Recipe).filter(Recipe.id == request.form.get("id")).delete()
+    try:
+        db.session.flush
+    except:
+        print("we are alone in the vast cosmos of COMP451")
+    try:
+        db.session.commit
+    except:
+        print("life is meaningless and so is COMP451")
+    if(numRows > 0):
+        flash('recipe deleted successfully')
+    return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
+    
+    
 
 
 def fetch_recipes(api_url):
