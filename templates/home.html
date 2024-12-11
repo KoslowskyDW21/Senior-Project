@@ -32,34 +32,33 @@
     <br>
     <div class="container">
       <div class="row">
-        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+        {% for recipe in recipes %}
+        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-4" style="padding-bottom: 20px;">
           <a href="/recipe/{{recipe.id}}" class="text-decoration-none text-dark">
             <div class="card">
               <div class="card-header">
                 {{recipe.recipe_name}}
               </div>
               <div class="card-body">
-                <img src={{recipe.image}} alt="...">
-                <p class="card-text">{{recipe.description}}</p>
-                {% if recipe.difficulty == 1 %}
+                {% if recipe.difficulty == "1" %}
                 <i class="bi-diamond-fill"></i>
                 <i class="bi-diamond"></i>
                 <i class="bi-diamond"></i>
                 <i class="bi-diamond"></i>
                 <i class="bi-diamond"></i>
-                {% elif recipe.difficulty == 2 %}
+                {% elif recipe.difficulty == "2" %}
                 <i class="bi-diamond-fill"></i>
                 <i class="bi-diamond-fill"></i>
                 <i class="bi-diamond"></i>
                 <i class="bi-diamond"></i>
                 <i class="bi-diamond"></i>
-                {% elif recipe.difficulty == 3 %}
+                {% elif recipe.difficulty == "3" %}
                 <i class="bi-diamond-fill"></i>
                 <i class="bi-diamond-fill"></i>
                 <i class="bi-diamond-fill"></i>
                 <i class="bi-diamond"></i>
                 <i class="bi-diamond"></i>
-                {% elif recipe.difficulty == 4 %}
+                {% elif recipe.difficulty == "4" %}
                 <i class="bi-diamond-fill"></i>
                 <i class="bi-diamond-fill"></i>
                 <i class="bi-diamond-fill"></i>
@@ -73,9 +72,11 @@
                 <i class="bi-diamond-fill"></i>
                 {% endif %}
               </div>
+              <img src={{recipe.image}} alt="..." class="card-img-bottom">
             </div>
           </a>
         </div>
+        {% endfor %}
       </div>
     </div>
   </main>

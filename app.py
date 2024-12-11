@@ -325,7 +325,7 @@ def get_logout():
 
 @app.get('/')
 def index():
-    return render_template('home.html', current_user=current_user, recipe=Recipe.query.first())
+    return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
 
 @app.get("/profile/<int:id>/")
 def get_profile_page(id):
