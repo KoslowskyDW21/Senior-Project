@@ -24,7 +24,11 @@ import requests
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['SECRET_KEY'] = 'idontknowwhattowriteforagoodkey'
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://username:intellectuallychallengeddata@10.18.101.49:3306/sys"
+# Uncomment this line and delete the 3 below it to switch to remote database
+#app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://username:intellectuallychallengeddata@10.18.101.49:3306/sys"
+scriptdir = os.path.dirname(os.path.abspath(__file__))
+dbfile = os.path.join(scriptdir, "users.sqlite3")
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{dbfile}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -473,7 +477,7 @@ def save_recipes_to_db(recipes):
 
 # uncomment to repopulate database
 # WARNING: THIS WILL DROP ALL TABLES IN THE DATABASE
-"""
+
 with app.app_context():
     db.drop_all()
     db.create_all()
@@ -490,4 +494,3 @@ with app.app_context():
         url = f"https://www.themealdb.com/api/json/v1/1/search.php?f={char}"
         recipes = fetch_recipes(url)
         save_recipes_to_db(recipes)
-"""
