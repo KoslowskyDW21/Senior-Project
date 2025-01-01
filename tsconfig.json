@@ -10,5 +10,5 @@
     "compileOnSave": true,
     "include": [
       "static/scripts/*.ts"
-    ]
+, "app/recipes/static/scripts/recipe.ts"    ]
 }

@@ -34,7 +34,7 @@
       <div class="row">
         {% for recipe in recipes %}
         <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-4" style="padding-bottom: 20px;">
-          <a href="/recipe/{{recipe.id}}" class="text-decoration-none text-dark">
+          <a href="/recipes/{{recipe.id}}" class="text-decoration-none text-dark">
             <div class="card">
               <div class="card-header">
                 {{recipe.recipe_name}}
@@ -80,14 +80,5 @@
       </div>
     </div>
   </main>
-  <footer>
-    <br>
-    <a href="/register"> Register </a>
-    &emsp;&emsp;&emsp;&emsp;&emsp;
-    <a href="/login"> Login </a>
-    &emsp;&emsp;&emsp;&emsp;&emsp;
-    <a href="/logout"> Logout </a>
-    <br>
-  </footer>
 </body>
 </html>

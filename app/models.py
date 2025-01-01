@@ -6,7 +6,6 @@ import os
 db = SQLAlchemy()
 
 # open and read the contents of the pepper file into your pepper key
-# NOTE: you should really generate your own and not use the one from the starter
 scriptdir = os.path.abspath(os.path.dirname(__file__))
 pepfile = os.path.join(scriptdir, "pepper.bin")
 with open(pepfile, 'rb') as fin:

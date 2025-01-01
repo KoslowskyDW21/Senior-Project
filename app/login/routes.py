@@ -7,6 +7,10 @@ from app.login import bp
 from app.models import User, db
 from app.login.loginforms import RegisterForm, LoginForm
 
+@bp.get('/')
+def reroute():
+    return redirect(url_for('recipes.home'))
+
 @bp.get('/register/')
 def get_register():
     form = RegisterForm()
@@ -60,7 +64,7 @@ def post_login():
             # redirect the user to the page they wanted or the home page
             next = request.args.get('next')
             if next is None or not next.startswith('/'):
-                next = url_for('recipes.index')
+                next = url_for('recipes.home')
             return redirect(next)
         else: # if the user does not exist or the password is incorrect
             # flash an error message and redirect to login form
@@ -77,4 +81,4 @@ def post_login():
 def get_logout():
     logout_user()
     flash('You have been logged out')
-    return redirect(url_for('recipes.index'))
+    return redirect(url_for('login.get_login'))
