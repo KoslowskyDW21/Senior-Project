@@ -17,8 +17,10 @@
     <p>Rating: {{recipe.rating}}</p>
 
     <div id="delete-recipe">
-      <input id="recipeID" type="hidden" value="{{recipe.id}}">
-      <button id="delete-button">Delete this Recipe</button>
+      {%if admin%}
+        <p><input idd="recipeID" type="hidden" value="{{recipe.id}}"></p>
+        <p><button id="delete-button"><a href = "/del/{{recipe.id}}">Delete Recipe</button></p>
+      {%endif%}
     </div>
 
     <button id="home-button"><a href="/">Home</button> <!--Make sure this is good practice, ADD BOOTSTRAP-->

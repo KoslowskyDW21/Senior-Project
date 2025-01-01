@@ -17,5 +17,8 @@
     <p>Is Admin: {{user.is_admin}}</p>
 
     <button id="home-button"><a href="/">Home</button> <!--Make sure this is good practice, ADD BOOTSTRAP-->
+    {%if user.is_admin%}
+      <p><button id="add-button"><a href = "/addrecipe/">Add Recipe</button></p>
+    {%endif%}
 </body>
 </html>
