@@ -13,7 +13,7 @@ class Config:
     # for each config option either find it in an environment variable or use a default
     SECRET_KEY = os.environ.get('SECRET_KEY')
     # NOTE this is using a temporary local database, use the commented out environmental
-    SQLALCHEMY_DATABASE_URI = f"sqlite:///{dbfile}" #os.environ.get('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # during debugging disable caching (remove for final version)
     SEND_FILE_MAX_AGE_DEFAULT = 0
