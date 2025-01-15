@@ -1,2 +1,0 @@
-SECRET_KEY=idontknowwhatagoodsecretkeyshouldbe
-DATABASE_URL=mysql+pymysql://username:intellectuallychallengeddata@10.18.101.49:3306/sys
