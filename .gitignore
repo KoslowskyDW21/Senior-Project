@@ -3,3 +3,5 @@
 *.pyc
 *.csv
 /__pycache__
+*.appenv
+*.flaskenv
