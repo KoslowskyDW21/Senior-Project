@@ -1,6 +1,7 @@
 from flask import Flask, request, current_app
 from config import Config
 from flask_login import LoginManager
+from flask_cors import CORS  
 from app.models import User, Recipe, RecipeIngredient, RecipeCuisine, RecipeStep, Ingredient, Cuisine, db
 import string, random
 from datetime import datetime
@@ -12,6 +13,8 @@ def create_app(config=Config):
     # create the flask app and set all its config options based on a config object
     app = Flask(__name__)
     app.config.from_object(config)
+    #Enable CORS to connect to React
+    cors = CORS(app, origins='*')
     # Prepare and connect the LoginManager to this app
     login_manager.init_app(app)
     # function name of the route that has the login form (so it can redirect users)
