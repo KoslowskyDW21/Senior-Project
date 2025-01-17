@@ -9,7 +9,7 @@ function App() {
 
   // EXAMPLE FOR RETRIEVING DATA FROM FLASK
   const fetchAPI = async () => {
-    const response = await axios.get("http://localhost:5000/recipes/");
+    const response = await axios.get("http://127.0.0.1:5000");
     console.log(response.data);
   };
 
