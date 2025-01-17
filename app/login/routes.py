@@ -7,6 +7,12 @@ from app.login import bp
 from app.models import User, db
 from app.login.loginforms import RegisterForm, LoginForm
 
+#default route just for the time being
+@bp.route('/', methods=['GET'])
+def home():
+    return jsonify({"message": "Welcome to the API!"}), 200
+
+
 # route for registering through API
 @bp.route('/api/register/', methods=['POST'])
 def api_register():
