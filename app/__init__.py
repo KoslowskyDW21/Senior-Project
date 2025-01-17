@@ -15,6 +15,7 @@ def create_app(config=Config):
     app.config.from_object(config)
     #Enable CORS to connect to React
     cors = CORS(app, origins='*')
+    CORS(app)
     # Prepare and connect the LoginManager to this app
     login_manager.init_app(app)
     # function name of the route that has the login form (so it can redirect users)

@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
-import reactLogo from "./assets/react.svg";
+import { useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Login from "./components/Login";
+import Recipes from "./components/Recipes";
 import axios from "axios";
-import viteLogo from "/vite.svg";
 import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   // EXAMPLE FOR RETRIEVING DATA FROM FLASK
   const fetchAPI = async () => {
     const response = await axios.get("http://127.0.0.1:5000");
@@ -18,28 +17,13 @@ function App() {
   }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <Router>
+      <Routes>
+        {/* Default route (login page) */}
+        <Route path="/" element={<Login />} />{" "}
+        <Route path="/recipes" element={<Recipes />} />
+      </Routes>
+    </Router>
   );
 }
 
