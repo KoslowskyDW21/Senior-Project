@@ -5,6 +5,7 @@ import Login from "./components/Login";
 import RegistrationOne from "./components/RegistrationOne";
 import RegistrationTwo from "./components/RegistrationTwo";
 import Recipes from "./components/Recipes";
+import Profile from "./components/Profile"
 import axios from "axios";
 import "./App.css";
 
