@@ -1,38 +1,76 @@
 from __future__ import annotations
-from flask import request, jsonify, render_template, redirect, url_for, flash
-from datetime import datetime
-from flask_login import login_required
-from flask_login import login_user, logout_user
 from app.login import bp
 from app.models import User, db
 from app.login.loginforms import RegisterForm, LoginForm
+from datetime import datetime
+from flask import request, jsonify, render_template, redirect, url_for, flash, current_app
+from flask_login import login_required
+from flask_login import login_user, logout_user
+import os
+from werkzeug.utils import secure_filename
+
 
 #default route just for the time being
 @bp.route('/', methods=['GET'])
 def home():
     return jsonify({"message": "Welcome to the API!"}), 200
 
+#File storage:
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # route for registering through API
 @bp.route('/api/register/', methods=['POST'])
 def api_register():
     data = request.get_json()
+    
     username = data.get('username')
     email = data.get('email')
-    password = data.get('password')
-
+    password = data.get('password') 
+    fname = data.get('fname')
+    lname = data.get('lname')
+    colonial_floor = data.get('colonial_floor')
+    colonial_side = data.get('colonial_side')
+    profile_picture = data.get('profile_picture')  
+    
     user = User.query.filter_by(email_address=email).first()
     if user is not None:
         return jsonify({"message": "There is already an account with that email address"}), 400
-    
-    new_user = User(username=username, email_address=email, password=password, xp_points=0, 
-                    is_admin=False, num_recipes_completed=0, date_created=datetime.utcnow(),
-                    num_reports=0, user_level=1, fname="", lname="", colonial_floor="1", 
-                    colonial_side="Mens", last_logged_in=datetime.utcnow())
+
+    new_user = User(
+        fname=fname,
+        lname=lname,
+        username=username,
+        email_address=email,  
+        colonial_floor=colonial_floor,
+        colonial_side=colonial_side,
+        password=password,
+        xp_points=0,
+        is_admin=False,
+        num_recipes_completed=0,
+        date_created=datetime.utcnow(),
+        num_reports=0,
+        user_level=1,
+        last_logged_in=datetime.utcnow()
+    )
+
     db.session.add(new_user)
     db.session.commit()
 
+    if profile_picture and allowed_file(profile_picture.filename):
+        filename = secure_filename(profile_picture.filename)
+        upload_folder = os.path.join(current_app.root_path, 'static', 'images', 'profile_pics')
+        os.makedirs(upload_folder, exist_ok=True)
+        profile_picture.save(os.path.join(upload_folder, filename))
+        
+        new_user.profile_picture = filename
+        db.session.commit()
+
     return jsonify({"message": "Registration successful"}), 200
+
+
 
 @bp.route('/api/login/', methods=['POST'])
 def api_login():

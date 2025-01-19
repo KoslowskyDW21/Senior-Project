@@ -13,9 +13,8 @@ def create_app(config=Config):
     # create the flask app and set all its config options based on a config object
     app = Flask(__name__)
     app.config.from_object(config)
-    #Enable CORS to connect to React
-    cors = CORS(app, origins='*')
-    CORS(app)
+    # Allow requests only from React frontend
+    CORS(app, origins='http://localhost:5173')  
     # Prepare and connect the LoginManager to this app
     login_manager.init_app(app)
     # function name of the route that has the login form (so it can redirect users)

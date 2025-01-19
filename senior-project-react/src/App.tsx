@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { RegistrationProvider } from "./components/RegistrationContext";
 import Login from "./components/Login";
+import RegistrationOne from "./components/RegistrationOne";
+import RegistrationTwo from "./components/RegistrationTwo";
 import Recipes from "./components/Recipes";
 import axios from "axios";
 import "./App.css";
@@ -18,11 +21,19 @@ function App() {
 
   return (
     <Router>
-      <Routes>
-        {/* Default route (login page) */}
-        <Route path="/" element={<Login />} />{" "}
-        <Route path="/recipes" element={<Recipes />} />
-      </Routes>
+      <RegistrationProvider>
+        <Routes>
+          {/* Default route (login page) */}
+          <Route path="/" element={<Login />} />
+
+          {/* Registration pages */}
+          <Route path="/registration-one" element={<RegistrationOne />} />
+          <Route path="/registration-two" element={<RegistrationTwo />} />
+
+          {/* Recipes page */}
+          <Route path="/recipes" element={<Recipes />} />
+        </Routes>
+      </RegistrationProvider>
     </Router>
   );
 }

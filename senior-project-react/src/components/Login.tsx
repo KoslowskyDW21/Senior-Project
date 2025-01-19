@@ -15,7 +15,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     //TODO: handle the request to the DB
-    console.log("Logging in with", email, password);
+    console.log("Logging in with", email);
 
     const loginData = {
       email,
@@ -50,7 +50,7 @@ const Login = () => {
 
   return (
     <Container>
-      <h2>Login</h2>
+      <h2>Let Them Cook</h2>
       <TextField
         label="Email"
         variant="outlined"
