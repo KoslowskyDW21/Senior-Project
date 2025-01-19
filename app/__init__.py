@@ -34,6 +34,8 @@ def create_app(config=Config):
     app.register_blueprint(recipes_bp, url_prefix='/recipes')
     from app.profile import bp as profile_bp
     app.register_blueprint(profile_bp, url_prefix='/profile')
+    from app.challenges import bp as challenge_bp
+    app.register_blueprint(challenge_bp, url_prefix='/challenges')
     return app
 
 @login_manager.user_loader

@@ -11,6 +11,11 @@ const Recipes: React.FC = () => {
     navigate(`/profile`); // TODO: get current user and put that here instead
   }
 
+  const handleGoToChallenges = async () => {
+    console.log("Navigating to challenges page");
+    navigate(`/challenges`);
+  }
+
   return (
     <div>
       <h1>Welcome to the Recipes Page!</h1>
@@ -21,6 +26,13 @@ const Recipes: React.FC = () => {
         color="primary"
       >
         Profile
+      </Button>
+      <Button
+        onClick={handleGoToChallenges}
+        variant="contained"
+        color="primary"
+      >
+        Challenges
       </Button>
     </div>
   );

@@ -8,6 +8,7 @@ import Recipes from "./components/Recipes";
 import Profile from "./components/Profile"
 import axios from "axios";
 import "./App.css";
+import Challenges from "./components/Challenges";
 
 function App() {
   // EXAMPLE FOR RETRIEVING DATA FROM FLASK
@@ -36,6 +37,9 @@ function App() {
 
           {/* profile */}
           <Route path="/profile" element={<Profile />} />
+
+          {/* challenges */}
+          <Route path="/challenges" element={<Challenges />} />
         </Routes>
       </RegistrationProvider>
     </Router>
