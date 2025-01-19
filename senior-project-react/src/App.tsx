@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Login from "./components/Login";
 import Recipes from "./components/Recipes";
+import Profile from "./components/Profile"
 import axios from "axios";
 import "./App.css";
 
@@ -22,6 +23,8 @@ function App() {
         {/* Default route (login page) */}
         <Route path="/" element={<Login />} />{" "}
         <Route path="/recipes" element={<Recipes />} />
+        {/* Profile route */}
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   );
