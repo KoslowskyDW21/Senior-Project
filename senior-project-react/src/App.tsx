@@ -33,6 +33,9 @@ function App() {
 
           {/* Recipes page */}
           <Route path="/recipes" element={<Recipes />} />
+
+          {/* profile */}
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </RegistrationProvider>
     </Router>
