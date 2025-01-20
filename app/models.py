@@ -161,6 +161,21 @@ class Challenge(db.Model):
     is_complete = db.Column(db.Boolean, nullable=False)
     num_reports = db.Column(db.Integer, nullable=False)
 
+    def to_json(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "creator": self.creator,
+            "image": self.image if self.image else None,
+            "difficulty": self.difficulty,
+            "theme": self.theme,
+            "location": self.location,
+            "start_time": self.start_time.isoformat() if self.start_time else None,
+            "end_time": self.end_time.isoformat() if self.end_time else None,
+            "is_complete": self.is_complete,
+            "num_reports": self.num_reports,
+        }
+
 class ChallengeResult(db.Model):
     __tablename__ = 'ChallengeResult'
     challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id'), primary_key=True)
