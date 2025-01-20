@@ -2,6 +2,15 @@ import React from "react";
 import { useNavigate } from "react-router-dom"; // React Router for nav
 import { Button, TextField, Container } from "@mui/material"; //matui components
 
+function Recipe() {
+   // TODO: figure out how to use bootstrap with react
+  return (
+    <>
+      <p>This is a recipe.</p>
+    </>
+  );
+}
+
 const Recipes: React.FC = () => {
 
   const navigate = useNavigate(); //for navigation
@@ -25,6 +34,13 @@ const Recipes: React.FC = () => {
     <div>
       <h1>Welcome to the Recipes Page!</h1>
       <p>Here are your delicious recipes.</p>
+
+      <div className="container">
+        <div className="row">
+          <Recipe />
+        </div>
+      </div>
+
       <Button
         onClick={handleGoToProfile}
         variant="contained"

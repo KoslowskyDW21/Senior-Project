@@ -12,8 +12,6 @@ def achievements():
 @bp.route('/<int:id>', methods=['GET'])
 def get_achievement(id):
     achievement = Achievement.query.get(id)
-    print(id)
-    print(achievement)
     if not achievement:
         abort(404, description="Achievement not found")
     return jsonify(achievement.to_json()), 200
