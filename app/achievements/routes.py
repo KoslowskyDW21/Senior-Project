@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 @bp.route('/', methods=['POST'])
 def achievements():
     achievements = Achievement.query.all()
-    return jsonify([achievement.to_json() for achievement in achievements]), 200
+    return jsonify([achievement.to_json() for achievement in achievements]), 200 
 
 @bp.route('/<int:id>', methods=['GET'])
 def get_achievement(id):

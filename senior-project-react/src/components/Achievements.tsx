@@ -15,7 +15,7 @@ interface Achievement{
 
 }
 
-const achievements = [{
+/*const achievements = [{
     id: 1,
     title: "Getting Started",
     image: 'https://st.depositphotos.com/1570716/1697/i/950/depositphotos_16978587-stock-photo-male-chef-cooking.jpg',
@@ -31,17 +31,17 @@ const achievements = [{
     isVisible: true
 
 }
-];
+];*/
 
 const Achievements: React.FC = () => {
-    const [achievement, setAchievement] = React.useState<Achievement | null>(null);
+    const [achievements, setAchievements] = React.useState<Achievement[]>([]);
     const navigate = useNavigate();
   
     const getResponse = async () => {
       try {
         const response = await axios.post(`http://127.0.0.1:5000/achievements/`);
-        //const data: Achievement[] = response.data;
-        //setAchievements(data);
+        const data: Achievement[] = response.data;
+        setAchievements(data);
       } catch (error) {
         console.error("Error fetching achievements:", error);
       }
