@@ -16,6 +16,11 @@ const Recipes: React.FC = () => {
     navigate(`/challenges`);
   }
 
+  const handleGoToAchievements = async() => {
+    console.log("Navigating to achievements page");
+    navigate(`/achievements`)
+  }
+
   return (
     <div>
       <h1>Welcome to the Recipes Page!</h1>
@@ -33,6 +38,13 @@ const Recipes: React.FC = () => {
         color="primary"
       >
         Challenges
+      </Button>
+      <Button
+        onClick={handleGoToAchievements}
+        variant="contained"
+        color="primary"
+      >
+        Achievements
       </Button>
     </div>
   );

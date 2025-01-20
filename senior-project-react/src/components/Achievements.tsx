@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 
 interface Achievements {
         achievements: Achievement[];
@@ -14,15 +14,34 @@ interface Achievement{
     isVisible: boolean;
 
 }
+
+const achievements = [{
+    id: 1,
+    title: "Getting Started",
+    image: 'https://st.depositphotos.com/1570716/1697/i/950/depositphotos_16978587-stock-photo-male-chef-cooking.jpg',
+    isComplete: true,
+    isVisible: true
+
+},
+{
+    id: 1,
+    title: "Getting Started 2",
+    image: 'https://st.depositphotos.com/1570716/1697/i/950/depositphotos_16978587-stock-photo-male-chef-cooking.jpg',
+    isComplete: true,
+    isVisible: true
+
+}
+];
+
 const Achievements: React.FC = () => {
-    const [achievements, setAchievements] = React.useState<Achievement[]>([]);
-    const navigate = useNavigate();
+    //const [achievements, setAchievements] = React.useState<Achievement[]>([]);
+    //const navigate = useNavigate();
   
     const getResponse = async () => {
       try {
-        const response = await axios.post("http://127.0.0.1:5000/challenges/");
-        const data: Achievement[] = response.data;
-        setAchievements(data);
+        //const response = await axios.post("http://127.0.0.1:5000/achievements/");
+        //const data: Achievement[] = response.data;
+        //setAchievements(data);
       } catch (error) {
         console.error("Error fetching achievements:", error);
       }
@@ -35,16 +54,13 @@ const Achievements: React.FC = () => {
     return (
       <div>
         <h1>Achievements</h1>
-        <ul>
         {achievements.map((achievement) => (
-          <li key={achievement.id}>
-            <h2>{achievement.title}</h2>
-            <button onClick={() => navigate(`/achievement/${achievement.id}`)}>
-              View Details
-            </button>
-            </li>
+          <div key={achievement.id}>
+            <button><img src={achievement.image} width = "100" /></button>
+            <p> Achievement: {achievement.title}</p>
+            
+          </div> 
           ))}
-        </ul>
       </div>
     );
   };
