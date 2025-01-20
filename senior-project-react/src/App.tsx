@@ -10,6 +10,7 @@ import axios from "axios";
 import "./App.css";
 import Challenges from "./components/Challenges";
 import ChallengeDetail from "./components/ChallengeDetails";
+import Achievements from "./components/Achievements";
 
 function App() {
   // EXAMPLE FOR RETRIEVING DATA FROM FLASK
@@ -42,6 +43,9 @@ function App() {
           {/* challenges */}
           <Route path="/challenges" element={<Challenges />} />
           <Route path="/challenges/:id" element={<ChallengeDetail />} />
+
+          {/*achievements*/}
+          <Route path="/achievements" element ={<Achievements />} />
         </Routes>
       </RegistrationProvider>
     </Router>
