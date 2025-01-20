@@ -5,4 +5,11 @@ from app.models import User, db
 
 @bp.route('/', methods=['POST'])
 def post_settings_page():
-    return "<h1>Settings not found</h1>"
+    return jsonify({
+        "id": 0,
+        "fname": "Jeff",
+        "lname": "Krug",
+        "profile_picutre": "null",
+        "colonial_floor": "1",
+        "colonial_side": "men's"
+    })

@@ -113,8 +113,19 @@ class Achievement(db.Model):
     __tablename__ = 'Achievement'
     id = db.Column(db.Integer, primary_key=True)
     image = db.Column(db.Text, nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    completion_requirement = db.Column(db.Text, nullable=False)
+    title = db.Column(db.Text, nullable = False)
+    isVisible = db.Column(db.Boolean, nullable = False)
+    isComplete = db.Column(db.Boolean, nullable = False)
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "image": self.image,
+            "title": self.title,
+            "isVisible": self.isVisible,
+            "isComplete": self.isComplete
+
+        }
 
 class UserAchievement(db.Model):
     __tablename__ = 'UserAchievement'
