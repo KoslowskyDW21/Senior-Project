@@ -52,6 +52,13 @@ const handleGoToRecipes = async () => {
             >
                 Recipes
             </Button>
+            <Button
+                onClick={() => navigate("/settings")}
+                variant="contained"
+                color="primary"
+            >
+                Settings
+            </Button>
         </>
     )
 }

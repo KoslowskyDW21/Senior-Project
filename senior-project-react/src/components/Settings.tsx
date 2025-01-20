@@ -34,7 +34,7 @@ export default function Settings() {
         }
     }
 
-    React.useEffect(() => { loadUser(); });
+    React.useEffect(() => { loadUser(); }, []);
 
     return (
         <>
