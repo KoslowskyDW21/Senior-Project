@@ -31,7 +31,6 @@ const Login = () => {
       const data: LoginResponse = response.data;
       setMessage(data.message);
       if (data.message === "Login successful") {
-        //TODO: Change this to Recipes or something, this is just to test navigation / routing
         navigate("/recipes");
       }
     } catch (error) {
@@ -47,6 +46,10 @@ const Login = () => {
       }
     }
   };
+
+  const handleRegistration = async () => {
+
+  }
 
   return (
     <Container>

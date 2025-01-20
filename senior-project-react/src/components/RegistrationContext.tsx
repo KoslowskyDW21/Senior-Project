@@ -20,6 +20,7 @@ interface RegistrationData {
   username: string;
   email: string;
   password: string;
+  confirmPassword: string;
   floor: Floor;
   side: Side;
   profilePicture: File | null;
@@ -31,6 +32,7 @@ const defaultData: RegistrationData = {
   username: "",
   email: "",
   password: "",
+  confirmPassword: "",
   floor: Floor.One,
   side: Side.Mens,
   profilePicture: null,
