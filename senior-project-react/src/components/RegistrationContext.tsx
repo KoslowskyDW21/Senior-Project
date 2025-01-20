@@ -3,38 +3,40 @@
 import React, { createContext, useContext, useState } from "react";
 
 export enum Floor {
-  One = 1,
-  Two = 2,
-  Three = 3,
-  Four = 4,
+  One = "1",
+  Two = "2",
+  Three = "3",
+  Four = "4",
+  ADMIN = "ADMIN",
 }
 
 export enum Side {
-  Mens = "Men's",
-  Womens = "Women's",
+  Mens = "Mens",
+  Womens = "Womens",
+  ADMIN = "ADMIN",
 }
 
 interface RegistrationData {
-  firstName: string;
-  lastName: string;
+  fname: string;
+  lname: string;
   username: string;
   email: string;
   password: string;
   confirmPassword: string;
-  floor: Floor;
-  side: Side;
+  colonial_floor: Floor;
+  colonial_side: Side;
   profilePicture: File | null;
 }
 
 const defaultData: RegistrationData = {
-  firstName: "",
-  lastName: "",
+  fname: "",
+  lname: "",
   username: "",
   email: "",
   password: "",
   confirmPassword: "",
-  floor: Floor.One,
-  side: Side.Mens,
+  colonial_floor: Floor.One,
+  colonial_side: Side.Mens,
   profilePicture: null,
 };
 
