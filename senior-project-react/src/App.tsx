@@ -41,6 +41,7 @@ function App() {
 
           {/* profile */}
           <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:id" element={<Profile />} />
 
           {/* challenges */}
           <Route path="/challenges" element={<Challenges />} />
