@@ -12,7 +12,7 @@ def post_settings_page():
         "id": user.id,
         "fname": user.fname,
         "lname": user.lname,
-        "profile_picutre": user.profile_picture,
+        "profile_picture": user.profile_picture,
         "colonial_floor": user.colonial_floor,
         "colonial_side": user.colonial_side
     })
