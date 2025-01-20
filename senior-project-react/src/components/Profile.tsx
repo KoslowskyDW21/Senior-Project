@@ -1,5 +1,6 @@
 import axios from "axios";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 interface ProfileResponse {
     id: string; // could have some problems here
@@ -7,6 +8,7 @@ interface ProfileResponse {
 
 const Profile: React.FC = () => {
     const [id, setId] = React.useState<String>();
+    const navigate = useNavigate();
 
     const getResponse = async () => {
         const response = await axios.post(
@@ -24,6 +26,7 @@ React.useEffect(() => {
         <>
             <h1>This is a profile page!!</h1> {/* TODO: replace with actual account information */}
             <h2>This profile belongs to the user with id={id}</h2>
+            <button onClick={() => navigate("/settings")}>Settings</button>
         </>
     )
 }
