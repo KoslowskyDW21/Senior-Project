@@ -11,6 +11,7 @@ import "./App.css";
 import Challenges from "./components/Challenges";
 import ChallengeDetail from "./components/ChallengeDetails";
 import Achievements from "./components/Achievements";
+import AchievementSpecific from "./components/AchievementSpecific";
 
 function App() {
   // EXAMPLE FOR RETRIEVING DATA FROM FLASK
@@ -46,6 +47,7 @@ function App() {
 
           {/*achievements*/}
           <Route path="/achievements" element ={<Achievements />} />
+          <Route path="/achievements/:id" element={<AchievementSpecific />} />
         </Routes>
       </RegistrationProvider>
     </Router>
