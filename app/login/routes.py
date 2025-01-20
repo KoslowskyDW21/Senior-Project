@@ -56,6 +56,18 @@ def api_register():
         last_logged_in=datetime.utcnow()
     )
 
+#   DEBUGGING
+    print("Debugging User Creation:")
+    print(f"Username: {username}")
+    print(f"Email: {email}")
+    print(f"First Name: {fname}")
+    print(f"Last Name: {lname}")
+    print(f"Colonial Floor: {colonial_floor}")
+    print(f"Colonial Side: {colonial_side}")
+    print(f"Password: {password}")
+    print(f"Profile Picture: {profile_picture.filename if profile_picture else 'No picture provided'}")
+    print("Full User Object:", new_user)
+
     db.session.add(new_user)
     db.session.commit()
 

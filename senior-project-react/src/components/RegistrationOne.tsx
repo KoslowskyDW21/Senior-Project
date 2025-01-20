@@ -15,8 +15,8 @@ const RegisterOne = () => {
 
   //To handle errors from invalid entries
   const [errors, setErrors] = useState({
-    firstName: "",
-    lastName: "",
+    fname: "",
+    lname: "",
     username: "",
     email: "",
     password: "",
@@ -26,8 +26,8 @@ const RegisterOne = () => {
   //Form validation
   const validateForm = () => {
     const newErrors: typeof errors = {
-      firstName: "",
-      lastName: "",
+      fname: "",
+      lname: "",
       username: "",
       email: "",
       password: "",
@@ -35,17 +35,19 @@ const RegisterOne = () => {
     };
 
     //ensuring data entry
-    if (!data.firstName.trim()) {
-      newErrors.firstName = "First name is required";
+    if (!data.fname.trim()) {
+      newErrors.fname = "First name is required";
     }
-    if (!data.lastName.trim()) {
-      newErrors.lastName = "Last name is required";
+    if (!data.lname.trim()) {
+      newErrors.lname = "Last name is required";
     }
+    //TODO: NO DUPLICATE USERNAMES
     if (!data.username.trim()) {
       newErrors.username = "Username is required";
     }
 
     //email validation
+    //TODO: Add validation to test if there's already an account with this email address
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!data.email.trim()) {
       newErrors.email = "Email is required";
@@ -77,8 +79,8 @@ const RegisterOne = () => {
     if (validateForm()) {
       console.log(
         "First registering with",
-        data.firstName,
-        data.lastName,
+        data.fname,
+        data.lname,
         data.email
       );
       navigate("/registration-two");
@@ -92,21 +94,21 @@ const RegisterOne = () => {
       <TextField
         label="First Name*"
         fullWidth
-        value={data.firstName}
+        value={data.fname}
         //...data copies existing data into a new object, ensuring all fields retain their values except one being updated
-        onChange={(e) => setData({ ...data, firstName: e.target.value })}
+        onChange={(e) => setData({ ...data, fname: e.target.value })}
         margin="normal"
-        error={!!errors.firstName}
-        helperText={errors.firstName}
+        error={!!errors.fname}
+        helperText={errors.fname}
       />
       <TextField
         label="Last Name*"
         fullWidth
-        value={data.lastName}
-        onChange={(e) => setData({ ...data, lastName: e.target.value })}
+        value={data.lname}
+        onChange={(e) => setData({ ...data, lname: e.target.value })}
         margin="normal"
-        error={!!errors.lastName}
-        helperText={errors.lastName}
+        error={!!errors.lname}
+        helperText={errors.lname}
       />
       <TextField
         label="Username*"

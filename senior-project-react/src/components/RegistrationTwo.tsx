@@ -21,15 +21,19 @@ const PageTwo = () => {
   const navigate = useNavigate();
 
   const handleFloorChange = (event: SelectChangeEvent<Floor>) => {
-    setData({ ...data, floor: event.target.value as Floor });
+    setData({ ...data, colonial_floor: event.target.value as Floor });
   };
 
   const handleSideChange = (event: SelectChangeEvent<Side>) => {
-    setData({ ...data, side: event.target.value as Side });
+    setData({ ...data, colonial_side: event.target.value as Side });
   };
 
   const handleNext = async () => {
-    console.log("Now registering with", data.floor, data.side);
+    console.log(
+      "Now registering with",
+      data.colonial_floor,
+      data.colonial_side
+    );
 
     try {
       const response = await axios.post(
@@ -63,16 +67,16 @@ const PageTwo = () => {
       <InputLabel id="floor-label">Floor</InputLabel>
       <Select
         labelId="floor-label"
-        value={data.floor}
+        value={data.colonial_floor}
         onChange={handleFloorChange}
         fullWidth
         style={{ marginBottom: "16px" }}
       >
         {Object.values(Floor)
-          .filter((value) => typeof value === "number")
+          .filter((floor) => floor !== "ADMIN")
           .map((floor) => (
             <MenuItem key={floor} value={floor}>
-              Floor {floor}
+              {floor}
             </MenuItem>
           ))}
       </Select>
@@ -80,16 +84,18 @@ const PageTwo = () => {
       <InputLabel id="side-label">Side</InputLabel>
       <Select
         labelId="side-label"
-        value={data.side}
+        value={data.colonial_side}
         onChange={handleSideChange}
         fullWidth
         style={{ marginBottom: "16px" }}
       >
-        {Object.values(Side).map((side) => (
-          <MenuItem key={side} value={side}>
-            {side}
-          </MenuItem>
-        ))}
+        {Object.values(Side)
+          .filter((side) => side !== "ADMIN")
+          .map((side) => (
+            <MenuItem key={side} value={side}>
+              {side}
+            </MenuItem>
+          ))}
       </Select>
 
       <Button

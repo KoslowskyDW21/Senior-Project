@@ -42,6 +42,16 @@ class User(UserMixin, db.Model):
     def verify_password(self, pwd: str) -> bool:
         return pwd_hasher.check(pwd, self.password_hash)
 
+    def __repr__(self):
+        return (
+            f"<User(id={self.id}, username='{self.username}', email_address='{self.email_address}', "
+            f"fname='{self.fname}', lname='{self.lname}', colonial_floor='{self.colonial_floor}', "
+            f"colonial_side='{self.colonial_side}', xp_points={self.xp_points}, is_admin={self.is_admin}, "
+            f"num_recipes_completed={self.num_recipes_completed}, date_created={self.date_created}, "
+            f"num_reports={self.num_reports}, user_level={self.user_level}, "
+            f"last_logged_in={self.last_logged_in})>"
+        )
+
 class UserBlock(db.Model):
     __tablename__ = 'UserBlock'
     blocked_user = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
