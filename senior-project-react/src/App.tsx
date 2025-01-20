@@ -6,6 +6,7 @@ import RegistrationOne from "./components/RegistrationOne";
 import RegistrationTwo from "./components/RegistrationTwo";
 import Recipes from "./components/Recipes";
 import Profile from "./components/Profile"
+import Settings from "./components/Settings";
 import axios from "axios";
 import "./App.css";
 import Challenges from "./components/Challenges";
@@ -48,6 +49,9 @@ function App() {
           {/*achievements*/}
           <Route path="/achievements" element ={<Achievements />} />
           <Route path="/achievements/:id" element={<AchievementSpecific />} />
+
+          {/* settings */}
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </RegistrationProvider>
     </Router>
