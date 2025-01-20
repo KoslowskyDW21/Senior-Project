@@ -9,7 +9,8 @@ def post_profile_page(id=1):
     user = User.query.filter_by(id=id).first()
     if user is not None:
         return jsonify({ "lname": user.lname,
-                         "fname": user.fname
+                         "fname": user.fname,
+                         "username": user.username
                          }), 200
     return "<h1>404: profile not found</h1>", 404
 

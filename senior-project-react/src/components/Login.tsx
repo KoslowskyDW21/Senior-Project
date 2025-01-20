@@ -1,7 +1,7 @@
 import { useState } from "react"; //react
 import axios, { AxiosError } from "axios";
-import { Button, TextField, Container } from "@mui/material"; //matui components
-import { useNavigate } from "react-router-dom"; // React Router for nav
+import { Button, TextField, Container, Box } from "@mui/material"; //matui components
+import { useNavigate, Link } from "react-router-dom"; // React Router for nav
 
 interface LoginResponse {
   message: string;
@@ -47,9 +47,7 @@ const Login = () => {
     }
   };
 
-  const handleRegistration = async () => {
-
-  }
+  const handleRegistration = async () => {};
 
   return (
     <Container>
@@ -71,11 +69,15 @@ const Login = () => {
         type="password"
         margin="normal"
       />
+      <Box sx={{ width: "100%", textAlign: "left", mt: 0.1 }}>
+        <Link to="/registration-one">Don't have an account?</Link>
+      </Box>
       <Button
         onClick={handleLogin}
         variant="contained"
         color="primary"
         fullWidth
+        sx={{ mt: 4 }}
       >
         Login
       </Button>

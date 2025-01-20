@@ -6,6 +6,7 @@ import { Button, TextField, Container } from "@mui/material"; //matui components
 interface ProfileResponse {
     lname: string;
     fname: string;
+    username: string;
 }
 
 const Profile: React.FC = () => {
@@ -18,6 +19,7 @@ const Profile: React.FC = () => {
     }
     const [lname, setLname] = React.useState<String>();
     const [fname, setFname] = React.useState<String>();
+    const [username, setUsername] = React.useState<String>();
 
     const getResponse = async () => {
         const response = await axios.post(
@@ -26,6 +28,7 @@ const Profile: React.FC = () => {
         const data: ProfileResponse = response.data;
         setLname(data.lname);
         setFname(data.fname);
+        setUsername(data.username);
     }
 
 React.useEffect(() => {
@@ -40,7 +43,7 @@ const handleGoToRecipes = async () => {
     return (
         <>
             <h1>This is a profile page!!</h1> {/* TODO: replace with fuller account information */}
-            <h2>This is {fname} {lname}'s profile!</h2>
+            <h2>This is {username}'s profile!</h2>
 
             <Button
                 onClick={handleGoToRecipes}
