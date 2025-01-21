@@ -57,13 +57,11 @@ def api_register():
     db.session.add(new_user)
     db.session.commit()
 
-    # Handle profile picture upload if provided
     if profile_picture and allowed_file(profile_picture.filename):
         filename = secure_filename(profile_picture.filename)
         upload_folder = os.path.expanduser('~/School/Senior-Project/app/static/images/profile_pics')  # Using absolute path
         os.makedirs(upload_folder, exist_ok=True)
 
-        # Check if the folder exists and is writable
         if not os.path.exists(upload_folder):
             return jsonify({"message": "Upload folder doesn't exist!"}), 500
 
@@ -72,8 +70,7 @@ def api_register():
             profile_picture.save(file_path)
         except Exception as e:
             return jsonify({"message": f"Error saving file: {str(e)}"}), 500
-
-        # Store the relative URL in the user's record
+            
         profile_picture_url = f"/static/images/profile_pics/{filename}"
         new_user.profile_picture = profile_picture_url
         db.session.commit()
