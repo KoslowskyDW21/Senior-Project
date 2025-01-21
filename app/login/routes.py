@@ -24,16 +24,14 @@ def allowed_file(filename):
 # route for registering through API
 @bp.route('/api/register/', methods=['POST'])
 def api_register():
-    data = request.get_json()
-    
-    username = data.get('username')
-    email = data.get('email')
-    password = data.get('password') 
-    fname = data.get('fname')
-    lname = data.get('lname')
-    colonial_floor = data.get('colonial_floor')
-    colonial_side = data.get('colonial_side')
-    profile_picture = data.get('profile_picture')  
+    username = request.form.get('username')
+    email = request.form.get('email')
+    password = request.form.get('password') 
+    fname = request.form.get('fname')
+    lname = request.form.get('lname')
+    colonial_floor = request.form.get('colonial_floor')
+    colonial_side = request.form.get('colonial_side')
+    profile_picture = request.files.get('profile_picture')  
     
     user = User.query.filter_by(email_address=email).first()
     if user is not None:
@@ -56,31 +54,39 @@ def api_register():
         last_logged_in=datetime.utcnow()
     )
 
-#   DEBUGGING
-    print("Debugging User Creation:")
-    print(f"Username: {username}")
-    print(f"Email: {email}")
-    print(f"First Name: {fname}")
-    print(f"Last Name: {lname}")
-    print(f"Colonial Floor: {colonial_floor}")
-    print(f"Colonial Side: {colonial_side}")
-    print(f"Password: {password}")
-    print(f"Profile Picture: {profile_picture.filename if profile_picture else 'No picture provided'}")
-    print("Full User Object:", new_user)
-
     db.session.add(new_user)
     db.session.commit()
 
+    # Handle profile picture upload if provided
     if profile_picture and allowed_file(profile_picture.filename):
         filename = secure_filename(profile_picture.filename)
-        upload_folder = os.path.join(current_app.root_path, 'static', 'images', 'profile_pics')
+        upload_folder = os.path.expanduser('~/School/Senior-Project/app/static/images/profile_pics')  # Using absolute path
         os.makedirs(upload_folder, exist_ok=True)
-        profile_picture.save(os.path.join(upload_folder, filename))
-        
-        new_user.profile_picture = filename
-        db.session.commit()
 
-    return jsonify({"message": "Registration successful"}), 200
+        # Check if the folder exists and is writable
+        if not os.path.exists(upload_folder):
+            return jsonify({"message": "Upload folder doesn't exist!"}), 500
+
+        file_path = os.path.join(upload_folder, filename)
+        try:
+            profile_picture.save(file_path)
+        except Exception as e:
+            return jsonify({"message": f"Error saving file: {str(e)}"}), 500
+
+        # Store the relative URL in the user's record
+        profile_picture_url = f"/static/images/profile_pics/{filename}"
+        new_user.profile_picture = profile_picture_url
+        db.session.commit()
+    else:
+        profile_picture_url = None
+
+    # Return a response with or without the profile picture URL
+    return jsonify({
+        "message": "Registration successful",
+        "profile_picture_url": profile_picture_url
+    }), 200
+
+    
 
 
 

@@ -26,6 +26,7 @@ interface RegistrationData {
   colonial_floor: Floor;
   colonial_side: Side;
   profilePicture: File | null;
+  profilePictureText: string;
 }
 
 const defaultData: RegistrationData = {
@@ -38,6 +39,7 @@ const defaultData: RegistrationData = {
   colonial_floor: Floor.One,
   colonial_side: Side.Mens,
   profilePicture: null,
+  profilePictureText: "",
 };
 
 const RegistrationContext = createContext({

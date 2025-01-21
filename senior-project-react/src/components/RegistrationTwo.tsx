@@ -1,8 +1,10 @@
 import axios, { AxiosError } from "axios";
-import { useState } from "react"; //react
+import FolderIcon from "@mui/icons-material/Folder";
+import { useState, ChangeEvent } from "react"; //react
 import { useRegistration, Floor, Side } from "./RegistrationContext";
 import { useNavigate } from "react-router-dom"; // React Router for nav
 import {
+  Avatar,
   Button,
   Container,
   MenuItem,
@@ -18,6 +20,7 @@ interface RegistrationResponse {
 const PageTwo = () => {
   const { data, setData } = useRegistration();
   const [message, setMessage] = useState("");
+  const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleFloorChange = (event: SelectChangeEvent<Floor>) => {
@@ -26,6 +29,19 @@ const PageTwo = () => {
 
   const handleSideChange = (event: SelectChangeEvent<Side>) => {
     setData({ ...data, colonial_side: event.target.value as Side });
+  };
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      const fileUrl = URL.createObjectURL(file);
+      setData({
+        ...data,
+        profilePicture: file,
+        profilePictureText: file.name,
+      });
+      setProfilePicUrl(fileUrl);
+    }
   };
 
   const handleNext = async () => {
@@ -38,7 +54,8 @@ const PageTwo = () => {
     try {
       const response = await axios.post(
         "http://127.0.0.1:5000/api/register/",
-        data
+        data,
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
 
       const responseData: RegistrationResponse = response.data;
@@ -97,6 +114,39 @@ const PageTwo = () => {
             </MenuItem>
           ))}
       </Select>
+
+      <h2>Upload a Profile Picture</h2>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          marginBottom: "16px",
+          marginLeft: "50px",
+          cursor: "pointer",
+          width: "150px",
+          height: "150px",
+          borderRadius: "50%",
+          border: "2px solid #ccc",
+        }}
+        onClick={() =>
+          document.getElementById("profile-picture-input")?.click()
+        }
+      >
+        {profilePicUrl ? (
+          <Avatar src={profilePicUrl} sx={{ width: 120, height: 120 }} />
+        ) : (
+          <FolderIcon sx={{ fontSize: 80 }} />
+        )}
+      </div>
+
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        style={{ display: "none" }}
+        id="profile-picture-input"
+      />
 
       <Button
         onClick={handleNext}
