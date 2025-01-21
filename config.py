@@ -14,3 +14,6 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # during debugging disable caching (remove for final version)
     SEND_FILE_MAX_AGE_DEFAULT = 0
+    #Configure uploading image
+    BASE_DIR = os.path.abspath(os.path.dirname(__file__)) 
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')  

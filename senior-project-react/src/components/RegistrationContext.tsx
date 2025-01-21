@@ -25,8 +25,8 @@ interface RegistrationData {
   confirmPassword: string;
   colonial_floor: Floor;
   colonial_side: Side;
-  profilePicture: File | null;
-  profilePictureText: string;
+  profile_picture: File | null;
+  profile_picture_text: string;
 }
 
 const defaultData: RegistrationData = {
@@ -38,8 +38,8 @@ const defaultData: RegistrationData = {
   confirmPassword: "",
   colonial_floor: Floor.One,
   colonial_side: Side.Mens,
-  profilePicture: null,
-  profilePictureText: "",
+  profile_picture: null,
+  profile_picture_text: "",
 };
 
 const RegistrationContext = createContext({
