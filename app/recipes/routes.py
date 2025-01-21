@@ -4,9 +4,13 @@ from flask_login import current_user
 from app.recipes import bp
 from app.models import Recipe, db
 
-@bp.get('/')
-def home():
-    return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
+# @bp.get('/')
+# def home():
+#     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
+
+@bp.post("/")
+def post_recipes():
+    pass
 
 @bp.get("/<int:id>/")
 def get_recipe_page(id):
