@@ -1,20 +1,89 @@
-import React from "react";
+import React, { useState } from "react";
+import axios, { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom"; // React Router for nav
 import { Button, TextField, Container } from "@mui/material"; //matui components
 
-function Recipe() {
-   // TODO: figure out how to use bootstrap with react
+interface Recipe {
+  id: number;
+  name: string;
+  difficulty: "1" | "2" | "3" | "4" | "5";
+  image_src: string;
+}
+
+function Difficulty({ difficulty }) {
+  if (difficulty === "1") {
+    return (
+      <>
+        <i className="bi-diamond-fill"></i>
+        <i className="bi-diamond"></i>
+        <i className="bi-diamond"></i>
+        <i className="bi-diamond"></i>
+        <i className="bi-diamond"></i>
+      </>
+    );
+  }
+  else if (difficulty === "2") {
+    return (
+      <>
+        <i className="bi-diamond-fill"></i>
+        <i className="bi-diamond-fill"></i>
+        <i className="bi-diamond"></i>
+        <i className="bi-diamond"></i>
+        <i className="bi-diamond"></i>
+      </>
+    );
+  }
+  else if (difficulty === "3") {
+    return (
+      <>
+        <i className="bi-diamond-fill"></i>
+        <i className="bi-diamond-fill"></i>
+        <i className="bi-diamond-fill"></i>
+        <i className="bi-diamond"></i>
+        <i className="bi-diamond"></i>
+      </>
+    );
+  }
+  else if (difficulty === "4") {
+    return (
+      <>
+        <i className="bi-diamond-fill"></i>
+        <i className="bi-diamond-fill"></i>
+        <i className="bi-diamond-fill"></i>
+        <i className="bi-diamond-fill"></i>
+        <i className="bi-diamond"></i>
+      </>
+    );
+  }
+  else {
+    return (
+      <>
+        <i className="bi-diamond-fill"></i>
+        <i className="bi-diamond-fill"></i>
+        <i className="bi-diamond-fill"></i>
+        <i className="bi-diamond-fill"></i>
+        <i className="bi-diamond-fill"></i>
+      </>
+    );
+  }
+}
+
+function Recipe({ name, difficulty, image }) {
   return (
-    <>
-      <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-4" /* style="padding-bottom: 20px;" */ >
-        <p>This is a recipe.</p>
+    <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-4" /* style="padding-bottom: 20px;" */ >
+      <div className="card-header">
+        <p>{name}</p>
       </div>
-    </>
+      <div className="card-body">
+        <Difficulty difficulty={difficulty} />
+      </div>
+      <img src={image} alt={name} className="card-img-bottom" />
+    </div>
   );
 }
 
 const Recipes: React.FC = () => {
-
+  let recipes: Array<Recipe> = [];
   const navigate = useNavigate(); //for navigation
 
   const handleGoToProfile = async () => {
@@ -32,6 +101,18 @@ const Recipes: React.FC = () => {
     navigate(`/achievements`)
   }
 
+  async function loadRecipes() {
+    try {
+      const response = await axios.post("");
+      recipes = response.data;
+    }
+    catch (error) {
+
+    }
+  }
+
+  React.useEffect(() => { loadRecipes(); }, []);
+
   return (
     <div>
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
@@ -42,8 +123,7 @@ const Recipes: React.FC = () => {
 
       <div className="container">
         <div className="row">
-          <i className="bi-diamond-fill"></i>
-          <Recipe />
+          <Recipe name="Spaghetti" difficulty="1" image="" />
         </div>
       </div>
 
