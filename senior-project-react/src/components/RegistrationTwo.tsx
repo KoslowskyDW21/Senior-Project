@@ -37,8 +37,8 @@ const PageTwo = () => {
       const fileUrl = URL.createObjectURL(file);
       setData({
         ...data,
-        profilePicture: file,
-        profilePictureText: file.name,
+        profile_picture: file,
+        profile_picture_text: file.name,
       });
       setProfilePicUrl(fileUrl);
     }

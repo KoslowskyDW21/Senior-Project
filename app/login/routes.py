@@ -32,10 +32,19 @@ def api_register():
     colonial_floor = request.form.get('colonial_floor')
     colonial_side = request.form.get('colonial_side')
     profile_picture = request.files.get('profile_picture')  
+
+    if profile_picture is not None:
+        print("pfp found!")
+    else:
+        print("sad")
     
     user = User.query.filter_by(email_address=email).first()
     if user is not None:
         return jsonify({"message": "There is already an account with that email address"}), 400
+    
+    userNameValidation = User.query.filter_by(username=username).first()
+    if userNameValidation is not None:
+        return jsonify({"message": "There is already an account with that username"}), 400
 
     new_user = User(
         fname=fname,
@@ -58,26 +67,25 @@ def api_register():
     db.session.commit()
 
     if profile_picture and allowed_file(profile_picture.filename):
-        filename = secure_filename(profile_picture.filename)
-        upload_folder = os.path.expanduser('~/School/Senior-Project/app/static/images/profile_pics')  # Using absolute path
+        print("profile_picture and allowed_file")
+
+        upload_folder = current_app.config['UPLOAD_FOLDER']
+
         os.makedirs(upload_folder, exist_ok=True)
 
-        if not os.path.exists(upload_folder):
-            return jsonify({"message": "Upload folder doesn't exist!"}), 500
+        file_path = os.path.join(upload_folder, profile_picture.filename)
+        profile_picture.save(file_path)
 
-        file_path = os.path.join(upload_folder, filename)
-        try:
-            profile_picture.save(file_path)
-        except Exception as e:
-            return jsonify({"message": f"Error saving file: {str(e)}"}), 500
-            
-        profile_picture_url = f"/static/images/profile_pics/{filename}"
-        new_user.profile_picture = profile_picture_url
+        new_user.profile_picture = file_path
+        profile_picture_url = file_path
         db.session.commit()
+
+        print(file_path)
+
     else:
+        print("sad")
         profile_picture_url = None
 
-    # Return a response with or without the profile picture URL
     return jsonify({
         "message": "Registration successful",
         "profile_picture_url": profile_picture_url
