@@ -5,7 +5,7 @@ from app.login.loginforms import RegisterForm, LoginForm
 from datetime import datetime
 from flask import request, jsonify, render_template, redirect, url_for, flash, current_app
 from flask_login import login_required
-from flask_login import login_user, logout_user
+from flask_login import current_user, login_user, logout_user
 import os
 from werkzeug.utils import secure_filename
 

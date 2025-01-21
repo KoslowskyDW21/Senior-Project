@@ -41,6 +41,24 @@ class User(UserMixin, db.Model):
     # add a verify_password convenience method
     def verify_password(self, pwd: str) -> bool:
         return pwd_hasher.check(pwd, self.password_hash)
+    def to_json(self):
+        return {
+            "id": self.id,
+            "fname": self.fname,
+            "lname": self.lname,
+            "email_address": self.email_address,
+            "username": self.username,
+            "profile_picture": self.profile_picture,
+            "xp_points": self.xp_points,
+            "user_level": self.user_level,
+            "is_admin": self.is_admin,
+            "num_recipes_completed": self.num_recipes_completed,
+            "colonial_floor": self.colonial_floor,
+            "colonial_side": self.colonial_side,
+            "date_created": self.date_created.isoformat() if self.date_created else None,
+            "last_logged_in": self.last_logged_in.isoformat() if self.last_logged_in else None,
+            "num_reports": self.num_reports,
+        }
 
     def __repr__(self):
         return (
@@ -56,32 +74,62 @@ class UserBlock(db.Model):
     __tablename__ = 'UserBlock'
     blocked_user = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
     blocked_by = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    def to_json(self):
+        return {
+            "blocked_user": self.blocked_user,
+            "blocked_by": self.blocked_by,
+        }
 
 
 class Friendship(db.Model):
     __tablename__ = 'Friendship'
     user1 = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
     user2 = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    def to_json(self):
+        return {
+            "user1": self.user1,
+            "user2": self.user2,
+        }
 
 class DietaryRestriction(db.Model):
     __tablename__ = 'DietaryRestriction'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.Text, nullable=False)
+    def to_json(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+        }
 
 class UserDietaryRestriction(db.Model):
     __tablename__ = 'UserDietaryRestriction'
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
     restriction_id = db.Column(db.Integer, db.ForeignKey('DietaryRestriction.id'), primary_key=True)
+    def to_json(self):
+        return {
+            "user_id": self.user_id,
+            "restriction_id": self.restriction_id,
+        }
 
 class Cuisine(db.Model):
     __tablename__ = 'Cuisine'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.Text, nullable=False)
+    def to_json(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+        }
 
 class UserCuisinePreference(db.Model):
     __tablename__ = 'UserCuisinePreference'
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
     cuisine_id = db.Column(db.Integer, db.ForeignKey('Cuisine.id'), primary_key=True)
+    def to_json(self):
+        return {
+            "user_id": self.user_id,
+            "cuisine_id": self.cuisine_id,
+        }
 
 class UserGroup(db.Model):
     __tablename__ = 'UserGroup'
@@ -90,16 +138,34 @@ class UserGroup(db.Model):
     description = db.Column(db.Text, nullable=False)
     is_public = db.Column(db.Boolean, nullable=False)
     num_reports = db.Column(db.Integer, nullable=False)
+    def to_json(self):
+        return {
+            "id": self.id,
+            "image": self.image,
+            "description": self.description,
+            "is_public": self.is_public,
+            "num_reports": self.num_reports,
+        }
 
 class GroupMember(db.Model):
     __tablename__ = 'GroupMember'
     group_id = db.Column(db.Integer, db.ForeignKey('UserGroup.id'), primary_key=True)
     member_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    def to_json(self):
+        return {
+            "group_id": self.group_id,
+            "member_id": self.member_id,
+        }
 
 class GroupBannedMember(db.Model):
     __tablename__ = 'GroupBannedMember'
     group_id = db.Column(db.Integer, db.ForeignKey('UserGroup.id'), primary_key=True)
     banned_member_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    def to_json(self):
+        return {
+            "group_id": self.group_id,
+            "banned_member_id": self.banned_member_id,
+        }
 
 class Message(db.Model):
     __tablename__ = 'Message'
@@ -108,6 +174,14 @@ class Message(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
     is_reported = db.Column(db.Boolean, nullable=False)
     text = db.Column(db.Text, nullable=False)
+    def to_json(self):
+        return {
+            "id": self.id,
+            "group_id": self.group_id,
+            "user_id": self.user_id,
+            "is_reported": self.is_reported,
+            "text": self.text,
+        }
 
 class Achievement(db.Model):
     __tablename__ = 'Achievement'
@@ -131,6 +205,11 @@ class UserAchievement(db.Model):
     __tablename__ = 'UserAchievement'
     achievement_id = db.Column(db.Integer, db.ForeignKey('Achievement.id'), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    def to_json(self):
+        return {
+            "achievement_id": self.achievement_id,
+            "user_id": self.user_id,
+        }
 
 class Recipe(db.Model):
     __tablename__ = 'Recipe'
@@ -140,23 +219,49 @@ class Recipe(db.Model):
     xp_amount = db.Column(db.Integer, nullable=False)
     rating = db.Column(db.Float, nullable=False)
     image = db.Column(db.Text, nullable=False)
+    def to_json(self):
+        return {
+            "id": self.id,
+            "recipe_name": self.recipe_name,
+            "difficulty": self.difficulty,
+            "xp_amount": self.xp_amount,
+            "rating": self.rating,
+            "image": self.image,
+        }
 
 class RecipeStep(db.Model):
     __tablename__ = 'RecipeStep'
     recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), primary_key=True)
     step_number = db.Column(db.Integer, primary_key=True)
     step_description = db.Column(db.Text, nullable=False)
+    def to_json(self):
+        return {
+            "recipe_id": self.recipe_id,
+            "step_number": self.step_number,
+            "step_description": self.step_description,
+        }
 
 class CookedRecipe(db.Model):
     __tablename__ = 'CookedRecipe'
     recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), primary_key=True)
     completed_by = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
     date_completed = db.Column(db.DateTime, nullable=False)
+    def to_json(self):
+        return {
+            "recipe_id": self.recipe_id,
+            "completed_by": self.completed_by,
+            "date_completed": self.date_completed.isoformat() if self.date_completed else None,
+        }
 
 class RecipeCuisine(db.Model):
     __tablename__ = 'RecipeCuisine'
     recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), primary_key=True)
     cuisine_id = db.Column(db.Integer, db.ForeignKey('Cuisine.id'), primary_key=True)
+    def to_json(self):
+        return {
+            "recipe_id": self.recipe_id,
+            "cuisine_id": self.cuisine_id,
+        }
 
 class Review(db.Model):
     __tablename__ = 'Review'
@@ -167,6 +272,16 @@ class Review(db.Model):
     rating = db.Column(db.Enum('1', '2', '3', '4', '5'), nullable=False)
     difficulty = db.Column(db.Enum('1', '2', '3', '4', '5'), nullable=False)
     num_reports = db.Column(db.Integer, nullable=False)
+    def to_json(self):
+        return {
+            "id": self.id,
+            "recipe_id": self.recipe_id,
+            "text": self.text,
+            "image": self.image,
+            "rating": self.rating,
+            "difficulty": self.difficulty,
+            "num_reports": self.num_reports,
+        }
 
 class Challenge(db.Model):
     __tablename__ = 'Challenge'
@@ -202,27 +317,54 @@ class ChallengeResult(db.Model):
     challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id'), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
     challenge_rank = db.Column(db.Integer, nullable=False)
+    def to_json(self):
+        return {
+            "challenge_id": self.challenge_id,
+            "user_id": self.user_id,
+            "challenge_rank": self.challenge_rank,
+        }
 
 class ChallengeVote(db.Model):
     __tablename__ = 'ChallengeVote'
     challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id'), primary_key=True)
     given_to = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
     given_by = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    def to_json(self):
+        return {
+            "challenge_id": self.challenge_id,
+            "given_to": self.given_to,
+            "given_by": self.given_by,
+        }
 
 class ChallengeParticipant(db.Model):
     __tablename__ = 'ChallengeParticipant'
     challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id'), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    def to_json(self):
+        return {
+            "challenge_id": self.challenge_id,
+            "user_id": self.user_id,
+        }
 
 class RecommendedChallengeRecipe(db.Model):
     __tablename__ = 'RecommendedChallengeRecipe'
     challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id'), primary_key=True)
     recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), primary_key=True)
+    def to_json(self):
+        return {
+            "challenge_id": self.challenge_id,
+            "recipe_id": self.recipe_id,
+        }
 
 class Ingredient(db.Model):
     __tablename__ = 'Ingredient'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ingredient_name = db.Column(db.Text, nullable=False)
+    def to_json(self):
+        return {
+            "id": self.id,
+            "ingredient_name": self.ingredient_name,
+        }
 
 class RecipeIngredient(db.Model):
     __tablename__ = 'RecipeIngredient'
@@ -230,16 +372,33 @@ class RecipeIngredient(db.Model):
     ingredient_id = db.Column(db.Integer, db.ForeignKey('Ingredient.id'), primary_key=True)
     ingredient_name = db.Column(db.Text)
     measure = db.Column(db.String(100), nullable=False, primary_key=True)
+    def to_json(self):
+        return {
+            "recipe_id": self.recipe_id,
+            "ingredient_id": self.ingredient_id,
+            "ingredient_name": self.ingredient_name,
+            "measure": self.measure,
+        }
 
 class Substitution(db.Model):
     __tablename__ = 'Substitution'
     substituted = db.Column(db.Integer, db.ForeignKey('Ingredient.id'), primary_key=True)
     substituted_by = db.Column(db.Integer, db.ForeignKey('Ingredient.id'), primary_key=True)
+    def to_json(self):
+        return {
+            "substituted": self.substituted,
+            "substituted_by": self.substituted_by,
+        }
 
 class ShoppingList(db.Model):
     __tablename__ = 'ShoppingList'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    def to_json(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+        }
 
 class ShoppingListItem(db.Model):
     __tablename__ = 'ShoppingListItem'
@@ -247,9 +406,22 @@ class ShoppingListItem(db.Model):
     ingredient_id = db.Column(db.Integer, db.ForeignKey('Ingredient.id'), primary_key=True)
     ingredient_quantity = db.Column(db.Integer, nullable=False)
     ingredient_quantity_unit = db.Column(db.Text)
+    def to_json(self):
+        return {
+            "shopping_list_id": self.shopping_list_id,
+            "ingredient_id": self.ingredient_id,
+            "ingredient_quantity": self.ingredient_quantity,
+            "ingredient_quantity_unit": self.ingredient_quantity_unit,
+        }
 
 class RecipeList(db.Model):
     __tablename__ = 'RecipeList'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.Text, nullable=False)
     belongs_to = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    def to_json(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "belongs_to": self.belongs_to,
+        }
