@@ -91,8 +91,24 @@ def api_register():
         "profile_picture_url": profile_picture_url
     }), 200
 
-    
 
+@bp.route('/api/validate_user/', methods=['POST']) 
+def validate_user():
+    username = request.json.get('username')
+    email = request.json.get('email')
+
+    print(username)
+    print(email)
+
+    if username and User.query.filter_by(username=username).first():
+        print("invalid 1")
+        return jsonify({"valid": False, "message": "Username already in use"}), 400
+
+    if email and User.query.filter_by(email_address=email).first():
+        return jsonify({"valid": False, "message": "Email already in use"}), 400
+        print("invalid 2")
+
+    return jsonify({"valid": True, "message": "Valid"}), 200
 
 
 @bp.route('/api/login/', methods=['POST'])

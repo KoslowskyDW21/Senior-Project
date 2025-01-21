@@ -24,8 +24,8 @@ const RegisterOne = () => {
   });
 
   //Form validation
-  const validateForm = () => {
-    const newErrors: typeof errors = {
+  const validateForm = async () => {
+    const newErrors = {
       fname: "",
       lname: "",
       username: "",
@@ -34,20 +34,17 @@ const RegisterOne = () => {
       confirmPassword: "",
     };
 
-    //ensuring data entry
     if (!data.fname.trim()) {
       newErrors.fname = "First name is required";
     }
     if (!data.lname.trim()) {
       newErrors.lname = "Last name is required";
     }
-    //TODO: NO DUPLICATE USERNAMES
+
     if (!data.username.trim()) {
       newErrors.username = "Username is required";
     }
 
-    //email validation
-    //TODO: Add validation to test if there's already an account with this email address
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!data.email.trim()) {
       newErrors.email = "Email is required";
@@ -55,34 +52,60 @@ const RegisterOne = () => {
       newErrors.email = "Must be a valid email address";
     }
 
-    //password validation
     if (!data.password.trim()) {
       newErrors.password = "Password is required";
     } else if (data.password.length < 8) {
       newErrors.password = "Password must be at least 8 characters";
     }
 
-    //confirm password validation
     if (!data.confirmPassword.trim()) {
       newErrors.confirmPassword = "Password is required";
     } else if (data.password !== data.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
-    setErrors(newErrors);
+    // validating email and username aren't used
+    try {
+      console.log("Validating user");
+      const response = await axios.post(
+        "http://127.0.0.1:5000/api/validate_user/",
+        {
+          username: data.username,
+          email: data.email,
+        }
+      );
+      if (!response.data.valid) {
+        if (response.data.message.includes("Username")) {
+          newErrors.username = response.data.message;
+          console.log("invalid username");
+        }
+        if (response.data.message.includes("Email")) {
+          newErrors.email = response.data.message;
+          console.log("Invalid email");
+        }
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const apiError = error as AxiosError<{ message: string }>;
+        const errorMessage =
+          apiError.response?.data.message || "Validation failed";
+        if (errorMessage.includes("Username")) {
+          newErrors.username = errorMessage;
+        }
+        if (errorMessage.includes("Email")) {
+          newErrors.email = errorMessage;
+        }
+      }
+    }
 
-    //loops through all errors and checks if any have been set
+    setErrors(newErrors);
     return Object.values(newErrors).every((error) => !error);
   };
 
   const handleNext = async () => {
-    if (validateForm()) {
-      console.log(
-        "First registering with",
-        data.fname,
-        data.lname,
-        data.email
-      );
+    const isValid = await validateForm();
+    if (isValid) {
+      console.log("First registering with", data.fname, data.lname, data.email);
       navigate("/registration-two");
     }
   };
