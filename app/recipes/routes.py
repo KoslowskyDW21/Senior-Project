@@ -20,6 +20,14 @@ def post_recipe_page(id):
         return jsonify(recipe.to_json())
     return "<h1>404: recipe not found</h1>", 404
 
+@bp.post("/completed/<int:id>/")
+def post_completed_recipe_page(id):
+    print("searching for recipe" + str(id))
+    recipe = Recipe.query.filter_by(id=id).first()
+    if recipe is not None:
+        return jsonify(recipe.to_json())
+    return "<h1>404: recipe not found</h1>", 404
+
 @bp.get("/addrecipe/")
 def addrecipe():
         if(current_user.is_admin):
