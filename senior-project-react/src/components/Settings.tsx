@@ -8,7 +8,7 @@ namespace SettingsPage {
         fname: string;
         lname: string;
         profile_picture: string;
-        colonial_floor: string
+        colonial_floor: string;
         colonial_side: string;
     }
 }
