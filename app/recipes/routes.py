@@ -12,12 +12,12 @@ from app.models import Recipe, db
 def post_recipes():
     pass
 
-@bp.get("/<int:id>/")
-def get_recipe_page(id):
+@bp.post("/<int:id>/")
+def post_recipe_page(id):
     print("searching for recipe " + str(id))
     recipe = Recipe.query.filter_by(id=id).first()
     if recipe is not None:
-        return render_template("recipe.html", recipe=recipe)
+        return jsonify(recipe.to_json())
     return "<h1>404: recipe not found</h1>", 404
 
 @bp.get("/addrecipe/")

@@ -68,7 +68,15 @@ function Difficulty({ difficulty }) {
   }
 }
 
-function Recipe({ name, difficulty, image }) {
+function Recipe({ id, name, difficulty, image }) {
+  const navigate = useNavigate(); //for navigation
+  id = id.toString(); // hacky insurance against mistakes
+
+  const handleGoToRecipe = async () => {
+    console.log(`Navigating to recipe page of recipe with id=${id}`);
+    navigate(`/recipes/${id}`);
+  }
+
   return (
     <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-4" /* style="padding-bottom: 20px;" */ >
       <div className="card-header">
@@ -78,6 +86,13 @@ function Recipe({ name, difficulty, image }) {
         <Difficulty difficulty={difficulty} />
       </div>
       <img src={image} alt={name} className="card-img-bottom" />
+      <Button
+        onClick={handleGoToRecipe}
+        variant="contained"
+        color="primary"
+      >
+        Instructions
+      </Button>
     </div>
   );
 }
@@ -123,7 +138,7 @@ const Recipes: React.FC = () => {
 
       <div className="container">
         <div className="row">
-          <Recipe name="Spaghetti" difficulty="1" image="" />
+          <Recipe id="1" name="Apple Frangipan Tart" difficulty="1" image="" />
         </div>
       </div>
 
