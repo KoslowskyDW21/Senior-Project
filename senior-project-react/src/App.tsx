@@ -4,6 +4,7 @@ import { RegistrationProvider } from "./components/RegistrationContext";
 import Login from "./components/Login";
 import RegistrationOne from "./components/RegistrationOne";
 import RegistrationTwo from "./components/RegistrationTwo";
+import Recipe from "./components/Recipe";
 import Recipes from "./components/Recipes";
 import Profile from "./components/Profile"
 import Settings from "./components/Settings";
@@ -43,6 +44,7 @@ function App() {
 
           {/* Recipes page */}
           <Route path="/recipes" element={<Recipes />} />
+          <Route path="/recipes/:id" element={<Recipe />} />
 
           {/* profile */}
           <Route path="/profile" element={<Profile />} />
