@@ -23,7 +23,9 @@ const Profile: React.FC = () => {
 
     const getResponse = async () => {
         const response = await axios.post(
-            `http://127.0.0.1:5000/profile/${id}`
+            `http://127.0.0.1:5000/profile/${id}`,
+            {},
+            { withCredentials: true }
         );
         const data: ProfileResponse = response.data;
         setLname(data.lname);

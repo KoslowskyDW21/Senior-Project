@@ -14,11 +14,11 @@ def create_app(config=Config):
     app = Flask(__name__)
     app.config.from_object(config)
     # Allow requests only from React frontend
-    CORS(app, origins='http://localhost:5173')  
+    CORS(app, origins="http://localhost:5173", supports_credentials=True) 
     # Prepare and connect the LoginManager to this app
     login_manager.init_app(app)
     # function name of the route that has the login form (so it can redirect users)
-    login_manager.login_view = 'get_login' # type: ignore
+    login_manager.login_view = 'login.get_login' # type: ignore
     login_manager.session_protection = "strong"
 
     db.init_app(app)  # Initialize the SQLAlchemy instance with the app

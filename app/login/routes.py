@@ -105,7 +105,10 @@ def api_login():
     if user is None or not user.verify_password(password):
         return jsonify({"message": "Invalid email or password"}), 400
 
-    login_user(user)
+    login_user(user, remember=True)
+    print("Logged in:")
+    print(current_user)
+    print(user)
     return jsonify({"message": "Login successful", "user_id": user.id}), 200
 
 @bp.route('/api/logout/', methods=['POST'])

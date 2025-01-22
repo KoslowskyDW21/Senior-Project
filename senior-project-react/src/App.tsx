@@ -15,15 +15,20 @@ import Achievements from "./components/Achievements";
 import AchievementSpecific from "./components/AchievementSpecific";
 
 function App() {
-  // EXAMPLE FOR RETRIEVING DATA FROM FLASK
-  const fetchAPI = async () => {
-    const response = await axios.get("http://127.0.0.1:5000");
-    console.log(response.data);
-  };
-
+  // this allows cookies to be sent with all requests in the app
   useEffect(() => {
-    fetchAPI();
+    axios.defaults.withCredentials = true;
   }, []);
+
+  // EXAMPLE FOR RETRIEVING DATA FROM FLASK
+  // const fetchAPI = async () => {
+  //   const response = await axios.get("http://127.0.0.1:5000");
+  //   console.log(response.data);
+  // };
+
+  // useEffect(() => {
+  //   fetchAPI();
+  // }, []);
 
   return (
     <Router>

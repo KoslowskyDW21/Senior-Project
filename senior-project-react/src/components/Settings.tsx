@@ -26,12 +26,10 @@ export default function Settings() {
     });
 
     async function loadUser() {
-        try {
-            const response = await axios.post("http://127.0.0.1:5000/settings/");
+            const response = await axios.post("http://127.0.0.1:5000/settings/",
+            {},
+            { withCredentials: true });
             setUser(response.data);
-        } catch (error) {
-    
-        }
     }
 
     React.useEffect(() => { loadUser(); }, []);

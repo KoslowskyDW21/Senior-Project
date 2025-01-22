@@ -1,9 +1,12 @@
 from __future__ import annotations
+
+from flask_login import login_required
 from app.challenges import bp
 from app.models import User, Challenge, db
 from flask import request, jsonify, abort
 from datetime import datetime, timedelta
 
+@login_required
 @bp.route('/', methods=['POST'])
 def challenges():
     """
@@ -25,6 +28,7 @@ def challenges():
     challenges = Challenge.query.all()
     return jsonify([challenge.to_json() for challenge in challenges]), 200
 
+@login_required
 @bp.route('/<int:id>', methods=['GET'])
 def get_challenge(id):
     challenge = Challenge.query.get(id)
@@ -34,6 +38,7 @@ def get_challenge(id):
         abort(404, description="Challenge not found")
     return jsonify(challenge.to_json()), 200
 
+@login_required
 @bp.route('/create', methods=['POST'])
 def create_challenge():
     return jsonify({"message": "Challenge created successfully!"}), 200
