@@ -9,6 +9,6 @@ from flask_login import current_user, login_required
 def post_settings_page():
     print("Current User:")
     print(current_user)
-    user = current_user
+    user = current_user._get_current_object()
 
     return jsonify(user.to_json()), 200

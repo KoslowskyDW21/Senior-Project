@@ -5,9 +5,11 @@ import { Button, TextField, Container } from "@mui/material"; //matui components
 
 interface Recipe {
   id: number;
-  name: string;
+  recipe_name: string;
   difficulty: "1" | "2" | "3" | "4" | "5";
-  image_src: string;
+  xp_amount: number;
+  rating: number;
+  image: string;
 }
 
 function Difficulty({ difficulty }) {
@@ -97,8 +99,18 @@ function Recipe({ id, name, difficulty, image }) {
   );
 }
 
+function createRecipe(recipe: Recipe) {
+  console.log(recipe.id);
+  console.log(recipe.recipe_name);
+  console.log(recipe.difficulty);
+  console.log(recipe.image);
+
+  return <Recipe id={recipe.id} name={recipe.recipe_name} difficulty={recipe.difficulty} image={recipe.image} />;
+  // return <Recipe id="1" name="Apple Frangipan Tart" difficulty="1" image="" />;
+}
+
 const Recipes: React.FC = () => {
-  let recipes: Array<Recipe> = [];
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
   const navigate = useNavigate(); //for navigation
 
   const handleGoToProfile = async () => {
@@ -118,15 +130,18 @@ const Recipes: React.FC = () => {
 
   async function loadRecipes() {
     try {
-      const response = await axios.post("");
-      recipes = response.data;
+      const response = await axios.post("http://127.0.0.1:5000/recipes/");
+      const data = response.data;
+      setRecipes(data);
     }
     catch (error) {
-
+      	console.error("Unable to fetch recipes", error);
     }
   }
 
-  React.useEffect(() => { loadRecipes(); }, []);
+  React.useEffect(() => {
+    loadRecipes();
+  }, []);
 
   return (
     <div>
@@ -138,7 +153,15 @@ const Recipes: React.FC = () => {
 
       <div className="container">
         <div className="row">
-          <Recipe id="1" name="Apple Frangipan Tart" difficulty="1" image="" />
+          {/*createRecipe(recipes[0])*/}
+          {/*<button><Recipe id="1" name="Apple Frangipan Tart" difficulty="1" image="" /></button>*/}
+
+          {recipes.map((recipe) => (
+            <div key={recipe.id}>
+              <Recipe id={recipe.id} name={recipe.recipe_name} difficulty={recipe.difficulty} image={recipe.image} />
+            </div>
+          ))}
+
         </div>
       </div>
 

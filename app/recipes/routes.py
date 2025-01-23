@@ -10,7 +10,9 @@ from app.models import Recipe, db
 
 @bp.post("/")
 def post_recipes():
-    pass
+    print("Fetching recipes")
+    recipes = Recipe.query.all()
+    return jsonify([recipe.to_json() for recipe in recipes])
 
 @bp.post("/<int:id>/")
 def post_recipe_page(id):
