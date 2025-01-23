@@ -1,6 +1,12 @@
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import React from "react";
+import { Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
+interface DeleteResponse {
+  message: string;
+}
 
 namespace SettingsPage {
   export interface User {
@@ -23,6 +29,9 @@ export default function Settings() {
     colonial_side: null,
   });
 
+  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
+
   async function loadUser() {
     const response = await axios.post(
       "http://127.0.0.1:5000/settings/",
@@ -30,6 +39,31 @@ export default function Settings() {
       { withCredentials: true }
     );
     setUser(response.data);
+  }
+
+  async function handleDelete() {
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/api/delete_account",
+        {},
+        { withCredentials: true }
+      );
+
+      const data: DeleteResponse = response.data;
+      setMessage(data.message);
+      if (data.message === "Account deleted successfully") {
+        navigate("/");
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError;
+
+      if (axiosError.response && axiosError.response.data) {
+        const errorData = axiosError.response.data as DeleteResponse;
+        setMessage(errorData.message);
+      } else {
+        setMessage("An unknown error occurred");
+      }
+    }
   }
 
   React.useEffect(() => {
@@ -44,6 +78,15 @@ export default function Settings() {
       </p>
       <p>Colonial Floor: {user.colonial_floor}</p>
       <p>Colonial Side: {user.colonial_side}</p>
+
+      <Button
+        onClick={handleDelete}
+        variant="contained"
+        color="error"
+        fullWidth
+      >
+        DELETE ACCOUNT
+      </Button>
     </>
   );
 }
