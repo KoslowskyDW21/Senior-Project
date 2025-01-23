@@ -17,6 +17,10 @@ interface RegistrationResponse {
   message: string;
 }
 
+interface LoginResponse {
+  message: string;
+}
+
 const PageTwo = () => {
   const { data, setData } = useRegistration();
   const [message, setMessage] = useState("");
@@ -61,7 +65,28 @@ const PageTwo = () => {
       const responseData: RegistrationResponse = response.data;
       setMessage(responseData.message);
       if (responseData.message === "Registration successful") {
-        //TODO: Change this to Recipes or something, this is just to test navigation / routing
+        const loginData = {
+          email: data.email,
+          password: data.password,
+        };
+        try {
+          const loginResponse = await axios.post(
+            "http://127.0.0.1:5000/api/login/",
+            loginData,
+            { headers: { "Content-Type": "application/json" } }
+          );
+        } catch (error) {
+          // Type the error as AxiosError to get response structure
+          const axiosError = error as AxiosError;
+
+          // Check if response and response.data exist and are of type LoginResponse
+          if (axiosError.response && axiosError.response.data) {
+            const errorData = axiosError.response.data as LoginResponse; // Type assertion
+            setMessage(errorData.message); // Error message from server
+          } else {
+            setMessage("An unknown error occurred");
+          }
+        }
         navigate("/recipes");
       }
     } catch (error) {

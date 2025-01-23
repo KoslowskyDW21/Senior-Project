@@ -23,9 +23,9 @@ def create_app(config=Config):
 
     db.init_app(app)  # Initialize the SQLAlchemy instance with the app
     with app.app_context():
-        pass
         # UNCOMMENT TO REPOPULATE DATABASE
-        # populate_database()
+        #populate_database()
+        pass
 
     # connect the core endpoints
     from app.login import bp as login_bp
@@ -83,7 +83,9 @@ def save_recipes_to_db(recipes):
             difficulty=str(difficulty),  # type: ignore
             xp_amount=100*difficulty,  # type: ignore
             rating=0,  # type: ignore
-            image=recipe_data["strMealThumb"]  # type: ignore
+            image=recipe_data["strMealThumb"],  # type: ignore
+            youtube_url=recipe_data["strCategory"], # type: ignore
+            category=recipe_data["strYoutube"] # type: ignore
         )
         db.session.add(recipe)
         db.session.flush()
