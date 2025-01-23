@@ -73,14 +73,18 @@ def api_register():
 
         os.makedirs(upload_folder, exist_ok=True)
 
-        file_path = os.path.join(upload_folder, profile_picture.filename)
+        filename = secure_filename(profile_picture.filename)
+
+        file_path = os.path.join(upload_folder, filename)
         profile_picture.save(file_path)
 
-        new_user.profile_picture = file_path
-        profile_picture_url = file_path
+        relative_path = os.path.join('static', 'uploads', filename)
+        new_user.profile_picture = relative_path
+        profile_picture_url = relative_path
+
         db.session.commit()
 
-        print(file_path)
+        print(relative_path)
 
     else:
         print("sad")

@@ -23,6 +23,11 @@ const IndividualRecipe: React.FC = () => {
         navigate(`/recipes`);
     }
 
+    const handleGoToCompletedRecipe = async () => {
+        console.log("Navigating to completed recipe page");
+        navigate(`/recipes/completed/${id}`);
+    }
+
     const getResponse = async () => {
         try {
             const response = await axios.post(`http://127.0.0.1:5000/recipes/${id}`);
@@ -46,6 +51,13 @@ const IndividualRecipe: React.FC = () => {
                 color="primary"
             >
                 Recipes
+            </Button>
+            <Button
+                onClick={handleGoToCompletedRecipe}
+                variant="contained"
+                color="primary"
+            >
+                Complete
             </Button>
         </>
     )

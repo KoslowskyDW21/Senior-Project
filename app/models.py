@@ -219,6 +219,8 @@ class Recipe(db.Model):
     xp_amount = db.Column(db.Integer, nullable=False)
     rating = db.Column(db.Float, nullable=False)
     image = db.Column(db.Text, nullable=False)
+    youtube_url = db.Column(db.Text)
+    category = db.Column(db.Text, nullable=False)
     def to_json(self):
         return {
             "id": self.id,
