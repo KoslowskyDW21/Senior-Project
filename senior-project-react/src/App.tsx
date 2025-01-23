@@ -4,7 +4,7 @@ import { RegistrationProvider } from "./components/RegistrationContext";
 import Login from "./components/Login";
 import RegistrationOne from "./components/RegistrationOne";
 import RegistrationTwo from "./components/RegistrationTwo";
-import Recipe from "./components/Recipe";
+import IndividualRecipe from "./components/Recipe";
 import Recipes from "./components/Recipes";
 import Profile from "./components/Profile"
 import Settings from "./components/Settings";
@@ -14,6 +14,7 @@ import Challenges from "./components/Challenges";
 import ChallengeDetail from "./components/ChallengeDetails";
 import Achievements from "./components/Achievements";
 import AchievementSpecific from "./components/AchievementSpecific";
+import CompletedRecipe from "./components/CompletedRecipe";
 
 function App() {
   // this allows cookies to be sent with all requests in the app
@@ -44,7 +45,12 @@ function App() {
 
           {/* Recipes page */}
           <Route path="/recipes" element={<Recipes />} />
-          <Route path="/recipes/:id" element={<Recipe />} />
+
+          {/* Individual recipe page */}
+          <Route path="/recipes/:id" element={<IndividualRecipe />} />
+
+          {/* Complted recipe page */}
+          <Route path="/recipes/completed/:id" element={<CompletedRecipe />} />
 
           {/* profile */}
           <Route path="/profile" element={<Profile />} />

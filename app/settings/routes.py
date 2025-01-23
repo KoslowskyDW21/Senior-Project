@@ -10,8 +10,10 @@ from flask_login import current_user, login_required
 @login_required
 @bp.route('/', methods=['POST'])
 def post_settings_page():
-    print("Current User:", current_user)
-    user = current_user
+    print("Current User:")
+    print(current_user)
+    user = current_user._get_current_object()
+
     return jsonify(user.to_json()), 200
 
 
