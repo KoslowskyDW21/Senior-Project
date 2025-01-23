@@ -6,6 +6,7 @@ import RegistrationOne from "./components/RegistrationOne";
 import RegistrationTwo from "./components/RegistrationTwo";
 import IndividualRecipe from "./components/Recipe";
 import Recipes from "./components/Recipes";
+import RecipeLists from "./components/RecipeList";
 import Profile from "./components/Profile"
 import Settings from "./components/Settings";
 import axios from "axios";
@@ -51,6 +52,9 @@ function App() {
 
           {/* Complted recipe page */}
           <Route path="/recipes/completed/:id" element={<CompletedRecipe />} />
+
+          {/* RecipeLists page */}
+          <Route path="/recipe-lists/:id" element={<RecipeLists />} />
 
           {/* profile */}
           <Route path="/profile" element={<Profile />} />
