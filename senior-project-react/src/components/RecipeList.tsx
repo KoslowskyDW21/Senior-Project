@@ -10,12 +10,12 @@ interface Recipe {
     image_src: string;
   }
 
-interface RecipeList {
+interface Recipes {
     recipes: Recipe[];
 }
 
 const RecipeLists: React.FC = () => {
-    const [ recipeList, setRecipeList ] = React.useState<Recipe[]>([]);
+    const [ recipes, setRecipes ] = React.useState<Recipe[]>([]);
     const { recipeListId } = useParams<{ recipeListId: string }>();
 
     const navigate = useNavigate();
@@ -28,8 +28,8 @@ const RecipeLists: React.FC = () => {
     const getResponse = async () => {
         try {
             const response = await axios.post(`http://127.0.0.1:5000/recipe_lists/${id}`);
-            const data: RecipeList = response.data;
-            setRecipeList(data); // TODO: figure out how to get the Recipe[] out of a RecipeList (model?)
+            const resp_recipes: Recipes = response.data;
+            setRecipes(resp_recipes.recipes); // TODO: figure out how to get the Recipe[] out of a RecipeList (model?)
         } catch (error) {
             console.error("Error fetching recipe: ", error);
         }
@@ -38,7 +38,7 @@ const RecipeLists: React.FC = () => {
     return (
         <>
             <h1>RecipeList</h1>
-            {recipeList.map((recipe) => (
+            {recipes.map((recipe) => (
           <div key={recipe.id}>
             <button><img src={recipe.image_src} width = "100" onClick={() => navigate(`/recipes/${recipe.id}`)} /></button>
             <p> {recipe.name}</p>
