@@ -8,6 +8,7 @@ interface Achievement{
     image?: string;
     isComplete: boolean;
     isVisible: boolean;
+    description: string;
 
 }
 
@@ -34,7 +35,8 @@ const AchievementSpecific: React.FC = () => {
         <div>
         <h1>{achievement.title}</h1>   
         <button><img src= {achievement.image}/></button> 
-        <p>Completed: {achievement.isComplete}</p>
+        <p>{achievement.description}</p>
+        <p>Completed: {achievement.isComplete.toString()}</p>
         </div>
 
     );
