@@ -7,12 +7,14 @@ export enum Floor {
   Two = "2",
   Three = "3",
   Four = "4",
+  None = "",
   ADMIN = "ADMIN",
 }
 
 export enum Side {
   Mens = "Mens",
   Womens = "Womens",
+  None = "",
   ADMIN = "ADMIN",
 }
 
@@ -36,8 +38,8 @@ const defaultData: RegistrationData = {
   email: "",
   password: "",
   confirmPassword: "",
-  colonial_floor: Floor.One,
-  colonial_side: Side.Mens,
+  colonial_floor: Floor.None,
+  colonial_side: Side.None,
   profile_picture: null,
   profile_picture_text: "",
 };
