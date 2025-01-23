@@ -12,6 +12,7 @@ interface Achievement{
     image?: string;
     isComplete: boolean;
     isVisible: boolean;
+    description: string;
 
 }
 
