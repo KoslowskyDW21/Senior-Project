@@ -427,3 +427,15 @@ class RecipeList(db.Model):
             "name": self.name,
             "belongs_to": self.belongs_to,
         }
+    
+# TODO: is this the best way to solve this issue?
+class RecipeRecipeList(db.Model):
+    __tablename__ = 'RecipeRecipeList'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), primary_key=True)
+    recipe_list_id = db.Column(db.Integer, db.ForeignKey('RecipeList.id'), primary_key=True)
+    def to_json(self):
+        return {
+            "recipe_id": self.recipe_id,
+            "recipe_list_id": self.recipe_list_id,
+        }
