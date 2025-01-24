@@ -14,7 +14,12 @@ def post_settings_page():
     print(current_user)
     user = current_user._get_current_object()
 
+    #dietaryRestictions = UserDietaryRestriction.query.filter(UserDietaryRestriction.user_id == user.id).all()
+
+    
+
     return jsonify(user.to_json()), 200
+
 
 
 def delete_user_and_dependencies(session, current_user_id):
