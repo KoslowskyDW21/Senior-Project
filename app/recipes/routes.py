@@ -2,7 +2,7 @@ from __future__ import annotations
 from flask import request, jsonify, render_template, redirect, url_for, abort, flash
 from flask_login import current_user
 from app.recipes import bp
-from app.models import Recipe, db
+from app.models import UserAchievement, Recipe, db
 
 # @bp.get('/')
 # def home():
@@ -26,6 +26,12 @@ def post_recipe_page(id):
 def post_completed_recipe_page(id):
     print("searching for recipe" + str(id))
     recipe = Recipe.query.filter_by(id=id).first()
+    nc = current_user.num_recipes_completed
+    current_user.num_recipes_completed = nc + 1
+    db.session.add(current_user)
+    db.session.flush()
+    db.session.commit()
+    completionAchievements()
     if recipe is not None:
         return jsonify(recipe.to_json())
     return "<h1>404: recipe not found</h1>", 404
@@ -74,3 +80,13 @@ def delete_recipe():
     db.session.commit()
     flash('recipe deleted successfully')
     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
+
+def completionAchievements():
+    if(current_user.num_recipes_completed == 1):
+        a = UserAchievement(achievement_id = 1, user_id = current_user.id) #type:ignore
+        b = UserAchievement.query.filter(UserAchievement.achievement_id == 1)
+        if(b is None):
+            db.session.add(a)
+            db.session.flush()
+            db.session.commit()
+        

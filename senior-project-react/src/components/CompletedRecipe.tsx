@@ -24,7 +24,7 @@ const CompletedRecipe: React.FC = () => {
 
     const getResponse = async () => {
         try {
-            const response = await axios.post(`http://127.0.0.1:5000/recipes/${id}`);
+            const response = await axios.post(`http://127.0.0.1:5000/recipes/completed/${id}`);
             const data: Recipe = response.data;
             setRecipe_name(data.recipe_name);
         } catch (error) {
