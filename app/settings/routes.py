@@ -20,6 +20,14 @@ def post_settings_page():
 
     return jsonify(user.to_json()), 200
 
+@login_required
+@bp.route("/update/", methods=['POST'])
+def post_update_user():
+    user = None # User.from_json(request.json)
+    db.session.add(user)
+    db.session.commit()
+
+    return ""
 
 
 def delete_user_and_dependencies(session, current_user_id):

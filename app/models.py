@@ -69,6 +69,26 @@ class User(UserMixin, db.Model):
             f"num_reports={self.num_reports}, user_level={self.user_level}, "
             f"last_logged_in={self.last_logged_in})>"
         )
+    
+    # TODO: Figure out why this method is broken
+    @staticmethod
+    def from_json(o: dict):
+        return User(
+            # fname=o.get("fname"),
+            # lname=o.get("lname"),
+            # email_address=o.get("email_address"),
+            # username=o.get("username"),
+            # profile_picture=o.get("profile_picture"),
+            # xp_points=o.get("xp_points"),
+            # user_level=o.get("user_level"),
+            # is_admin=o.get("is_admin"),
+            # num_recipes_completed=o.get("num_recipes_completed"),
+            # colonial_floor=o.get("colonial_floor"),
+            # colonial_side=o.get("colonial_side"),
+            # date_created=o.get("date_created"),
+            # last_logged_in=o.get("last_logged_in"),
+            # num_reports=o.get("num_reports"),
+        )
 
 class UserBlock(db.Model):
     __tablename__ = 'UserBlock'
