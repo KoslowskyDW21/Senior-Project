@@ -73,8 +73,6 @@ def api_register():
     db.session.commit()
 
     if profile_picture and allowed_file(profile_picture.filename):
-        print("profile_picture and allowed_file")
-
         upload_folder = current_app.config['UPLOAD_FOLDER']
 
         os.makedirs(upload_folder, exist_ok=True)
@@ -90,10 +88,7 @@ def api_register():
 
         db.session.commit()
 
-        print(relative_path)
-
     else:
-        print("sad")
         profile_picture_url = None
 
     return jsonify({
