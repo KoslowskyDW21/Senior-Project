@@ -45,6 +45,12 @@ def api_register():
     userNameValidation = User.query.filter_by(username=username).first()
     if userNameValidation is not None:
         return jsonify({"message": "There is already an account with that username"}), 400
+    
+    if colonial_floor == "":
+        colonial_floor = None
+     
+    if colonial_side == "":
+        colonial_side = None
 
     new_user = User(
         fname=fname,
