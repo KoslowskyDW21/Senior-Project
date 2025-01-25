@@ -9,14 +9,16 @@ def post_profile_page(id=1):
     print("searching for user " + str(id))
     print(current_user)
     user = User.query.filter_by(id=id).first()
+    ua = UserAchievement.query.filter_by(user_id = id)
+    achievements = []
+    for a in ua:
+        achievements.append(Achievement.query.filter_by(id = a.user_id).first())
+
     if user is not None:
-        a = []
-        for entry in UserAchievement.query.filter_by(user_id = user.id):
-            a.append(Achievement.query.filter_by(id = entry.achievement_id))
         return jsonify({ "lname": user.lname,
                          "fname": user.fname,
                          "username": user.username,
-                         "achievements": a
+                         "achievements": [achievement.to_json() for achievement in achievements]
                          }), 200
     return "<h1>404: profile not found</h1>", 404
 

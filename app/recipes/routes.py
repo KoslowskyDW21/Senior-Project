@@ -84,8 +84,8 @@ def delete_recipe():
 def completionAchievements():
     if(current_user.num_recipes_completed == 1):
         a = UserAchievement(achievement_id = 1, user_id = current_user.id) #type:ignore
-        b = UserAchievement.query.filter(UserAchievement.achievement_id == 1)
-        if(b is None):
+        b = UserAchievement.query.all()
+        if(a not in b):
             db.session.add(a)
             db.session.flush()
             db.session.commit()

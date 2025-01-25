@@ -10,6 +10,7 @@ interface Recipe {
     "xp_amount": string,
     "rating": string,
     "image": string,
+    "achievements": []
 }
 
 const IndividualRecipe: React.FC = () => {
