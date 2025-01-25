@@ -23,7 +23,15 @@ const RegisterTwo = () => {
     });
   };
 
+  const getCheckedRestrictions = () => {
+    return Object.keys(data.dietaryRestrictions).filter(
+      (key) =>
+        data.dietaryRestrictions[key as keyof typeof data.dietaryRestrictions]
+    );
+  };
+
   const handleNext = async () => {
+    console.log(getCheckedRestrictions());
     navigate("/registration-three");
   };
 

@@ -22,6 +22,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # route for registering through API
+#TODO: Add dietary restrictions to db
 @bp.route('/api/register/', methods=['POST'])
 def api_register():
     username = request.form.get('username')
@@ -31,13 +32,9 @@ def api_register():
     lname = request.form.get('lname')
     colonial_floor = request.form.get('colonial_floor')
     colonial_side = request.form.get('colonial_side')
-    profile_picture = request.files.get('profile_picture')  
+    profile_picture = request.files.get('profile_picture')
+    dietary_restrictions = request.form.get('dietaryRestrictions')
 
-    if profile_picture is not None:
-        print("pfp found!")
-    else:
-        print("sad")
-    
     user = User.query.filter_by(email_address=email).first()
     if user is not None:
         return jsonify({"message": "There is already an account with that email address"}), 400

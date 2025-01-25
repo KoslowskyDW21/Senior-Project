@@ -55,10 +55,38 @@ const RegisterThree = () => {
       data.colonial_side
     );
 
+    const formData = new FormData();
+
+    formData.append("username", data.username);
+    formData.append("email", data.email);
+    formData.append("password", data.password);
+    formData.append("fname", data.fname);
+    formData.append("lname", data.lname);
+    formData.append("colonial_floor", data.colonial_floor);
+    formData.append("colonial_side", data.colonial_side);
+
+    const dietaryRestrictionsArray = Object.entries(data.dietaryRestrictions)
+      .filter(([key, value]) => value)
+      .map(([key]) => key);
+
+    if (dietaryRestrictionsArray.length > 0) {
+      formData.append(
+        "dietaryRestrictions",
+        dietaryRestrictionsArray.join(",")
+      );
+    }
+
+    console.log(dietaryRestrictionsArray);
+    console.log(formData);
+
+    if (data.profile_picture) {
+      formData.append("profile_picture", data.profile_picture);
+    }
+
     try {
       const response = await axios.post(
         "http://127.0.0.1:5000/api/register/",
-        data,
+        formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
