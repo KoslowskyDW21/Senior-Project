@@ -12,6 +12,24 @@ interface Recipe {
   image: string;
 }
 
+interface User {
+  "id": string,
+  "fname": string,
+  "lname": string,
+  "email_address": string,
+  "username": string,
+  "profile_picture": string,
+  "xp_points": number,
+  "user_level": number,
+  "is_admin": boolean,
+  "num_recipes_completed": number,
+  "colonial_floor": string,
+  "colonial_side": string,
+  "date_created": string,
+  "last_logged_in": string,
+  "num_reports": number,
+}
+
 function Difficulty({ difficulty }) {
   if (difficulty === "1") {
     return (
@@ -111,6 +129,7 @@ function createRecipe(recipe: Recipe) {
 
 const Recipes: React.FC = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [ current_user, setCurrent_user ] = React.useState<User>();
   const navigate = useNavigate(); //for navigation
 
   const handleGoToProfile = async () => {
@@ -127,6 +146,17 @@ const Recipes: React.FC = () => {
     console.log("Navigating to achievements page");
     navigate(`/achievements`)
   }
+
+  const getCurrentUser = async () => {
+    console.log("Getting FULL JSON of current user");
+    try {
+        const response = await axios.post(`http://127.0.0.1:5000/profile/current_user`);
+        const data: User = response.data;
+        setCurrent_user(data);
+    } catch (error) {
+        console.error("Error fetching recipe: ", error);
+    }
+}
 
   async function loadRecipes() {
     try {
