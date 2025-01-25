@@ -7,6 +7,7 @@ import RegistrationTwo from "./components/RegistrationTwo";
 import RegistrationThree from "./components/RegistrationThree";
 import IndividualRecipe from "./components/Recipe";
 import Recipes from "./components/Recipes";
+import RecipeList from "./components/RecipeList";
 import RecipeLists from "./components/RecipeList";
 import Profile from "./components/Profile";
 import Settings from "./components/Settings";
@@ -57,6 +58,9 @@ function App() {
 
           {/* RecipeLists page */}
           <Route path="/recipe-lists/:id" element={<RecipeLists />} />
+
+          {/* RecipeList page */}
+          <Route path="/recipe-list/:id" element={<RecipeList />} />
 
           {/* profile */}
           <Route path="/profile" element={<Profile />} />

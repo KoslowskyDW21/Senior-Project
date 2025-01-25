@@ -30,6 +30,7 @@ interface User {
   "num_reports": number,
 }
 
+// @ts-expect-error
 function Difficulty({ difficulty }) {
   if (difficulty === "1") {
     return (
@@ -88,6 +89,7 @@ function Difficulty({ difficulty }) {
   }
 }
 
+// @ts-expect-error
 function Recipe({ id, name, difficulty, image }) {
   const navigate = useNavigate(); //for navigation
   id = id.toString(); // hacky insurance against mistakes
