@@ -22,7 +22,7 @@ def post_profile_page(id=1):
                          }), 200
     return "<h1>404: profile not found</h1>", 404
 
-@bp.route('/current_user', methods=['POST'])
+@bp.route('/current_user', methods=['GET', 'POST'])
 def post_current_user():
     return jsonify({
         current_user.to_json()

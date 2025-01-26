@@ -10,24 +10,20 @@ import requests
 login_manager = LoginManager()
 
 def create_app(config=Config):
-    # create the flask app and set all its config options based on a config object
     app = Flask(__name__)
     app.config.from_object(config)
     # Allow requests only from React frontend
     CORS(app, origins="http://localhost:5173", supports_credentials=True) 
-    # Prepare and connect the LoginManager to this app
     login_manager.init_app(app)
-    # function name of the route that has the login form (so it can redirect users)
     login_manager.login_view = 'login.get_login' # type: ignore
     login_manager.session_protection = "strong"
 
-    db.init_app(app)  # Initialize the SQLAlchemy instance with the app
+    db.init_app(app)
     with app.app_context():
         # UNCOMMENT TO REPOPULATE DATABASE
         # populate_database()
         pass
 
-    # connect the core endpoints
     from app.login import bp as login_bp
     app.register_blueprint(login_bp, url_prefix='/')
     from app.recipes import bp as recipes_bp
@@ -42,6 +38,7 @@ def create_app(config=Config):
     app.register_blueprint(achievement_bp, url_prefix='/achievements')
     from app.settings import bp as settings_bp
     app.register_blueprint(settings_bp, url_prefix='/settings')
+    
     return app
 
 @login_manager.user_loader

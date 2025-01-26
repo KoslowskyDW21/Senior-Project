@@ -18,6 +18,7 @@ import ChallengeDetail from "./components/ChallengeDetails";
 import Achievements from "./components/Achievements";
 import AchievementSpecific from "./components/AchievementSpecific";
 import CompletedRecipe from "./components/CompletedRecipe";
+import CreateChallenge from "./components/CreateChallenge";
 
 function App() {
   // this allows cookies to be sent with all requests in the app
@@ -69,6 +70,7 @@ function App() {
           {/* challenges */}
           <Route path="/challenges" element={<Challenges />} />
           <Route path="/challenges/:id" element={<ChallengeDetail />} />
+          <Route path="/challenges/create" element={<CreateChallenge />} />
 
           {/*achievements*/}
           <Route path="/achievements" element={<Achievements />} />
