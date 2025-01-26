@@ -35,6 +35,8 @@ def api_register():
     profile_picture = request.files.get('profile_picture')
     dietary_restrictions = request.form.get('dietaryRestrictions')
 
+    print(dietary_restrictions)
+
     user = User.query.filter_by(email_address=email).first()
     if user is not None:
         return jsonify({"message": "There is already an account with that email address"}), 400
