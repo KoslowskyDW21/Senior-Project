@@ -14,13 +14,12 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @login_required
-@bp.route('/', methods=['POST'])
+@bp.route('/', methods=['GET', 'POST'])
 def challenges():
     """
     challenge = Challenge(
         name = "Charlie's Chili Challenge",
         creator = 1,
-        image = "app\\challenges\\static\\sampleImage.png",
         difficulty = '1',
         theme = "Chili",
         location = "Main Lobby",
@@ -123,3 +122,9 @@ def create_challenge():
     db.session.commit()
 
     return jsonify({"message": "Challenge created successfully!"}), 200
+
+@bp.route('/current_user_id', methods=['GET', 'POST'])
+def post_current_user():
+    return jsonify(
+        current_user.id
+    ), 200
