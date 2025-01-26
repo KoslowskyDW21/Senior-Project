@@ -2,11 +2,14 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import React from "react";
 import { Button, TextField, Container } from "@mui/material"; //matui components
+import Achievement from "./Achievements";
+
 
 interface ProfileResponse {
     lname: string;
     fname: string;
     username: string;
+    achievements: Achievement[];
 }
 
 const Profile: React.FC = () => {
@@ -20,6 +23,7 @@ const Profile: React.FC = () => {
     const [lname, setLname] = React.useState<String>();
     const [fname, setFname] = React.useState<String>();
     const [username, setUsername] = React.useState<String>();
+    const [achievements, setAchievements] = React.useState<Achievement[]>([]);
 
     const getResponse = async () => {
         const response = await axios.post(
@@ -31,6 +35,7 @@ const Profile: React.FC = () => {
         setLname(data.lname);
         setFname(data.fname);
         setUsername(data.username);
+        setAchievements(data.achievements);
     }
 
 React.useEffect(() => {
@@ -61,6 +66,13 @@ const handleGoToRecipes = async () => {
             >
                 Settings
             </Button>
+            <p> Recent Achievements: </p>
+            {achievements.map((achievement) => (
+          <div key={achievement.id}>
+            <button><img src={achievement.image} width = "100" onClick={() => navigate(`/achievements/${achievement.id}`)} /></button>
+            <p> {achievement.title}</p>
+          </div> 
+          ))}
         </>
     )
 }

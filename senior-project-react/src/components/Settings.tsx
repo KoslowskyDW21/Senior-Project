@@ -45,6 +45,21 @@ export default function Settings() {
     setColonialSide(user.colonial_side);
   }
 
+  async function updateUser() { // TODO: Insert the correct URL
+    try {
+      await axios.post("", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(user)
+      });
+    }
+    catch (error) {
+      console.log("Could not update user ", error);
+    }
+  }
+
   async function handleDelete() {
     try {
       const response = await axios.post(
@@ -86,6 +101,8 @@ export default function Settings() {
       colonial_floor: newFloor,
       colonial_side: user.colonial_side,
     });
+
+    updateUser();
   }
 
   const handleSideChange = (event: SelectChangeEvent) => {
@@ -100,6 +117,8 @@ export default function Settings() {
       colonial_floor: user.colonial_floor,
       colonial_side: newSide,
     });
+
+    updateUser();
   }
 
   return (

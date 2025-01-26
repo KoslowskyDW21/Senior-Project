@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 
 interface Achievements {
-        achievements: Achievement[];
+  achievements: Achievement[];
 }
 
 interface Achievement{

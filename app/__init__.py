@@ -24,7 +24,7 @@ def create_app(config=Config):
     db.init_app(app)  # Initialize the SQLAlchemy instance with the app
     with app.app_context():
         # UNCOMMENT TO REPOPULATE DATABASE
-        #populate_database()
+        # populate_database()
         pass
 
     # connect the core endpoints
