@@ -41,6 +41,9 @@ interface Challenge {
   
     return (
       <div>
+        <button onClick={() => navigate(`/challenges/create`)}>
+              Create a Challenge
+            </button>
         <h1>Challenges</h1>
         <ul>
         {challenges.map((challenge) => (
