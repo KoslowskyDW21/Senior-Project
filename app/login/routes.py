@@ -1,6 +1,6 @@
 from __future__ import annotations
 from app.login import bp
-from app.models import User, db
+from app.models import *
 from app.login.loginforms import RegisterForm, LoginForm
 from datetime import datetime
 from flask import request, jsonify, render_template, redirect, url_for, flash, current_app
@@ -21,8 +21,25 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
+def add_dietary_restrictions(restriction_ids, user_id):
+    # theoretically this will prevent duplicate data
+    UserDietaryRestriction.query.filter_by(user_id=user_id).delete()
+
+    for restriction_id in restriction_ids:
+        new_restriction = UserDietaryRestriction(user_id=user_id, restriction_id=restriction_id)
+        db.session.add(new_restriction)
+
+    try:
+        db.session.commit()
+    except IntegrityError as e:
+        db.session.rollback()
+        print(f"Error adding dietary restrictions for user {user_id}: {e}")
+
+
+
+
 # route for registering through API
-#TODO: Add dietary restrictions to db
 @bp.route('/api/register/', methods=['POST'])
 def api_register():
     username = request.form.get('username')
@@ -35,19 +52,16 @@ def api_register():
     profile_picture = request.files.get('profile_picture')
     dietary_restrictions = request.form.get('dietaryRestrictions')
 
-    print(dietary_restrictions)
-
     user = User.query.filter_by(email_address=email).first()
     if user is not None:
         return jsonify({"message": "There is already an account with that email address"}), 400
-    
+
     userNameValidation = User.query.filter_by(username=username).first()
     if userNameValidation is not None:
         return jsonify({"message": "There is already an account with that username"}), 400
-    
+
     if colonial_floor == "":
         colonial_floor = None
-     
     if colonial_side == "":
         colonial_side = None
 
@@ -67,28 +81,34 @@ def api_register():
         user_level=1,
         last_logged_in=datetime.utcnow()
     )
-
     db.session.add(new_user)
-    db.session.commit()
+    db.session.commit()  # Commit so `new_user.id` is generated
 
     if profile_picture and allowed_file(profile_picture.filename):
         upload_folder = current_app.config['UPLOAD_FOLDER']
-
         os.makedirs(upload_folder, exist_ok=True)
 
         filename = secure_filename(profile_picture.filename)
-
         file_path = os.path.join(upload_folder, filename)
         profile_picture.save(file_path)
 
         relative_path = os.path.join('static', 'uploads', filename)
         new_user.profile_picture = relative_path
         profile_picture_url = relative_path
-
         db.session.commit()
-
     else:
         profile_picture_url = None
+
+    if dietary_restrictions:
+        restriction_mapping = {
+            "Wheat": 1, "Dairy": 2, "Egg": 3, "Fish": 4, "Pork": 5,
+            "Shellfish": 6, "Soy": 7, "Treenut": 8, "Peanut": 9, "Sesame": 10,
+            "Vegan": 11, "Vegetarian": 12
+        }
+        dietary_restriction_list = dietary_restrictions.split(',')
+        restriction_ids = [restriction_mapping[restriction] for restriction in dietary_restriction_list if restriction in restriction_mapping]
+
+        add_dietary_restrictions(restriction_ids, new_user.id)
 
     return jsonify({
         "message": "Registration successful",
@@ -113,6 +133,7 @@ def validate_user():
         print("invalid 2")
 
     return jsonify({"valid": True, "message": "Valid"}), 200
+
 
 
 @bp.route('/api/login/', methods=['POST'])

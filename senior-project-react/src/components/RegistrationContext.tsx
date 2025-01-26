@@ -33,18 +33,18 @@ interface RegistrationData {
 }
 
 interface DietaryRestrictions {
-  Wheat: Boolean;
-  Dairy: Boolean;
-  Egg: Boolean;
-  Fish: Boolean;
-  Pork: Boolean;
-  Shellfish: Boolean;
-  Soy: Boolean;
-  Treenut: Boolean;
-  Peanut: Boolean;
-  Sesame: Boolean;
-  Vegan: Boolean;
-  Vegetarian: Boolean;
+  Wheat: Boolean; //wheat
+  Dairy: Boolean; //dairy
+  Egg: Boolean; //egg
+  Fish: Boolean; //fish
+  Pork: Boolean; //pork
+  Shellfish: Boolean; //shellfish
+  Soy: Boolean; //soy
+  Treenut: Boolean; //treenut
+  Peanut: Boolean; //peanut
+  Sesame: Boolean; //sesame
+  Vegan: Boolean; //vegan
+  Vegetarian: Boolean; //vegetarian
 }
 
 const defaultDietaryRestrictions: DietaryRestrictions = {
