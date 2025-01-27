@@ -1,5 +1,5 @@
 from __future__ import annotations
-from flask import jsonify
+from flask import jsonify, request
 from app.settings import bp
 from app.models import *
 from flask_login import current_user, login_required
@@ -16,12 +16,12 @@ def post_settings_page():
 
     
 
-    return jsonify(user.to_json()), 200
+    return jsonify(user.to_json()), 200 # type: ignore
 
 @login_required
 @bp.route("/update/", methods=['POST'])
 def post_update_user():
-    user = None # User.from_json(request.json)
+    user = User.from_json(request.json)
     db.session.add(user)
     db.session.commit()
 
