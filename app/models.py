@@ -294,6 +294,7 @@ class Review(db.Model):
     rating = db.Column(db.Enum('1', '2', '3', '4', '5'), nullable=False)
     difficulty = db.Column(db.Enum('1', '2', '3', '4', '5'), nullable=False)
     num_reports = db.Column(db.Integer, nullable=False)
+    author = db.Column(db.Integer, db.ForeignKey('User.id', ondelete="CASCADE"), nullable=False)
     def to_json(self):
         return {
             "id": self.id,
@@ -303,6 +304,7 @@ class Review(db.Model):
             "rating": self.rating,
             "difficulty": self.difficulty,
             "num_reports": self.num_reports,
+            "author": self.author,
         }
 
 class Challenge(db.Model):

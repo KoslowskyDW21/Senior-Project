@@ -177,26 +177,6 @@ const Recipes: React.FC = () => {
 
   return (
     <div>
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossOrigin="anonymous" />
-
-      <h1>Welcome to the Recipes Page!</h1>
-      <p>Here are your delicious recipes.</p>
-
-      <div className="container">
-        <div className="row">
-          {/*createRecipe(recipes[0])*/}
-          {/*<button><Recipe id="1" name="Apple Frangipan Tart" difficulty="1" image="" /></button>*/}
-
-          {recipes.map((recipe) => (
-            <div key={recipe.id}>
-              <Recipe id={recipe.id} name={recipe.recipe_name} difficulty={recipe.difficulty} image={recipe.image} />
-            </div>
-          ))}
-
-        </div>
-      </div>
-
       <Button
         onClick={handleGoToProfile}
         variant="contained"
@@ -218,6 +198,27 @@ const Recipes: React.FC = () => {
       >
         Achievements
       </Button>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossOrigin="anonymous" />
+
+      <h1>Welcome to the Recipes Page!</h1>
+      <p>Here are your delicious recipes.</p>
+
+      <div className="container">
+        <div className="row">
+          {/*createRecipe(recipes[0])*/}
+          {/*<button><Recipe id="1" name="Apple Frangipan Tart" difficulty="1" image="" /></button>*/}
+
+          {recipes.map((recipe) => (
+            <div key={recipe.id}>
+              <Recipe id={recipe.id} name={recipe.recipe_name} difficulty={recipe.difficulty} image={recipe.image} />
+            </div>
+          ))}
+
+        </div>
+      </div>
+
+      
     </div>
   );
 };
