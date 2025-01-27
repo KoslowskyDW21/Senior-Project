@@ -209,7 +209,7 @@ class Achievement(db.Model):
     image = db.Column(db.Text, nullable=False)
     title = db.Column(db.Text, nullable = False)
     isVisible = db.Column(db.Boolean, nullable = False)
-    isComplete = db.Column(db.Boolean, nullable = False)
+    description = db.Column(db.Text, nullable = False)
 
     def to_json(self):
         return {
@@ -217,7 +217,7 @@ class Achievement(db.Model):
             "image": self.image,
             "title": self.title,
             "isVisible": self.isVisible,
-            "isComplete": self.isComplete
+            "description": self.description
 
         }
 
