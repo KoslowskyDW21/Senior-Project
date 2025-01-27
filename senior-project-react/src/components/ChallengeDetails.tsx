@@ -89,6 +89,15 @@ const ChallengeDetail: React.FC = () => {
     }
   };
 
+  const handleDeleteChallenge = async () => {
+    try {
+      await axios.delete(`http://127.0.0.1:5000/challenges/${id}/delete`);
+      window.history.back()
+    } catch (error) {
+      console.error("Error deleting challenge:", error);
+    }
+  };
+
   if (!challenge) {
     return (
       <Container>
@@ -100,6 +109,7 @@ const ChallengeDetail: React.FC = () => {
   }
 
   const isParticipant = participants.some((p) => p.user_id === currentUserId);
+  const isCreator = challenge.creator === currentUserId;
 
   return (
     <Container>
@@ -140,7 +150,15 @@ const ChallengeDetail: React.FC = () => {
             </Typography>
           </Box>
           <Box textAlign="center" mt={3}>
-            {isParticipant ? (
+            {isCreator ? (
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleDeleteChallenge}
+              >
+                Delete Challenge
+              </Button>
+            ) : isParticipant ? (
               <Button
                 variant="contained"
                 color="secondary"

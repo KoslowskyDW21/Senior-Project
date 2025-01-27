@@ -171,3 +171,22 @@ def get_participants(challenge_id):
 def is_participant(challenge_id):
     participant = ChallengeParticipant.query.filter_by(challenge_id=challenge_id, user_id=current_user.id).first()
     return jsonify({"is_participant": participant is not None}), 200
+
+@bp.route('/<int:challenge_id>/delete', methods=['DELETE'])
+@login_required
+def delete_challenge(challenge_id):
+    challenge = Challenge.query.get(challenge_id)
+    if not challenge:
+        abort(404, description="Challenge not found")
+
+    if challenge.creator != current_user.id:
+        abort(403, description="You do not have permission to delete this challenge")
+
+    # Delete associated participants
+    ChallengeParticipant.query.filter_by(challenge_id=challenge_id).delete()
+
+    # Delete the challenge
+    db.session.delete(challenge)
+    db.session.commit()
+
+    return jsonify({"message": "Challenge deleted successfully!"}), 200
