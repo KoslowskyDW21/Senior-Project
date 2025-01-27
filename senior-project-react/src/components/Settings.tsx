@@ -1,32 +1,30 @@
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import React from "react";
-import {
-  Button,
-  InputLabel,
-  Select,
-  MenuItem,
-  Modal,
-  FormControl,
-  SelectChangeEvent,
-  Box,
-  FormHelperText,
-} from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { Button, InputLabel, Select, MenuItem, Modal, FormControl, SelectChangeEvent, Box, FormHelperText } from "@mui/material";
+import { ShouldRevalidateFunction, useNavigate } from "react-router-dom";
+
 
 interface DeleteResponse {
   message: string;
 }
 
-namespace SettingsPage {
-  export interface User {
-    id: number;
-    fname: string;
-    lname: string;
-    profile_picture: string;
-    colonial_floor: string;
-    colonial_side: string;
-  }
+export interface User {
+  id: number;
+  fname: string;
+  lname: string;
+  email_address: string;
+  username: string;
+  profile_picture: string;
+  xp_points: number
+  user_level: number
+  is_admin: boolean
+  num_recipes_completed: number
+  colonial_floor: string;
+  colonial_side: string;
+  date_create: Date;
+  last_logged_in: Date;
+  num_reports: number;
 }
 
 const modalStyle = {
@@ -60,11 +58,7 @@ export default function Settings() {
   const navigate = useNavigate();
 
   async function loadUser() {
-    const response = await axios.post(
-      "http://127.0.0.1:5000/settings/",
-      {},
-      { withCredentials: true }
-    );
+    const response = await axios.post("http://127.0.0.1:5000/settings/");
     setUser(response.data);
     setColonialFloor(user.colonial_floor);
     setColonialSide(user.colonial_side);
@@ -87,11 +81,7 @@ export default function Settings() {
 
   async function handleDelete() {
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:5000/settings/api/delete_account/",
-        {},
-        { withCredentials: true }
-      );
+      const response = await axios.post("http://127.0.0.1:5000/settings/api/delete_account/");
       console.log("Response:");
       console.log(response);
       const data: DeleteResponse = response.data;
