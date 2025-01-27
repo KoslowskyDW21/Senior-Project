@@ -1,7 +1,17 @@
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import React from "react";
-import { Button, InputLabel, Select, MenuItem, FormControl, SelectChangeEvent, Box, FormHelperText } from "@mui/material";
+import {
+  Button,
+  InputLabel,
+  Select,
+  MenuItem,
+  Modal,
+  FormControl,
+  SelectChangeEvent,
+  Box,
+  FormHelperText,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 interface DeleteResponse {
@@ -19,6 +29,20 @@ namespace SettingsPage {
   }
 }
 
+const modalStyle = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  pt: 2,
+  px: 4,
+  pb: 3,
+};
+
 export default function Settings() {
   const [user, setUser] = useState({
     id: null,
@@ -32,6 +56,7 @@ export default function Settings() {
   const [colonialSide, setColonialSide] = useState<string>("");
 
   const [message, setMessage] = useState("");
+  const [openModal, setOpenModal] = useState(false);
   const navigate = useNavigate();
 
   async function loadUser() {
@@ -45,17 +70,17 @@ export default function Settings() {
     setColonialSide(user.colonial_side);
   }
 
-  async function updateUser() { // TODO: Insert the correct URL
+  async function updateUser() {
+    // TODO: Insert the correct URL
     try {
       await axios.post("", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(user)
+        body: JSON.stringify(user),
       });
-    }
-    catch (error) {
+    } catch (error) {
       console.log("Could not update user ", error);
     }
   }
@@ -63,15 +88,18 @@ export default function Settings() {
   async function handleDelete() {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/api/delete_account",
+        "http://127.0.0.1:5000/settings/api/delete_account/",
         {},
         { withCredentials: true }
       );
-
+      console.log("Response:");
+      console.log(response);
       const data: DeleteResponse = response.data;
       setMessage(data.message);
+      console.log("Message:");
+      console.log(data.message);
       if (data.message === "Account deleted successfully") {
-        navigate("/");
+        navigate("/deleted_account");
       }
     } catch (error) {
       const axiosError = error as AxiosError;
@@ -103,7 +131,7 @@ export default function Settings() {
     });
 
     updateUser();
-  }
+  };
 
   const handleSideChange = (event: SelectChangeEvent) => {
     const newSide = event.target.value;
@@ -119,7 +147,20 @@ export default function Settings() {
     });
 
     updateUser();
-  }
+  };
+
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  const handleConfirmDelete = () => {
+    handleDelete();
+    setOpenModal(false);
+  };
 
   return (
     <>
@@ -131,7 +172,6 @@ export default function Settings() {
       <p>Colonial Side: {user.colonial_side}</p>
 
       <h2>Change Personal Details</h2>
-      
 
       <FormControl variant="filled" sx={{ m: 1, minWidth: 200 }} size="small">
         <Select
@@ -145,7 +185,9 @@ export default function Settings() {
             return selected;
           }}
         >
-          <MenuItem disabled value="">{user.colonial_floor}</MenuItem>
+          <MenuItem disabled value="">
+            {user.colonial_floor}
+          </MenuItem>
           <MenuItem value={1}>One</MenuItem>
           <MenuItem value={2}>Two</MenuItem>
           <MenuItem value={3}>Three</MenuItem>
@@ -166,24 +208,46 @@ export default function Settings() {
             return selected;
           }}
         >
-          <MenuItem disabled value="">{user.colonial_side}</MenuItem>
+          <MenuItem disabled value="">
+            {user.colonial_side}
+          </MenuItem>
           <MenuItem value={"Men's"}>Men's</MenuItem>
           <MenuItem value={"Women's"}>Women's</MenuItem>
         </Select>
         <FormHelperText>Colonial Side</FormHelperText>
       </FormControl>
-      
+
       <br />
-      <br />    
+      <br />
 
       <Button
-        onClick={handleDelete}
+        onClick={handleOpenModal}
         variant="contained"
         color="error"
         fullWidth
       >
         DELETE ACCOUNT
       </Button>
+      <Modal open={openModal} onClose={handleCloseModal}>
+        <Box sx={modalStyle}>
+          <h2>Are you sure you want to delete your account?</h2>
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
+            color="error"
+            sx={{ marginRight: 2 }}
+          >
+            Yes, delete my account
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleCloseModal}
+          >
+            Cancel
+          </Button>
+        </Box>
+      </Modal>
     </>
   );
 }
