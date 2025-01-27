@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from flask_login import login_required, current_user
 from app.challenges import bp
-from app.models import User, Challenge, db
+from app.models import User, Challenge, ChallengeParticipant, db
 from flask import request, jsonify, abort, current_app
 from datetime import datetime, timedelta, UTC
 from werkzeug.utils import secure_filename
@@ -123,8 +123,51 @@ def create_challenge():
 
     return jsonify({"message": "Challenge created successfully!"}), 200
 
-@bp.route('/current_user_id', methods=['GET', 'POST'])
+@bp.route('/current_user_id/', methods=['GET', 'POST'])
 def post_current_user():
     return jsonify(
         current_user.id
     ), 200
+
+@bp.route('/<int:challenge_id>/join', methods=['POST'])
+@login_required
+def join_challenge(challenge_id):
+    challenge = Challenge.query.get(challenge_id)
+    if not challenge:
+        abort(404, description="Challenge not found")
+
+    participant = ChallengeParticipant(challenge_id=challenge_id, user_id=current_user.id)
+    db.session.add(participant)
+    db.session.commit()
+
+    return jsonify({"message": "Joined challenge successfully!"}), 200
+
+@bp.route('/<int:challenge_id>/leave', methods=['POST'])
+@login_required
+def leave_challenge(challenge_id):
+    challenge = Challenge.query.get(challenge_id)
+    if not challenge:
+        abort(404, description="Challenge not found")
+
+    participant = ChallengeParticipant.query.filter_by(challenge_id=challenge_id, user_id=current_user.id).first()
+    if participant:
+        db.session.delete(participant)
+        db.session.commit()
+
+    return jsonify({"message": "Left challenge successfully!"}), 200
+
+@bp.route('/<int:challenge_id>/participants', methods=['GET'])
+@login_required
+def get_participants(challenge_id):
+    participants = ChallengeParticipant.query.filter_by(challenge_id=challenge_id).all()
+    participant_data = []
+    for participant in participants:
+        user = User.query.get(participant.user_id)
+        participant_data.append({"user_id": user.id, "username": user.username})
+    return jsonify(participant_data), 200
+
+@bp.route('/<int:challenge_id>/is_participant', methods=['GET'])
+@login_required
+def is_participant(challenge_id):
+    participant = ChallengeParticipant.query.filter_by(challenge_id=challenge_id, user_id=current_user.id).first()
+    return jsonify({"is_participant": participant is not None}), 200
