@@ -12,6 +12,25 @@ interface Recipe {
   image: string;
 }
 
+interface User {
+  "id": string,
+  "fname": string,
+  "lname": string,
+  "email_address": string,
+  "username": string,
+  "profile_picture": string,
+  "xp_points": number,
+  "user_level": number,
+  "is_admin": boolean,
+  "num_recipes_completed": number,
+  "colonial_floor": string,
+  "colonial_side": string,
+  "date_created": string,
+  "last_logged_in": string,
+  "num_reports": number,
+}
+
+// @ts-expect-error
 function Difficulty({ difficulty }) {
   if (difficulty === "1") {
     return (
@@ -70,6 +89,7 @@ function Difficulty({ difficulty }) {
   }
 }
 
+// @ts-expect-error
 function Recipe({ id, name, difficulty, image }) {
   const navigate = useNavigate(); //for navigation
   id = id.toString(); // hacky insurance against mistakes
@@ -111,6 +131,7 @@ function createRecipe(recipe: Recipe) {
 
 const Recipes: React.FC = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [ current_user, setCurrent_user ] = React.useState<User>();
   const navigate = useNavigate(); //for navigation
 
   const handleGoToProfile = async () => {
@@ -127,6 +148,17 @@ const Recipes: React.FC = () => {
     console.log("Navigating to achievements page");
     navigate(`/achievements`)
   }
+
+  const getCurrentUser = async () => {
+    console.log("Getting FULL JSON of current user");
+    try {
+        const response = await axios.post(`http://127.0.0.1:5000/profile/current_user`);
+        const data: User = response.data;
+        setCurrent_user(data);
+    } catch (error) {
+        console.error("Error fetching recipe: ", error);
+    }
+}
 
   async function loadRecipes() {
     try {
@@ -145,26 +177,6 @@ const Recipes: React.FC = () => {
 
   return (
     <div>
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossOrigin="anonymous" />
-
-      <h1>Welcome to the Recipes Page!</h1>
-      <p>Here are your delicious recipes.</p>
-
-      <div className="container">
-        <div className="row">
-          {/*createRecipe(recipes[0])*/}
-          {/*<button><Recipe id="1" name="Apple Frangipan Tart" difficulty="1" image="" /></button>*/}
-
-          {recipes.map((recipe) => (
-            <div key={recipe.id}>
-              <Recipe id={recipe.id} name={recipe.recipe_name} difficulty={recipe.difficulty} image={recipe.image} />
-            </div>
-          ))}
-
-        </div>
-      </div>
-
       <Button
         onClick={handleGoToProfile}
         variant="contained"
@@ -186,6 +198,27 @@ const Recipes: React.FC = () => {
       >
         Achievements
       </Button>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossOrigin="anonymous" />
+
+      <h1>Welcome to the Recipes Page!</h1>
+      <p>Here are your delicious recipes.</p>
+
+      <div className="container">
+        <div className="row">
+          {/*createRecipe(recipes[0])*/}
+          {/*<button><Recipe id="1" name="Apple Frangipan Tart" difficulty="1" image="" /></button>*/}
+
+          {recipes.map((recipe) => (
+            <div key={recipe.id}>
+              <Recipe id={recipe.id} name={recipe.recipe_name} difficulty={recipe.difficulty} image={recipe.image} />
+            </div>
+          ))}
+
+        </div>
+      </div>
+
+      
     </div>
   );
 };

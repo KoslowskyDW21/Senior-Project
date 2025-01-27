@@ -22,6 +22,8 @@ def post_profile_page(id=1):
                          }), 200
     return "<h1>404: profile not found</h1>", 404
 
-@bp.route('/', methods=['POST'])
-def post_default_profile_page():
-    return redirect(url_for('post_profile_page'))
+@bp.route('/current_user', methods=['GET', 'POST'])
+def post_current_user():
+    return jsonify({
+        current_user.to_json()
+    }), 200

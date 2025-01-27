@@ -29,7 +29,38 @@ interface RegistrationData {
   colonial_side: Side;
   profile_picture: File | null;
   profile_picture_text: string;
+  dietaryRestrictions: DietaryRestrictions;
 }
+
+interface DietaryRestrictions {
+  Wheat: Boolean; //wheat
+  Dairy: Boolean; //dairy
+  Egg: Boolean; //egg
+  Fish: Boolean; //fish
+  Pork: Boolean; //pork
+  Shellfish: Boolean; //shellfish
+  Soy: Boolean; //soy
+  Treenut: Boolean; //treenut
+  Peanut: Boolean; //peanut
+  Sesame: Boolean; //sesame
+  Vegan: Boolean; //vegan
+  Vegetarian: Boolean; //vegetarian
+}
+
+const defaultDietaryRestrictions: DietaryRestrictions = {
+  Wheat: false,
+  Dairy: false,
+  Egg: false,
+  Fish: false,
+  Pork: false,
+  Shellfish: false,
+  Soy: false,
+  Treenut: false,
+  Peanut: false,
+  Sesame: false,
+  Vegan: false,
+  Vegetarian: false,
+};
 
 const defaultData: RegistrationData = {
   fname: "",
@@ -42,6 +73,7 @@ const defaultData: RegistrationData = {
   colonial_side: Side.None,
   profile_picture: null,
   profile_picture_text: "",
+  dietaryRestrictions: defaultDietaryRestrictions,
 };
 
 const RegistrationContext = createContext({

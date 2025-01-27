@@ -5,18 +5,15 @@ import axios from "axios";
 
 interface Recipe {
     id: number;
-    name: string;
+    recipe_name: string;
+    xp_amount: number;
     difficulty: "1" | "2" | "3" | "4" | "5";
-    image_src: string;
+    image: string;
   }
-
-interface Recipes {
-    recipes: Recipe[];
-}
 
 const RecipeLists: React.FC = () => {
     const [ recipes, setRecipes ] = React.useState<Recipe[]>([]);
-    const { recipeListId } = useParams<{ recipeListId: string }>();
+    const { id } = useParams<{ id: string }>();
 
     const navigate = useNavigate();
 
@@ -27,21 +24,26 @@ const RecipeLists: React.FC = () => {
 
     const getResponse = async () => {
         try {
-            const response = await axios.post(`http://127.0.0.1:5000/recipe_lists/${id}`);
-            const resp_recipes: Recipes = response.data;
-            setRecipes(resp_recipes.recipes); // TODO: figure out how to get the Recipe[] out of a RecipeList (model?)
+            const response = await axios.post(`http://127.0.0.1:5000/recipe_list/${id}`);
+            const resp_recipes: Recipe[] = response.data;
+            console.log(resp_recipes);
+            setRecipes(resp_recipes); // TODO: figure out how to get the Recipe[] out of a RecipeList (model?)
         } catch (error) {
-            console.error("Error fetching recipe: ", error);
+            console.error("Error fetching recipeList: ", error);
         }
-    }
+    };
+
+    React.useEffect(() => {
+        getResponse();
+    }, []);
 
     return (
         <>
             <h1>RecipeList</h1>
             {recipes.map((recipe) => (
           <div key={recipe.id}>
-            <button><img src={recipe.image_src} width = "100" onClick={() => navigate(`/recipes/${recipe.id}`)} /></button>
-            <p> {recipe.name}</p>
+            <button><img src={recipe.image} width = "100" onClick={() => navigate(`/recipes/${recipe.id}`)} /></button>
+            <p> {recipe.recipe_name}</p>
             
           </div> 
           ))}
