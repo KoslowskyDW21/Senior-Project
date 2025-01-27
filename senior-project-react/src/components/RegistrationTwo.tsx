@@ -2,6 +2,7 @@ import { useState } from "react"; //react
 import { useRegistration } from "./RegistrationContext";
 import axios, { AxiosError } from "axios";
 import {
+  Button,
   Checkbox,
   Container,
   FormGroup,
@@ -55,7 +56,9 @@ const RegisterTwo = () => {
           />
         ))}
       </FormGroup>
-      <button onClick={handleNext}>Continue</button>
+      <Button variant="contained" onClick={handleNext}>
+        Continue
+      </Button>
     </Container>
   );
 };

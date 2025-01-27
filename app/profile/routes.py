@@ -27,3 +27,15 @@ def post_current_user():
     return jsonify({
         current_user.to_json()
     }), 200
+
+@bp.route('/get_profile_pic/', methods=['POST'])
+def get_profile_pic():
+    user = db.session.query(User).filter(User.id == current_user.id).first()
+    if user and user.profile_picture:
+        print(user.profile_picture)
+        profilePicturePath = f'http://127.0.0.1:5000/~{user.profile_picture}'
+        print(jsonify({"profile_picture": profilePicturePath}))
+        return jsonify({
+            "profile_picture": profilePicturePath
+        }), 200
+    return jsonify({"message": "No profile picture found"}), 404
