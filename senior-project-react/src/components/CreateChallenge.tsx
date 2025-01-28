@@ -5,6 +5,7 @@ import { Button, TextField, Container, Box } from "@mui/material";
 
 interface CreateChallengeResponse {
   message: string;
+  challenge_id: int;
 }
 
 const CreateChallenge: React.FC = () => {
@@ -40,7 +41,9 @@ const CreateChallenge: React.FC = () => {
       const data: CreateChallengeResponse = response.data;
       setMessage(data.message);
       if (data.message === "Challenge created successfully!") {
-        navigate("/challenges");
+        const challengeId = response.data.challenge_id;
+        await axios.post(`http://127.0.0.1:5000/challenges/${challengeId}/join`);
+        window.history.back();
       }
     } catch (error) {
       const axiosError = error as AxiosError;
