@@ -3,9 +3,9 @@ import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import Modal from '@mui/material/Modal';
 import Button from '@mui/material/Button';
-import { Avatar } from "@mui/material";
 import Box from '@mui/material/Box';
 import Typography from "@mui/material/Typography";
+import { sizing } from '@mui/system';
 
 interface Achievements {
   achievements: Achievement[];
@@ -81,9 +81,7 @@ const Achievements: React.FC = () => {
         {achievements.map((achievement) => (
           <div key={achievement.id}>
             <Button 
-            variant ="contained" 
-            color = "secondary"
-            startIcon ={<Avatar src = {achievement.image}/>}
+            startIcon ={<Box > <img src = {achievement.image}/> </Box>}
             onClick = {handleOpen}></Button> 
             <Modal
               open={open}
@@ -95,13 +93,17 @@ const Achievements: React.FC = () => {
               <Typography id="modal-modal-title" variant="h6" component="h2">
                {achievement.title}
               </Typography>
+              <Typography id = "modal-image">
+                <Box>
+                  <img src = {achievement.image} style = {{width: '100%', height: '100%', objectFit: 'cover'}}/> 
+                </Box>
+              </Typography>
               <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                 {achievement.description}
               </Typography>
              </Box>
             </Modal>
             <p> {achievement.title}</p>
-            <p>{achievement.description}</p>
           </div> 
           ))}
       </div>

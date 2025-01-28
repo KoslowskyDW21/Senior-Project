@@ -232,7 +232,7 @@ const Profile: React.FC = () => {
             <img
               src={achievement.image}
               width="100"
-              onClick={() => navigate(`/achievements/${achievement.id}`)}
+              onClick={() => navigate(`/achievements/${achievement.id}`)} //need to change to modal code
             />
           </button>
           <p> {achievement.title}</p>
