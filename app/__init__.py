@@ -6,17 +6,23 @@ from app.models import User, Recipe, RecipeIngredient, RecipeCuisine, RecipeStep
 import string, random
 from datetime import datetime
 import requests
+import os
 
 login_manager = LoginManager()
 
 def create_app(config=Config):
     app = Flask(__name__)
     app.config.from_object(config)
+    app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
+    #max file size for uploads
+    app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # 2 MB limit
     # Allow requests only from React frontend
     CORS(app, origins="http://localhost:5173", supports_credentials=True) 
     login_manager.init_app(app)
     login_manager.login_view = 'login.get_login' # type: ignore
     login_manager.session_protection = "strong"
+
+    
 
     db.init_app(app)
     with app.app_context():

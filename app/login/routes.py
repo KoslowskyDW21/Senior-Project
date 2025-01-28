@@ -8,6 +8,7 @@ from flask_login import login_required
 from flask_login import current_user, login_user, logout_user
 import os
 from werkzeug.utils import secure_filename
+import uuid
 
 
 #default route just for the time being
@@ -88,7 +89,7 @@ def api_register():
         upload_folder = current_app.config['UPLOAD_FOLDER']
         os.makedirs(upload_folder, exist_ok=True)
 
-        filename = secure_filename(profile_picture.filename)
+        filename = f"{uuid.uuid4().hex}_{secure_filename(profile_picture.filename)}"
         file_path = os.path.join(upload_folder, filename)
         profile_picture.save(file_path)
 
