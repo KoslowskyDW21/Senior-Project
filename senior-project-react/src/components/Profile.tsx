@@ -16,6 +16,14 @@ interface getProfileResponse {
   message: string;
 }
 
+interface getDeleteResponse {
+  message: string;
+}
+
+interface getUpdateResponse {
+  message: string;
+}
+
 const modalStyle = {
   position: "absolute",
   top: "calc(50% + 60px)",
@@ -120,7 +128,7 @@ const Profile: React.FC = () => {
       } catch (error) {
         const axiosError = error as AxiosError;
         if (axiosError.response && axiosError.response.data) {
-          const errorData = axiosError.response.data as getProfileResponse;
+          const errorData = axiosError.response.data as getUpdateResponse;
           setMessage(errorData.message);
         } else {
           setMessage("An error occurred while updating the profile picture.");
@@ -142,10 +150,26 @@ const Profile: React.FC = () => {
     handleClosePfpModal();
   };
 
-  //* TODO: make handler method for removing pfp */
-  const handleRemovePfp = () => {
+  const handleRemovePfp = async () => {
     handleClosePfpModal();
-    //TODO: make a route for removing pfp
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/profile/remove_profile_pic/",
+        {},
+        { withCredentials: true }
+      );
+      setProfilePicUrl(null);
+      setMessage("Profile picture removed successfully!");
+      getProfilePic();
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response && axiosError.response.data) {
+        const errorData = axiosError.response.data as getDeleteResponse;
+        setMessage(errorData.message);
+      } else {
+        setMessage("An unknown error occurred");
+      }
+    }
   };
 
   return (

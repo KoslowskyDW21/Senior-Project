@@ -42,7 +42,7 @@ def get_profile_pic():
         return jsonify({
             "profile_picture": profilePicturePath
         }), 200
-    return jsonify({"message": "No profile picture found"}), 404
+    return jsonify({"message": "No profile picture found"}), 200
 
 #File storage:
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -86,5 +86,15 @@ def change_profile_pic():
 
 @bp.route('/remove_profile_pic/', methods=['POST'])
 def remove_profile_pic():
-    pass
+    user = db.session.query(User).filter(User.id == current_user.id).first()
+    if user.profile_picture:
+            old_file_path = os.path.join(current_app.root_path, user.profile_picture)
+            if os.path.exists(old_file_path):
+                try:
+                    os.remove(old_file_path)
+                except OSError as e:
+                    current_app.logger.error(f"Error deleting old profile picture: {e}")
+            user.profile_picture = None
+            db.session.commit()
+    return {"message": "Profile picture removed successfully"}, 200
 
