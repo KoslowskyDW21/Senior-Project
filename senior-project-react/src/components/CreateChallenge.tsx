@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import axios, { AxiosError } from "axios";
-import { useNavigate } from "react-router-dom";
-import { Button, TextField, Container, Box } from "@mui/material";
+import { Button, TextField, Container } from "@mui/material";
 
 interface CreateChallengeResponse {
   message: string;
-  challenge_id: int;
+  challenge_id: number;
 }
 
 const CreateChallenge: React.FC = () => {
@@ -17,7 +16,6 @@ const CreateChallenge: React.FC = () => {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [message, setMessage] = useState("");
-  const navigate = useNavigate();
 
   const handleCreateChallenge = async () => {
     const formData = new FormData();

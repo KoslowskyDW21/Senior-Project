@@ -32,6 +32,7 @@ interface Challenge {
 const Challenges: React.FC = () => {
   const [challenges, setChallenges] = React.useState<Challenge[]>([]);
   const [myChallenges, setMyChallenges] = React.useState<Challenge[]>([]);
+  const [joinedChallenges, setJoinedChallenges] = React.useState<Challenge[]>([]);
   const [currentUserId, setCurrentUserId] = React.useState<number | null>(null);
   const [participants, setParticipants] = React.useState<{ [key: number]: boolean }>({});
   const navigate = useNavigate();
@@ -54,11 +55,16 @@ const Challenges: React.FC = () => {
 
       // Fetch participant status for each challenge
       const participantStatus: { [key: number]: boolean } = {};
+      const joinedChallengesList: Challenge[] = [];
       for (const challenge of data) {
         const participantResponse = await axios.get(`http://127.0.0.1:5000/challenges/${challenge.id}/is_participant`);
         participantStatus[challenge.id] = participantResponse.data.is_participant;
+        if (participantResponse.data.is_participant && challenge.creator !== currentUserId) {
+          joinedChallengesList.push(challenge);
+        }
       }
       setParticipants(participantStatus);
+      setJoinedChallenges(joinedChallengesList);
     } catch (error) {
       console.error("Error fetching challenges:", error);
     }
@@ -119,6 +125,40 @@ const Challenges: React.FC = () => {
                       onClick={() => navigate(`/challenges/${challenge.id}`)}
                     >
                       View Details
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      )}
+
+      {joinedChallenges.length > 0 && (
+        <Box mt={4}>
+          <Typography variant="h5" gutterBottom>
+            Joined Challenges
+          </Typography>
+          <Grid container spacing={2}>
+            {joinedChallenges.map((challenge) => (
+              <Grid item xs={12} sm={6} md={4} key={challenge.id}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" component="div" gutterBottom>
+                      {challenge.name}
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      onClick={() => navigate(`/challenges/${challenge.id}`)}
+                    >
+                      View Details
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => handleLeaveChallenge(challenge.id)}
+                    >
+                      Leave Challenge
                     </Button>
                   </CardContent>
                 </Card>
