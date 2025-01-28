@@ -2,7 +2,14 @@ import axios, { AxiosError } from "axios";
 import FolderIcon from "@mui/icons-material/Folder";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, ChangeEvent } from "react";
-import { Avatar, Button, TextField, Container } from "@mui/material"; //matui components
+import {
+  Avatar,
+  Box,
+  Button,
+  TextField,
+  Container,
+  Modal,
+} from "@mui/material"; //matui components
 import Achievement from "./Achievements";
 
 interface ProfileResponse {
@@ -16,6 +23,21 @@ interface getProfileResponse {
   message: string;
 }
 
+const modalStyle = {
+  position: "absolute",
+  top: "calc(50% + 60px)",
+  left: "50%",
+  transform: "translateX(-50%)",
+  width: 250,
+  bgcolor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  pt: 2,
+  px: 4,
+  pb: 3,
+  borderRadius: 2,
+};
+
 const Profile: React.FC = () => {
   const navigate = useNavigate(); //for navigation
 
@@ -28,6 +50,7 @@ const Profile: React.FC = () => {
   const [username, setUsername] = useState<String>();
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
+  const [openPfpModal, setOpenPfpModal] = useState(false);
   const [message, setMessage] = useState("");
 
   const getResponse = async () => {
@@ -85,7 +108,26 @@ const Profile: React.FC = () => {
       const file = event.target.files[0];
       const fileUrl = URL.createObjectURL(file);
       setProfilePicUrl(fileUrl);
+      //TODO: create and implement a route for changing pfp
     }
+  };
+
+  const handleOpenPfpModal = () => {
+    setOpenPfpModal(true);
+  };
+
+  const handleClosePfpModal = () => {
+    setOpenPfpModal(false);
+  };
+
+  const handleChangePfp = () => {
+    document.getElementById("profile-picture-input")?.click();
+    handleClosePfpModal();
+  };
+
+  //* TODO: make handler method for removing pfp */
+  const handleRemovePfp = () => {
+    handleClosePfpModal();
   };
 
   return (
@@ -93,32 +135,20 @@ const Profile: React.FC = () => {
       <h1>This is a profile page!!</h1>{" "}
       {/* TODO: replace with fuller account information */}
       <h2>This is {username}'s profile!</h2>
-      <Button onClick={handleGoToRecipes} variant="contained" color="primary">
-        Recipes
-      </Button>
-      <Button
-        onClick={() => navigate("/settings")}
-        variant="contained"
-        color="primary"
-      >
-        Settings
-      </Button>
       <div
         style={{
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           marginBottom: "16px",
-          marginLeft: "50px",
+          marginLeft: "175px",
           cursor: "pointer",
           width: "150px",
           height: "150px",
           borderRadius: "50%",
           border: "2px solid #ccc",
         }}
-        onClick={() =>
-          document.getElementById("profile-picture-input")?.click()
-        }
+        onClick={handleOpenPfpModal}
       >
         {profilePicUrl ? (
           <Avatar src={profilePicUrl} sx={{ width: 120, height: 120 }} />
@@ -133,6 +163,26 @@ const Profile: React.FC = () => {
         style={{ display: "none" }}
         id="profile-picture-input"
       />
+      <Modal open={openPfpModal} onClose={handleClosePfpModal}>
+        <Box sx={modalStyle}>
+          <Button onClick={handleChangePfp} fullWidth>
+            Change Profile Picture
+          </Button>
+          <Button onClick={handleRemovePfp} fullWidth color="error">
+            Remove Profile Picture
+          </Button>
+        </Box>
+      </Modal>
+      <Button onClick={handleGoToRecipes} variant="contained" color="primary">
+        Recipes
+      </Button>
+      <Button
+        onClick={() => navigate("/settings")}
+        variant="contained"
+        color="primary"
+      >
+        Settings
+      </Button>
       <p> Recent Achievements: </p>
       {achievements.map((achievement) => (
         <div key={achievement.id}>
