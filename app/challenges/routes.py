@@ -121,7 +121,8 @@ def create_challenge():
     db.session.add(challenge)
     db.session.commit()
 
-    return jsonify({"message": "Challenge created successfully!"}), 200
+    return jsonify({"message": "Challenge created successfully!",
+                    "challenge_id": challenge.id}), 200
 
 @bp.route('/current_user_id/', methods=['GET', 'POST'])
 def post_current_user():
