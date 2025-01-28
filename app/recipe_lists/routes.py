@@ -15,5 +15,6 @@ def post_array_of_recipes_in_list(id):
 def post_all_recipe_lists_of_current_user():
     print(f"Attempting to return all recipe lists of the current user")
     recipe_lists = RecipeList.query.filter_by(id=current_user.id)
+    print([recipe_list.to_json() for recipe_list in recipe_lists])
     return jsonify([recipe_list.to_json() for recipe_list in recipe_lists])
     

@@ -27,9 +27,9 @@ def post_profile_page(id=1):
 
 @bp.route('/current_user', methods=['GET', 'POST'])
 def post_current_user():
-    return jsonify({
-        current_user.to_json()
-    }), 200
+    return jsonify(
+        current_user._get_current_object().to_json()
+    ), 200
 
 @bp.route('/get_profile_pic/', methods=['POST'])
 def get_profile_pic():

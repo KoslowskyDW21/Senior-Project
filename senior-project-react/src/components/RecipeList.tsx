@@ -24,7 +24,7 @@ const RecipeLists: React.FC = () => {
 
     const getResponse = async () => {
         try {
-            const response = await axios.post(`http://127.0.0.1:5000/recipe_list/${id}`);
+            const response = await axios.post(`http://127.0.0.1:5000/recipe_lists/${id}`);
             const resp_recipes: Recipe[] = response.data;
             console.log(resp_recipes);
             setRecipes(resp_recipes);

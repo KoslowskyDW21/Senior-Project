@@ -51,19 +51,19 @@ const RecipeLists: React.FC = () => {
             console.error("Error fetching recipe: ", error);
         }
     }
-
+    
     const getResponse = async () => {
         try {
-            getCurrentUser();
+            await getCurrentUser();
         } catch (error) {
             console.error(`Error in fetching current_user's id`);
         }
         try {
-            const response = await axios.get("http://127.0.0.1:5000/recipe_list/all");
+            const response = await axios.get("http://127.0.0.1:5000/recipe_lists/all");
             const data: RecipeList[] = response.data;
             setRecipeLists(data);
         } catch (error) {
-            console.error(`Error in fetching RecipeList[] for user id=${currentUserId}`);
+            console.error(`Error in fetching RecipeList[] for user id=${currentUserId}: ${error}`);
         }
     }
 
