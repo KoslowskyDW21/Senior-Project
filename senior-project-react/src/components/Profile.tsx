@@ -58,8 +58,11 @@ const Profile: React.FC = () => {
       const profilePicturePath = response.data.profile_picture;
       console.log(profilePicturePath);
       if (profilePicturePath) {
+        console.log("Setting path");
         setProfilePicUrl(profilePicturePath);
+        console.log(profilePicUrl);
       }
+      console.log(profilePicUrl);
     } catch (error) {
       const axiosError = error as AxiosError;
 

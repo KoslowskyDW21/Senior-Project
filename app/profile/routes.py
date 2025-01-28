@@ -1,8 +1,9 @@
 from __future__ import annotations
-from flask import jsonify, redirect, url_for
+from flask import jsonify, redirect, url_for, current_app
 from flask_login import current_user
 from app.profile import bp
 from app.models import User, UserAchievement, Achievement, db
+import uuid
 
 @bp.route('/<int:id>', methods=['POST'])
 def post_profile_page(id=1):
@@ -30,12 +31,14 @@ def post_current_user():
 
 @bp.route('/get_profile_pic/', methods=['POST'])
 def get_profile_pic():
+    print("Static folder:", current_app.static_folder)
     user = db.session.query(User).filter(User.id == current_user.id).first()
     if user and user.profile_picture:
         print(user.profile_picture)
-        profilePicturePath = f'http://127.0.0.1:5000/~{user.profile_picture}'
+        profilePicturePath = f'http://127.0.0.1:5000/{user.profile_picture}'
         print(jsonify({"profile_picture": profilePicturePath}))
         return jsonify({
             "profile_picture": profilePicturePath
         }), 200
     return jsonify({"message": "No profile picture found"}), 404
+
