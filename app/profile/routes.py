@@ -24,6 +24,5 @@ def post_profile_page(id=1):
 
 @bp.route('/current_user', methods=['GET', 'POST'])
 def post_current_user():
-    return jsonify({
-        current_user.to_json()
-    }), 200
+    print(f"current_user: {current_user}") # TODO: remove debugging
+    return jsonify(current_user.to_json()), 200

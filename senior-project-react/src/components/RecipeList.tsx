@@ -27,7 +27,7 @@ const RecipeLists: React.FC = () => {
             const response = await axios.post(`http://127.0.0.1:5000/recipe_list/${id}`);
             const resp_recipes: Recipe[] = response.data;
             console.log(resp_recipes);
-            setRecipes(resp_recipes); // TODO: figure out how to get the Recipe[] out of a RecipeList (model?)
+            setRecipes(resp_recipes);
         } catch (error) {
             console.error("Error fetching recipeList: ", error);
         }

@@ -8,10 +8,12 @@ from app.models import Recipe, RecipeList, RecipeRecipeList, db
 def post_array_of_recipes_in_list(id):
     print(f"searching for RecipeList {id}")
     recipe_ids = [rrl.recipe_id for rrl in (RecipeRecipeList.query.filter_by(recipe_list_id=id).all())]
-    for id in recipe_ids:
-        print(id)
     recipes = [Recipe.query.filter_by(id=recipe_id).first() for recipe_id in recipe_ids]
-    for recipe in recipes:
-        print(recipe.to_json()) # type: ignore
     return jsonify([recipe.to_json() for recipe in recipes]) # type: ignore
+
+@bp.post("/all")
+def post_all_recipe_lists_of_current_user():
+    print(f"Attempting to return all recipe lists of the current user")
+    recipe_lists = RecipeList.query.filter_by(id=current_user.id)
+    return jsonify([recipe_list.to_json() for recipe_list in recipe_lists])
     
