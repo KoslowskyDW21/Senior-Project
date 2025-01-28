@@ -450,7 +450,6 @@ class RecipeList(db.Model):
             "belongs_to": self.belongs_to,
         }
     
-# TODO: is this the best way to solve this issue?
 class RecipeRecipeList(db.Model):
     __tablename__ = 'RecipeRecipeList'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

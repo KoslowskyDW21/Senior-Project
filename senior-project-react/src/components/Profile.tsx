@@ -2,14 +2,7 @@ import axios, { AxiosError } from "axios";
 import FolderIcon from "@mui/icons-material/Folder";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, ChangeEvent } from "react";
-import {
-  Avatar,
-  Box,
-  Button,
-  TextField,
-  Container,
-  Modal,
-} from "@mui/material"; //matui components
+import { Avatar, Box, Button, Modal } from "@mui/material"; //matui components
 import Achievement from "./Achievements";
 
 interface ProfileResponse {
@@ -20,6 +13,14 @@ interface ProfileResponse {
 }
 
 interface getProfileResponse {
+  message: string;
+}
+
+interface getDeleteResponse {
+  message: string;
+}
+
+interface getUpdateResponse {
   message: string;
 }
 
@@ -103,12 +104,36 @@ const Profile: React.FC = () => {
     navigate(`/recipes`);
   };
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-      const fileUrl = URL.createObjectURL(file);
-      setProfilePicUrl(fileUrl);
-      //TODO: create and implement a route for changing pfp
+      const formData = new FormData();
+      formData.append("profile_picture", file);
+
+      try {
+        const response = await axios.post(
+          "http://127.0.0.1:5000/profile/change_profile_pic/",
+          formData,
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        const updatedProfilePicUrl = response.data.profile_picture;
+        setProfilePicUrl(updatedProfilePicUrl);
+        setMessage("Profile picture updated successfully!");
+        getProfilePic();
+      } catch (error) {
+        const axiosError = error as AxiosError;
+        if (axiosError.response && axiosError.response.data) {
+          const errorData = axiosError.response.data as getUpdateResponse;
+          setMessage(errorData.message);
+        } else {
+          setMessage("An error occurred while updating the profile picture.");
+        }
+      }
     }
   };
 
@@ -125,9 +150,26 @@ const Profile: React.FC = () => {
     handleClosePfpModal();
   };
 
-  //* TODO: make handler method for removing pfp */
-  const handleRemovePfp = () => {
+  const handleRemovePfp = async () => {
     handleClosePfpModal();
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/profile/remove_profile_pic/",
+        {},
+        { withCredentials: true }
+      );
+      setProfilePicUrl(null);
+      setMessage("Profile picture removed successfully!");
+      getProfilePic();
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response && axiosError.response.data) {
+        const errorData = axiosError.response.data as getDeleteResponse;
+        setMessage(errorData.message);
+      } else {
+        setMessage("An unknown error occurred");
+      }
+    }
   };
 
   return (

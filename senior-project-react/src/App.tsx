@@ -8,7 +8,7 @@ import RegistrationThree from "./components/RegistrationThree";
 import IndividualRecipe from "./components/Recipe";
 import Recipes from "./components/Recipes";
 import RecipeList from "./components/RecipeList";
-import RecipeLists from "./components/RecipeList";
+import RecipeLists from "./components/RecipeLists";
 import Profile from "./components/Profile";
 import Settings from "./components/Settings";
 import axios from "axios";
@@ -58,10 +58,10 @@ function App() {
           {/* Complted recipe page */}
           <Route path="/recipes/completed/:id" element={<CompletedRecipe />} />
 
-          {/* RecipeLists page */}
-          <Route path="/recipe-lists/:id" element={<RecipeLists />} />
+          {/* RecipeLists page (list of RecipeLists) */}
+          <Route path="/recipe-lists" element={<RecipeLists />} />
 
-          {/* RecipeList page */}
+          {/* RecipeList page (individual RecipeList) */}
           <Route path="/recipe-list/:id" element={<RecipeList />} />
 
           {/* profile */}
