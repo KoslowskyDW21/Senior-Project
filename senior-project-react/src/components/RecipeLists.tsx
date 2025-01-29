@@ -46,7 +46,7 @@ const RecipeLists: React.FC = () => {
     const getCurrentUser = async () => {
         console.log("Getting FULL JSON of current user");
         try {
-            const response = await axios.post(`http://127.0.0.1:5000/profile/current_user`);
+            const response = await axios.get(`http://127.0.0.1:5000/profile/current_user`);
             const data: User = response.data;
             console.log(data); // TODO: remove debugging
             setCurrentUserId(data.id);
@@ -87,7 +87,7 @@ const RecipeLists: React.FC = () => {
                         </Typography>
                         <Button
                             variant="outlined"
-                            onClick={() => navigate(`/recipe_list/${recipeList.id}`)}
+                            onClick={() => navigate(`/recipe-list/${recipeList.id}`)}
                         >
                             View List
                         </Button>
