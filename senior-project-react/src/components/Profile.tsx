@@ -1,9 +1,10 @@
 import axios, { AxiosError } from "axios";
 import FolderIcon from "@mui/icons-material/Folder";
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect, ChangeEvent } from "react";
-import { Avatar, Box, Button, Modal, Typography, LinearProgress, Tooltip } from "@mui/material"; //matui components
-import Achievement from "./Achievements"; // Ensure Achievement type is imported
+import { useState, useEffect, ChangeEvent, useRef } from "react";
+import { Avatar, Box, Button, Modal, Typography, LinearProgress, Tooltip } from "@mui/material"; 
+import Achievement from "./Achievements"; 
+import Confetti from "react-confetti"; 
 
 interface ProfileResponse {
   lname: string;
@@ -12,18 +13,7 @@ interface ProfileResponse {
   achievements: Achievement[];
   user_level: number;
   xp_points: number;
-}
-
-interface getProfileResponse {
-  message: string;
-}
-
-interface getDeleteResponse {
-  message: string;
-}
-
-interface getUpdateResponse {
-  message: string;
+  hasLeveled: boolean;
 }
 
 const modalStyle = {
@@ -42,12 +32,12 @@ const modalStyle = {
 };
 
 const Profile: React.FC = () => {
-  const navigate = useNavigate(); //for navigation
-
+  const navigate = useNavigate();
   let { id } = useParams<{ id: string }>();
   if (id == undefined) {
     id = "1";
   }
+
   const [lname, setLname] = useState<String>();
   const [fname, setFname] = useState<String>();
   const [username, setUsername] = useState<String>();
@@ -57,6 +47,7 @@ const Profile: React.FC = () => {
   const [message, setMessage] = useState("");
   const [user_level, setLevel] = useState<number>(0);
   const [xp_points, setXp_points] = useState<number>(0);
+  const [hasLeveled, setHasLeveled] = useState<boolean>(false);
 
   const [openAchievementModal, setOpenAchievementModal] = useState(false);
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
@@ -71,9 +62,15 @@ const Profile: React.FC = () => {
     setSelectedAchievement(null);
   };
 
-  const calculateXPForLevel = (level: number): number => {return Math.floor(1000 * Math.pow(level - 1, 2)); };
-  const calculateNextLevelXP = (level: number): number => {return Math.floor(1000 * Math.pow(level, 2));};
-  const calculateLevel = (xp: number): number => {return Math.floor(0.1 * Math.sqrt(0.1 * xp)) + 1;};
+  const calculateXPForLevel = (level: number): number => {
+    return Math.floor(1000 * Math.pow(level - 1, 2));
+  };
+  const calculateNextLevelXP = (level: number): number => {
+    return Math.floor(1000 * Math.pow(level, 2));
+  };
+  const calculateLevel = (xp: number): number => {
+    return Math.floor(0.1 * Math.sqrt(0.1 * xp)) + 1;
+  };
 
   const currentLevel = calculateLevel(xp_points);
   const xpForCurrentLevel = calculateXPForLevel(currentLevel);
@@ -81,7 +78,6 @@ const Profile: React.FC = () => {
   const progressPercentage = ((xp_points - xpForCurrentLevel) / (xpForNextLevel - xpForCurrentLevel)) * 100;
 
   const [hovered, setHovered] = useState(false);
-
 
   const getResponse = async () => {
     const response = await axios.post(
@@ -96,6 +92,7 @@ const Profile: React.FC = () => {
     setAchievements(data.achievements);
     setLevel(data.user_level);
     setXp_points(data.xp_points);
+    setHasLeveled(data.hasLeveled); 
   };
 
   useEffect(() => {
@@ -116,9 +113,8 @@ const Profile: React.FC = () => {
       }
     } catch (error) {
       const axiosError = error as AxiosError;
-
       if (axiosError.response && axiosError.response.data) {
-        const errorData = axiosError.response.data as getProfileResponse;
+        const errorData = axiosError.response.data;
         setMessage(errorData.message);
       } else {
         setMessage("An unknown error occurred");
@@ -154,7 +150,7 @@ const Profile: React.FC = () => {
       } catch (error) {
         const axiosError = error as AxiosError;
         if (axiosError.response && axiosError.response.data) {
-          const errorData = axiosError.response.data as getUpdateResponse;
+          const errorData = axiosError.response.data;
           setMessage(errorData.message);
         } else {
           setMessage("An error occurred while updating the profile picture.");
@@ -190,7 +186,7 @@ const Profile: React.FC = () => {
     } catch (error) {
       const axiosError = error as AxiosError;
       if (axiosError.response && axiosError.response.data) {
-        const errorData = axiosError.response.data as getDeleteResponse;
+        const errorData = axiosError.response.data;
         setMessage(errorData.message);
       } else {
         setMessage("An unknown error occurred");
@@ -198,8 +194,58 @@ const Profile: React.FC = () => {
     }
   };
 
+  const resetHasLeveled = async () => {
+    try {
+      await axios.post(
+        `http://127.0.0.1:5000/profile/leveled/`,
+        {},
+        { withCredentials: true }
+      );
+      setHasLeveled(false);
+    } catch (error) {
+      console.error("Error resetting hasLeveled:", error);
+    }
+  };
+
+  const handleConfettiComplete = () => {
+    resetHasLeveled();
+  };
+
+  const [confettiVisible, setConfettiVisible] = useState(false);
+  const [confettiSource, setConfettiSource] = useState({ x: 0, y: 0 });
+
+  const xpBarRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (hasLeveled) {
+      if (xpBarRef.current) {
+        const rect = xpBarRef.current.getBoundingClientRect();
+        setConfettiSource({
+          x: rect.left + rect.width / 2, 
+          y: rect.top + rect.height / 2,
+        });
+      }
+
+      setConfettiVisible(true);
+
+      setTimeout(() => {
+        setConfettiVisible(false);
+        handleConfettiComplete();
+      }, 3000);
+    }
+  }, [hasLeveled]);
+
   return (
     <>
+      {confettiVisible && (
+        <Confetti
+          width={window.innerWidth}
+          height={window.innerHeight}
+          confettiSource={confettiSource} 
+          onConfettiComplete={handleConfettiComplete}
+        />
+      )}
+
       <h1>This is {username}'s profile!</h1>
       <div
         style={{
@@ -207,12 +253,12 @@ const Profile: React.FC = () => {
           justifyContent: "center",
           alignItems: "center",
           marginBottom: "16px",
-          width: "150px", 
-          height: "150px", 
+          width: "150px",
+          height: "150px",
           borderRadius: "50%",
           border: "2px solid #ccc",
-          marginLeft: "auto", 
-          marginRight: "auto", 
+          marginLeft: "auto",
+          marginRight: "auto",
         }}
         onClick={handleOpenPfpModal}
       >
@@ -246,9 +292,7 @@ const Profile: React.FC = () => {
         Settings
       </Button>
 
-      <p> Level {user_level}: {xp_points} experience points! </p>
-
-      <Box sx={{ width: '100%', textAlign: 'center', marginBottom: 2 }}>
+      <Box sx={{ width: "100%", textAlign: "center", marginBottom: 2, marginTop: 5 }}>
         <Typography variant="h6" gutterBottom>
           Level {user_level}
         </Typography>
@@ -259,22 +303,22 @@ const Profile: React.FC = () => {
           onOpen={() => setHovered(true)}
           onClose={() => setHovered(false)}
         >
-        <Box sx={{ width: '100%', position: 'relative' }}>
-          <LinearProgress
-            variant="determinate"
-            value={progressPercentage}
-            sx={{
-              height: 20, // Adjust height of the bar
-              borderRadius: 5, // Add rounded corners to the bar
-              backgroundColor: '#e0e0e0', // Light gray background color for the empty part of the bar
-            }}
-            color="success" // Green color for the progress
-          />
-        </Box>
+          <Box sx={{ width: "100%", position: "relative" }} ref={xpBarRef}>
+            <LinearProgress
+              variant="determinate"
+              value={progressPercentage}
+              sx={{
+                height: 20, 
+                borderRadius: 5,
+                backgroundColor: "#e0e0e0", 
+              }}
+              color="success"
+            />
+          </Box>
         </Tooltip>
       </Box>
 
-      <p> Recent Achievements: </p>
+      <p>Recent Achievements:</p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
         {achievements.map((achievement: Achievement) => (
           <div key={achievement.id}>

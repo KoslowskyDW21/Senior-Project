@@ -31,6 +31,7 @@ class User(UserMixin, db.Model):
     last_logged_in = db.Column(db.DateTime)
     num_reports = db.Column(db.Integer, nullable=False)
     password_hash = db.Column(db.LargeBinary, nullable=False)
+    hasLeveled = db.Column(db.Boolean, nullable = False)
 
     @property
     def password(self):

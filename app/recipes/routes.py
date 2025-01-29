@@ -94,9 +94,14 @@ def completionAchievements():
             completedAchievement()
 
 def checkLevel():
+    startingLevel = current_user.user_level
     current_user.user_level = math.floor(.1 * math.sqrt(.1 * current_user.xp_points)) + 1 # type: ignore
     db.session.add(current_user)
     db.session.commit()
+    if(startingLevel != current_user.user_level):
+        current_user.hasLeveled = 1
+        db.session.add(current_user)
+        db.session.commit()
 
 def completedAchievement():
     current_user.xp_points = current_user.xp_points + 100

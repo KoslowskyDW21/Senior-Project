@@ -22,7 +22,8 @@ def post_profile_page(id=1):
                          "username": current_user.username,
                          "achievements": [achievement.to_json() for achievement in achievements],
                          "user_level": current_user.user_level,
-                         "xp_points": current_user.xp_points
+                         "xp_points": current_user.xp_points,
+                         "hasLeveled": current_user.hasLeveled
                          }), 200
     return "<h1>404: profile not found</h1>", 404
 
@@ -98,4 +99,11 @@ def remove_profile_pic():
             user.profile_picture = None
             db.session.commit()
     return {"message": "Profile picture removed successfully"}, 200
+
+@bp.route('/leveled/', methods=['POST'])
+def leveled():
+    current_user.hasLeveled = 0
+    db.session.add(current_user)
+    db.session.commit()
+    return {"message": "Level trigger updated successfully!"}, 200
 
