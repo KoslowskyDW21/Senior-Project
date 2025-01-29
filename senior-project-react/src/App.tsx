@@ -20,6 +20,7 @@ import AchievementSpecific from "./components/AchievementSpecific";
 import CompletedRecipe from "./components/CompletedRecipe";
 import CreateChallenge from "./components/CreateChallenge";
 import DeletedAccount from "./components/DeletedAccount";
+import AdminPage from "./components/AdminPage";
 
 function App() {
   // this allows cookies to be sent with all requests in the app
@@ -80,6 +81,9 @@ function App() {
           {/* settings */}
           <Route path="/settings" element={<Settings />} />
           <Route path="/deleted_account" element={<DeletedAccount />} />
+
+          {/* admin */}
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </RegistrationProvider>
     </Router>
