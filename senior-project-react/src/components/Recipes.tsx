@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import axios, { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom"; // React Router for nav
-import { Button, TextField, Container } from "@mui/material"; //matui components
+import { Button, TextField, Container, Card, CardHeader, CardMedia, CardActionArea } from "@mui/material"; //matui components
+import Grid from "@mui/material/Grid2";
+import { Star, StarBorder } from "@mui/icons-material"
 
 interface Recipe {
   id: number;
@@ -35,55 +37,55 @@ function Difficulty({ difficulty }) {
   if (difficulty === "1") {
     return (
       <>
-        <i className="bi-diamond-fill"></i>
-        <i className="bi-diamond"></i>
-        <i className="bi-diamond"></i>
-        <i className="bi-diamond"></i>
-        <i className="bi-diamond"></i>
+        <Star />
+        <StarBorder />
+        <StarBorder />
+        <StarBorder />
+        <StarBorder />
       </>
     );
   }
   else if (difficulty === "2") {
     return (
       <>
-        <i className="bi-diamond-fill"></i>
-        <i className="bi-diamond-fill"></i>
-        <i className="bi-diamond"></i>
-        <i className="bi-diamond"></i>
-        <i className="bi-diamond"></i>
+        <Star />
+        <Star />
+        <StarBorder />
+        <StarBorder />
+        <StarBorder />
       </>
     );
   }
   else if (difficulty === "3") {
     return (
       <>
-        <i className="bi-diamond-fill"></i>
-        <i className="bi-diamond-fill"></i>
-        <i className="bi-diamond-fill"></i>
-        <i className="bi-diamond"></i>
-        <i className="bi-diamond"></i>
+        <Star />
+        <Star />
+        <Star />
+        <StarBorder />
+        <StarBorder />
       </>
     );
   }
   else if (difficulty === "4") {
     return (
       <>
-        <i className="bi-diamond-fill"></i>
-        <i className="bi-diamond-fill"></i>
-        <i className="bi-diamond-fill"></i>
-        <i className="bi-diamond-fill"></i>
-        <i className="bi-diamond"></i>
+        <Star />
+        <Star />
+        <Star />
+        <Star />
+        <StarBorder />
       </>
     );
   }
   else {
     return (
       <>
-        <i className="bi-diamond-fill"></i>
-        <i className="bi-diamond-fill"></i>
-        <i className="bi-diamond-fill"></i>
-        <i className="bi-diamond-fill"></i>
-        <i className="bi-diamond-fill"></i>
+        <Star />
+        <Star />
+        <Star />
+        <Star />
+        <Star />
       </>
     );
   }
@@ -100,22 +102,20 @@ function Recipe({ id, name, difficulty, image }) {
   }
 
   return (
-    <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-4" /* style="padding-bottom: 20px;" */ >
-      <div className="card-header">
-        <p>{name}</p>
-      </div>
-      <div className="card-body">
-        <Difficulty difficulty={difficulty} />
-      </div>
-      <img src={image} alt={name} className="card-img-bottom" />
-      <Button
+    <Card variant="outlined">
+      <CardActionArea
         onClick={handleGoToRecipe}
-        variant="contained"
-        color="primary"
       >
-        Instructions
-      </Button>
-    </div>
+        <CardHeader
+          title={name}
+          subheader={Difficulty({difficulty})}
+        />
+        <CardMedia
+          component="img"
+          image={image}
+        />
+      </CardActionArea>
+    </Card>
   );
 }
 
@@ -198,27 +198,17 @@ const Recipes: React.FC = () => {
       >
         Achievements
       </Button>
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossOrigin="anonymous" />
 
       <h1>Welcome to the Recipes Page!</h1>
-      <p>Here are your delicious recipes.</p>
+      <h4>Here are your delicious recipes.</h4>
 
-      <div className="container">
-        <div className="row">
-          {/*createRecipe(recipes[0])*/}
-          {/*<button><Recipe id="1" name="Apple Frangipan Tart" difficulty="1" image="" /></button>*/}
-
-          {recipes.map((recipe) => (
-            <div key={recipe.id}>
-              <Recipe id={recipe.id} name={recipe.recipe_name} difficulty={recipe.difficulty} image={recipe.image} />
-            </div>
-          ))}
-
-        </div>
-      </div>
-
-      
+      <Grid container spacing={3}>
+        {recipes.map((recipe) => (
+          <Grid size={4} key={recipe.id}>
+            <Recipe id={recipe.id} name={recipe.recipe_name} difficulty={recipe.difficulty} image={recipe.image} />
+          </Grid>
+        ))}
+      </Grid>
     </div>
   );
 };
