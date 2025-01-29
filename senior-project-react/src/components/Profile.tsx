@@ -10,6 +10,8 @@ interface ProfileResponse {
   fname: string;
   username: string;
   achievements: Achievement[];
+  user_level: number;
+  xp_points: number;
 }
 
 interface getProfileResponse {
@@ -53,6 +55,8 @@ const Profile: React.FC = () => {
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
   const [openPfpModal, setOpenPfpModal] = useState(false);
   const [message, setMessage] = useState("");
+  const [user_level, setLevel] = useState<number>(0);
+  const [xp_points, setXp_points] = useState<number>(0);
 
   const getResponse = async () => {
     const response = await axios.post(
@@ -65,6 +69,8 @@ const Profile: React.FC = () => {
     setFname(data.fname);
     setUsername(data.username);
     setAchievements(data.achievements);
+    setLevel(data.user_level);
+    setXp_points(data.xp_points);
   };
 
   useEffect(() => {
@@ -225,6 +231,7 @@ const Profile: React.FC = () => {
       >
         Settings
       </Button>
+      <p> Level {user_level + ''}: {xp_points + ''} experience points! </p>
       <p> Recent Achievements: </p>
       {achievements.map((achievement) => (
         <div key={achievement.id}>

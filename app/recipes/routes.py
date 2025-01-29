@@ -1,4 +1,5 @@
 from __future__ import annotations
+import math
 from flask import request, jsonify, render_template, redirect, url_for, abort, flash
 from flask_login import current_user
 from app.recipes import bp
@@ -26,12 +27,13 @@ def post_recipe_page(id):
 def post_completed_recipe_page(id):
     print("searching for recipe" + str(id))
     recipe = Recipe.query.filter_by(id=id).first()
-    nc = current_user.num_recipes_completed
-    current_user.num_recipes_completed = nc + 1
+    current_user.num_recipes_completed = current_user.num_recipes_completed + 1
+    current_user.xp_points = current_user.xp_points + Recipe.query.filter_by(id = id).first().xp_amount # type: ignore
     db.session.add(current_user)
     db.session.flush()
     db.session.commit()
     completionAchievements()
+    checkLevel()
     if recipe is not None:
         return jsonify(recipe.to_json())
     return "<h1>404: recipe not found</h1>", 404
@@ -89,4 +91,8 @@ def completionAchievements():
             db.session.add(a)
             db.session.flush()
             db.session.commit()
-        
+
+def checkLevel():
+    current_user.user_level = math.floor(.1 * math.sqrt(.1 * current_user.xp_points)) + 1 # type: ignore
+    db.session.add(current_user)
+    db.session.commit()

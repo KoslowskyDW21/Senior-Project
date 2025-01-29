@@ -21,7 +21,9 @@ def post_profile_page(id=1):
         return jsonify({ "lname": user.lname,
                          "fname": user.fname,
                          "username": user.username,
-                         "achievements": [achievement.to_json() for achievement in achievements]
+                         "achievements": [achievement.to_json() for achievement in achievements],
+                         "user_level": user.user_level,
+                         "xp_points": user.xp_points
                          }), 200
     return "<h1>404: profile not found</h1>", 404
 
