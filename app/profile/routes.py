@@ -11,10 +11,11 @@ import os
 def post_profile_page(id=1):
     print("searching for user " + str(id))
     print(current_user)
-    ua = UserAchievement.query.filter_by(user_id = id)
+    ua = UserAchievement.query.filter_by(user_id = current_user.id).all()
     achievements = []
     for a in ua:
-        achievements.append(Achievement.query.filter_by(id = a.user_id).first())
+        achievements.append(Achievement.query.filter_by(id = a.achievement_id).first())
+        
 
     if current_user is not None:
         return jsonify({ "lname": current_user.lname,
