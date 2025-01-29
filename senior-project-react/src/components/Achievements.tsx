@@ -1,42 +1,20 @@
 import React from "react";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Modal from '@mui/material/Modal';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Typography from "@mui/material/Typography";
-import { sizing } from '@mui/system';
+import { useMediaQuery } from '@mui/material';
 
-interface Achievements {
-  achievements: Achievement[];
+interface Achievement {
+  id: number;
+  title: string;
+  image?: string;
+  isVisible: boolean;
+  description: string;
 }
 
-interface Achievement{
-    id: number;
-    title: string;
-    image?: string;
-    isVisible: boolean;
-    description: string;
-
-}
-
-/*const achievements = [{
-    id: 1,
-    title: "Getting Started",
-    image: 'https://st.depositphotos.com/1570716/1697/i/950/depositphotos_16978587-stock-photo-male-chef-cooking.jpg',
-    isComplete: true,
-    isVisible: true
-
-},
-{
-    id: 2,
-    title: "Getting Started 2",
-    image: 'https://st.depositphotos.com/1570716/1697/i/950/depositphotos_16978587-stock-photo-male-chef-cooking.jpg',
-    isComplete: true,
-    isVisible: true
-
-}
-];*/
 const style = {
   position: 'absolute',
   top: '50%',
@@ -48,67 +26,129 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
-  
 
 const Achievements: React.FC = () => {
-    const [achievements, setAchievements] = React.useState<Achievement[]>([]);
-    const navigate = useNavigate();
+  const [achievements, setAchievements] = React.useState<Achievement[]>([]);
+  const [specAchievements, setSpecAchievements] = React.useState<Achievement[]>([]);
+  const [open, setOpen] = React.useState(false);
+  const [selectedAchievement, setSelectedAchievement] = React.useState<Achievement | null>(null);
 
-    const [open, setOpen] = React.useState(false);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
-  
-    const getResponse = async () => {
-      try {
-        const response = await axios.post(`http://127.0.0.1:5000/achievements/`);
-        const data: Achievement[] = response.data;
-        setAchievements(data);
-      } catch (error) {
-        console.error("Error fetching achievements:", error);
-      }
-    };
-  
-    React.useEffect(() => {
-      getResponse();
-    }, []);
+  const navigate = useNavigate();
 
-    //handleOpenModal(achievement):
+  const handleOpen = (achievement: Achievement) => {
+    setSelectedAchievement(achievement);
+    setOpen(true);
+  };
 
-  
-    return (
-      <div>
-        <h1>Achievements</h1>
-        {achievements.map((achievement) => (
-          <div key={achievement.id}>
-            <Button 
-            startIcon ={<Box > <img src = {achievement.image}/> </Box>}
-            onClick = {handleOpen}></Button> 
-            <Modal
-              open={open}
-              onClose={handleClose}
-              aria-labelledby="modal-modal-title"
-              aria-describedby="modal-modal-description"
-            >
-            <Box sx={style}>
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedAchievement(null);
+  };
+
+  const isSmallScreen = useMediaQuery('(max-width:600px)');
+  const isMediumScreen = useMediaQuery('(max-width:960px)');
+
+  const gridTemplateColumns = isSmallScreen
+    ? 'repeat(1, 1fr)'  // 1 column for small screens
+    : isMediumScreen
+    ? 'repeat(2, 1fr)'  // 2 columns for medium screens
+    : 'repeat(3, 1fr)'; // 3 columns for larger screens
+
+  const getResponse = async () => {
+    try {
+      const response = await axios.post(`http://127.0.0.1:5000/achievements/`);
+      const { achievements, specAchievements }: { achievements: Achievement[], specAchievements: Achievement[] } = response.data;
+      setAchievements(achievements);
+      setSpecAchievements(specAchievements);
+    } catch (error) {
+      console.error("Error fetching achievements:", error);
+    }
+  };
+
+  React.useEffect(() => {
+    getResponse();
+  }, []);
+
+  return (
+    <div>
+      <h1>Achievements</h1>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: gridTemplateColumns,
+          gap: '16px',
+        }}
+      >
+        {achievements.map((achievement) => {
+          const isSpecial = specAchievements.some(
+            (specAch) => specAch.id === achievement.id
+          );
+
+          return (
+            <div key={achievement.id}>
+              <Button
+                onClick={() => handleOpen(achievement)}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '10px',
+                  textAlign: 'center',
+                  filter: isSpecial ? 'none' : 'grayscale(100%)',  
+                }}
+              >
+                {achievement.image && (
+                  <img
+                    src={achievement.image}
+                    alt={achievement.title}
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      objectFit: 'cover',
+                      maxHeight: '150px', 
+                    }}
+                  />
+                )}
+                <Typography variant="body1" style={{ marginTop: '8px' }}>
+                  {achievement.title}
+                </Typography>
+              </Button>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Modal */}
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          {selectedAchievement && (
+            <>
               <Typography id="modal-modal-title" variant="h6" component="h2">
-               {achievement.title}
+                {selectedAchievement.title}
               </Typography>
-              <Typography id = "modal-image">
+              <Typography id="modal-image">
                 <Box>
-                  <img src = {achievement.image} style = {{width: '100%', height: '100%', objectFit: 'cover'}}/> 
+                  <img
+                    src={selectedAchievement.image}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    alt={selectedAchievement.title}
+                  />
                 </Box>
               </Typography>
               <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                {achievement.description}
+                {selectedAchievement.description}
               </Typography>
-             </Box>
-            </Modal>
-            <p> {achievement.title}</p>
-          </div> 
-          ))}
-      </div>
-
-    );
-  };
+            </>
+          )}
+        </Box>
+      </Modal>
+    </div>
+  );
+};
 
 export default Achievements;
