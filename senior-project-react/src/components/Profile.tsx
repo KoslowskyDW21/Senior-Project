@@ -2,8 +2,8 @@ import axios, { AxiosError } from "axios";
 import FolderIcon from "@mui/icons-material/Folder";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, ChangeEvent } from "react";
-import { Avatar, Box, Button, Modal } from "@mui/material"; //matui components
-import Achievement from "./Achievements";
+import { Avatar, Box, Button, Modal, Typography } from "@mui/material"; //matui components
+import Achievement from "./Achievements"; // Ensure Achievement type is imported
 
 interface ProfileResponse {
   lname: string;
@@ -58,6 +58,19 @@ const Profile: React.FC = () => {
   const [user_level, setLevel] = useState<number>(0);
   const [xp_points, setXp_points] = useState<number>(0);
 
+  const [openAchievementModal, setOpenAchievementModal] = useState(false);
+  const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
+
+  const handleOpenAchievementModal = (achievement: Achievement) => {
+    setSelectedAchievement(achievement);
+    setOpenAchievementModal(true);
+  };
+
+  const handleCloseAchievementModal = () => {
+    setOpenAchievementModal(false);
+    setSelectedAchievement(null);
+  };
+
   const getResponse = async () => {
     const response = await axios.post(
       `http://127.0.0.1:5000/profile/${id}`,
@@ -86,13 +99,9 @@ const Profile: React.FC = () => {
         { withCredentials: true }
       );
       const profilePicturePath = response.data.profile_picture;
-      console.log(profilePicturePath);
       if (profilePicturePath) {
-        console.log("Setting path");
         setProfilePicUrl(profilePicturePath);
-        console.log(profilePicUrl);
       }
-      console.log(profilePicUrl);
     } catch (error) {
       const axiosError = error as AxiosError;
 
@@ -106,7 +115,6 @@ const Profile: React.FC = () => {
   };
 
   const handleGoToRecipes = async () => {
-    console.log("Navigating to recipes page");
     navigate(`/recipes`);
   };
 
@@ -180,21 +188,19 @@ const Profile: React.FC = () => {
 
   return (
     <>
-      <h1>This is a profile page!!</h1>{" "}
-      {/* TODO: replace with fuller account information */}
-      <h2>This is {username}'s profile!</h2>
+      <h1>This is {username}'s profile!</h1>
       <div
         style={{
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           marginBottom: "16px",
-          marginLeft: "175px",
-          cursor: "pointer",
-          width: "150px",
-          height: "150px",
+          width: "150px", // Control the width of the container
+          height: "150px", // Ensure the height is fixed
           borderRadius: "50%",
           border: "2px solid #ccc",
+          marginLeft: "auto", // Ensure it takes up space to the left
+          marginRight: "auto", // and right to center it
         }}
         onClick={handleOpenPfpModal}
       >
@@ -224,28 +230,54 @@ const Profile: React.FC = () => {
       <Button onClick={handleGoToRecipes} variant="contained" color="primary">
         Recipes
       </Button>
-      <Button
-        onClick={() => navigate("/settings")}
-        variant="contained"
-        color="primary"
-      >
+      <Button onClick={() => navigate("/settings")} variant="contained" color="primary">
         Settings
       </Button>
-      <p> Level {user_level + ''}: {xp_points + ''} experience points! </p>
+      <p> Level {user_level}: {xp_points} experience points! </p>
       <p> Recent Achievements: </p>
-      {achievements.map((achievement: Achievement) => ( // unsure why these type errors exist. achievement is clearly not of type Achievements
-        <div key={achievement.id}>
-          <button>
-            <img
-              src={achievement.image}
-              width="100"
-              onClick={() => navigate(`/achievements/${achievement.id}`)} //need to change to modal code
-              alt=""
-            />
-          </button>
-          <p> {achievement.title}</p>
-        </div>
-      ))}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
+        {achievements.map((achievement: Achievement) => (
+          <div key={achievement.id}>
+            <button onClick={() => handleOpenAchievementModal(achievement)}>
+              <img
+                src={achievement.image}
+                width="100"
+                alt={achievement.title}
+              />
+            </button>
+            <p>{achievement.title}</p>
+          </div>
+        ))}
+      </div>
+
+      <Modal
+        open={openAchievementModal}
+        onClose={handleCloseAchievementModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={modalStyle}>
+          {selectedAchievement && (
+            <>
+              <Typography id="modal-modal-title" variant="h6" component="h2">
+                {selectedAchievement.title}
+              </Typography>
+              <Typography id="modal-image">
+                <Box>
+                  <img
+                    src={selectedAchievement.image}
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    alt={selectedAchievement.title}
+                  />
+                </Box>
+              </Typography>
+              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                {selectedAchievement.description}
+              </Typography>
+            </>
+          )}
+        </Box>
+      </Modal>
     </>
   );
 };
