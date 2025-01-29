@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 import FolderIcon from "@mui/icons-material/Folder";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, ChangeEvent } from "react";
-import { Avatar, Box, Button, Modal, Typography } from "@mui/material"; //matui components
+import { Avatar, Box, Button, Modal, Typography, LinearProgress, Tooltip } from "@mui/material"; //matui components
 import Achievement from "./Achievements"; // Ensure Achievement type is imported
 
 interface ProfileResponse {
@@ -70,6 +70,18 @@ const Profile: React.FC = () => {
     setOpenAchievementModal(false);
     setSelectedAchievement(null);
   };
+
+  const calculateXPForLevel = (level: number): number => {return Math.floor(1000 * Math.pow(level - 1, 2)); };
+  const calculateNextLevelXP = (level: number): number => {return Math.floor(1000 * Math.pow(level, 2));};
+  const calculateLevel = (xp: number): number => {return Math.floor(0.1 * Math.sqrt(0.1 * xp)) + 1;};
+
+  const currentLevel = calculateLevel(xp_points);
+  const xpForCurrentLevel = calculateXPForLevel(currentLevel);
+  const xpForNextLevel = calculateNextLevelXP(currentLevel);
+  const progressPercentage = ((xp_points - xpForCurrentLevel) / (xpForNextLevel - xpForCurrentLevel)) * 100;
+
+  const [hovered, setHovered] = useState(false);
+
 
   const getResponse = async () => {
     const response = await axios.post(
@@ -195,12 +207,12 @@ const Profile: React.FC = () => {
           justifyContent: "center",
           alignItems: "center",
           marginBottom: "16px",
-          width: "150px", // Control the width of the container
-          height: "150px", // Ensure the height is fixed
+          width: "150px", 
+          height: "150px", 
           borderRadius: "50%",
           border: "2px solid #ccc",
-          marginLeft: "auto", // Ensure it takes up space to the left
-          marginRight: "auto", // and right to center it
+          marginLeft: "auto", 
+          marginRight: "auto", 
         }}
         onClick={handleOpenPfpModal}
       >
@@ -233,7 +245,35 @@ const Profile: React.FC = () => {
       <Button onClick={() => navigate("/settings")} variant="contained" color="primary">
         Settings
       </Button>
+
       <p> Level {user_level}: {xp_points} experience points! </p>
+
+      <Box sx={{ width: '100%', textAlign: 'center', marginBottom: 2 }}>
+        <Typography variant="h6" gutterBottom>
+          Level {user_level}
+        </Typography>
+        <Tooltip
+          title={`XP: ${xp_points}`}
+          open={hovered}
+          placement="top"
+          onOpen={() => setHovered(true)}
+          onClose={() => setHovered(false)}
+        >
+        <Box sx={{ width: '100%', position: 'relative' }}>
+          <LinearProgress
+            variant="determinate"
+            value={progressPercentage}
+            sx={{
+              height: 20, // Adjust height of the bar
+              borderRadius: 5, // Add rounded corners to the bar
+              backgroundColor: '#e0e0e0', // Light gray background color for the empty part of the bar
+            }}
+            color="success" // Green color for the progress
+          />
+        </Box>
+        </Tooltip>
+      </Box>
+
       <p> Recent Achievements: </p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
         {achievements.map((achievement: Achievement) => (
