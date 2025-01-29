@@ -3,7 +3,7 @@ import math
 from flask import request, jsonify, render_template, redirect, url_for, abort, flash
 from flask_login import current_user
 from app.recipes import bp
-from app.models import UserAchievement, Recipe, db
+from app.models import UserAchievement, Recipe, RecipeStep, db
 
 # @bp.get('/')
 # def home():
@@ -22,6 +22,15 @@ def post_recipe_page(id):
     if recipe is not None:
         return jsonify(recipe.to_json())
     return "<h1>404: recipe not found</h1>", 404
+
+@bp.post("/steps/<int:id>")
+def post_recipe_steps(id):
+    print(f"searching for steps of recipe {id}")
+    steps = RecipeStep.query.filter_by(recipe_id=id).all()
+    if steps is not None:
+        return jsonify([step.to_json() for step in steps])
+    return f"<h1>404: steps not found for recipe {id}</h1>", 404
+
 
 @bp.post("/completed/<int:id>/")
 def post_completed_recipe_page(id):
