@@ -3,7 +3,7 @@ import math
 from flask import request, jsonify, render_template, redirect, url_for, abort, flash
 from flask_login import current_user
 from app.recipes import bp
-from app.models import UserAchievement, Recipe, RecipeStep, db
+from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, db
 
 # @bp.get('/')
 # def home():
@@ -41,8 +41,10 @@ def post_completed_recipe_page(id):
     db.session.add(current_user)
     db.session.flush()
     db.session.commit()
-    completionAchievements()
+    if(current_user.num_recipes_completed == 1):
+        completionAchievements(1)
     checkLevel()
+    completeCuisine(recipe)
     if recipe is not None:
         return jsonify(recipe.to_json())
     return "<h1>404: recipe not found</h1>", 404
@@ -92,9 +94,8 @@ def delete_recipe():
     flash('recipe deleted successfully')
     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
 
-def completionAchievements():
-    if(current_user.num_recipes_completed == 1):
-        a = UserAchievement(achievement_id = 1, user_id = current_user.id) #type:ignore
+def completionAchievements(id):
+        a = UserAchievement(achievement_id = id, user_id = current_user.id) #type:ignore
         b = UserAchievement.query.all()
         if(a not in b):
             db.session.add(a)
@@ -111,6 +112,19 @@ def checkLevel():
         current_user.hasLeveled = 1
         db.session.add(current_user)
         db.session.commit()
+
+def completeCuisine(recipe):
+    cid = RecipeCuisine.query.filter_by(recipe_id = recipe.id).first().cuisine_id # type: ignore
+    if(UserCuisinePreference.query.filter_by(user_id = current_user.id, cuisine_id = cid).first() is None):
+        entry = UserCuisinePreference(user_id = current_user.id, cuisine_id = cid, numComplete = 1) #type: ignore
+    else:
+        entry = UserCuisinePreference.query.filter_by(user_id = current_user.id, cuisine_id = cid).first()
+        entry.numComplete = entry.numComplete + 1 #type: ignore
+    db.session.add(entry)
+    db.session.commit()
+    if(len(UserCuisinePreference.query.filter_by(user_id = current_user.id).all()) == 3):
+        completionAchievements(2)
+
 
 def completedAchievement():
     current_user.xp_points = current_user.xp_points + 100
