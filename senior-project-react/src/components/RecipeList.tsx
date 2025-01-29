@@ -17,9 +17,9 @@ const RecipeLists: React.FC = () => {
 
     const navigate = useNavigate();
 
-    const handleGoToRecipes = async () => {
-        console.log("Navigating to recipes page");
-        navigate(`/recipes`);
+    const handleGoToRecipeLists = async () => {
+        console.log("Navigating to all recipe lists page");
+        navigate(`/recipe-lists/`);
     }
 
     const getResponse = async () => {
@@ -48,11 +48,11 @@ const RecipeLists: React.FC = () => {
           </div> 
           ))}
             <Button
-                onClick={handleGoToRecipes}
+                onClick={handleGoToRecipeLists}
                 variant="contained"
                 color="primary"
             >
-                Recipes
+                All Lists
             </Button>
         </>
     )

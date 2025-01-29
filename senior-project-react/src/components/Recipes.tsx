@@ -149,6 +149,11 @@ const Recipes: React.FC = () => {
     navigate(`/achievements`)
   }
 
+  const handleGoToRecipeLists = async () => {
+    console.log(`Navigating to all recipe lists of this user`);
+    navigate(`/recipe-lists/`);
+  }
+
   const getCurrentUser = async () => {
     console.log("Getting FULL JSON of current user");
     try {
@@ -197,6 +202,13 @@ const Recipes: React.FC = () => {
         color="primary"
       >
         Achievements
+      </Button>
+      <Button
+        onClick={handleGoToRecipeLists}
+        variant="contained"
+        color="primary"
+      >
+        Recipe Lists
       </Button>
 
       <h1>Welcome to the Recipes Page!</h1>

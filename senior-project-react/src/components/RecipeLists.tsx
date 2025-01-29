@@ -40,6 +40,11 @@ const RecipeLists: React.FC = () => {
     const [ recipeLists, setRecipeLists ] = React.useState<RecipeList[]>([]);
     const navigate = useNavigate();
 
+    const handleGoToRecipes = async () => {
+        console.log("Navigating to recipe page");
+        navigate(`/recipes/`);
+    }
+
     const getCurrentUser = async () => {
         console.log("Getting FULL JSON of current user");
         try {
@@ -93,6 +98,13 @@ const RecipeLists: React.FC = () => {
                 </Grid>
             ))}
         </Grid>
+        <Button
+            onClick={handleGoToRecipes}
+            variant="contained"
+            color="primary"
+        >
+            Recipes
+        </Button>
         </>
     );
 }
