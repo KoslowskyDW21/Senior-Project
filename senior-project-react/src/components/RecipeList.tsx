@@ -42,7 +42,7 @@ const RecipeLists: React.FC = () => {
             <h1>RecipeList</h1>
             {recipes.map((recipe) => (
           <div key={recipe.id}>
-            <button><img src={recipe.image} width = "100" onClick={() => navigate(`/recipes/${recipe.id}`)} /></button>
+            <button><img src={recipe.image} width = "100" onClick={() => navigate(`/recipes/${recipe.id}`)} alt={recipe.recipe_name} /></button>
             <p> {recipe.recipe_name}</p>
             
           </div> 

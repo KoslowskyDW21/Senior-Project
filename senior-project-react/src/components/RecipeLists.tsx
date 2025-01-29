@@ -1,14 +1,12 @@
 import React from "react";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
     Button,
     Card,
     CardContent,
     Typography,
     Grid,
-    Box,
-    Container,
 } from "@mui/material";
 
 interface RecipeList {

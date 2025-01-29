@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { useNavigate } from "react-router-dom"; // React Router for nav
-import { Button, TextField, Container, Card, CardHeader, CardMedia, CardActionArea } from "@mui/material"; //matui components
+import { Button, Card, CardHeader, CardMedia, CardActionArea } from "@mui/material"; //matui components
 import Grid from "@mui/material/Grid2";
 import { Star, StarBorder } from "@mui/icons-material"
 
@@ -154,16 +154,16 @@ const Recipes: React.FC = () => {
     navigate(`/recipe-lists/`);
   }
 
-  const getCurrentUser = async () => {
-    console.log("Getting FULL JSON of current user");
-    try {
-        const response = await axios.post(`http://127.0.0.1:5000/profile/current_user`);
-        const data: User = response.data;
-        setCurrent_user(data);
-    } catch (error) {
-        console.error("Error fetching recipe: ", error);
-    }
-}
+//   const getCurrentUser = async () => {
+//     console.log("Getting FULL JSON of current user");
+//     try {
+//         const response = await axios.post(`http://127.0.0.1:5000/profile/current_user`);
+//         const data: User = response.data;
+//         setCurrent_user(data);
+//     } catch (error) {
+//         console.error("Error fetching recipe: ", error);
+//     }
+// }
 
   async function loadRecipes() {
     try {

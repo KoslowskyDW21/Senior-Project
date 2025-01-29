@@ -233,13 +233,14 @@ const Profile: React.FC = () => {
       </Button>
       <p> Level {user_level + ''}: {xp_points + ''} experience points! </p>
       <p> Recent Achievements: </p>
-      {achievements.map((achievement) => (
+      {achievements.map((achievement: Achievement) => ( // unsure why these type errors exist. achievement is clearly not of type Achievements
         <div key={achievement.id}>
           <button>
             <img
               src={achievement.image}
               width="100"
               onClick={() => navigate(`/achievements/${achievement.id}`)} //need to change to modal code
+              alt=""
             />
           </button>
           <p> {achievement.title}</p>
