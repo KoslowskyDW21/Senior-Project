@@ -11,25 +11,27 @@ import os
 def post_profile_page(id=1):
     print("searching for user " + str(id))
     print(current_user)
-    user = User.query.filter_by(id=id).first()
     ua = UserAchievement.query.filter_by(user_id = id)
     achievements = []
     for a in ua:
         achievements.append(Achievement.query.filter_by(id = a.user_id).first())
 
-    if user is not None:
-        return jsonify({ "lname": user.lname,
-                         "fname": user.fname,
-                         "username": user.username,
-                         "achievements": [achievement.to_json() for achievement in achievements]
+    if current_user is not None:
+        return jsonify({ "lname": current_user.lname,
+                         "fname": current_user.fname,
+                         "username": current_user.username,
+                         "achievements": [achievement.to_json() for achievement in achievements],
+                         "user_level": current_user.user_level,
+                         "xp_points": current_user.xp_points,
+                         "hasLeveled": current_user.hasLeveled
                          }), 200
     return "<h1>404: profile not found</h1>", 404
 
 @bp.route('/current_user', methods=['GET', 'POST'])
 def post_current_user():
-    return jsonify({
-        current_user.to_json()
-    }), 200
+    return jsonify(
+        current_user._get_current_object().to_json()
+    ), 200
 
 @bp.route('/get_profile_pic/', methods=['POST'])
 def get_profile_pic():
@@ -97,4 +99,11 @@ def remove_profile_pic():
             user.profile_picture = None
             db.session.commit()
     return {"message": "Profile picture removed successfully"}, 200
+
+@bp.route('/leveled/', methods=['POST'])
+def leveled():
+    current_user.hasLeveled = 0
+    db.session.add(current_user)
+    db.session.commit()
+    return {"message": "Level trigger updated successfully!"}, 200
 

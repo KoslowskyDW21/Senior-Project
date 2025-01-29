@@ -6,7 +6,7 @@ from flask_login import current_user, login_required
 
 
 @login_required
-@bp.route('/', methods=['POST'])
+@bp.route('/', methods=['GET'])
 def post_settings_page():
     print("Current User:")
     print(current_user)
@@ -14,18 +14,23 @@ def post_settings_page():
 
     #dietaryRestictions = UserDietaryRestriction.query.filter(UserDietaryRestriction.user_id == user.id).all()
 
-    
-
     return jsonify(user.to_json()), 200 # type: ignore
 
 @login_required
 @bp.route("/update/", methods=['POST'])
 def post_update_user():
-    user = User.from_json(request.json)
-    db.session.add(user)
-    db.session.commit()
+    # user = User.from_json(request.json)
+    # print(user)
+    # db.session.add(user)
+    # db.session.commit()
+    data = request.get_json()
+    newFloor = str(data.get("floor"))
+    newSide = str(data.get("side"))
 
-    return ""
+    print("Floor: " + newFloor)
+    print("Side: " + newSide)
+
+    return "Unknown"
 
 
 def delete_user_and_dependencies(session, current_user_id):

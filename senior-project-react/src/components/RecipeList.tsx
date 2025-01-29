@@ -11,23 +11,34 @@ interface Recipe {
     image: string;
   }
 
+interface RecipeList {
+    id: number;
+    name: string;
+    belongs_to: number;
+}
+
 const RecipeLists: React.FC = () => {
     const [ recipes, setRecipes ] = React.useState<Recipe[]>([]);
+    const [ recipe_list, setRecipe_list ] = React.useState<RecipeList>();
     const { id } = useParams<{ id: string }>();
 
     const navigate = useNavigate();
 
-    const handleGoToRecipes = async () => {
-        console.log("Navigating to recipes page");
-        navigate(`/recipes`);
+    const handleGoToRecipeLists = async () => {
+        console.log("Navigating to all recipe lists page");
+        navigate(`/recipe-lists/`);
     }
 
     const getResponse = async () => {
         try {
-            const response = await axios.post(`http://127.0.0.1:5000/recipe_list/${id}`);
+            const response = await axios.get(`http://127.0.0.1:5000/recipe_lists/recipes/${id}`);
             const resp_recipes: Recipe[] = response.data;
             console.log(resp_recipes);
-            setRecipes(resp_recipes); // TODO: figure out how to get the Recipe[] out of a RecipeList (model?)
+            setRecipes(resp_recipes);
+            const response2 = await axios.get(`http://127.0.0.1:5000/recipe_lists/info/${id}`);
+            const resp_recipe_list: RecipeList = response2.data;
+            console.log(resp_recipe_list);
+            setRecipe_list(resp_recipe_list);
         } catch (error) {
             console.error("Error fetching recipeList: ", error);
         }
@@ -37,22 +48,30 @@ const RecipeLists: React.FC = () => {
         getResponse();
     }, []);
 
+    if (!recipe_list) {
+        return (
+            <>
+            <p>Loading...</p>
+            </>
+        )
+    }
+
     return (
         <>
-            <h1>RecipeList</h1>
+            <h1>{recipe_list.name}</h1>
             {recipes.map((recipe) => (
           <div key={recipe.id}>
-            <button><img src={recipe.image} width = "100" onClick={() => navigate(`/recipes/${recipe.id}`)} /></button>
+            <button><img src={recipe.image} width = "100" onClick={() => navigate(`/recipes/${recipe.id}`)} alt={recipe.recipe_name} /></button>
             <p> {recipe.recipe_name}</p>
             
           </div> 
           ))}
             <Button
-                onClick={handleGoToRecipes}
+                onClick={handleGoToRecipeLists}
                 variant="contained"
                 color="primary"
             >
-                Recipes
+                All Lists
             </Button>
         </>
     )

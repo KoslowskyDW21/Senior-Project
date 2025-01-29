@@ -1,27 +1,19 @@
 import axios, { AxiosError } from "axios";
 import FolderIcon from "@mui/icons-material/Folder";
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect, ChangeEvent } from "react";
-import { Avatar, Box, Button, Modal } from "@mui/material"; //matui components
-import Achievement from "./Achievements";
+import { useState, useEffect, ChangeEvent, useRef } from "react";
+import { Avatar, Box, Button, Modal, Typography, LinearProgress, Tooltip } from "@mui/material"; 
+import Achievement from "./Achievements"; 
+import Confetti from "react-confetti"; 
 
 interface ProfileResponse {
   lname: string;
   fname: string;
   username: string;
   achievements: Achievement[];
-}
-
-interface getProfileResponse {
-  message: string;
-}
-
-interface getDeleteResponse {
-  message: string;
-}
-
-interface getUpdateResponse {
-  message: string;
+  user_level: number;
+  xp_points: number;
+  hasLeveled: boolean;
 }
 
 const modalStyle = {
@@ -40,12 +32,12 @@ const modalStyle = {
 };
 
 const Profile: React.FC = () => {
-  const navigate = useNavigate(); //for navigation
-
+  const navigate = useNavigate();
   let { id } = useParams<{ id: string }>();
   if (id == undefined) {
     id = "1";
   }
+
   const [lname, setLname] = useState<String>();
   const [fname, setFname] = useState<String>();
   const [username, setUsername] = useState<String>();
@@ -53,6 +45,39 @@ const Profile: React.FC = () => {
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
   const [openPfpModal, setOpenPfpModal] = useState(false);
   const [message, setMessage] = useState("");
+  const [user_level, setLevel] = useState<number>(0);
+  const [xp_points, setXp_points] = useState<number>(0);
+  const [hasLeveled, setHasLeveled] = useState<boolean>(false);
+
+  const [openAchievementModal, setOpenAchievementModal] = useState(false);
+  const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
+
+  const handleOpenAchievementModal = (achievement: Achievement) => {
+    setSelectedAchievement(achievement);
+    setOpenAchievementModal(true);
+  };
+
+  const handleCloseAchievementModal = () => {
+    setOpenAchievementModal(false);
+    setSelectedAchievement(null);
+  };
+
+  const calculateXPForLevel = (level: number): number => {
+    return Math.floor(1000 * Math.pow(level - 1, 2));
+  };
+  const calculateNextLevelXP = (level: number): number => {
+    return Math.floor(1000 * Math.pow(level, 2));
+  };
+  const calculateLevel = (xp: number): number => {
+    return Math.floor(0.1 * Math.sqrt(0.1 * xp)) + 1;
+  };
+
+  const currentLevel = calculateLevel(xp_points);
+  const xpForCurrentLevel = calculateXPForLevel(currentLevel);
+  const xpForNextLevel = calculateNextLevelXP(currentLevel);
+  const progressPercentage = ((xp_points - xpForCurrentLevel) / (xpForNextLevel - xpForCurrentLevel)) * 100;
+
+  const [hovered, setHovered] = useState(false);
 
   const getResponse = async () => {
     const response = await axios.post(
@@ -65,6 +90,9 @@ const Profile: React.FC = () => {
     setFname(data.fname);
     setUsername(data.username);
     setAchievements(data.achievements);
+    setLevel(data.user_level);
+    setXp_points(data.xp_points);
+    setHasLeveled(data.hasLeveled); 
   };
 
   useEffect(() => {
@@ -80,18 +108,13 @@ const Profile: React.FC = () => {
         { withCredentials: true }
       );
       const profilePicturePath = response.data.profile_picture;
-      console.log(profilePicturePath);
       if (profilePicturePath) {
-        console.log("Setting path");
         setProfilePicUrl(profilePicturePath);
-        console.log(profilePicUrl);
       }
-      console.log(profilePicUrl);
     } catch (error) {
       const axiosError = error as AxiosError;
-
       if (axiosError.response && axiosError.response.data) {
-        const errorData = axiosError.response.data as getProfileResponse;
+        const errorData = axiosError.response.data;
         setMessage(errorData.message);
       } else {
         setMessage("An unknown error occurred");
@@ -100,7 +123,6 @@ const Profile: React.FC = () => {
   };
 
   const handleGoToRecipes = async () => {
-    console.log("Navigating to recipes page");
     navigate(`/recipes`);
   };
 
@@ -128,7 +150,7 @@ const Profile: React.FC = () => {
       } catch (error) {
         const axiosError = error as AxiosError;
         if (axiosError.response && axiosError.response.data) {
-          const errorData = axiosError.response.data as getUpdateResponse;
+          const errorData = axiosError.response.data;
           setMessage(errorData.message);
         } else {
           setMessage("An error occurred while updating the profile picture.");
@@ -164,7 +186,7 @@ const Profile: React.FC = () => {
     } catch (error) {
       const axiosError = error as AxiosError;
       if (axiosError.response && axiosError.response.data) {
-        const errorData = axiosError.response.data as getDeleteResponse;
+        const errorData = axiosError.response.data;
         setMessage(errorData.message);
       } else {
         setMessage("An unknown error occurred");
@@ -172,23 +194,71 @@ const Profile: React.FC = () => {
     }
   };
 
+  const resetHasLeveled = async () => {
+    try {
+      await axios.post(
+        `http://127.0.0.1:5000/profile/leveled/`,
+        {},
+        { withCredentials: true }
+      );
+      setHasLeveled(false);
+    } catch (error) {
+      console.error("Error resetting hasLeveled:", error);
+    }
+  };
+
+  const handleConfettiComplete = () => {
+    resetHasLeveled();
+  };
+
+  const [confettiVisible, setConfettiVisible] = useState(false);
+  const [confettiSource, setConfettiSource] = useState({ x: 0, y: 0 });
+
+  const xpBarRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (hasLeveled) {
+      if (xpBarRef.current) {
+        const rect = xpBarRef.current.getBoundingClientRect();
+        setConfettiSource({
+          x: rect.left + rect.width / 2, 
+          y: rect.top + rect.height / 2,
+        });
+      }
+
+      setConfettiVisible(true);
+
+      setTimeout(() => {
+        setConfettiVisible(false);
+        handleConfettiComplete();
+      }, 3000);
+    }
+  }, [hasLeveled]);
+
   return (
     <>
-      <h1>This is a profile page!!</h1>{" "}
-      {/* TODO: replace with fuller account information */}
-      <h2>This is {username}'s profile!</h2>
+      {confettiVisible && (
+        <Confetti
+          width={window.innerWidth}
+          height={window.innerHeight}
+          confettiSource={confettiSource} 
+          onConfettiComplete={handleConfettiComplete}
+        />
+      )}
+
+      <h1>This is {username}'s profile!</h1>
       <div
         style={{
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           marginBottom: "16px",
-          marginLeft: "175px",
-          cursor: "pointer",
           width: "150px",
           height: "150px",
           borderRadius: "50%",
           border: "2px solid #ccc",
+          marginLeft: "auto",
+          marginRight: "auto",
         }}
         onClick={handleOpenPfpModal}
       >
@@ -218,26 +288,80 @@ const Profile: React.FC = () => {
       <Button onClick={handleGoToRecipes} variant="contained" color="primary">
         Recipes
       </Button>
-      <Button
-        onClick={() => navigate("/settings")}
-        variant="contained"
-        color="primary"
-      >
+      <Button onClick={() => navigate("/settings")} variant="contained" color="primary">
         Settings
       </Button>
-      <p> Recent Achievements: </p>
-      {achievements.map((achievement) => (
-        <div key={achievement.id}>
-          <button>
-            <img
-              src={achievement.image}
-              width="100"
-              onClick={() => navigate(`/achievements/${achievement.id}`)}
+
+      <Box sx={{ width: "100%", textAlign: "center", marginBottom: 2, marginTop: 5 }}>
+        <Typography variant="h6" gutterBottom>
+          Level {user_level}
+        </Typography>
+        <Tooltip
+          title={`XP: ${xp_points}`}
+          open={hovered}
+          placement="top"
+          onOpen={() => setHovered(true)}
+          onClose={() => setHovered(false)}
+        >
+          <Box sx={{ width: "100%", position: "relative" }} ref={xpBarRef}>
+            <LinearProgress
+              variant="determinate"
+              value={progressPercentage}
+              sx={{
+                height: 20, 
+                borderRadius: 5,
+                backgroundColor: "#e0e0e0", 
+              }}
+              color="success"
             />
-          </button>
-          <p> {achievement.title}</p>
-        </div>
-      ))}
+          </Box>
+        </Tooltip>
+      </Box>
+
+      <p>Recent Achievements:</p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
+        {achievements.map((achievement: Achievement) => (
+          <div key={achievement.id}>
+            <button onClick={() => handleOpenAchievementModal(achievement)}>
+              <img
+                src={achievement.image}
+                width="100"
+                alt={achievement.title}
+              />
+            </button>
+            <p>{achievement.title}</p>
+          </div>
+        ))}
+      </div>
+
+      <Modal
+        open={openAchievementModal}
+        onClose={handleCloseAchievementModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={modalStyle}>
+          {selectedAchievement && (
+            <>
+              <Typography id="modal-modal-title" variant="h6" component="h2">
+                {selectedAchievement.title}
+              </Typography>
+              <Typography id="modal-image">
+                <Box>
+                  <img
+                    src={selectedAchievement.image}
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    alt={selectedAchievement.title}
+                  />
+                </Box>
+              </Typography>
+              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                {selectedAchievement.description}
+              </Typography>
+            </>
+          )}
+        </Box>
+      </Modal>
     </>
   );
 };

@@ -13,6 +13,12 @@ interface Recipe {
     "achievements": []
 }
 
+interface Step {
+    "recipe_id": string,
+    "step_number": number,
+    "step_description": string
+}
+
 interface User {
     "id": string,
     "fname": string,
@@ -31,9 +37,19 @@ interface User {
     "num_reports": number,
 }
 
+function Step({ recipe_id, step_number, step_description }) {
+    return (
+        <>
+        <h4>Step {step_number}</h4>
+        <p>{step_description}</p>
+        </>
+    );
+}
+
 const IndividualRecipe: React.FC = () => {
     const [ recipe_name, setRecipe_name ] = React.useState<String>();
     const [ current_user, setCurrent_user ] = React.useState<User>();
+    const [ steps, setSteps ] = React.useState<Step[]>([]);
     const { id } = useParams<{ id: string }>();
 
     const navigate = useNavigate();
@@ -59,7 +75,7 @@ const IndividualRecipe: React.FC = () => {
         }
     }
 
-    const getResponse = async () => {
+    const getRecipeName = async () => {
         try {
             const response = await axios.post(`http://127.0.0.1:5000/recipes/${id}`);
             const data: Recipe = response.data;
@@ -69,9 +85,20 @@ const IndividualRecipe: React.FC = () => {
         }
     };
 
+    const getSteps = async () => {
+        try {
+            const response = await axios.post(`http://127.0.0.1:5000/recipes/steps/${id}`);
+            const data: Step[] = response.data;
+            setSteps(data);
+        } catch (error) {
+            console.error("Error fetching steps: ", error);
+        }
+    }
+
     React.useEffect(() => {
-        getResponse();
+        getRecipeName();
         getCurrentUser();
+        getSteps();
     }, []);
 
     return (
@@ -91,6 +118,10 @@ const IndividualRecipe: React.FC = () => {
             >
                 Complete
             </Button>
+
+            {steps.map((step) => (
+                <Step recipe_id={step.recipe_id} step_number={step.step_number} step_description={step.step_description} />
+            ))}
         </>
     )
 }

@@ -1,13 +1,23 @@
 from __future__ import annotations
 from app.achievements import bp
-from app.models import User, Achievement, db
+from app.models import UserAchievement, Achievement, db
 from flask import request, jsonify, abort
 from datetime import datetime, timedelta
+from flask_login import current_user
 
 @bp.route('/', methods=['POST'])
 def achievements():
     achievements = Achievement.query.all()
-    return jsonify([achievement.to_json() for achievement in achievements]), 200 
+    userAs = UserAchievement.query.filter_by(user_id=current_user.id).all()
+    specAchievements = []
+    for a in userAs:
+        achievement = Achievement.query.get(a.achievement_id) 
+        if achievement:
+            specAchievements.append(achievement)
+    return jsonify({
+        "achievements": [achievement.to_json() for achievement in achievements],
+        "specAchievements": [achievement.to_json() for achievement in specAchievements]
+    }), 200
 
 @bp.route('/<int:id>', methods=['GET'])
 def get_achievement(id):

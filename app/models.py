@@ -31,6 +31,7 @@ class User(UserMixin, db.Model):
     last_logged_in = db.Column(db.DateTime)
     num_reports = db.Column(db.Integer, nullable=False)
     password_hash = db.Column(db.LargeBinary, nullable=False)
+    hasLeveled = db.Column(db.Boolean, nullable = False)
 
     @property
     def password(self):
@@ -145,10 +146,13 @@ class UserCuisinePreference(db.Model):
     __tablename__ = 'UserCuisinePreference'
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
     cuisine_id = db.Column(db.Integer, db.ForeignKey('Cuisine.id'), primary_key=True)
+    numComplete = db.Column(db.Integer, nullable=False)
     def to_json(self):
         return {
             "user_id": self.user_id,
             "cuisine_id": self.cuisine_id,
+            "numComplete": self.numComplete
+
         }
 
 class UserGroup(db.Model):
@@ -450,7 +454,6 @@ class RecipeList(db.Model):
             "belongs_to": self.belongs_to,
         }
     
-# TODO: is this the best way to solve this issue?
 class RecipeRecipeList(db.Model):
     __tablename__ = 'RecipeRecipeList'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

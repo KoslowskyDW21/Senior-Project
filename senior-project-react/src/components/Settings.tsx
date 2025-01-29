@@ -41,6 +41,36 @@ const modalStyle = {
   pb: 3,
 };
 
+async function updateUser(floor: string, side: string) {
+  await axios.post("http://127.0.0.1:5000/settings/update/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      "floor": 3,
+      "side": "men's"
+    })
+  })
+    .then()
+    .catch((error) => {
+      console.log("Could not update user: ", error);
+    })
+
+  // TODO: Insert the correct URL
+  // try {
+  //   await axios.post("", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify(user),
+  //   });
+  // } catch (error) {
+  //   console.log("Could not update user ", error);
+  // }
+}
+
 export default function Settings() {
   const [user, setUser] = useState({
     id: null,
@@ -58,26 +88,18 @@ export default function Settings() {
   const navigate = useNavigate();
 
   async function loadUser() {
-    const response = await axios.post("http://127.0.0.1:5000/settings/");
-    setUser(response.data);
-    setColonialFloor(user.colonial_floor);
-    setColonialSide(user.colonial_side);
+    await axios.get("http://127.0.0.1:5000/settings/")
+      .then((response) => {
+        setUser(response.data);
+        setColonialFloor(user.colonial_floor);
+        setColonialSide(user.colonial_side);
+      })
+      .catch((error) => {
+        console.log("Could not fetch user: ", error);
+      })
   }
 
-  async function updateUser() {
-    // TODO: Insert the correct URL
-    try {
-      await axios.post("", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(user),
-      });
-    } catch (error) {
-      console.log("Could not update user ", error);
-    }
-  }
+
 
   async function handleDelete() {
     try {
@@ -120,7 +142,7 @@ export default function Settings() {
       colonial_side: user.colonial_side,
     });
 
-    updateUser();
+    updateUser(user.colonial_floor, user.colonial_side);
   };
 
   const handleSideChange = (event: SelectChangeEvent) => {
@@ -136,7 +158,7 @@ export default function Settings() {
       colonial_side: newSide,
     });
 
-    updateUser();
+    updateUser(user.colonial_floor, user.colonial_side);
   };
 
   const handleOpenModal = () => {
