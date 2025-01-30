@@ -95,9 +95,13 @@ def delete_recipe():
     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
 
 def completionAchievements(id):
-        a = UserAchievement(achievement_id = id, user_id = current_user.id) #type:ignore
-        b = UserAchievement.query.all()
-        if(a not in b):
+        specA = UserAchievement(achievement_id = id, user_id = current_user.id) #type:ignore
+        allUserAs = UserAchievement.query.all()
+        run = True
+        for a in allUserAs:
+            if(a.user_id == specA.user_id and a.achievement_id == specA.achievement_id):
+                run =  False
+        if(run):
             db.session.add(a)
             db.session.flush()
             db.session.commit()
