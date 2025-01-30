@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button } from "@mui/material"; //matui components
-import axios from "axios";
+import { Button, FormControl, MenuItem, Select, InputLabel } from "@mui/material"; //matui components
+import axios, { AxiosError } from "axios";
 
 interface Recipe {
     "id": string,
@@ -11,6 +11,12 @@ interface Recipe {
     "rating": string,
     "image": string,
     "achievements": []
+}
+
+interface RecipeList {
+    id: number;
+    name: string;
+    belongs_to: number;
 }
 
 interface Step {
@@ -37,6 +43,10 @@ interface User {
     "num_reports": number,
 }
 
+interface AddRecipeToListResponse {
+    message: string;
+}
+
 function Step({ recipe_id, step_number, step_description }) {
     return (
         <>
@@ -49,6 +59,9 @@ function Step({ recipe_id, step_number, step_description }) {
 const IndividualRecipe: React.FC = () => {
     const [ recipe_name, setRecipe_name ] = React.useState<String>();
     const [ current_user, setCurrent_user ] = React.useState<User>();
+    const [ message, setMessage ] = React.useState("");
+    const [ lid, setLid ] = React.useState();
+    const [ recipeLists, setRecipeLists ] = React.useState<RecipeList[]>([]);
     const [ steps, setSteps ] = React.useState<Step[]>([]);
     const { id } = useParams<{ id: string }>();
 
@@ -64,6 +77,32 @@ const IndividualRecipe: React.FC = () => {
         navigate(`/recipes/completed/${id}`);
     }
 
+    const handleAddRecipeToList = async (lid: number) => {
+        console.log(`Trying to add this recipe to list number ${lid} `);
+        const formData = new FormData();
+        formData.append("rid", id.toString());
+        formData.append("lid", lid.toString());
+        try {
+            const response = await axios.post(
+                "http://127.0.0.1:5000/recipe_lists/add-recipe-to-list/", formData,
+                 { headers: { "Content-Type": "multipart/form-data"} }
+            );
+            const data: AddRecipeToListResponse = response.data;
+            setMessage(data.message);
+            if (data.message === "Recipe added to list successfully!") {
+            console.log("Reicpe added successfully"); // TODO: replace with flashed message
+            }
+        } catch (error) {
+            const axiosError = error as AxiosError;
+                  if (axiosError.response && axiosError.response.data) {
+                    const errorData = axiosError.response.data as AddRecipeToListResponse;
+                    setMessage(errorData.message);
+                  } else {
+                    setMessage("An unknown error occurred");
+                  }
+        }
+    }
+
     const getCurrentUser = async () => {
         console.log("Getting FULL JSON of current user");
         try {
@@ -72,6 +111,16 @@ const IndividualRecipe: React.FC = () => {
             setCurrent_user(data);
         } catch (error) {
             console.error("Error fetching recipe: ", error);
+        }
+    }
+
+    const getRecipeLists = async () => {
+        try {
+            const response = await axios.get("http://127.0.0.1:5000/recipe_lists/all");
+            const data: RecipeList[] = response.data;
+            setRecipeLists(data);
+        } catch (error) {
+            console.error(`Error in fetching RecipeList[] for user id=${currentUserId}: ${error}`);
         }
     }
 
@@ -118,6 +167,23 @@ const IndividualRecipe: React.FC = () => {
             >
                 Complete
             </Button>
+
+            <FormControl fullWidth>
+            <InputLabel id="demo-simple-select-label">Add to a list</InputLabel>
+            <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                label="Add to a list"
+                value={lid}
+                onChange={handleAddRecipeToList(lid)}
+            >
+
+                {recipeLists.map((recipeList) => (
+                    <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
+                ))}
+
+            </Select>
+            </FormControl>
 
             {steps.map((step) => (
                 <Step recipe_id={step.recipe_id} step_number={step.step_number} step_description={step.step_description} />

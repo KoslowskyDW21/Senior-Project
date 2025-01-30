@@ -1,6 +1,6 @@
 from __future__ import annotations
-from flask import jsonify
-from flask_login import current_user
+from flask import jsonify, request
+from flask_login import current_user, login_required
 from app.recipe_lists import bp
 from app.models import Recipe, RecipeList, RecipeRecipeList, db
 
@@ -23,3 +23,18 @@ def get_recipe_list_name(rid):
     print(f"Searching for RecipeList {rid}")
     recipe_list = RecipeList.query.filter_by(id=rid).first()
     return jsonify(recipe_list.to_json())
+
+@bp.post('/add-recipe-to-list')
+@login_required
+def add_recipe_to_list():
+    rid = request.form.get("rid")
+    lid = request.form.get("lid")
+    print(f"Adding recipe {rid} to list {lid}")
+    # create a new RecipeRecipeList and add it to the db
+    try:
+        rrl = RecipeRecipeList(recipe_id=rid, recipe_list_id=lid)
+        db.session.add(rrl)
+        db.session.commit()
+        return jsonify({"message": "Recipe added to list successfully"}), 200
+    except:
+        return jsonify({"message": "Failed to add recipe to list"}), 400
