@@ -132,26 +132,26 @@ function createRecipe(recipe: Recipe) {
 const Recipes: React.FC = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [ current_user, setCurrent_user ] = React.useState<User>();
-  const navigate = useNavigate(); //for navigation
+  const navigate = useNavigate();
 
   const handleGoToProfile = async () => {
-    console.log("Navigating to profile page");
-    navigate(`/profile`); // TODO: get current user and put that here instead
+    navigate(`/profile`);
   }
 
   const handleGoToChallenges = async () => {
-    console.log("Navigating to challenges page");
     navigate(`/challenges`);
   }
 
   const handleGoToAchievements = async() => {
-    console.log("Navigating to achievements page");
     navigate(`/achievements`)
   }
 
   const handleGoToRecipeLists = async () => {
-    console.log(`Navigating to all recipe lists of this user`);
     navigate(`/recipe-lists/`);
+  }
+
+  const handleGoToGroups = async () => {
+    navigate(`/groups`);
   }
 
 //   const getCurrentUser = async () => {
@@ -209,6 +209,13 @@ const Recipes: React.FC = () => {
         color="primary"
       >
         Recipe Lists
+      </Button>
+      <Button
+        onClick={handleGoToGroups}
+        variant="contained"
+        color="primary"
+      >
+        Groups
       </Button>
 
       <h1>Welcome to the Recipes Page!</h1>
