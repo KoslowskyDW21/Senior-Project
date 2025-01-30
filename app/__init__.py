@@ -26,7 +26,7 @@ def create_app(config=Config):
 
     db.init_app(app)
     with app.app_context():
-        # UNCOMMENT TO REPOPULATE DATABASE
+        # UNCOMMENT (and get rid of pass) TO REPOPULATE DATABASE
         # populate_database()
         pass
 
@@ -44,6 +44,8 @@ def create_app(config=Config):
     app.register_blueprint(achievement_bp, url_prefix='/achievements')
     from app.settings import bp as settings_bp
     app.register_blueprint(settings_bp, url_prefix='/settings')
+    from app.groups import bp as groups_bp
+    app.register_blueprint(groups_bp, url_prefix='/groups')
     
     return app
 
@@ -87,8 +89,8 @@ def save_recipes_to_db(recipes):
             xp_amount=100*difficulty,  # type: ignore
             rating=0,  # type: ignore
             image=recipe_data["strMealThumb"],  # type: ignore
-            youtube_url=recipe_data["strCategory"], # type: ignore
-            category=recipe_data["strYoutube"] # type: ignore
+            category=recipe_data["strCategory"], # type: ignore
+            youtube_url=recipe_data["strYoutube"] # type: ignore
         )
         db.session.add(recipe)
         db.session.flush()
@@ -146,3 +148,12 @@ def save_recipes_to_db(recipes):
             db.session.add(recipe_cuisine)
 
     db.session.commit()
+
+# a temporary method to fix some improperly stored data. This can safely be deleted
+def switch_category_and_youtube_url():
+        recipes = Recipe.query.all()
+        for recipe in recipes:
+            temp = recipe.category
+            recipe.category = recipe.youtube_url
+            recipe.youtube_url = temp
+        db.session.commit()
