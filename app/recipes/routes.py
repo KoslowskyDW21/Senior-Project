@@ -120,7 +120,7 @@ def checkLevel():
 def completeCuisine(recipe):
     cid = RecipeCuisine.query.filter_by(recipe_id = recipe.id).first().cuisine_id # type: ignore
     if(UserCuisinePreference.query.filter_by(user_id = current_user.id, cuisine_id = cid).first() is None):
-        entry = UserCuisinePreference(user_id = current_user.id, cuisine_id = cid, numComplete = 1) #type: ignore
+        entry = UserCuisinePreference(user_id = current_user.id, cuisine_id = cid, numComplete = 1, userSelected = 0) #type: ignore
     else:
         entry = UserCuisinePreference.query.filter_by(user_id = current_user.id, cuisine_id = cid).first()
         entry.numComplete = entry.numComplete + 1 #type: ignore
