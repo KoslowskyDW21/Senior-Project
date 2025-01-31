@@ -36,6 +36,7 @@ interface User {
 const RecipeLists: React.FC = () => {
     const [ currentUserId, setCurrentUserId ] = React.useState<string | null>(null);
     const [ recipeLists, setRecipeLists ] = React.useState<RecipeList[]>([]);
+    const [ recipeList, setRecipeList ] = React.useState<RecipeList>();
     const navigate = useNavigate();
 
     const handleGoToRecipes = async () => {

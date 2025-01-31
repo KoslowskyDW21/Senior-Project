@@ -43,3 +43,23 @@ def add_recipe_to_list():
         return jsonify({"message": "Recipe added to list successfully!"}), 200
     except:
         return jsonify({"message": "Failed to add recipe to list"}), 400
+    
+@bp.post("/remove-recipe-from-list")
+@login_required
+def remove_recipe_from_list():
+    rid = request.form.get("rid")
+    lid = request.form.get("lid")
+    print(f"Removing recipe {rid} from list {lid}")
+    # delete RecipeRecipeList with matching rid and lid
+    try:
+        rrl = RecipeRecipeList.query.filter_by(recipe_id=rid, recipe_list_id=lid).first()
+        if not rrl:
+            return jsonify({"message": f"recipe {rid} does not exist in list {lid}"}), 400
+        db.session.delete(rrl)
+        db.session.commit()
+        stillExists = RecipeRecipeList.query.filter_by(recipe_id=rid, recipe_list_id=lid).first()
+        if stillExists:
+            return jsonify({"message": f"Recipe {rid} failed to be removed from list {lid}"}), 400
+        return jsonify({"message": f"Recipe {rid} successfully removed from list {lid}"}), 200
+    except:
+        return jsonify({"message": f"Some other error occured while trying to remove recipe {rid} from list {lid}"}), 400
