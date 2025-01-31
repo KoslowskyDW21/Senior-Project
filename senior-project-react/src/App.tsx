@@ -22,6 +22,7 @@ import CreateChallenge from "./components/CreateChallenge";
 import DeletedAccount from "./components/DeletedAccount";
 import AdminPage from "./components/AdminPage";
 import Groups from "./components/Groups";
+import GroupDetails from "./components/GroupDetails";
 
 function App() {
   // this allows cookies to be sent with all requests in the app
@@ -85,6 +86,7 @@ function App() {
 
           {/* groups */}
           <Route path="/groups" element={<Groups />} />
+          <Route path="/groups/:id" element={<GroupDetails />} />
 
           {/* admin */}
           <Route path="/admin" element={<AdminPage />} />
