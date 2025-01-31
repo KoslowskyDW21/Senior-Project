@@ -1,5 +1,5 @@
 from __future__ import annotations
-from app.login import bp
+from app.groups import bp
 from app.models import *
 from app.login.loginforms import RegisterForm, LoginForm
 from datetime import datetime
