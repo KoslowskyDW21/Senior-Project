@@ -27,14 +27,19 @@ def get_recipe_list_name(rid):
 @bp.post('/add-recipe-to-list')
 @login_required
 def add_recipe_to_list():
+    print(request)
     rid = request.form.get("rid")
     lid = request.form.get("lid")
     print(f"Adding recipe {rid} to list {lid}")
     # create a new RecipeRecipeList and add it to the db
     try:
+        already_exists = RecipeRecipeList.query.filter_by(recipe_id=rid, recipe_list_id=lid).first()
+        print(already_exists)
+        if (already_exists):
+            return jsonify({"message": "duplicate recipe"}), 200
         rrl = RecipeRecipeList(recipe_id=rid, recipe_list_id=lid)
         db.session.add(rrl)
         db.session.commit()
-        return jsonify({"message": "Recipe added to list successfully"}), 200
+        return jsonify({"message": "Recipe added to list successfully!"}), 200
     except:
         return jsonify({"message": "Failed to add recipe to list"}), 400

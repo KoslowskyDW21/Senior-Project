@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button, FormControl, MenuItem, Select, InputLabel } from "@mui/material"; //matui components
+import { Button, FormControl, MenuItem, Select, InputLabel, Box, SelectChangeEvent } from "@mui/material"; //matui components
 import axios, { AxiosError } from "axios";
 
 interface Recipe {
@@ -60,7 +60,7 @@ const IndividualRecipe: React.FC = () => {
     const [ recipe_name, setRecipe_name ] = React.useState<String>();
     const [ current_user, setCurrent_user ] = React.useState<User>();
     const [ message, setMessage ] = React.useState("");
-    const [ lid, setLid ] = React.useState();
+    const [ lid, setLid ] = React.useState('');
     const [ recipeLists, setRecipeLists ] = React.useState<RecipeList[]>([]);
     const [ steps, setSteps ] = React.useState<Step[]>([]);
     const { id } = useParams<{ id: string }>();
@@ -77,21 +77,22 @@ const IndividualRecipe: React.FC = () => {
         navigate(`/recipes/completed/${id}`);
     }
 
-    const handleAddRecipeToList = async (lid: number) => {
-        console.log(`Trying to add this recipe to list number ${lid} `);
+    const handleAddRecipeToList = async (event: SelectChangeEvent) => {
+        if (id == undefined) {
+            return;
+        }
+        console.log(`Trying to add this recipe to list number ${event.target.value} `);
         const formData = new FormData();
         formData.append("rid", id.toString());
-        formData.append("lid", lid.toString());
+        formData.append("lid", event.target.value); // event.target.value is lid
         try {
             const response = await axios.post(
-                "http://127.0.0.1:5000/recipe_lists/add-recipe-to-list/", formData,
+                "http://127.0.0.1:5000/recipe_lists/add-recipe-to-list", formData,
                  { headers: { "Content-Type": "multipart/form-data"} }
             );
             const data: AddRecipeToListResponse = response.data;
             setMessage(data.message);
-            if (data.message === "Recipe added to list successfully!") {
-            console.log("Reicpe added successfully"); // TODO: replace with flashed message
-            }
+            console.log(data.message);
         } catch (error) {
             const axiosError = error as AxiosError;
                   if (axiosError.response && axiosError.response.data) {
@@ -147,6 +148,7 @@ const IndividualRecipe: React.FC = () => {
     React.useEffect(() => {
         getRecipeName();
         getCurrentUser();
+        getRecipeLists();
         getSteps();
     }, []);
 
@@ -168,6 +170,7 @@ const IndividualRecipe: React.FC = () => {
                 Complete
             </Button>
 
+            <Box sx={{ minWidth: 240, maxWidth: 512 }}>
             <FormControl fullWidth>
             <InputLabel id="demo-simple-select-label">Add to a list</InputLabel>
             <Select
@@ -175,7 +178,7 @@ const IndividualRecipe: React.FC = () => {
                 id="demo-simple-select"
                 label="Add to a list"
                 value={lid}
-                onChange={handleAddRecipeToList(lid)}
+                onChange={handleAddRecipeToList}
             >
 
                 {recipeLists.map((recipeList) => (
@@ -184,6 +187,7 @@ const IndividualRecipe: React.FC = () => {
 
             </Select>
             </FormControl>
+            </Box>
 
             {steps.map((step) => (
                 <Step recipe_id={step.recipe_id} step_number={step.step_number} step_description={step.step_description} />
