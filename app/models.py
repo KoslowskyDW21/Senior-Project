@@ -160,6 +160,8 @@ class UserCuisinePreference(db.Model):
 class UserGroup(db.Model):
     __tablename__ = 'UserGroup'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(255), nullable=False)
+    creator = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
     image = db.Column(db.Text)
     description = db.Column(db.Text, nullable=False)
     is_public = db.Column(db.Boolean, nullable=False)
@@ -167,6 +169,8 @@ class UserGroup(db.Model):
     def to_json(self):
         return {
             "id": self.id,
+            "name": self.name,
+            "creator": self.creator,
             "image": self.image,
             "description": self.description,
             "is_public": self.is_public,
