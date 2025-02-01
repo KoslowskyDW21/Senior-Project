@@ -2,7 +2,7 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button, Grid2, Card, CardActionArea, CardHeader, CardMedia } from "@mui/material"; //matui components
 import { Star, StarBorder } from "@mui/icons-material"
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 interface Recipe {
     id: number;
@@ -16,6 +16,10 @@ interface RecipeList {
     id: number;
     name: string;
     belongs_to: number;
+}
+
+interface RemoveRecipeFromListResponse {
+  message: string;
 }
 
 // @ts-expect-error
@@ -78,14 +82,44 @@ function Difficulty({ difficulty }) {
 }
 
 // @ts-expect-error
-function Recipe({ id, name, difficulty, image }) {
-    const navigate = useNavigate(); //for navigation
-    id = id.toString(); // hacky insurance against mistakes
-  
-    const handleGoToRecipe = async () => {
-      console.log(`Navigating to recipe page of recipe with id=${id}`);
-      navigate(`/recipes/${id}`);
+function Recipe({ id, name, difficulty, image, lid }) {
+  const [ message, setMessage ] = React.useState<String>();
+  const navigate = useNavigate(); //for navigation
+  id = id.toString(); // hacky insurance against mistakes
+
+  const handleGoToRecipe = async () => {
+    console.log(`Navigating to recipe page of recipe with id=${id}`);
+    navigate(`/recipes/${id}`);
+  }
+
+  const handleRemoveRecipeFromList = async () => {
+    if (id == undefined) {
+      return;
     }
+    console.log(`Trying to remove recipe ${id} from this list`);
+    const formData = new FormData();
+    formData.append("rid", id.toString());
+    formData.append("lid", lid);
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/recipe_lists/remove-recipe-from-list",
+        formData,
+        {headers: {"Content-Type": "multipart/form-data"} }
+      );
+      const data: RemoveRecipeFromListResponse = response.data;
+      setMessage(data.message);
+      console.log(data.message);
+      navigate(`/recipe-list/${lid}`); //TODO: won't force reload page
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response && axiosError.response.data) {
+        const errorData = axiosError.response.data as RemoveRecipeFromListResponse
+        setMessage(errorData.message);
+      } else {
+        setMessage("An unknown error occurred--how spooky");
+      }
+    }
+  }
   
     return (
         <>
@@ -103,7 +137,12 @@ function Recipe({ id, name, difficulty, image }) {
             />
             </CardActionArea>
         </Card>
-        <Button variant="outlined" color="error">Delete</Button>
+        <Button variant="outlined"
+         color="error"
+          onClick={handleRemoveRecipeFromList}
+          >
+            Delete
+          </Button>
         </>
     );
   }
@@ -118,10 +157,6 @@ const RecipeLists: React.FC = () => {
     const handleGoToRecipeLists = async () => {
         console.log("Navigating to all recipe lists page");
         navigate(`/recipe-lists/`);
-    }
-
-    const handleRemoveRecipeFromList = async () => {
-        // TODO: implement
     }
 
     const getResponse = async () => {
@@ -155,19 +190,11 @@ const RecipeLists: React.FC = () => {
         <>
             <h1>{recipe_list.name}</h1>
 
-            {/* Implements a single-column view of recipes in list (GROSS) */}
-            {/* {recipes.map((recipe) => (
-          <div key={recipe.id}>
-            <button><img src={recipe.image} width = "100" onClick={() => navigate(`/recipes/${recipe.id}`)} alt={recipe.recipe_name} /></button>
-            <p> {recipe.recipe_name}</p>
-          </div> 
-          ))} */}
-
           {/* Implements a grid view of recipes */}
           <Grid2 container spacing={3}>
             {recipes.map((recipe) => (
                 <Grid2 size={4} key={recipe.id}>
-                    <Recipe id={recipe.id} name={recipe.recipe_name} difficulty={recipe.difficulty} image={recipe.image} />
+                    <Recipe id={recipe.id} name={recipe.recipe_name} difficulty={recipe.difficulty} image={recipe.image} lid={id} />
                 </Grid2>
             ))}
           </Grid2>

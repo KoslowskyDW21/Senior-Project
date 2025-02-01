@@ -95,12 +95,12 @@ const IndividualRecipe: React.FC = () => {
             console.log(data.message);
         } catch (error) {
             const axiosError = error as AxiosError;
-                  if (axiosError.response && axiosError.response.data) {
-                    const errorData = axiosError.response.data as AddRecipeToListResponse;
-                    setMessage(errorData.message);
-                  } else {
-                    setMessage("An unknown error occurred");
-                  }
+            if (axiosError.response && axiosError.response.data) {
+                const errorData = axiosError.response.data as AddRecipeToListResponse;
+                setMessage(errorData.message);
+            } else {
+                setMessage("An unknown error occurred");
+            }
         }
     }
 
