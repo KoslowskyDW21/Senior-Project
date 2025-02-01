@@ -143,6 +143,10 @@ const Recipes: React.FC = () => {
     navigate(`/groups`);
   }
 
+  const handleGoToSettings = async () => {
+    navigate('/settings')
+  }
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -203,7 +207,8 @@ const Recipes: React.FC = () => {
         onClose={handleClose}
       >
         <MenuItem onClick={handleGoToProfile}>Profile</MenuItem>
-        <MenuItem onClick={handleGoToChallenges}>Challenges</MenuItem>
+        <MenuItem onClick={handleGoToSettings}>Settings</MenuItem>
+        <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem>
 
       </Menu>
       <Button
@@ -219,13 +224,6 @@ const Recipes: React.FC = () => {
         color="primary"
       >
         Achievements
-      </Button>
-      <Button
-        onClick={handleGoToRecipeLists}
-        variant="contained"
-        color="primary"
-      >
-        Recipe Lists
       </Button>
       <Button
         onClick={handleGoToGroups}
