@@ -28,7 +28,7 @@ def create_app(config=Config):
     with app.app_context():
         # UNCOMMENT (and get rid of pass) TO REPOPULATE DATABASE
         # populate_database()
-        # create_dummy_groups()
+        #create_dummy_groups()
         pass
         
 
@@ -163,27 +163,80 @@ def switch_category_and_youtube_url():
 def create_dummy_groups():
     dummy_groups = [
         UserGroup(
-            creator=1,
-            name="Group 1",
-            image="static/uploads/group1.jpg",
-            description="This is the first dummy group.",
+            creator=2,
+            name="Group 10",
+            description="Test",
             is_public=True,
             num_reports=0
         ),
         UserGroup(
-            creator=1,
-            name="Group 2",
-            image="static/uploads/group2.jpg",
-            description="This is the second dummy group.",
+            creator=2,
+            name="Group 11",
+            description="Test",
             is_public=False,
             num_reports=0
         ),
         UserGroup(
-            creator=1,
-            name="Group 3",
-            image="static/uploads/group3.jpg",
-            description="This is the third dummy group.",
+            creator=2,
+            name="Group 12",
+            description="Test",
+            is_public=False,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 13",
+            description="Test",
             is_public=True,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 14",
+            description="Test",
+            is_public=False,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 15",
+            description="Test",
+            is_public=False,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 16",
+            description="Test",
+            is_public=True,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 17",
+            description="Test",
+            is_public=False,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 18",
+            description="Test",
+            is_public=False,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 19",
+            description="Test",
+            is_public=True,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 20",
+            description="Test",
+            is_public=False,
             num_reports=0
         )
     ]
