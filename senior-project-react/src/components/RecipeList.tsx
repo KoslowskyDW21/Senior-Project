@@ -93,6 +93,11 @@ const RecipeLists: React.FC = () => {
         navigate(`/recipe-lists/`);
     }
 
+    const handleGoToRecipes = async () => {
+      console.log("Navigating to all recipes page");
+      navigate(`/recipes`);
+    }
+
     const getRecipesAndThisList = async () => {
         try {
             const response = await axios.get(`http://127.0.0.1:5000/recipe_lists/recipes/${id}`);
@@ -197,6 +202,16 @@ function Recipe({ rid, name, difficulty, image, lid }) {
                 </Grid2>
             ))}
           </Grid2>
+            <br />
+            <br />
+            <Button
+                onClick={handleGoToRecipes}
+                variant="contained"
+                color="primary"
+            >
+                Find Recipes
+            </Button>
+            <br />
             <br />
             <Button
                 onClick={handleGoToRecipeLists}

@@ -38,6 +38,20 @@ def create_list():
                         "recipe_list_id": recipeList.id}), 201
     except Exception as e:
         return jsonify({"message": f"RecipeList creation failed: {str(e)}", "recipe_list_id": -1}), 500
+    
+@bp.post('/deletelist')
+def delete_list():
+    lid = request.form.get('lid')
+    if not lid:
+        return jsonify({"message": "List ID must be specified"}), 400
+    try:
+        recipeList = RecipeList.query.filter_by(id=lid).first()
+        if recipeList:
+            db.session.delete(recipeList)
+            db.session.commit()
+            return jsonify({"message": f"List {lid} deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"message": f"RecipeList {lid} failed to be deleted: {str(e)}"}), 500
         
 
 @bp.post('/add-recipe-to-list')
