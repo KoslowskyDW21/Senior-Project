@@ -81,24 +81,51 @@ function Difficulty({ difficulty }) {
   }
 }
 
+const RecipeLists: React.FC = () => {
+    const [ recipes, setRecipes ] = React.useState<Recipe[]>([]);
+    const [ recipe_list, setRecipe_list ] = React.useState<RecipeList>();
+    const { id } = useParams<{ id: string }>();
+
+    const navigate = useNavigate();
+
+    const handleGoToRecipeLists = async () => {
+        console.log("Navigating to all recipe lists page");
+        navigate(`/recipe-lists/`);
+    }
+
+    const getRecipesAndThisList = async () => {
+        try {
+            const response = await axios.get(`http://127.0.0.1:5000/recipe_lists/recipes/${id}`);
+            const resp_recipes: Recipe[] = response.data;
+            console.log(resp_recipes);
+            setRecipes(resp_recipes);
+            const response2 = await axios.get(`http://127.0.0.1:5000/recipe_lists/info/${id}`);
+            const resp_recipe_list: RecipeList = response2.data;
+            console.log(resp_recipe_list);
+            setRecipe_list(resp_recipe_list);
+        } catch (error) {
+            console.error("Error fetching recipeList: ", error);
+        }
+    };
+
 // @ts-expect-error
-function Recipe({ id, name, difficulty, image, lid }) {
+function Recipe({ rid, name, difficulty, image, lid }) {
   const [ message, setMessage ] = React.useState<String>();
   const navigate = useNavigate(); //for navigation
-  id = id.toString(); // hacky insurance against mistakes
+  rid = rid.toString(); // hacky insurance against mistakes
 
   const handleGoToRecipe = async () => {
-    console.log(`Navigating to recipe page of recipe with id=${id}`);
-    navigate(`/recipes/${id}`);
+    console.log(`Navigating to recipe page of recipe with id=${rid}`);
+    navigate(`/recipes/${rid}`);
   }
 
   const handleRemoveRecipeFromList = async () => {
-    if (id == undefined) {
+    if (rid == undefined) {
       return;
     }
-    console.log(`Trying to remove recipe ${id} from this list`);
+    console.log(`Trying to remove recipe ${rid} from this list`);
     const formData = new FormData();
-    formData.append("rid", id.toString());
+    formData.append("rid", rid.toString());
     formData.append("lid", lid);
     try {
       const response = await axios.post(
@@ -109,7 +136,7 @@ function Recipe({ id, name, difficulty, image, lid }) {
       const data: RemoveRecipeFromListResponse = response.data;
       setMessage(data.message);
       console.log(data.message);
-      navigate(`/recipe-list/${lid}`); //TODO: won't force reload page
+      getRecipesAndThisList();
     } catch (error) {
       const axiosError = error as AxiosError;
       if (axiosError.response && axiosError.response.data) {
@@ -145,37 +172,10 @@ function Recipe({ id, name, difficulty, image, lid }) {
           </Button>
         </>
     );
-  }
-
-const RecipeLists: React.FC = () => {
-    const [ recipes, setRecipes ] = React.useState<Recipe[]>([]);
-    const [ recipe_list, setRecipe_list ] = React.useState<RecipeList>();
-    const { id } = useParams<{ id: string }>();
-
-    const navigate = useNavigate();
-
-    const handleGoToRecipeLists = async () => {
-        console.log("Navigating to all recipe lists page");
-        navigate(`/recipe-lists/`);
-    }
-
-    const getResponse = async () => {
-        try {
-            const response = await axios.get(`http://127.0.0.1:5000/recipe_lists/recipes/${id}`);
-            const resp_recipes: Recipe[] = response.data;
-            console.log(resp_recipes);
-            setRecipes(resp_recipes);
-            const response2 = await axios.get(`http://127.0.0.1:5000/recipe_lists/info/${id}`);
-            const resp_recipe_list: RecipeList = response2.data;
-            console.log(resp_recipe_list);
-            setRecipe_list(resp_recipe_list);
-        } catch (error) {
-            console.error("Error fetching recipeList: ", error);
-        }
-    };
+  } // end of embedded Recipe component definition
 
     React.useEffect(() => {
-        getResponse();
+        getRecipesAndThisList();
     }, []);
 
     if (!recipe_list) {
@@ -194,7 +194,7 @@ const RecipeLists: React.FC = () => {
           <Grid2 container spacing={3}>
             {recipes.map((recipe) => (
                 <Grid2 size={4} key={recipe.id}>
-                    <Recipe id={recipe.id} name={recipe.recipe_name} difficulty={recipe.difficulty} image={recipe.image} lid={id} />
+                    <Recipe rid={recipe.id} name={recipe.recipe_name} difficulty={recipe.difficulty} image={recipe.image} lid={id} />
                 </Grid2>
             ))}
           </Grid2>
