@@ -23,6 +23,7 @@ import DeletedAccount from "./components/DeletedAccount";
 import AdminPage from "./components/AdminPage";
 import Groups from "./components/Groups";
 import GroupDetails from "./components/GroupDetails";
+import CreateRecipeList from "./components/CreateRecipeList";
 
 function App() {
   // this allows cookies to be sent with all requests in the app
@@ -60,6 +61,7 @@ function App() {
           {/* recipelists */}
           <Route path="/recipe-lists" element={<RecipeLists />} />
           <Route path="/recipe-lists/:id" element={<RecipeList />} />
+          <Route path="/recipe-lists/create" element={<CreateRecipeList />} />
 
           {/* profile */}
           <Route path="/profile" element={<Profile />} />

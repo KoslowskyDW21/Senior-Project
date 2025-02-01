@@ -37,7 +37,7 @@ def create_list():
         return jsonify({"message": "RecipeList created successfully",
                         "recipe_list_id": recipeList.id}), 201
     except Exception as e:
-        return jsonify({"message": f"RecipeList creation failed: {str(e)}"}), 500
+        return jsonify({"message": f"RecipeList creation failed: {str(e)}", "recipe_list_id": -1}), 500
         
 
 @bp.post('/add-recipe-to-list')
