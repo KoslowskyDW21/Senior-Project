@@ -1,7 +1,7 @@
 from __future__ import annotations
 import math
 from flask import request, jsonify, render_template, redirect, url_for, abort, flash
-from flask_login import current_user
+from flask_login import current_user, login_required
 from app.recipes import bp
 from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, db
 
@@ -94,6 +94,17 @@ def delete_recipe():
     flash('recipe deleted successfully')
     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
 
+@bp.route('/current_user/', methods=['POST'])
+@login_required
+def post_current_user():
+    if current_user is not None:
+        print(current_user.id)
+        print(current_user.profile_picture)
+        return jsonify({ "id": current_user.id,
+                        "profile_picture": current_user.profile_picture
+                         }), 200
+    return "<h1>404: user not found</h1>", 404
+
 def completionAchievements(id):
         specA = UserAchievement(achievement_id = id, user_id = current_user.id) #type:ignore
         allUserAs = UserAchievement.query.all()
@@ -120,7 +131,7 @@ def checkLevel():
 def completeCuisine(recipe):
     cid = RecipeCuisine.query.filter_by(recipe_id = recipe.id).first().cuisine_id # type: ignore
     if(UserCuisinePreference.query.filter_by(user_id = current_user.id, cuisine_id = cid).first() is None):
-        entry = UserCuisinePreference(user_id = current_user.id, cuisine_id = cid, numComplete = 1) #type: ignore
+        entry = UserCuisinePreference(user_id = current_user.id, cuisine_id = cid, numComplete = 1, userSelected = 0) #type: ignore
     else:
         entry = UserCuisinePreference.query.filter_by(user_id = current_user.id, cuisine_id = cid).first()
         entry.numComplete = entry.numComplete + 1 #type: ignore

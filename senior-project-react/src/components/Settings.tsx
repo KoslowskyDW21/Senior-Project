@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import React from "react";
-import { Button, InputLabel, Select, MenuItem, Modal, FormControl, SelectChangeEvent, Box, FormHelperText } from "@mui/material";
+import { Button, InputLabel, Select, MenuItem, Modal, FormControl, SelectChangeEvent, Box, FormHelperText, Checkbox, ListItemText } from "@mui/material";
 import { ShouldRevalidateFunction, useNavigate } from "react-router-dom";
 
 
@@ -25,6 +25,11 @@ export interface User {
   date_create: Date;
   last_logged_in: Date;
   num_reports: number;
+}
+
+interface UserCuisines {
+  cuisines: [];
+  userCuisines: [];
 }
 
 const modalStyle = {
@@ -87,17 +92,55 @@ export default function Settings() {
   const [openModal, setOpenModal] = useState(false);
   const navigate = useNavigate();
 
+  const [cuisines, setCuisines] = useState<[]>([]);
+  const [userCuisines, setUserCuisines] = useState<[]>([]);
+
+  const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
+
+
   async function loadUser() {
     await axios.get("http://127.0.0.1:5000/settings/")
       .then((response) => {
         setUser(response.data);
         setColonialFloor(user.colonial_floor);
         setColonialSide(user.colonial_side);
+        loadCuisines();
       })
       .catch((error) => {
         console.log("Could not fetch user: ", error);
       })
   }
+
+  async function loadCuisines(){
+    await axios.get("http://127.0.0.1:5000/settings/cuisines/")
+      .then((response) =>{
+        const data: UserCuisines = response.data;
+        setCuisines(data.cuisines);
+        setUserCuisines(data.userCuisines);
+      })
+      .catch((error) => {
+        console.log("Could not fetch cuisines: ", error);
+      })
+
+  }
+
+  async function updateUserCuisines(selectedIds: number[]) {
+    try {
+      const data = {
+        user_id: user.id,  
+        selected_cuisines: selectedIds,  
+      };
+      await axios.post("http://127.0.0.1:5000/settings/update_cuisines/", data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log("Cuisines updated successfully!");
+    } catch (error) {
+      console.error("Error updating cuisines: ", error);
+    }
+  }
+  
 
 
 
@@ -128,6 +171,30 @@ export default function Settings() {
   React.useEffect(() => {
     loadUser();
   }, []);
+
+
+  React.useEffect(() => {
+    const preselectedCuisines = cuisines
+      .filter(cuisine => userCuisines.some(userCuisine => userCuisine.cuisine_id === cuisine.id && userCuisine.userSelected === true))
+      .map(cuisine => cuisine.name);
+
+    setSelectedCuisines(preselectedCuisines); 
+  }, [cuisines, userCuisines]);
+
+  const handleCuisineChange = (event: SelectChangeEvent<typeof selectedCuisines>) => {
+    const selectedNames = event.target.value; 
+    const selectedIds = cuisines
+      .filter(cuisine => selectedNames.includes(cuisine.name))  
+      .map(cuisine => cuisine.id);  
+  
+    if (selectedIds.length <= 5) {
+      setSelectedCuisines(selectedNames); 
+      updateUserCuisines(selectedIds);  
+    } else {
+      alert("You can only select up to 5 cuisines.");
+    }
+  };
+  
 
   const handleFloorChange = (event: SelectChangeEvent) => {
     const newFloor = event.target.value;
@@ -231,6 +298,29 @@ export default function Settings() {
 
       <br />
       <br />
+      <FormControl variant="filled" sx={{ m: 1, minWidth: 200 }} size="small">
+        <InputLabel id="cuisine-select-label">Select Cuisine(s)</InputLabel>
+        <Select
+          labelId="cuisine-select-label"
+          multiple
+          value={selectedCuisines}
+          onChange={handleCuisineChange}
+          renderValue={(selected) => selected.join(', ')}
+          displayEmpty
+        >
+          <MenuItem value="" disabled>
+            <em>Choose a cuisine</em>
+          </MenuItem>
+          {cuisines && cuisines.map((cuisine, index) => (
+            <MenuItem key={index} value={cuisine.name}>
+              <Checkbox checked={selectedCuisines.indexOf(cuisine.name) > -1} />
+              <ListItemText primary={cuisine.name} />
+            </MenuItem>
+          ))}
+        </Select>
+        <FormHelperText>Favorite Cuisines</FormHelperText>
+      </FormControl>
+
 
       <Button
         onClick={handleOpenModal}

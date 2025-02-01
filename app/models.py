@@ -147,11 +147,13 @@ class UserCuisinePreference(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
     cuisine_id = db.Column(db.Integer, db.ForeignKey('Cuisine.id'), primary_key=True)
     numComplete = db.Column(db.Integer, nullable=False)
+    userSelected = db.Column(db.Boolean, nullable = False)
     def to_json(self):
         return {
             "user_id": self.user_id,
             "cuisine_id": self.cuisine_id,
-            "numComplete": self.numComplete
+            "numComplete": self.numComplete,
+            "userSelected": self.userSelected
 
         }
 

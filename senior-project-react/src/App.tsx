@@ -23,6 +23,7 @@ import DeletedAccount from "./components/DeletedAccount";
 import AdminPage from "./components/AdminPage";
 import Groups from "./components/Groups";
 import GroupDetails from "./components/GroupDetails";
+import CreateRecipeList from "./components/CreateRecipeList";
 
 function App() {
   // this allows cookies to be sent with all requests in the app
@@ -52,20 +53,15 @@ function App() {
           <Route path="/registration-two" element={<RegistrationTwo />} />
           <Route path="/registration-three" element={<RegistrationThree />} />
 
-          {/* Recipes page */}
+          {/* recipes */}
           <Route path="/recipes" element={<Recipes />} />
-
-          {/* Individual recipe page */}
           <Route path="/recipes/:id" element={<IndividualRecipe />} />
-
-          {/* Complted recipe page */}
           <Route path="/recipes/completed/:id" element={<CompletedRecipe />} />
 
-          {/* RecipeLists page (list of RecipeLists) */}
+          {/* recipelists */}
           <Route path="/recipe-lists" element={<RecipeLists />} />
-
-          {/* RecipeList page (individual RecipeList) */}
-          <Route path="/recipe-list/:id" element={<RecipeList />} />
+          <Route path="/recipe-lists/:id" element={<RecipeList />} />
+          <Route path="/recipe-lists/create" element={<CreateRecipeList />} />
 
           {/* profile */}
           <Route path="/profile" element={<Profile />} />
