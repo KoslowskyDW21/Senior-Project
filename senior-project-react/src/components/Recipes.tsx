@@ -209,30 +209,9 @@ const Recipes: React.FC = () => {
         <MenuItem onClick={handleGoToProfile}>Profile</MenuItem>
         <MenuItem onClick={handleGoToSettings}>Settings</MenuItem>
         <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem>
+        <MenuItem onClick={handleGoToAchievements}>Achievements</MenuItem>
 
       </Menu>
-      <Button
-        onClick={handleGoToChallenges}
-        variant="contained"
-        color="primary"
-      >
-        Challenges
-      </Button>
-      <Button
-        onClick={handleGoToAchievements}
-        variant="contained"
-        color="primary"
-      >
-        Achievements
-      </Button>
-      <Button
-        onClick={handleGoToGroups}
-        variant="contained"
-        color="primary"
-      >
-        Groups
-      </Button>
-
       <h1>Welcome to the Recipes Page!</h1>
 
       <Grid container spacing={3}>
@@ -242,6 +221,29 @@ const Recipes: React.FC = () => {
           </Grid>
         ))}
       </Grid>
+
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        display: 'flex',
+        justifyContent: 'space-around',
+        padding: '10px',
+        backgroundColor: '#fff',
+        boxShadow: '0px -2px 5px rgba(0, 0, 0, 0.1)',
+        zIndex: 1000,
+      }}>
+        <Button variant ="contained"  color="default" sx={{ flex: 1 }}>
+          Recipes
+        </Button>
+        <Button onClick={handleGoToChallenges} variant="contained" color="primary" sx={{ flex: 1 }}>
+          Challenges
+        </Button>
+        <Button onClick={handleGoToGroups} variant="contained" color="primary" sx={{ flex: 1 }}>
+          Groups
+        </Button>
+      </div>
     </div>
   );
 };
