@@ -1,5 +1,5 @@
 import React from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 import {
     Button,
@@ -13,6 +13,10 @@ interface RecipeList {
     id: number;
     name: string;
     belongs_to: number;
+}
+
+interface RecipeListDeletionResponse {
+    message: string;
 }
 
 interface User {
@@ -36,6 +40,7 @@ interface User {
 const RecipeLists: React.FC = () => {
     const [ currentUserId, setCurrentUserId ] = React.useState<string | null>(null);
     const [ recipeLists, setRecipeLists ] = React.useState<RecipeList[]>([]);
+    const [ message, setMessage ] = React.useState<String>("");
     const navigate = useNavigate();
 
     const handleGoToRecipes = async () => {
@@ -81,7 +86,31 @@ const RecipeLists: React.FC = () => {
             navigate(`/recipe-lists/${lid}`);
         }
         const handleDeleteList = async () => {
-            // TODO: implement
+            if (lid == undefined) {
+                return;
+            }
+            console.log(`Deleting recipe list ${lid}`);
+            const formData = new FormData();
+            formData.append("lid", lid);
+            try {
+                const response = await axios.post(
+                    "http://127.0.0.1:5000/recipe_lists/deletelist",
+                    formData,
+                    { headers: {"Content-Type": "multipart/form-data"} }
+                );
+                const data: RecipeListDeletionResponse = response.data;
+                setMessage(data.message);
+                console.log(message);
+                getResponse(); // reload RecipeList list
+            } catch (error) {
+                const axiosError = error as AxiosError;
+                if (axiosError.response && axiosError.response.data) {
+                    const errorData = axiosError.response.data as RecipeListDeletionResponse;
+                    setMessage(errorData.message);
+                } else {
+                    setMessage("An unknown error occured");
+                }
+            }
         }
         return (
             <>
@@ -96,6 +125,15 @@ const RecipeLists: React.FC = () => {
                     >
                         View List
                     </Button>
+                    <br />
+                    <br />
+                    <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={handleDeleteList}
+                    >
+                        Delete List
+                    </Button>
                     </CardContent>
                 </Card>
             </>
@@ -108,7 +146,7 @@ const RecipeLists: React.FC = () => {
 
     return (
         <>
-        <Typography variant="h5" gutterBottom>RecipeLists of user with id={currentUserId}</Typography>
+        <Typography variant="h5" gutterBottom>My Recipe Lists</Typography>
         <Grid2 container spacing={2}>
             {recipeLists.map((recipeList) => (
                 <Grid2 xs={12} sm={6} md={4} key={recipeList.id}>
