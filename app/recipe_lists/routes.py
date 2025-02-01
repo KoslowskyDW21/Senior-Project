@@ -24,6 +24,22 @@ def get_recipe_list_name(rid):
     recipe_list = RecipeList.query.filter_by(id=rid).first()
     return jsonify(recipe_list.to_json())
 
+@bp.post('/createlist')
+def create_list():
+    name = request.form.get("name")
+    print(f"Creating a new RecipeList with name {name}")
+    if not name:
+        return jsonify({"message": "name must be specified"}), 400
+    try:
+        recipeList = RecipeList(name=name, belongs_to=current_user.id)
+        db.session.add(recipeList)
+        db.session.commit()
+        return jsonify({"message": "RecipeList created successfully",
+                        "recipe_list_id": recipeList.id}), 201
+    except Exception as e:
+        return jsonify({"message": f"RecipeList creation failed: {str(e)}"}), 500
+        
+
 @bp.post('/add-recipe-to-list')
 @login_required
 def add_recipe_to_list():

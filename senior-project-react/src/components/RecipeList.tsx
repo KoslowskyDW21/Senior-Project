@@ -111,7 +111,6 @@ const RecipeLists: React.FC = () => {
 // @ts-expect-error
 function Recipe({ rid, name, difficulty, image, lid }) {
   const [ message, setMessage ] = React.useState<String>();
-  const navigate = useNavigate(); //for navigation
   rid = rid.toString(); // hacky insurance against mistakes
 
   const handleGoToRecipe = async () => {

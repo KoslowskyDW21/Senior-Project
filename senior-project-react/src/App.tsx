@@ -52,20 +52,14 @@ function App() {
           <Route path="/registration-two" element={<RegistrationTwo />} />
           <Route path="/registration-three" element={<RegistrationThree />} />
 
-          {/* Recipes page */}
+          {/* recipes */}
           <Route path="/recipes" element={<Recipes />} />
-
-          {/* Individual recipe page */}
           <Route path="/recipes/:id" element={<IndividualRecipe />} />
-
-          {/* Complted recipe page */}
           <Route path="/recipes/completed/:id" element={<CompletedRecipe />} />
 
-          {/* RecipeLists page (list of RecipeLists) */}
+          {/* recipelists */}
           <Route path="/recipe-lists" element={<RecipeLists />} />
-
-          {/* RecipeList page (individual RecipeList) */}
-          <Route path="/recipe-list/:id" element={<RecipeList />} />
+          <Route path="/recipe-lists/:id" element={<RecipeList />} />
 
           {/* profile */}
           <Route path="/profile" element={<Profile />} />
