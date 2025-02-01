@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // React Router for nav
-import { Button, Card, CardHeader, CardMedia, CardActionArea } from "@mui/material"; //matui components
+import { Button, Card, CardHeader, CardMedia, CardActionArea, Menu, MenuItem, IconButton, Avatar} from "@mui/material"; //matui components
 import Grid from "@mui/material/Grid2";
 import { Star, StarBorder } from "@mui/icons-material"
+import PersonIcon from '@mui/icons-material/Person';
 
 interface Recipe {
   id: number;
@@ -15,21 +16,7 @@ interface Recipe {
 }
 
 interface User {
-  "id": string,
-  "fname": string,
-  "lname": string,
-  "email_address": string,
-  "username": string,
-  "profile_picture": string,
-  "xp_points": number,
-  "user_level": number,
-  "is_admin": boolean,
-  "num_recipes_completed": number,
-  "colonial_floor": string,
-  "colonial_side": string,
-  "date_created": string,
-  "last_logged_in": string,
-  "num_reports": number,
+  profile_picture: string,
 }
 
 // @ts-expect-error
@@ -131,7 +118,9 @@ function createRecipe(recipe: Recipe) {
 
 const Recipes: React.FC = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [ current_user, setCurrent_user ] = React.useState<User>();
+
+  const[profile_picture, setProfile_picture] = useState<string>();
+
   const navigate = useNavigate();
 
   const handleGoToProfile = async () => {
@@ -154,16 +143,29 @@ const Recipes: React.FC = () => {
     navigate(`/groups`);
   }
 
-//   const getCurrentUser = async () => {
-//     console.log("Getting FULL JSON of current user");
-//     try {
-//         const response = await axios.post(`http://127.0.0.1:5000/profile/current_user`);
-//         const data: User = response.data;
-//         setCurrent_user(data);
-//     } catch (error) {
-//         console.error("Error fetching recipe: ", error);
-//     }
-// }
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget); 
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  
+
+
+   const getCurrentUser = async () => {
+     try {
+         const response = await axios.post(`http://127.0.0.1:5000/profile/get_profile_pic/`);
+         const data: User = response.data;
+         setProfile_picture(data.profile_picture)
+         console.log(profile_picture)
+     } catch (error) {
+         console.error("Error fetching user: ", error);
+     }
+ }
 
   async function loadRecipes() {
     try {
@@ -177,18 +179,33 @@ const Recipes: React.FC = () => {
   }
 
   React.useEffect(() => {
+    getCurrentUser();
     loadRecipes();
   }, []);
 
   return (
     <div>
-      <Button
-        onClick={handleGoToProfile}
-        variant="contained"
-        color="primary"
+        <IconButton
+          onClick={handleClick}
+          style={{ position: "absolute", top: 16, right: 16 }}
+        >
+        {profile_picture ? (
+          <Avatar alt="Profile Picture" src={profile_picture} sx={{ width: 50, height: 50 }} />
+        ) : (
+          <Avatar sx={{ width: 50, height: 50, backgroundColor: "gray" }}>
+            <PersonIcon sx={{ color: "white" }} />
+          </Avatar>
+        )}
+        </IconButton>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
       >
-        Profile
-      </Button>
+        <MenuItem onClick={handleGoToProfile}>Profile</MenuItem>
+        <MenuItem onClick={handleGoToChallenges}>Challenges</MenuItem>
+
+      </Menu>
       <Button
         onClick={handleGoToChallenges}
         variant="contained"
@@ -219,7 +236,6 @@ const Recipes: React.FC = () => {
       </Button>
 
       <h1>Welcome to the Recipes Page!</h1>
-      <h4>Here are your delicious recipes.</h4>
 
       <Grid container spacing={3}>
         {recipes.map((recipe) => (
