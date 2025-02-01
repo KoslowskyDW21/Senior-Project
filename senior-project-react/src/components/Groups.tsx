@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {
@@ -24,6 +24,7 @@ const Groups: React.FC = () => {
   const [groups, setGroups] = useState<UserGroup[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(true);
   const navigate = useNavigate();
 
   const fetchGroups = async (page: number) => {
@@ -32,24 +33,38 @@ const Groups: React.FC = () => {
         params: { page, per_page: 10 },
       });
       if (response.status === 200) {
-        setGroups((prevGroups) => [...prevGroups, ...response.data]);
+        const newGroups = response.data;
+        setGroups((prevGroups) => [...prevGroups, ...newGroups]);
+        setHasMore(newGroups.length > 0);
       }
     } catch (error) {
       console.error("Error fetching groups:", error);
     }
   };
 
-  const loadMoreGroups = () => {
+  const loadMoreGroups = useCallback(() => {
+    if (loading || !hasMore) return;
     setLoading(true);
     fetchGroups(page).then(() => {
       setPage((prevPage) => prevPage + 1);
       setLoading(false);
     });
-  };
+  }, [loading, hasMore, page]);
 
   useEffect(() => {
     loadMoreGroups();
   }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 500) {
+        loadMoreGroups();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loadMoreGroups]);
 
   return (
     <Container>

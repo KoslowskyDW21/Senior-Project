@@ -57,14 +57,6 @@ const GroupDetails: React.FC = () => {
         </Typography>
       </Box>
       <Card>
-        {group.image && (
-          <CardMedia
-            component="img"
-            height="300"
-            image={`http://127.0.0.1:5000/${group.image}`}
-            alt={group.name}
-          />
-        )}
         <CardContent>
           <Typography variant="h6" component="div" gutterBottom>
             Description
