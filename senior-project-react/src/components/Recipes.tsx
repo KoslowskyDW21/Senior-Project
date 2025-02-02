@@ -291,7 +291,7 @@ const Recipes: React.FC = () => {
         boxShadow: '0px -2px 5px rgba(0, 0, 0, 0.1)',
         zIndex: 1000,
       }}>
-        <Button variant ="outlined" color="default" sx={{ flex: 1 }}>
+        <Button variant ="outlined" color="primary" sx={{ flex: 1 }}>
           Recipes
         </Button>
         <Button onClick={handleGoToChallenges} variant="contained" color="primary" sx={{ flex: 1 }}>
