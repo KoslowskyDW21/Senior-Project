@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@azure/msal-browser": "^4.0.2",
+    "@azure/msal-react": "^3.0.2"
+  }
+}

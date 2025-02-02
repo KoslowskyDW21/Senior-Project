@@ -1,9 +1,19 @@
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import React from "react";
-import { Button, InputLabel, Select, MenuItem, Modal, FormControl, SelectChangeEvent, Box, FormHelperText } from "@mui/material";
+import {
+  Button,
+  InputLabel,
+  Select,
+  MenuItem,
+  Modal,
+  FormControl,
+  SelectChangeEvent,
+  Box,
+  FormHelperText,
+} from "@mui/material";
 import { ShouldRevalidateFunction, useNavigate } from "react-router-dom";
-
+import { useMsal } from "@azure/msal-react";
 
 interface DeleteResponse {
   message: string;
@@ -16,10 +26,10 @@ export interface User {
   email_address: string;
   username: string;
   profile_picture: string;
-  xp_points: number
-  user_level: number
-  is_admin: boolean
-  num_recipes_completed: number
+  xp_points: number;
+  user_level: number;
+  is_admin: boolean;
+  num_recipes_completed: number;
   colonial_floor: string;
   colonial_side: string;
   date_create: Date;
@@ -42,20 +52,21 @@ const modalStyle = {
 };
 
 async function updateUser(floor: string, side: string) {
-  await axios.post("http://127.0.0.1:5000/settings/update/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      "floor": 3,
-      "side": "men's"
+  await axios
+    .post("http://127.0.0.1:5000/settings/update/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        floor: 3,
+        side: "men's",
+      }),
     })
-  })
     .then()
     .catch((error) => {
       console.log("Could not update user: ", error);
-    })
+    });
 
   // TODO: Insert the correct URL
   // try {
@@ -88,7 +99,8 @@ export default function Settings() {
   const navigate = useNavigate();
 
   async function loadUser() {
-    await axios.get("http://127.0.0.1:5000/settings/")
+    await axios
+      .get("http://127.0.0.1:5000/settings/")
       .then((response) => {
         setUser(response.data);
         setColonialFloor(user.colonial_floor);
@@ -96,14 +108,14 @@ export default function Settings() {
       })
       .catch((error) => {
         console.log("Could not fetch user: ", error);
-      })
+      });
   }
-
-
 
   async function handleDelete() {
     try {
-      const response = await axios.post("http://127.0.0.1:5000/settings/api/delete_account/");
+      const response = await axios.post(
+        "http://127.0.0.1:5000/settings/api/delete_account/"
+      );
       console.log("Response:");
       console.log(response);
       const data: DeleteResponse = response.data;
@@ -174,6 +186,36 @@ export default function Settings() {
     setOpenModal(false);
   };
 
+  const { instance } = useMsal();
+
+  const handleLogout = async () => {
+    try {
+      // Get access token
+      const response = await instance.acquireTokenSilent({
+        scopes: ["User.Read"],
+      });
+
+      const token = response.idToken;
+
+      await axios.post(
+        "http://127.0.0.1:5000/api/logout/",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      instance.logoutPopup().then(() => {
+        // After logoutRedirect, navigate to the homepage
+        navigate("/");
+      });
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
+
   return (
     <>
       <h1>Settings Page</h1>
@@ -239,6 +281,9 @@ export default function Settings() {
         fullWidth
       >
         DELETE ACCOUNT
+      </Button>
+      <Button variant="contained" color="primary" onClick={handleLogout}>
+        Logout
       </Button>
       <Modal open={openModal} onClose={handleCloseModal}>
         <Box sx={modalStyle}>

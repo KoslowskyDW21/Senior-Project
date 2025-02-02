@@ -1,88 +1,79 @@
 import { useState } from "react"; //react
-import axios, { AxiosError } from "axios";
-import { Button, TextField, Container, Box } from "@mui/material"; //matui components
-import { useNavigate, Link } from "react-router-dom"; // React Router for nav
+import axios from "axios";
+import { Button, Container } from "@mui/material"; //matui components
+import { useNavigate } from "react-router-dom"; // React Router for nav
+import { useMsal } from "@azure/msal-react";
+import * as msal from "@azure/msal-browser";
 
 interface LoginResponse {
   message: string;
 }
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const navigate = useNavigate(); //for navigation
+  const navigate = useNavigate();
+  const { instance } = useMsal();
 
-  const handleLogin = async () => {
-    //TODO: handle the request to the DB
-    console.log("Logging in with", email);
-
-    const loginData = {
-      email,
-      password,
-    };
-
+  const handleSSOLogin = async () => {
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:5000/api/login/",
-        loginData,
+      // Check if there is already an active account
+      let activeAccount = instance.getActiveAccount();
+
+      if (!activeAccount) {
+        const allAccounts = instance.getAllAccounts();
+
+        if (allAccounts.length > 0) {
+          instance.setActiveAccount(allAccounts[0]); // Set active account only once
+          activeAccount = instance.getActiveAccount();
+        } else {
+          // No existing account, proceed with login
+          const loginResponse = await instance.loginPopup();
+          instance.setActiveAccount(instance.getAllAccounts()[0]); // Set new account
+          activeAccount = instance.getActiveAccount();
+        }
+      }
+
+      // Retrieve the ID token from the active session
+      const idToken = (
+        await instance.acquireTokenSilent({
+          scopes: ["openid", "profile", "email"],
+          account: activeAccount || undefined,
+        })
+      ).idToken;
+
+      console.log("ID Token:", idToken);
+
+      // Send ID Token to backend
+      const response = await axios.post<LoginResponse>(
+        "http://127.0.0.1:5000/api/login/sso/",
+        { token: idToken },
         { withCredentials: true }
       );
 
-      const data: LoginResponse = response.data;
-      setMessage(data.message);
-      if (data.message === "Login successful") {
+      console.log("Backend Response:", response.data);
+
+      if (response.data.message === "Login successful") {
+        console.log("MSAL Account Info:", instance.getAccount);
+        console.log("All MSAL Accounts:", instance.getAllAccounts());
         navigate("/recipes");
       }
     } catch (error) {
-      // Type the error as AxiosError to get response structure
-      const axiosError = error as AxiosError;
-
-      // Check if response and response.data exist and are of type LoginResponse
-      if (axiosError.response && axiosError.response.data) {
-        const errorData = axiosError.response.data as LoginResponse; // Type assertion
-        setMessage(errorData.message); // Error message from server
-      } else {
-        setMessage("An unknown error occurred");
-      }
+      console.error("SSO Login Failed", error);
     }
   };
-
-  const handleRegistration = async () => {};
-
   return (
     <Container>
       <h2>Let Them Cook</h2>
-      <TextField
-        label="Email"
-        variant="outlined"
-        fullWidth
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        margin="normal"
-      />
-      <TextField
-        label="Password"
-        variant="outlined"
-        fullWidth
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        type="password"
-        margin="normal"
-      />
-      <Box sx={{ width: "100%", textAlign: "left", mt: 0.1 }}>
-        <Link to="/registration-one">Don't have an account?</Link>
-      </Box>
+      <br></br>
       <Button
-        onClick={handleLogin}
+        onClick={() => handleSSOLogin()}
         variant="contained"
         color="primary"
         fullWidth
         sx={{ mt: 4 }}
       >
-        Login
+        Login with SSO
       </Button>
-      {message && <p>{message}</p>}
     </Container>
   );
 };

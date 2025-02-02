@@ -6,6 +6,8 @@ import RegistrationOne from "./components/RegistrationOne";
 import RegistrationTwo from "./components/RegistrationTwo";
 import RegistrationThree from "./components/RegistrationThree";
 import IndividualRecipe from "./components/Recipe";
+import { MsalProvider } from "@azure/msal-react";
+import { msalConfig } from "./authConfig";
 import Recipes from "./components/Recipes";
 import RecipeList from "./components/RecipeList";
 import RecipeLists from "./components/RecipeLists";
@@ -21,6 +23,8 @@ import CompletedRecipe from "./components/CompletedRecipe";
 import CreateChallenge from "./components/CreateChallenge";
 import DeletedAccount from "./components/DeletedAccount";
 import AdminPage from "./components/AdminPage";
+import { PublicClientApplication } from "@azure/msal-browser";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   // this allows cookies to be sent with all requests in the app
@@ -38,55 +42,73 @@ function App() {
   //   fetchAPI();
   // }, []);
 
+  const msalInstance = new PublicClientApplication(msalConfig);
+
   return (
-    <Router>
-      <RegistrationProvider>
-        <Routes>
-          {/* Default route (login page) */}
-          <Route path="/" element={<Login />} />
+    <MsalProvider instance={msalInstance}>
+      <Router>
+        <RegistrationProvider>
+          <Routes>
+            {/* Default route (login page) */}
+            <Route path="/" element={<Login />} />
 
-          {/* Registration pages */}
-          <Route path="/registration-one" element={<RegistrationOne />} />
-          <Route path="/registration-two" element={<RegistrationTwo />} />
-          <Route path="/registration-three" element={<RegistrationThree />} />
+            {/* Protected Routes for Authenticated Users */}
+            <Route element={<ProtectedRoute />}>
+              {/* Registration pages */}
+              <Route path="/registration-one" element={<RegistrationOne />} />
+              <Route path="/registration-two" element={<RegistrationTwo />} />
+              <Route
+                path="/registration-three"
+                element={<RegistrationThree />}
+              />
 
-          {/* Recipes page */}
-          <Route path="/recipes" element={<Recipes />} />
+              {/* Recipes page */}
+              <Route path="/recipes" element={<Recipes />} />
 
-          {/* Individual recipe page */}
-          <Route path="/recipes/:id" element={<IndividualRecipe />} />
+              {/* Individual recipe page */}
+              <Route path="/recipes/:id" element={<IndividualRecipe />} />
 
-          {/* Complted recipe page */}
-          <Route path="/recipes/completed/:id" element={<CompletedRecipe />} />
+              {/* Complted recipe page */}
+              <Route
+                path="/recipes/completed/:id"
+                element={<CompletedRecipe />}
+              />
 
-          {/* RecipeLists page (list of RecipeLists) */}
-          <Route path="/recipe-lists" element={<RecipeLists />} />
+              {/* RecipeLists page (list of RecipeLists) */}
+              <Route path="/recipe-lists" element={<RecipeLists />} />
 
-          {/* RecipeList page (individual RecipeList) */}
-          <Route path="/recipe-list/:id" element={<RecipeList />} />
+              {/* RecipeList page (individual RecipeList) */}
+              <Route path="/recipe-list/:id" element={<RecipeList />} />
 
-          {/* profile */}
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/profile/:id" element={<Profile />} />
+              {/* profile */}
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/:id" element={<Profile />} />
 
-          {/* challenges */}
-          <Route path="/challenges" element={<Challenges />} />
-          <Route path="/challenges/:id" element={<ChallengeDetail />} />
-          <Route path="/challenges/create" element={<CreateChallenge />} />
+              {/* challenges */}
+              <Route path="/challenges" element={<Challenges />} />
+              <Route path="/challenges/:id" element={<ChallengeDetail />} />
+              <Route path="/challenges/create" element={<CreateChallenge />} />
 
-          {/*achievements*/}
-          <Route path="/achievements" element={<Achievements />} />
-          <Route path="/achievements/:id" element={<AchievementSpecific />} />
+              {/*achievements*/}
+              <Route path="/achievements" element={<Achievements />} />
+              <Route
+                path="/achievements/:id"
+                element={<AchievementSpecific />}
+              />
 
-          {/* settings */}
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/deleted_account" element={<DeletedAccount />} />
+              {/* settings */}
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/deleted_account" element={<DeletedAccount />} />
 
-          {/* admin */}
-          <Route path="/admin" element={<AdminPage />} />
-        </Routes>
-      </RegistrationProvider>
-    </Router>
+              {/* admin */}
+              <Route path="/admin" element={<AdminPage />} />
+            </Route>
+            {/* Redirect unknown routes to login */}
+            <Route path="/" element={<Login />} />
+          </Routes>
+        </RegistrationProvider>
+      </Router>
+    </MsalProvider>
   );
 }
 

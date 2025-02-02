@@ -22,7 +22,6 @@ def create_app(config=Config):
     login_manager.login_view = 'login.get_login' # type: ignore
     login_manager.session_protection = "strong"
 
-    
 
     db.init_app(app)
     with app.app_context():

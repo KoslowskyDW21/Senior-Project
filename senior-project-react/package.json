@@ -11,13 +11,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@azure/msal-browser": "^4.0.2",
+    "@azure/msal-react": "^3.0.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.4.1",
     "@mui/material": "^6.4.1",
     "argon2": "^0.41.1",
     "axios": "^1.7.9",
+    "bootstrap": "^5.3.3",
     "react": "^18.3.1",
+    "react-bootstrap": "^2.10.9",
     "react-confetti": "^6.2.2",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.1.3"
