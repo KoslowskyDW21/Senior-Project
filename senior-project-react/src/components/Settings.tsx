@@ -1,8 +1,9 @@
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import React from "react";
-import { Button, InputLabel, Select, MenuItem, Modal, FormControl, SelectChangeEvent, Box, FormHelperText, Checkbox, ListItemText } from "@mui/material";
+import { Button, InputLabel, Select, MenuItem, Modal, FormControl, SelectChangeEvent, Box, FormHelperText, Checkbox, ListItemText, IconButton } from "@mui/material";
 import { ShouldRevalidateFunction, useNavigate } from "react-router-dom";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 
 interface DeleteResponse {
@@ -220,6 +221,12 @@ export default function Settings() {
 
   return (
     <>
+    <IconButton
+        onClick={() => navigate(-1)}
+        style={{ position: "absolute", top: 30, left: 30 }} 
+      >
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+      </IconButton>
       <h1>Settings Page</h1>
       <p>
         Name: {user.fname} {user.lname}

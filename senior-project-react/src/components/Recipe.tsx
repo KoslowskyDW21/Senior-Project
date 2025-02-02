@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button, FormControl, MenuItem, Select, InputLabel, Box, SelectChangeEvent } from "@mui/material"; //matui components
+import { Button, FormControl, MenuItem, Select, InputLabel, Box, SelectChangeEvent, IconButton } from "@mui/material"; //matui components
 import axios, { AxiosError } from "axios";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface Recipe {
     "id": string,
@@ -154,6 +155,12 @@ const IndividualRecipe: React.FC = () => {
 
     return (
         <>
+        <   IconButton
+                onClick={() => navigate(-1)}
+                style={{ position: "absolute", top: 30, left: 30 }} 
+            >
+            <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+            </IconButton>
             <h1>{recipe_name}</h1>
             <Button
                 onClick={handleGoToRecipes}

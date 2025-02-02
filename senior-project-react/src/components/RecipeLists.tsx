@@ -1,12 +1,14 @@
 import React from "react";
 import axios, { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {
     Button,
     Card,
     CardContent,
     Typography,
     Grid2,
+    IconButton,
 } from "@mui/material";
 
 interface RecipeList {
@@ -146,6 +148,12 @@ const RecipeLists: React.FC = () => {
 
     return (
         <>
+        <IconButton
+                onClick={() => navigate(-1)}
+                style={{ position: "absolute", top: 30, left: 30 }} 
+            >
+            <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+            </IconButton>
         <Typography variant="h5" gutterBottom>My Recipe Lists</Typography>
         <Grid2 container spacing={2}>
             {recipeLists.map((recipeList) => (
