@@ -2,10 +2,11 @@ import React from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Modal from '@mui/material/Modal';
-import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Typography from "@mui/material/Typography";
 import { useMediaQuery } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Button, IconButton} from "@mui/material";
 
 interface Achievement {
   id: number;
@@ -71,6 +72,12 @@ const Achievements: React.FC = () => {
 
   return (
     <div>
+      <IconButton
+        onClick={() => navigate(-1)}
+        style={{ position: "absolute", top: 30, left: 30 }} 
+      >
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+      </IconButton>
       <h1>Achievements</h1>
       <div
         style={{

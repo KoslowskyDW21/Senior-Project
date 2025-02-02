@@ -2,9 +2,10 @@ import axios, { AxiosError } from "axios";
 import FolderIcon from "@mui/icons-material/Folder";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, ChangeEvent, useRef } from "react";
-import { Avatar, Box, Button, Modal, Typography, LinearProgress, Tooltip } from "@mui/material"; 
+import { Avatar, Box, Button, Modal, Typography, LinearProgress, Tooltip, IconButton } from "@mui/material"; 
 import Achievement from "./Achievements"; 
 import Confetti from "react-confetti"; 
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface ProfileResponse {
   lname: string;
@@ -126,6 +127,10 @@ const Profile: React.FC = () => {
     navigate(`/recipes`);
   };
 
+  const handleGoToAchievements = () => {
+    navigate("/achievements"); 
+  };
+
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
@@ -237,6 +242,12 @@ const Profile: React.FC = () => {
 
   return (
     <>
+    <IconButton
+        onClick={() => navigate(-1)}
+        style={{ position: "absolute", top: 30, left: 30}} 
+      >
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+      </IconButton>
       {confettiVisible && (
         <Confetti
           width={window.innerWidth}
@@ -285,19 +296,13 @@ const Profile: React.FC = () => {
           </Button>
         </Box>
       </Modal>
-      <Button onClick={handleGoToRecipes} variant="contained" color="primary">
-        Recipes
-      </Button>
-      <Button onClick={() => navigate("/settings")} variant="contained" color="primary">
-        Settings
-      </Button>
 
       <Box sx={{ width: "100%", textAlign: "center", marginBottom: 2, marginTop: 5 }}>
         <Typography variant="h6" gutterBottom>
           Level {user_level}
         </Typography>
         <Tooltip
-          title={`XP: ${xp_points}`}
+          title={`XP: ${xp_points} / ${xpForNextLevel}`}
           open={hovered}
           placement="top"
           onOpen={() => setHovered(true)}
@@ -317,51 +322,72 @@ const Profile: React.FC = () => {
           </Box>
         </Tooltip>
       </Box>
-
       <p>Recent Achievements:</p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
-        {achievements.map((achievement: Achievement) => (
-          <div key={achievement.id}>
-            <button onClick={() => handleOpenAchievementModal(achievement)}>
-              <img
-                src={achievement.image}
-                width="100"
-                alt={achievement.title}
-              />
-            </button>
-            <p>{achievement.title}</p>
-          </div>
-        ))}
+<div style={{ display: "flex", gap: "16px", alignItems: "flex-start", flexWrap: "wrap" }}>
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: `repeat(${Math.min(3, achievements.length)}, 1fr)`, 
+      gap: "16px",
+      flexGrow: 1,
+      width: "auto", // Ensure the grid only takes up as much space as needed
+    }}
+  >
+    {achievements.slice(0, 3).map((achievement: Achievement) => (
+      <div key={achievement.id}>
+        <button onClick={() => handleOpenAchievementModal(achievement)}>
+          <img
+            src={achievement.image}
+            width="100"
+            alt={achievement.title}
+          />
+        </button>
+        <p>{achievement.title}</p>
       </div>
+    ))}
+  </div>
 
-      <Modal
-        open={openAchievementModal}
-        onClose={handleCloseAchievementModal}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={modalStyle}>
-          {selectedAchievement && (
-            <>
-              <Typography id="modal-modal-title" variant="h6" component="h2">
-                {selectedAchievement.title}
-              </Typography>
-              <Typography id="modal-image">
-                <Box>
-                  <img
-                    src={selectedAchievement.image}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    alt={selectedAchievement.title}
-                  />
-                </Box>
-              </Typography>
-              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                {selectedAchievement.description}
-              </Typography>
+  <Button
+    onClick={handleGoToAchievements}
+    sx={{
+      alignSelf: "center", 
+      whiteSpace: "nowrap", 
+      minWidth: "max-content", 
+      marginLeft: "16px", 
+    }}
+  >
+    See More
+  </Button>
+</div>
+  
+    <Modal
+      open={openAchievementModal}
+      onClose={handleCloseAchievementModal}
+       aria-labelledby="modal-modal-title"
+      aria-describedby="modal-modal-description"
+     >
+      <Box sx={modalStyle}>
+        {selectedAchievement && (
+          <>
+             <Typography id="modal-modal-title" variant="h6" component="h2">
+              {selectedAchievement.title}
+            </Typography>
+            <Typography id="modal-image">
+              <Box>
+                <img
+                  src={selectedAchievement.image}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                   alt={selectedAchievement.title}
+                />
+              </Box>
+            </Typography>
+            <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+              {selectedAchievement.description}
+            </Typography>
             </>
-          )}
-        </Box>
-      </Modal>
+        )}
+      </Box>
+     </Modal>
     </>
   );
 };
