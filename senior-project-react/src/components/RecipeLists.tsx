@@ -163,14 +163,6 @@ const RecipeLists: React.FC = () => {
             ))}
         </Grid2>
         <br />
-        <Button
-            onClick={handleGoToRecipes}
-            variant="contained"
-            color="primary"
-        >
-            Recipes
-        </Button>
-        <br />
         <br />
         <Button
             onClick={handleGoToRecipeCreation}

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Container, TextField } from "@mui/material";
+import { Button, Container, TextField, IconButton } from "@mui/material";
 import axios, { AxiosError } from "axios";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface CreateRecipeListResponse {
     message: string;
@@ -45,6 +46,12 @@ const CreateRecipeList: React.FC = () => {
 
     return (
         <Container>
+            <   IconButton
+                onClick={() => navigate(-1)}
+                style={{ position: "absolute", top: 30, left: 30 }} 
+            >
+            <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+            </IconButton>
             <h2>Create a New Recipe List</h2>
             <TextField
                 label="Name"
