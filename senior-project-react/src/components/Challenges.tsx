@@ -99,7 +99,15 @@ const Challenges: React.FC = () => {
     setSearchQuery(event.target.value);
   };
 
-  const filteredChallenges = challenges.filter((challenge) =>
+  const filteredMyChallenges = myChallenges.filter((challenge) =>
+    challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredJoinedChallenges = joinedChallenges.filter((challenge) =>
+    challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredAllChallenges = challenges.filter((challenge) =>
     challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -132,7 +140,7 @@ const Challenges: React.FC = () => {
         />
       </Box>
 
-      {myChallenges.length > 0 && (
+      {filteredMyChallenges.length > 0 && (
         <Box mt={4}>
           <Typography variant="h5" gutterBottom>
             My Challenges
@@ -144,7 +152,7 @@ const Challenges: React.FC = () => {
             }}
           >
             <Grid container spacing={2}>
-              {myChallenges.map((challenge) => (
+              {filteredMyChallenges.map((challenge) => (
                 <Grid item xs={12} sm={6} md={4} key={challenge.id}>
                   <Card onClick={() => navigate(`/challenges/${challenge.id}`)} sx={{ cursor: "pointer" }}>
                     {challenge.image && (
@@ -165,7 +173,7 @@ const Challenges: React.FC = () => {
               ))}
             </Grid>
           </Box>
-          {myChallenges.length > 3 && (
+          {filteredMyChallenges.length > 3 && (
             <Box textAlign="center" mt={2}>
               <Button
                 variant="contained"
@@ -178,7 +186,7 @@ const Challenges: React.FC = () => {
         </Box>
       )}
 
-      {joinedChallenges.length > 0 && (
+      {filteredJoinedChallenges.length > 0 && (
         <Box mt={4}>
           <Typography variant="h5" gutterBottom>
             Joined Challenges
@@ -190,7 +198,7 @@ const Challenges: React.FC = () => {
             }}
           >
             <Grid container spacing={2}>
-              {joinedChallenges.map((challenge) => (
+              {filteredJoinedChallenges.map((challenge) => (
                 <Grid item xs={12} sm={6} md={4} key={challenge.id}>
                   <Card onClick={() => navigate(`/challenges/${challenge.id}`)} sx={{ cursor: "pointer" }}>
                     {challenge.image && (
@@ -221,7 +229,7 @@ const Challenges: React.FC = () => {
               ))}
             </Grid>
           </Box>
-          {joinedChallenges.length > 3 && (
+          {filteredJoinedChallenges.length > 3 && (
             <Box textAlign="center" mt={2}>
               <Button
                 variant="contained"
@@ -239,7 +247,7 @@ const Challenges: React.FC = () => {
           All Challenges
         </Typography>
         <Grid container spacing={2}>
-          {filteredChallenges.map((challenge) => (
+          {filteredAllChallenges.map((challenge) => (
             <Grid item xs={12} sm={6} md={4} key={challenge.id}>
               <Card onClick={() => navigate(`/challenges/${challenge.id}`)} sx={{ cursor: "pointer" }}>
                 {challenge.image && (
