@@ -56,6 +56,8 @@ const Login = () => {
         console.log("MSAL Account Info:", instance.getAccount);
         console.log("All MSAL Accounts:", instance.getAllAccounts());
         navigate("/recipes");
+      } else if (response.data.message === "User not registered") {
+        navigate("/registration-one");
       }
     } catch (error) {
       console.error("SSO Login Failed", error);

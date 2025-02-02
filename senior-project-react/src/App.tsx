@@ -55,25 +55,28 @@ function App() {
             {/* Default route (login page) */}
             <Route path="/" element={<Login />} />
 
+            {/* Registration pages */}
+            <Route path="/registration-one" element={<RegistrationOne />} />
+            <Route path="/registration-two" element={<RegistrationTwo />} />
+            <Route path="/registration-three" element={<RegistrationThree />} />
+
             {/* Protected Routes for Authenticated Users */}
             <Route element={<ProtectedRoute />}>
-              {/* Registration pages */}
-              <Route path="/registration-one" element={<RegistrationOne />} />
-              <Route path="/registration-two" element={<RegistrationTwo />} />
+              {/* recipes */}
+              <Route path="/recipes" element={<Recipes />} />
+              <Route path="/recipes/:id" element={<IndividualRecipe />} />
               <Route
-                path="/registration-three"
-                element={<RegistrationThree />}
+                path="/recipes/completed/:id"
+                element={<CompletedRecipe />}
               />
 
-          {/* recipes */}
-          <Route path="/recipes" element={<Recipes />} />
-          <Route path="/recipes/:id" element={<IndividualRecipe />} />
-          <Route path="/recipes/completed/:id" element={<CompletedRecipe />} />
-
-          {/* recipelists */}
-          <Route path="/recipe-lists" element={<RecipeLists />} />
-          <Route path="/recipe-lists/:id" element={<RecipeList />} />
-          <Route path="/recipe-lists/create" element={<CreateRecipeList />} />
+              {/* recipelists */}
+              <Route path="/recipe-lists" element={<RecipeLists />} />
+              <Route path="/recipe-lists/:id" element={<RecipeList />} />
+              <Route
+                path="/recipe-lists/create"
+                element={<CreateRecipeList />}
+              />
 
               {/* profile */}
               <Route path="/profile" element={<Profile />} />
@@ -95,9 +98,9 @@ function App() {
               <Route path="/settings" element={<Settings />} />
               <Route path="/deleted_account" element={<DeletedAccount />} />
 
-          {/* groups */}
-          <Route path="/groups" element={<Groups />} />
-          <Route path="/groups/:id" element={<GroupDetails />} />
+              {/* groups */}
+              <Route path="/groups" element={<Groups />} />
+              <Route path="/groups/:id" element={<GroupDetails />} />
 
               {/* admin */}
               <Route path="/admin" element={<AdminPage />} />

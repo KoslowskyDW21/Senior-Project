@@ -23,8 +23,6 @@ interface RegistrationData {
   lname: string;
   username: string;
   email: string;
-  password: string;
-  confirmPassword: string;
   colonial_floor: Floor;
   colonial_side: Side;
   profile_picture: File | null;
@@ -67,8 +65,6 @@ const defaultData: RegistrationData = {
   lname: "",
   username: "",
   email: "",
-  password: "",
-  confirmPassword: "",
   colonial_floor: Floor.None,
   colonial_side: Side.None,
   profile_picture: null,

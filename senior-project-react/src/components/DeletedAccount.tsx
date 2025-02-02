@@ -5,7 +5,7 @@ export default function DeletedAccount() {
   const navigate = useNavigate();
   const handleNext = async () => {
     console.log("Navigating to create account");
-    navigate("/registration-one");
+    navigate("/");
   };
 
   return (

@@ -30,7 +30,6 @@ class User(UserMixin, db.Model):
     date_created = db.Column(db.DateTime, nullable=False)
     last_logged_in = db.Column(db.DateTime)
     num_reports = db.Column(db.Integer, nullable=False)
-    password_hash = db.Column(db.LargeBinary, nullable=False)
     hasLeveled = db.Column(db.Boolean, nullable = False)
 
     @property

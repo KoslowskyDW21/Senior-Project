@@ -94,7 +94,6 @@ def add_dietary_restrictions(restriction_ids, user_id):
 def api_register():
     username = request.form.get('username')
     email = request.form.get('email')
-    password = request.form.get('password') 
     fname = request.form.get('fname')
     lname = request.form.get('lname')
     colonial_floor = request.form.get('colonial_floor')
@@ -122,7 +121,6 @@ def api_register():
         email_address=email,  
         colonial_floor=colonial_floor,
         colonial_side=colonial_side,
-        password=password,
         xp_points=0,
         is_admin=False,
         num_recipes_completed=0,
@@ -159,11 +157,22 @@ def api_register():
         restriction_ids = [restriction_mapping[restriction] for restriction in dietary_restriction_list if restriction in restriction_mapping]
 
         add_dietary_restrictions(restriction_ids, new_user.id)
+    
+    user = User.query.filter_by(email_address=email).first()
 
-    return jsonify({
+    print(user)
+
+    if user:
+        login_user(user, remember=True)
+        return jsonify({
         "message": "Registration successful",
         "profile_picture_url": profile_picture_url
     }), 200
+    else:
+        print("User not registered")
+        return jsonify({"message": "User not registered"}), 200
+
+ 
 
 
 @bp.route('/api/validate_user/', methods=['POST']) 
@@ -204,17 +213,59 @@ def sso_login():
         return jsonify({"message": "Invalid token"}), 401
 
     email = decoded_token.get("preferred_username")  #email
-    print(email)
+    name = decoded_token.get("name")
+    if name:
+        name = name.split()
+        fname = name[1].replace(",", "")
+        lname = name[0]
+    else:
+        return jsonify({"message": "Invalid token: No name found"}), 401
+
+
     if not email:
         return jsonify({"message": "Invalid token: No email found"}), 401
 
     user = User.query.filter_by(email_address=email).first()
 
+    print(user)
+
     if user:
         login_user(user, remember=True)
         return jsonify({"message": "Login successful", "user_id": user.id}), 200
     else:
-        return jsonify({"message": "User not registered"}), 403
+        print("User not registered")
+        return jsonify({"message": "User not registered"}), 200
+
+@bp.route('/api/get_initial_data/', methods=['POST'])
+def get_initial_data():
+    data = request.json
+    token = data.get("token")
+
+    if not token:
+        return jsonify({"message": "No token provided"}), 400
+
+    decoded_token = validate_jwt(token)
+    if not decoded_token:
+        return jsonify({"message": "Invalid token"}), 401
+
+    email = decoded_token.get("preferred_username")  #email
+    name = decoded_token.get("name")
+    if name:
+        name = name.split()
+        fname = name[1]
+        lname = name[0]
+    else:
+        return jsonify({"message": "Invalid token: No name found"}), 401
+
+    if not email:
+        return jsonify({"message": "Invalid token: No email found"}), 401
+    
+    return jsonify({
+        "email": email,
+        "fname": fname,
+        "lname": lname
+    }), 200
+
 
 @bp.route('/api/logout/', methods=['POST'])
 def logout():
