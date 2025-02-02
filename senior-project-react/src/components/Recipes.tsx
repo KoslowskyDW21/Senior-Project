@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // React Router for nav
-import { Button, Card, CardHeader, CardMedia, CardActionArea, Menu, MenuItem, IconButton, Avatar} from "@mui/material"; //matui components
+import { Button, Card, CardHeader, CardMedia, CardActionArea, Menu, MenuItem, IconButton, Avatar, Box} from "@mui/material"; //matui components
 import Grid from "@mui/material/Grid2";
 import { Star, StarBorder } from "@mui/icons-material"
 import PersonIcon from '@mui/icons-material/Person';
@@ -189,31 +189,88 @@ const Recipes: React.FC = () => {
 
   return (
     <div>
-        <IconButton
-          onClick={handleClick}
-          style={{ position: "absolute", top: 16, right: 16 }}
-        >
-        {profile_picture ? (
-          <Avatar alt="Profile Picture" src={profile_picture} sx={{ width: 50, height: 50 }} />
-        ) : (
-          <Avatar sx={{ width: 50, height: 50, backgroundColor: "gray" }}>
-            <PersonIcon sx={{ color: "white" }} />
-          </Avatar>
-        )}
-        </IconButton>
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-      >
-        <MenuItem onClick={handleGoToProfile}>Profile</MenuItem>
-        <MenuItem onClick={handleGoToSettings}>Settings</MenuItem>
-        <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem>
-        <MenuItem onClick={handleGoToAchievements}>Achievements</MenuItem>
+      <Box
+  sx={{
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    display: 'flex',
+    alignItems: 'center',
+    padding: '10px 20px',
+    backgroundColor: '#fff',
+    boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)',
+    zIndex: 1000,
+    height: '100px', 
+  }}
+>
+    <Box
+    sx={{
+      width: 70,
+      height: 70,
+      backgroundColor: 'lightgray',  
+      borderRadius: 2,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: '20px',  
+    }}
+  >
+    <img 
+      src="http://127.0.0.1:5000/static\uploads\2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg"
+      alt="Image"
+      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+    />
+    </Box>
 
-      </Menu>
-      <h1>Welcome to the Recipes Page!</h1>
-
+    <Box
+    sx={{
+      flexGrow: 1,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      fontSize: '24px',
+      fontWeight: 'bold',
+      textAlign: 'center',
+    }}
+  >
+    <h1>Recipes</h1>
+    </Box>
+    <IconButton
+    onClick={handleClick}
+    style={{ position: "relative", top: 8, right: 8 }}
+  >
+    {profile_picture ? (
+      <Avatar alt="Profile Picture" src={profile_picture} sx={{ width: 70, height: 70, border: '1px solid #000' }} />
+    ) : (
+      <Avatar sx={{ width: 70, height: 70, backgroundColor: "gray" }}>
+        <PersonIcon sx={{ color: "white" }} />
+      </Avatar>
+    )}
+    </IconButton>
+    <Menu
+    anchorEl={anchorEl}
+    open={Boolean(anchorEl)}
+    onClose={handleClose}
+  >
+    <MenuItem onClick={handleGoToProfile}>Profile</MenuItem>
+    <MenuItem onClick={handleGoToSettings}>Settings</MenuItem>
+    <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem>
+    <MenuItem onClick={handleGoToAchievements}>Achievements</MenuItem>
+  </Menu>
+  </Box>
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      fontSize: '24px',
+      fontWeight: 'bold',
+      textAlign: 'center',
+    }}
+    >
+      <h1></h1>
+  </Box>
       <Grid container spacing={3}>
         {recipes.map((recipe) => (
           <Grid size={4} key={recipe.id}>
@@ -234,7 +291,7 @@ const Recipes: React.FC = () => {
         boxShadow: '0px -2px 5px rgba(0, 0, 0, 0.1)',
         zIndex: 1000,
       }}>
-        <Button variant ="contained"  color="default" sx={{ flex: 1 }}>
+        <Button variant ="outlined" color="default" sx={{ flex: 1 }}>
           Recipes
         </Button>
         <Button onClick={handleGoToChallenges} variant="contained" color="primary" sx={{ flex: 1 }}>

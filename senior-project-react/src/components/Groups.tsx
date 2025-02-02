@@ -95,7 +95,7 @@ const Groups: React.FC = () => {
               <Button onClick={handleGoToChallenges} variant="contained" color="primary" sx={{ flex: 1 }}>
                 Challenges
               </Button>
-              <Button  variant="contained" color="default " sx={{ flex: 1 }}>
+              <Button  variant ="outlined" color="default " sx={{ flex: 1 }}>
                 Groups
               </Button>
             </div>
