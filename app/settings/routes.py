@@ -37,8 +37,6 @@ def post_update_user():
         print(f"Error updating user: {e}")
         return jsonify({"message": "Error updating user"}), 500
 
-
-
 def delete_user_and_dependencies(session, current_user_id):
     try:
         session.query(UserBlock).filter(
