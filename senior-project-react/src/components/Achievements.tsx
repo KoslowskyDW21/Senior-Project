@@ -2,10 +2,16 @@ import React from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Modal from '@mui/material/Modal';
-import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Typography from "@mui/material/Typography";
 import { useMediaQuery } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Button, IconButton} from "@mui/material";
+import CheckIcon from '@mui/icons-material/Check';
+import DoneIcon from '@mui/icons-material/Done';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+import { CheckCircle } from "@mui/icons-material";
+
 
 interface Achievement {
   id: number;
@@ -71,6 +77,12 @@ const Achievements: React.FC = () => {
 
   return (
     <div>
+      <IconButton
+        onClick={() => navigate(-1)}
+        style={{ position: "absolute", top: 30, left: 30 }} 
+      >
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+      </IconButton>
       <h1>Achievements</h1>
       <div
         style={{
@@ -109,6 +121,40 @@ const Achievements: React.FC = () => {
                     }}
                   />
                 )}
+                {isSpecial && (
+                <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                      width: 40,  
+                      height: 40, 
+                    }}
+                >
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  backgroundColor: 'white',  
+                }}
+              />
+              <CheckCircle
+                style={{
+                  position: 'absolute',
+                  top: '50%',  
+                  right: '50%', 
+                  transform: 'translate(50%, -50%)',
+                  color: 'green',
+                  fontSize: 50, 
+                }}
+              />
+            </Box>
+          )}
+
                 <Typography variant="body1" style={{ marginTop: '8px' }}>
                   {achievement.title}
                 </Typography>

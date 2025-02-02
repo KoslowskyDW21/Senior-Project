@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios, { AxiosError } from "axios";
-import { Button, TextField, Container } from "@mui/material";
+import { Button, TextField, Container, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Box } from "@mui/material";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface CreateChallengeResponse {
   message: string;
@@ -13,9 +15,10 @@ const CreateChallenge: React.FC = () => {
   const [difficulty, setDifficulty] = useState("1");
   const [theme, setTheme] = useState("");
   const [location, setLocation] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [endTime, setEndTime] = useState<Date | null>(null);
   const [message, setMessage] = useState("");
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
 
   const handleCreateChallenge = async () => {
     const formData = new FormData();
@@ -26,8 +29,8 @@ const CreateChallenge: React.FC = () => {
     formData.append("difficulty", difficulty);
     formData.append("theme", theme);
     formData.append("location", location);
-    formData.append("start_time", startTime);
-    formData.append("end_time", endTime);
+    formData.append("start_time", startTime ? startTime.toISOString() : "");
+    formData.append("end_time", endTime ? endTime.toISOString() : "");
 
     try {
       const response = await axios.post(
@@ -46,12 +49,16 @@ const CreateChallenge: React.FC = () => {
     } catch (error) {
       const axiosError = error as AxiosError;
       if (axiosError.response && axiosError.response.data) {
-        const errorData = axiosError.response.data as CreateChallengeResponse;
-        setMessage(errorData.message);
+        setMessage(axiosError.response.data.message);
       } else {
         setMessage("An unknown error occurred");
       }
+      setErrorDialogOpen(true);
     }
+  };
+
+  const handleCloseErrorDialog = () => {
+    setErrorDialogOpen(false);
   };
 
   return (
@@ -81,24 +88,26 @@ const CreateChallenge: React.FC = () => {
         onChange={(e) => setLocation(e.target.value)}
         margin="normal"
       />
-      <TextField
-        label="Start Time"
-        variant="outlined"
-        fullWidth
-        type="datetime-local"
-        value={startTime}
-        onChange={(e) => setStartTime(e.target.value)}
-        margin="normal"
-      />
-      <TextField
-        label="End Time"
-        variant="outlined"
-        fullWidth
-        type="datetime-local"
-        value={endTime}
-        onChange={(e) => setEndTime(e.target.value)}
-        margin="normal"
-      />
+      <Box mt={2}>
+        <Typography>Start Time</Typography>
+        <DatePicker
+          selected={startTime}
+          onChange={(date: Date) => setStartTime(date)}
+          showTimeSelect
+          dateFormat="Pp"
+          className="form-control"
+        />
+      </Box>
+      <Box mt={2}>
+        <Typography>End Time</Typography>
+        <DatePicker
+          selected={endTime}
+          onChange={(date: Date) => setEndTime(date)}
+          showTimeSelect
+          dateFormat="Pp"
+          className="form-control"
+        />
+      </Box>
       <TextField
         label="Difficulty"
         variant="outlined"
@@ -107,6 +116,9 @@ const CreateChallenge: React.FC = () => {
         onChange={(e) => setDifficulty(e.target.value)}
         margin="normal"
       />
+      <Box textAlign="left" mt={2}>
+        <Typography>Select an image:</Typography>
+      </Box>
       <input
         type="file"
         accept="image/*"
@@ -121,7 +133,18 @@ const CreateChallenge: React.FC = () => {
       >
         Create Challenge
       </Button>
-      {message && <p>{message}</p>}
+
+      <Dialog open={errorDialogOpen} onClose={handleCloseErrorDialog}>
+        <DialogTitle>Error</DialogTitle>
+        <DialogContent>
+          <Typography>{message}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseErrorDialog} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

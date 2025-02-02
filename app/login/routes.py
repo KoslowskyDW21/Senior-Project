@@ -67,11 +67,6 @@ def decode_jwt_header(token):
         print(f"Error decoding JWT header: {e}")
         return None
 
-#default route just for the time being
-@bp.route('/', methods=['GET'])
-def home():
-    return jsonify({"message": "Welcome to the API!"}), 200
-
 #File storage:
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 

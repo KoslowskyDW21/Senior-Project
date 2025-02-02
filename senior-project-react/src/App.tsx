@@ -23,6 +23,9 @@ import CompletedRecipe from "./components/CompletedRecipe";
 import CreateChallenge from "./components/CreateChallenge";
 import DeletedAccount from "./components/DeletedAccount";
 import AdminPage from "./components/AdminPage";
+import Groups from "./components/Groups";
+import GroupDetails from "./components/GroupDetails";
+import CreateRecipeList from "./components/CreateRecipeList";
 import { PublicClientApplication } from "@azure/msal-browser";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -62,23 +65,15 @@ function App() {
                 element={<RegistrationThree />}
               />
 
-              {/* Recipes page */}
-              <Route path="/recipes" element={<Recipes />} />
+          {/* recipes */}
+          <Route path="/recipes" element={<Recipes />} />
+          <Route path="/recipes/:id" element={<IndividualRecipe />} />
+          <Route path="/recipes/completed/:id" element={<CompletedRecipe />} />
 
-              {/* Individual recipe page */}
-              <Route path="/recipes/:id" element={<IndividualRecipe />} />
-
-              {/* Complted recipe page */}
-              <Route
-                path="/recipes/completed/:id"
-                element={<CompletedRecipe />}
-              />
-
-              {/* RecipeLists page (list of RecipeLists) */}
-              <Route path="/recipe-lists" element={<RecipeLists />} />
-
-              {/* RecipeList page (individual RecipeList) */}
-              <Route path="/recipe-list/:id" element={<RecipeList />} />
+          {/* recipelists */}
+          <Route path="/recipe-lists" element={<RecipeLists />} />
+          <Route path="/recipe-lists/:id" element={<RecipeList />} />
+          <Route path="/recipe-lists/create" element={<CreateRecipeList />} />
 
               {/* profile */}
               <Route path="/profile" element={<Profile />} />
@@ -99,6 +94,10 @@ function App() {
               {/* settings */}
               <Route path="/settings" element={<Settings />} />
               <Route path="/deleted_account" element={<DeletedAccount />} />
+
+          {/* groups */}
+          <Route path="/groups" element={<Groups />} />
+          <Route path="/groups/:id" element={<GroupDetails />} />
 
               {/* admin */}
               <Route path="/admin" element={<AdminPage />} />

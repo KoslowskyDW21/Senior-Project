@@ -1,18 +1,24 @@
 import React from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {
     Button,
     Card,
     CardContent,
     Typography,
-    Grid,
+    Grid2,
+    IconButton,
 } from "@mui/material";
 
 interface RecipeList {
     id: number;
     name: string;
     belongs_to: number;
+}
+
+interface RecipeListDeletionResponse {
+    message: string;
 }
 
 interface User {
@@ -36,6 +42,7 @@ interface User {
 const RecipeLists: React.FC = () => {
     const [ currentUserId, setCurrentUserId ] = React.useState<string | null>(null);
     const [ recipeLists, setRecipeLists ] = React.useState<RecipeList[]>([]);
+    const [ message, setMessage ] = React.useState<String>("");
     const navigate = useNavigate();
 
     const handleGoToRecipes = async () => {
@@ -43,12 +50,16 @@ const RecipeLists: React.FC = () => {
         navigate(`/recipes/`);
     }
 
+    const handleGoToRecipeCreation = async () => {
+        console.log("Navigating to create recipe list page");
+        navigate(`/recipe-lists/create`);
+    }
+
     const getCurrentUser = async () => {
         console.log("Getting FULL JSON of current user");
         try {
             const response = await axios.get(`http://127.0.0.1:5000/profile/current_user`);
             const data: User = response.data;
-            console.log(data); // TODO: remove debugging
             setCurrentUserId(data.id);
         } catch (error) {
             console.error("Error fetching recipe: ", error);
@@ -70,38 +81,102 @@ const RecipeLists: React.FC = () => {
         }
     }
 
+    // @ts-expect-error
+    function RecipeList({ lid, name, belongs_to }) {
+        const handleGoToRecipeList = async () => {
+            console.log(`Navigating to page of RecipeList ${lid}`);
+            navigate(`/recipe-lists/${lid}`);
+        }
+        const handleDeleteList = async () => {
+            if (lid == undefined) {
+                return;
+            }
+            console.log(`Deleting recipe list ${lid}`);
+            const formData = new FormData();
+            formData.append("lid", lid);
+            try {
+                const response = await axios.post(
+                    "http://127.0.0.1:5000/recipe_lists/deletelist",
+                    formData,
+                    { headers: {"Content-Type": "multipart/form-data"} }
+                );
+                const data: RecipeListDeletionResponse = response.data;
+                setMessage(data.message);
+                console.log(message);
+                getResponse(); // reload RecipeList list
+            } catch (error) {
+                const axiosError = error as AxiosError;
+                if (axiosError.response && axiosError.response.data) {
+                    const errorData = axiosError.response.data as RecipeListDeletionResponse;
+                    setMessage(errorData.message);
+                } else {
+                    setMessage("An unknown error occured");
+                }
+            }
+        }
+        return (
+            <>
+                <Card>
+                    <CardContent>
+                    <Typography variant="h6" component="div" gutterBottom>
+                        {name}
+                    </Typography>
+                    <Button
+                        variant="outlined"
+                        onClick={handleGoToRecipeList}
+                    >
+                        View List
+                    </Button>
+                    <br />
+                    <br />
+                    <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={handleDeleteList}
+                    >
+                        Delete List
+                    </Button>
+                    </CardContent>
+                </Card>
+            </>
+        )
+    }
+
     React.useEffect(() => {
         getResponse();
     }, []);
 
     return (
         <>
-        <Typography variant="h5" gutterBottom>RecipeLists of user with id={currentUserId}</Typography>
-        <Grid container spacing={2}>
+        <IconButton
+                onClick={() => navigate(-1)}
+                style={{ position: "absolute", top: 30, left: 30 }} 
+            >
+            <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+            </IconButton>
+        <Typography variant="h5" gutterBottom>My Recipe Lists</Typography>
+        <Grid2 container spacing={2}>
             {recipeLists.map((recipeList) => (
-                <Grid item xs={12} sm={6} md={4} key={recipeList.id}>
-                    <Card>
-                        <CardContent>
-                        <Typography variant="h6" component="div" gutterBottom>
-                            {recipeList.name}
-                        </Typography>
-                        <Button
-                            variant="outlined"
-                            onClick={() => navigate(`/recipe-list/${recipeList.id}`)}
-                        >
-                            View List
-                        </Button>
-                        </CardContent>
-                    </Card>
-                </Grid>
+                <Grid2 xs={12} sm={6} md={4} key={recipeList.id}>
+                    <RecipeList lid={recipeList.id} name={recipeList.name} belongs_to={recipeList.belongs_to}/>
+                </Grid2>
             ))}
-        </Grid>
+        </Grid2>
+        <br />
         <Button
             onClick={handleGoToRecipes}
             variant="contained"
             color="primary"
         >
             Recipes
+        </Button>
+        <br />
+        <br />
+        <Button
+            onClick={handleGoToRecipeCreation}
+            variant="outlined"
+        >
+            Create new list
         </Button>
         </>
     );

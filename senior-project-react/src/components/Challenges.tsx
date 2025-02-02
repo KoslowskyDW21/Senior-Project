@@ -95,11 +95,28 @@ const Challenges: React.FC = () => {
     }
   };
 
+  const handleGoToRecipes = async () => {
+    navigate(`/recipes`);
+  }
+
+  const handleGoToGroups = async () => {
+    navigate(`/groups`);
+  }
+
+
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
   };
 
-  const filteredChallenges = challenges.filter((challenge) =>
+  const filteredMyChallenges = myChallenges.filter((challenge) =>
+    challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredJoinedChallenges = joinedChallenges.filter((challenge) =>
+    challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredAllChallenges = challenges.filter((challenge) =>
     challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -109,6 +126,28 @@ const Challenges: React.FC = () => {
 
   return (
     <Container>
+      <div style={{
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              display: 'flex',
+              justifyContent: 'space-around',
+              padding: '10px',
+              backgroundColor: '#fff',
+              boxShadow: '0px -2px 5px rgba(0, 0, 0, 0.1)',
+              zIndex: 1000,
+            }}>
+              <Button onClick={handleGoToRecipes} variant ="contained"  color="primary" sx={{ flex: 1 }}>
+                Recipes
+              </Button>
+              <Button  variant ="outlined" color="default" sx={{ flex: 1 }}>
+                Challenges
+              </Button>
+              <Button onClick={handleGoToGroups} variant="contained" color="primary" sx={{ flex: 1 }}>
+                Groups
+              </Button>
+            </div>
       <Box mt={4} mb={2} textAlign="center">
         <Typography variant="h4" gutterBottom>
           Challenges
@@ -132,7 +171,7 @@ const Challenges: React.FC = () => {
         />
       </Box>
 
-      {myChallenges.length > 0 && (
+      {filteredMyChallenges.length > 0 && (
         <Box mt={4}>
           <Typography variant="h5" gutterBottom>
             My Challenges
@@ -144,7 +183,7 @@ const Challenges: React.FC = () => {
             }}
           >
             <Grid container spacing={2}>
-              {myChallenges.map((challenge) => (
+              {filteredMyChallenges.map((challenge) => (
                 <Grid item xs={12} sm={6} md={4} key={challenge.id}>
                   <Card onClick={() => navigate(`/challenges/${challenge.id}`)} sx={{ cursor: "pointer" }}>
                     {challenge.image && (
@@ -165,7 +204,7 @@ const Challenges: React.FC = () => {
               ))}
             </Grid>
           </Box>
-          {myChallenges.length > 3 && (
+          {filteredMyChallenges.length > 3 && (
             <Box textAlign="center" mt={2}>
               <Button
                 variant="contained"
@@ -178,7 +217,7 @@ const Challenges: React.FC = () => {
         </Box>
       )}
 
-      {joinedChallenges.length > 0 && (
+      {filteredJoinedChallenges.length > 0 && (
         <Box mt={4}>
           <Typography variant="h5" gutterBottom>
             Joined Challenges
@@ -190,7 +229,7 @@ const Challenges: React.FC = () => {
             }}
           >
             <Grid container spacing={2}>
-              {joinedChallenges.map((challenge) => (
+              {filteredJoinedChallenges.map((challenge) => (
                 <Grid item xs={12} sm={6} md={4} key={challenge.id}>
                   <Card onClick={() => navigate(`/challenges/${challenge.id}`)} sx={{ cursor: "pointer" }}>
                     {challenge.image && (
@@ -221,7 +260,7 @@ const Challenges: React.FC = () => {
               ))}
             </Grid>
           </Box>
-          {joinedChallenges.length > 3 && (
+          {filteredJoinedChallenges.length > 3 && (
             <Box textAlign="center" mt={2}>
               <Button
                 variant="contained"
@@ -239,7 +278,7 @@ const Challenges: React.FC = () => {
           All Challenges
         </Typography>
         <Grid container spacing={2}>
-          {filteredChallenges.map((challenge) => (
+          {filteredAllChallenges.map((challenge) => (
             <Grid item xs={12} sm={6} md={4} key={challenge.id}>
               <Card onClick={() => navigate(`/challenges/${challenge.id}`)} sx={{ cursor: "pointer" }}>
                 {challenge.image && (

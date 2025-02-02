@@ -1,7 +1,7 @@
 from __future__ import annotations
 import math
 from flask import request, jsonify, render_template, redirect, url_for, abort, flash
-from flask_login import current_user
+from flask_login import current_user, login_required
 from app.recipes import bp
 from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, db
 
@@ -95,9 +95,13 @@ def delete_recipe():
     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
 
 def completionAchievements(id):
-        a = UserAchievement(achievement_id = id, user_id = current_user.id) #type:ignore
-        b = UserAchievement.query.all()
-        if(a not in b):
+        specA = UserAchievement(achievement_id = id, user_id = current_user.id) #type:ignore
+        allUserAs = UserAchievement.query.all()
+        run = True
+        for a in allUserAs:
+            if(a.user_id == specA.user_id and a.achievement_id == specA.achievement_id):
+                run =  False
+        if(run):
             db.session.add(a)
             db.session.flush()
             db.session.commit()
@@ -116,7 +120,7 @@ def checkLevel():
 def completeCuisine(recipe):
     cid = RecipeCuisine.query.filter_by(recipe_id = recipe.id).first().cuisine_id # type: ignore
     if(UserCuisinePreference.query.filter_by(user_id = current_user.id, cuisine_id = cid).first() is None):
-        entry = UserCuisinePreference(user_id = current_user.id, cuisine_id = cid, numComplete = 1) #type: ignore
+        entry = UserCuisinePreference(user_id = current_user.id, cuisine_id = cid, numComplete = 1, userSelected = 0) #type: ignore
     else:
         entry = UserCuisinePreference.query.filter_by(user_id = current_user.id, cuisine_id = cid).first()
         entry.numComplete = entry.numComplete + 1 #type: ignore

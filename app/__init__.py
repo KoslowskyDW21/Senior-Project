@@ -2,7 +2,7 @@ from flask import Flask, request, current_app
 from config import Config
 from flask_login import LoginManager
 from flask_cors import CORS  
-from app.models import User, Recipe, RecipeIngredient, RecipeCuisine, RecipeStep, Ingredient, Cuisine, db
+from app.models import User, UserGroup, Recipe, RecipeIngredient, RecipeCuisine, RecipeStep, Ingredient, Cuisine, db
 import string, random
 from datetime import datetime
 import requests
@@ -25,9 +25,11 @@ def create_app(config=Config):
 
     db.init_app(app)
     with app.app_context():
-        # UNCOMMENT TO REPOPULATE DATABASE
+        # UNCOMMENT (and get rid of pass) TO REPOPULATE DATABASE
         # populate_database()
+        #create_dummy_groups()
         pass
+        
 
     from app.login import bp as login_bp
     app.register_blueprint(login_bp, url_prefix='/')
@@ -43,6 +45,10 @@ def create_app(config=Config):
     app.register_blueprint(achievement_bp, url_prefix='/achievements')
     from app.settings import bp as settings_bp
     app.register_blueprint(settings_bp, url_prefix='/settings')
+    from app.groups import bp as groups_bp
+    app.register_blueprint(groups_bp, url_prefix='/groups')
+    from app.admin import bp as admin_bp
+    app.register_blueprint(admin_bp, url_prefix='/admin')
     
     return app
 
@@ -86,8 +92,8 @@ def save_recipes_to_db(recipes):
             xp_amount=100*difficulty,  # type: ignore
             rating=0,  # type: ignore
             image=recipe_data["strMealThumb"],  # type: ignore
-            youtube_url=recipe_data["strCategory"], # type: ignore
-            category=recipe_data["strYoutube"] # type: ignore
+            category=recipe_data["strCategory"], # type: ignore
+            youtube_url=recipe_data["strYoutube"] # type: ignore
         )
         db.session.add(recipe)
         db.session.flush()
@@ -144,4 +150,96 @@ def save_recipes_to_db(recipes):
             )
             db.session.add(recipe_cuisine)
 
+    db.session.commit()
+
+# a temporary method to fix some improperly stored data. This can safely be deleted
+def switch_category_and_youtube_url():
+        recipes = Recipe.query.all()
+        for recipe in recipes:
+            temp = recipe.category
+            recipe.category = recipe.youtube_url
+            recipe.youtube_url = temp
+        db.session.commit()
+
+def create_dummy_groups():
+    dummy_groups = [
+        UserGroup(
+            creator=2,
+            name="Group 10",
+            description="Test",
+            is_public=True,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 11",
+            description="Test",
+            is_public=False,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 12",
+            description="Test",
+            is_public=False,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 13",
+            description="Test",
+            is_public=True,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 14",
+            description="Test",
+            is_public=False,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 15",
+            description="Test",
+            is_public=False,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 16",
+            description="Test",
+            is_public=True,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 17",
+            description="Test",
+            is_public=False,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 18",
+            description="Test",
+            is_public=False,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 19",
+            description="Test",
+            is_public=True,
+            num_reports=0
+        ),
+        UserGroup(
+            creator=2,
+            name="Group 20",
+            description="Test",
+            is_public=False,
+            num_reports=0
+        )
+    ]
+    db.session.add_all(dummy_groups)
     db.session.commit()

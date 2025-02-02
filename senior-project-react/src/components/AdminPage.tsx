@@ -4,21 +4,25 @@ import React from "react";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-async function isAdmin() {
-  await axios.get("") // TODO: Add the URL
+async function isAdmin(admin: boolean) {
+  await axios.get("http://127.0.0.1:5000/admin/") // TODO: Add the URL
     .then((response) => {
-      return response.data.isAdmin;
+      admin = response.data.is_admin;
     })
     .catch((error) => {
       console.log("Could not retrieve data: ", (error));
     })
+
+  admin = false;
 }
 
 export default function AdminPage() {
-  const isAdmin = false;
+  let admin: boolean = false;
+  React.useEffect(() => {isAdmin(admin);}, [])
+
   const navigate = useNavigate();
 
-  if(isAdmin) {
+  if(admin) {
     return <h1>Admin Page</h1>;
   }
   else {

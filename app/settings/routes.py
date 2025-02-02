@@ -16,22 +16,26 @@ def post_settings_page():
 
     return jsonify(user.to_json()), 200 # type: ignore
 
-@login_required
+
+
 @bp.route("/update/", methods=['POST'])
+@login_required  
 def post_update_user():
-    # user = User.from_json(request.json)
-    # print(user)
-    # db.session.add(user)
-    # db.session.commit()
     data = request.get_json()
     newFloor = str(data.get("floor"))
     newSide = str(data.get("side"))
-
-    print("Floor: " + newFloor)
-    print("Side: " + newSide)
-
-    return "Unknown"
-
+    print("Received data - Floor: " + newFloor)
+    print("Received data - Side: " + newSide)
+    user = current_user
+    user.colonial_floor = newFloor
+    user.colonial_side = newSide
+    try:
+        db.session.commit()
+        return jsonify({"message": "User updated successfully"}), 200
+    except Exception as e:
+        db.session.rollback() 
+        print(f"Error updating user: {e}")
+        return jsonify({"message": "Error updating user"}), 500
 
 def delete_user_and_dependencies(session, current_user_id):
     try:
@@ -95,3 +99,43 @@ def delete_account():
     delete_user_and_dependencies(session, current_user_id)
     print("Deleted successfully")
     return jsonify({"message": "Account deleted successfully"}), 200
+
+@bp.route('/cuisines/', methods = ['GET'])
+def cuisines():
+    cuisines = Cuisine.query.all()
+    userCuisines = UserCuisinePreference.query.filter_by(user_id = current_user.id).all()
+    return jsonify({
+        "cuisines": [cuisine.to_json() for cuisine in cuisines],
+        "userCuisines": [uc.to_json() for uc in userCuisines],
+    }), 200
+
+
+@bp.route('/update_cuisines/', methods=['POST'])
+def update_user_cuisines():
+    data = request.get_json()
+    user_id = data['user_id']
+    selected_cuisines = data['selected_cuisines']
+
+    for cuisine in selected_cuisines:
+        entry = UserCuisinePreference.query.filter_by(user_id=current_user.id, cuisine_id=cuisine).first()
+
+        if entry is None:
+            e = UserCuisinePreference(user_id=current_user.id, cuisine_id=cuisine, numComplete=0, userSelected=1) #type:ignore
+            db.session.add(e)
+        else:
+            entry.userSelected = 1
+            db.session.add(entry)
+    all_preferences = UserCuisinePreference.query.filter_by(user_id=current_user.id).all()
+    for preference in all_preferences:
+        if preference.cuisine_id not in [cuisine for cuisine in selected_cuisines]:
+            preference.userSelected = 0
+            if preference.numComplete == 0:
+                db.session.delete(preference)
+            else:
+                db.session.add(preference)
+    db.session.commit()
+
+    
+    return jsonify({"message": "Cuisines updated successfully"})
+
+    
