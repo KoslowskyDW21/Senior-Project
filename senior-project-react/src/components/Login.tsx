@@ -34,12 +34,27 @@ const Login = () => {
       }
 
       // Retrieve the ID token from the active session
-      const idToken = (
-        await instance.acquireTokenSilent({
-          scopes: ["openid", "profile", "email"],
-          account: activeAccount || undefined,
-        })
-      ).idToken;
+      const getIdToken = async () => {
+        try {
+          return (
+            await instance.acquireTokenSilent({
+              scopes: ["openid", "profile", "email"],
+              account: instance.getActiveAccount() || undefined,
+            })
+          ).idToken;
+        } catch (error) {
+          console.warn(
+            "Silent token acquisition failed, falling back to popup:",
+            error
+          );
+          return (
+            await instance.acquireTokenPopup({
+              scopes: ["openid", "profile", "email"],
+            })
+          ).idToken;
+        }
+      };
+      const idToken = await getIdToken();
 
       console.log("ID Token:", idToken);
 
