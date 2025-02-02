@@ -47,33 +47,16 @@ const modalStyle = {
 };
 
 async function updateUser(floor: string, side: string) {
-  await axios.post("http://127.0.0.1:5000/settings/update/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      "floor": 3,
-      "side": "men's"
-    })
-  })
-    .then()
-    .catch((error) => {
-      console.log("Could not update user: ", error);
-    })
-
-  // TODO: Insert the correct URL
-  // try {
-  //   await axios.post("", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify(user),
-  //   });
-  // } catch (error) {
-  //   console.log("Could not update user ", error);
-  // }
+  try {
+    // Sending the updated data to the backend
+    const response = await axios.post("http://127.0.0.1:5000/settings/update/", {
+      floor: floor,
+      side: side,
+    });
+    console.log("User updated successfully:", response.data);
+  } catch (error) {
+    console.error("Could not update user: ", error);
+  }
 }
 
 export default function Settings() {
@@ -195,38 +178,26 @@ export default function Settings() {
     }
   };
   
-
   const handleFloorChange = (event: SelectChangeEvent) => {
     const newFloor = event.target.value;
-
     setColonialFloor(newFloor);
-    setUser({
-      id: user.id,
-      fname: user.fname,
-      lname: user.lname,
-      profile_picture: user.profile_picture,
+    setUser(prevUser => ({
+      ...prevUser,
       colonial_floor: newFloor,
-      colonial_side: user.colonial_side,
-    });
-
-    updateUser(user.colonial_floor, user.colonial_side);
+    }));
+    updateUser(newFloor, colonialSide);
   };
-
+  
   const handleSideChange = (event: SelectChangeEvent) => {
     const newSide = event.target.value;
-
     setColonialSide(newSide);
-    setUser({
-      id: user.id,
-      fname: user.fname,
-      lname: user.lname,
-      profile_picture: user.profile_picture,
-      colonial_floor: user.colonial_floor,
-      colonial_side: newSide,
-    });
-
-    updateUser(user.colonial_floor, user.colonial_side);
+    setUser(prevUser => ({
+      ...prevUser,
+      colonial_side: newSide, 
+    }));
+    updateUser(colonialFloor, newSide);
   };
+  
 
   const handleOpenModal = () => {
     setOpenModal(true);
@@ -290,8 +261,8 @@ export default function Settings() {
           <MenuItem disabled value="">
             {user.colonial_side}
           </MenuItem>
-          <MenuItem value={"Men's"}>Men's</MenuItem>
-          <MenuItem value={"Women's"}>Women's</MenuItem>
+          <MenuItem value={"Mens"}>Men's</MenuItem>
+          <MenuItem value={"Womens"}>Women's</MenuItem>
         </Select>
         <FormHelperText>Colonial Side</FormHelperText>
       </FormControl>

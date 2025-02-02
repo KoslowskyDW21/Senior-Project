@@ -16,21 +16,27 @@ def post_settings_page():
 
     return jsonify(user.to_json()), 200 # type: ignore
 
-@login_required
+
+
 @bp.route("/update/", methods=['POST'])
+@login_required  
 def post_update_user():
-    # user = User.from_json(request.json)
-    # print(user)
-    # db.session.add(user)
-    # db.session.commit()
     data = request.get_json()
     newFloor = str(data.get("floor"))
     newSide = str(data.get("side"))
+    print("Received data - Floor: " + newFloor)
+    print("Received data - Side: " + newSide)
+    user = current_user
+    user.colonial_floor = newFloor
+    user.colonial_side = newSide
+    try:
+        db.session.commit()
+        return jsonify({"message": "User updated successfully"}), 200
+    except Exception as e:
+        db.session.rollback() 
+        print(f"Error updating user: {e}")
+        return jsonify({"message": "Error updating user"}), 500
 
-    print("Floor: " + newFloor)
-    print("Side: " + newSide)
-
-    return "Unknown"
 
 
 def delete_user_and_dependencies(session, current_user_id):

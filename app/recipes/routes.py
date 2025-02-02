@@ -94,17 +94,6 @@ def delete_recipe():
     flash('recipe deleted successfully')
     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
 
-@bp.route('/current_user/', methods=['POST'])
-@login_required
-def post_current_user():
-    if current_user is not None:
-        print(current_user.id)
-        print(current_user.profile_picture)
-        return jsonify({ "id": current_user.id,
-                        "profile_picture": current_user.profile_picture
-                         }), 200
-    return "<h1>404: user not found</h1>", 404
-
 def completionAchievements(id):
         specA = UserAchievement(achievement_id = id, user_id = current_user.id) #type:ignore
         allUserAs = UserAchievement.query.all()
