@@ -87,6 +87,8 @@ export default function Settings() {
         setUser(response.data);
         setColonialFloor(user.colonial_floor);
         setColonialSide(user.colonial_side);
+        console.log("Floor: " + user.colonial_floor);
+        console.log("Side: " + user.colonial_side);
         loadCuisines();
       })
       .catch((error) => {
@@ -180,22 +182,26 @@ export default function Settings() {
   
   const handleFloorChange = (event: SelectChangeEvent) => {
     const newFloor = event.target.value;
+    console.log("Floor: " + newFloor);
+    console.log("Side: " + colonialSide);
     setColonialFloor(newFloor);
     setUser(prevUser => ({
       ...prevUser,
       colonial_floor: newFloor,
     }));
-    updateUser(newFloor, colonialSide);
+    updateUser(newFloor, user.colonial_side);
   };
   
   const handleSideChange = (event: SelectChangeEvent) => {
     const newSide = event.target.value;
+    console.log("Floor: " + user.colonial_floor);
+    console.log("Side: " + newSide);
     setColonialSide(newSide);
     setUser(prevUser => ({
       ...prevUser,
       colonial_side: newSide, 
     }));
-    updateUser(colonialFloor, newSide);
+    updateUser(user.colonial_floor, newSide);
   };
   
 
