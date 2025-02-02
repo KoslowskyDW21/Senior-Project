@@ -48,6 +48,8 @@ def create_app(config=Config):
     app.register_blueprint(settings_bp, url_prefix='/settings')
     from app.groups import bp as groups_bp
     app.register_blueprint(groups_bp, url_prefix='/groups')
+    from app.admin import bp as admin_bp
+    app.register_blueprint(admin_bp, url_prefix='/admin')
     
     return app
 
