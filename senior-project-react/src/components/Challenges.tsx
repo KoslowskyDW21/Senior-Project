@@ -141,7 +141,7 @@ const Challenges: React.FC = () => {
               <Button onClick={handleGoToRecipes} variant ="contained"  color="primary" sx={{ flex: 1 }}>
                 Recipes
               </Button>
-              <Button  variant ="outlined" color="default" sx={{ flex: 1 }}>
+              <Button  variant ="outlined" color="primary" sx={{ flex: 1 }}>
                 Challenges
               </Button>
               <Button onClick={handleGoToGroups} variant="contained" color="primary" sx={{ flex: 1 }}>

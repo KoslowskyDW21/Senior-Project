@@ -48,7 +48,7 @@ interface AddRecipeToListResponse {
     message: string;
 }
 
-function Step({ recipe_id, step_number, step_description }) {
+function Step({ recipe_id, step_number, step_description }: Step) {
     return (
         <>
         <h4>Step {step_number}</h4>
@@ -67,11 +67,6 @@ const IndividualRecipe: React.FC = () => {
     const { id } = useParams<{ id: string }>();
 
     const navigate = useNavigate();
-
-    const handleGoToRecipes = async () => {
-        console.log("Navigating to recipes page");
-        navigate(`/recipes`);
-    }
 
     const handleGoToCompletedRecipe = async () => {
         console.log("Navigating to completed recipe page");
@@ -122,7 +117,12 @@ const IndividualRecipe: React.FC = () => {
             const data: RecipeList[] = response.data;
             setRecipeLists(data);
         } catch (error) {
-            console.error(`Error in fetching RecipeList[] for user id=${currentUserId}: ${error}`);
+            if (current_user) {
+                console.error(`Error in fetching RecipeList[] for user id=${current_user.id}: ${error}`);
+            }
+            else {
+                console.error("Error in fetching RecipeList[] for unknown user");
+            }
         }
     }
 
@@ -163,21 +163,14 @@ const IndividualRecipe: React.FC = () => {
             </IconButton>
             <h1>{recipe_name}</h1>
             <Button
-                onClick={handleGoToRecipes}
-                variant="contained"
-                color="primary"
-            >
-                Recipes
-            </Button>
-            <Button
                 onClick={handleGoToCompletedRecipe}
                 variant="contained"
                 color="primary"
             >
-                Complete
+                Mark as Complete
             </Button>
-
-            <Box sx={{ minWidth: 240, maxWidth: 512 }}>
+            <br/>
+            <br/>
             <FormControl fullWidth>
             <InputLabel id="demo-simple-select-label">Add to a list</InputLabel>
             <Select
@@ -187,14 +180,11 @@ const IndividualRecipe: React.FC = () => {
                 value={lid}
                 onChange={handleAddRecipeToList}
             >
-
                 {recipeLists.map((recipeList) => (
                     <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
                 ))}
-
             </Select>
             </FormControl>
-            </Box>
 
             {steps.map((step) => (
                 <Step recipe_id={step.recipe_id} step_number={step.step_number} step_description={step.step_description} />

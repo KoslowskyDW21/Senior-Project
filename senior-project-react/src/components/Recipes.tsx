@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // React Router for nav
-import { Button, Card, CardHeader, CardMedia, CardActionArea, Menu, MenuItem, IconButton, Avatar, Box} from "@mui/material"; //matui components
+import { Button, Card, CardHeader, CardMedia, CardActionArea, Menu, MenuItem, IconButton, Avatar, TextField, Box} from "@mui/material"; //matui components
 import Grid from "@mui/material/Grid2";
 import { Star, StarBorder } from "@mui/icons-material"
 import PersonIcon from '@mui/icons-material/Person';
@@ -117,6 +117,7 @@ function createRecipe(recipe: Recipe) {
 }
 
 const Recipes: React.FC = () => {
+  const [ searchQuery, setSearchQuery ] = useState<string>("");
   const [recipes, setRecipes] = useState<Recipe[]>([]);
 
   const[profile_picture, setProfile_picture] = useState<string>();
@@ -157,9 +158,6 @@ const Recipes: React.FC = () => {
     setAnchorEl(null);
   };
 
-  
-
-
    const getCurrentUser = async () => {
      try {
          const response = await axios.post(`http://127.0.0.1:5000/profile/get_profile_pic/`);
@@ -181,6 +179,14 @@ const Recipes: React.FC = () => {
       	console.error("Unable to fetch recipes", error);
     }
   }
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  }
+
+  const filteredRecipes = recipes.filter((recipe) => 
+  recipe.recipe_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   React.useEffect(() => {
     getCurrentUser();
@@ -270,9 +276,28 @@ const Recipes: React.FC = () => {
     }}
     >
       <h1></h1>
+
+  <Box mt={4} mb={2} textAlign="center">
+    <TextField
+      label="Search Recipes"
+      variant="outlined"
+      fullWidth
+      value={searchQuery}
+      onChange={handleSearchChange}
+      sx={{
+        zIndex: 1001,
+        position: "fixed",
+        top: screenTop + 20, // TODO: make these relative for mobile
+        left: 480,
+        right: 25,
+        width: 500
+      }}
+    />
+  </Box>
+
   </Box>
       <Grid container spacing={3}>
-        {recipes.map((recipe) => (
+        {filteredRecipes.map((recipe) => (
           <Grid size={4} key={recipe.id}>
             <Recipe id={recipe.id} name={recipe.recipe_name} difficulty={recipe.difficulty} image={recipe.image} />
           </Grid>
@@ -291,7 +316,7 @@ const Recipes: React.FC = () => {
         boxShadow: '0px -2px 5px rgba(0, 0, 0, 0.1)',
         zIndex: 1000,
       }}>
-        <Button variant ="outlined" color="default" sx={{ flex: 1 }}>
+        <Button variant ="outlined" color="primary" sx={{ flex: 1 }}>
           Recipes
         </Button>
         <Button onClick={handleGoToChallenges} variant="contained" color="primary" sx={{ flex: 1 }}>
