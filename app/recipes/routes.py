@@ -129,7 +129,6 @@ def completeCuisine(recipe):
     if(len(UserCuisinePreference.query.filter_by(user_id = current_user.id).all()) == 3):
         completionAchievements(2)
 
-
 def completedAchievement():
     current_user.xp_points = current_user.xp_points + 100
     db.session.add(current_user)
