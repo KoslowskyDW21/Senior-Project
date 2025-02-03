@@ -96,13 +96,15 @@ def delete_recipe():
 
 def completionAchievements(id):
         specA = UserAchievement(achievement_id = id, user_id = current_user.id) #type:ignore
+        print(specA)
         allUserAs = UserAchievement.query.all()
         run = True
         for a in allUserAs:
             if(a.user_id == specA.user_id and a.achievement_id == specA.achievement_id):
                 run =  False
         if(run):
-            db.session.add(a)
+            print("here")
+            db.session.add(specA)
             db.session.flush()
             db.session.commit()
             completedAchievement()
@@ -126,7 +128,11 @@ def completeCuisine(recipe):
         entry.numComplete = entry.numComplete + 1 #type: ignore
     db.session.add(entry)
     db.session.commit()
-    if(len(UserCuisinePreference.query.filter_by(user_id = current_user.id).all()) == 3):
+    count = 0
+    for a in UserCuisinePreference.query.filter_by(user_id = current_user.id).all():
+        if(a.numComplete > 0):
+            count += 1
+    if(count == 3):
         completionAchievements(2)
 
 def completedAchievement():
