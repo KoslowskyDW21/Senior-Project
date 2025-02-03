@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // React Router for nav
-import { Button, Card, CardHeader, CardMedia, CardActionArea, Menu, MenuItem, IconButton, Avatar, TextField, Box} from "@mui/material"; //matui components
+import { Button, ButtonBase, Card, CardHeader, CardMedia, CardActionArea, Menu, MenuItem, IconButton, Avatar, TextField, Box} from "@mui/material"; //matui components
 import Grid from "@mui/material/Grid2";
 import { Star, StarBorder } from "@mui/icons-material"
 import PersonIcon from '@mui/icons-material/Person';
@@ -118,10 +118,8 @@ function createRecipe(recipe: Recipe) {
 
 const Recipes: React.FC = () => {
   const [admin, setAdmin] = useState<boolean>(false);
-
   const [ searchQuery, setSearchQuery ] = useState<string>("");
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-
   const[profile_picture, setProfile_picture] = useState<string>();
 
   const navigate = useNavigate();
@@ -152,6 +150,10 @@ const Recipes: React.FC = () => {
 
   const handleGoToAdmin = async () => {
     navigate('/admin');
+  }
+
+  const handleGoToRecipes = async () => {
+    navigate('/recipes');
   }
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -236,14 +238,18 @@ const Recipes: React.FC = () => {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      marginRight: '20px',  
+      marginRight: '20px',
     }}
   >
+    <ButtonBase
+      onClick={handleGoToRecipes}
+    >
     <img 
       src="http://127.0.0.1:5000/static\uploads\2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg"
       alt="Image"
       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
     />
+    </ButtonBase>
     </Box>
 
     <Box
