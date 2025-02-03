@@ -117,6 +117,8 @@ function createRecipe(recipe: Recipe) {
 }
 
 const Recipes: React.FC = () => {
+  const [admin, setAdmin] = useState<boolean>(false);
+
   const [ searchQuery, setSearchQuery ] = useState<string>("");
   const [recipes, setRecipes] = useState<Recipe[]>([]);
 
@@ -146,6 +148,10 @@ const Recipes: React.FC = () => {
 
   const handleGoToSettings = async () => {
     navigate('/settings')
+  }
+
+  const handleGoToAdmin = async () => {
+    navigate('/admin');
   }
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -180,6 +186,16 @@ const Recipes: React.FC = () => {
     }
   }
 
+  async function isAdmin() {
+    await axios.get("http://127.0.0.1:5000/admin/")
+      .then((response) => {
+        setAdmin(response.data.is_admin);
+      })
+      .catch((error) => {
+        console.error("Unable to check if user is admin", error)
+      })
+  }
+
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
   }
@@ -191,6 +207,7 @@ const Recipes: React.FC = () => {
   React.useEffect(() => {
     getCurrentUser();
     loadRecipes();
+    isAdmin();
   }, []);
 
   return (
@@ -261,6 +278,7 @@ const Recipes: React.FC = () => {
   >
     <MenuItem onClick={handleGoToProfile}>Profile</MenuItem>
     <MenuItem onClick={handleGoToSettings}>Settings</MenuItem>
+    {admin ? <MenuItem onClick={handleGoToAdmin}>Admin Controls</MenuItem> : <></>}
     <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem>
     <MenuItem onClick={handleGoToAchievements}>Achievements</MenuItem>
   </Menu>
