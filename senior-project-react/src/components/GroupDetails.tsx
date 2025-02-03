@@ -8,6 +8,7 @@ import {
   Typography,
   Box,
   Container,
+  IconButton,
 } from "@mui/material";
 
 interface UserGroup {
@@ -19,10 +20,14 @@ interface UserGroup {
   is_public: boolean;
   num_reports: number;
 }
+import { useNavigate } from "react-router-dom";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const GroupDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [group, setGroup] = useState<UserGroup | null>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchGroup = async () => {
@@ -51,6 +56,12 @@ const GroupDetails: React.FC = () => {
 
   return (
     <Container>
+      <IconButton
+        onClick={() => navigate(-1)}
+        style={{ position: "absolute", top: 30, left: 30 }} 
+      >
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+      </IconButton>
       <Box mt={4} mb={2} textAlign="center">
         <Typography variant="h4" gutterBottom>
           {group.name}

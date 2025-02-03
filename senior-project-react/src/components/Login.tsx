@@ -1,6 +1,6 @@
 import { useState } from "react"; //react
 import axios from "axios";
-import { Button, Container } from "@mui/material"; //matui components
+import { Box, Button, Container } from "@mui/material"; //matui components
 import { useNavigate } from "react-router-dom"; // React Router for nav
 import { useMsal } from "@azure/msal-react";
 import * as msal from "@azure/msal-browser";
@@ -81,7 +81,23 @@ const Login = () => {
   };
   return (
     <Container>
-      <h2>Let Them Cook</h2>
+      <Box
+    sx={{
+      width: 300,
+      height: 300,
+      backgroundColor: 'lightgray',  
+      borderRadius: 1,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center', 
+    }}
+  >
+    <img 
+      src="http://127.0.0.1:5000/static\uploads\2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg"
+      alt="Image"
+      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+    />
+    </Box>
       <br></br>
       <Button
         onClick={() => handleSSOLogin()}
@@ -90,7 +106,7 @@ const Login = () => {
         fullWidth
         sx={{ mt: 4 }}
       >
-        Login with SSO
+        Login
       </Button>
     </Container>
   );
