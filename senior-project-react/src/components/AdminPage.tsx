@@ -1,7 +1,8 @@
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import React from "react";
-import { Button } from "@mui/material";
+import { Button, IconButton } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
 
 interface User {
@@ -25,6 +26,7 @@ interface User {
 export default function AdminPage() {
   const [admin, setAdmin] = useState<boolean>(false);
   const [users, setUsers] = useState<User[]>([]);
+  const [userAdmin, setUserAdmin] = useState<boolean[]>([]);
   const navigate = useNavigate();
 
   async function isAdmin() {
@@ -49,9 +51,49 @@ export default function AdminPage() {
   
   React.useEffect(() => {isAdmin(); loadUsers();}, []);
 
+  async function updateUser(isAnAdmin: boolean, userId: number) {
+    const data = {
+      id: userId,
+      isAdmin: isAnAdmin,
+    };
+
+    await axios.post("http://127.0.0.1:5000/admin/makeAdmin/", data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        console.log("User successfully updated.");
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not update user", error);
+      });
+  }
+
+  const handleAdminChange = (user: User) => {
+    console.log("handleAdminChange called");
+
+    const id = user.id;
+    for(const findUser of users) {
+      if(findUser.id == id) {
+        findUser.is_admin = false;
+      }
+    }
+
+    user.is_admin ? updateUser(false, id) : updateUser(true, id);
+  }
+
   if(admin) {
     return (
       <>
+        <IconButton
+          onClick={() => navigate(-1)}
+          style={{ position: "absolute", top: 30, left: 30 }} 
+        >
+          <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+        </IconButton>
+
         <h1>Admin Page</h1>
         <br />
         <h2>Users</h2>
@@ -62,6 +104,7 @@ export default function AdminPage() {
               <td>Username</td>
               <td>Admin Status</td>
               <td>Reports</td>
+              <td>Make Admin</td>
             </tr>
           </thead>
           <tbody>
@@ -71,6 +114,17 @@ export default function AdminPage() {
                 <td>{user.username}</td>
                 <td>{user.is_admin.toString()}</td>
                 <td>{user.num_reports}</td>
+                <td>
+                  <Button
+                    onClick={() => {
+                      handleAdminChange(user);
+                    }}
+                    variant="contained"
+                    color="success"
+                  >
+                    Make Admin
+                  </Button>
+                </td>
               </tr>
             ))}
           </tbody>
