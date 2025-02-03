@@ -254,7 +254,6 @@ export default function Settings() {
         }
       );
       instance.logoutPopup().then(() => {
-        // After logoutRedirect, navigate to the homepage
         navigate("/");
       });
     } catch (error) {

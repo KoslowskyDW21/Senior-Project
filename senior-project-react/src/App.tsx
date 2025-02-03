@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { RegistrationProvider } from "./components/RegistrationContext";
 import Login from "./components/Login";
@@ -28,6 +28,7 @@ import GroupDetails from "./components/GroupDetails";
 import CreateRecipeList from "./components/CreateRecipeList";
 import { PublicClientApplication } from "@azure/msal-browser";
 import ProtectedRoute from "./components/ProtectedRoute";
+import useIdTokenRefresher from "./components/refresh";
 
 function App() {
   // this allows cookies to be sent with all requests in the app
@@ -46,6 +47,8 @@ function App() {
   // }, []);
 
   const msalInstance = new PublicClientApplication(msalConfig);
+
+  useIdTokenRefresher();
 
   return (
     <MsalProvider instance={msalInstance}>

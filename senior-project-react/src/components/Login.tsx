@@ -40,6 +40,7 @@ const Login = () => {
             await instance.acquireTokenSilent({
               scopes: ["openid", "profile", "email"],
               account: instance.getActiveAccount() || undefined,
+              forceRefresh: true,
             })
           ).idToken;
         } catch (error) {

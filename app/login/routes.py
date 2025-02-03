@@ -14,6 +14,7 @@ import jwt
 import requests
 from jwt.algorithms import RSAAlgorithm
 import redis
+import time
 
 revoked_tokens = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
 
@@ -203,6 +204,8 @@ def sso_login():
     print("LOGIN TOKEN: ", token)
     decoded = jwt.decode(token, options={"verify_signature": False})
     print("DECODED TOKEN: ", decoded)
+    exp = decoded.get("exp", 0)
+    print(f"Token expires at: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(exp))}")
 
 
     if not token:
@@ -283,6 +286,8 @@ def logout():
     try:
         decoded = jwt.decode(token, options={"verify_signature": False})
         print("Decoded token: ", decoded)
+        exp = decoded.get("exp", 0)
+        print(f"Token expires at: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(exp))}")
     except jwt.DecodeError as e:
         print(f"Error decoding JWT: {e}")
         return jsonify({"message": "Invalid token"}), 401
