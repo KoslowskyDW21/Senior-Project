@@ -303,7 +303,7 @@ const Recipes: React.FC = () => {
             sx={{
               zIndex: 1001,
               position: 'fixed',
-              top: screenTop + 40, // TODO: make these relative for mobile
+              top: screenTop + 5, // TODO: make these relative for mobile
               left: 480,
               right: 25,
               width: 500,
