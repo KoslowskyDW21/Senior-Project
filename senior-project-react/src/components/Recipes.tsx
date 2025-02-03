@@ -217,6 +217,9 @@ const Recipes: React.FC = () => {
           height: '100px',
         }}
       >
+        <ButtonBase
+          onClick={handleGoToRecipes}
+        >
         <Box
           sx={{
             width: 70,
@@ -235,6 +238,7 @@ const Recipes: React.FC = () => {
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         </Box>
+        </ButtonBase>
   
         <Box
           sx={{
