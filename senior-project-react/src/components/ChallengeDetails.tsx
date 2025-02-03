@@ -1,5 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   Card,
@@ -9,7 +10,9 @@ import {
   Box,
   Container,
   Button,
+  IconButton,
 } from "@mui/material";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface Challenge {
   id: number;
@@ -35,6 +38,8 @@ const ChallengeDetail: React.FC = () => {
   const [challenge, setChallenge] = React.useState<Challenge | null>(null);
   const [participants, setParticipants] = React.useState<Participant[]>([]);
   const [currentUserId, setCurrentUserId] = React.useState<number | null>(null);
+
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     const fetchChallenge = async () => {
@@ -113,6 +118,12 @@ const ChallengeDetail: React.FC = () => {
 
   return (
     <Container>
+      <IconButton
+        onClick={() => navigate(-1)}
+        style={{ position: "absolute", top: 30, left: 30 }} 
+      >
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+      </IconButton>
       <Card sx={{ maxWidth: 800, margin: "20px auto", padding: 2 }}>
         {challenge.image && (
           <CardMedia
