@@ -36,3 +36,16 @@ def make_admin():
         db.session.rollback()
         print(f"Error updating admin status: {e}")
         return jsonify({"message": "Error: Could not update user"}), 500
+    
+@bp.route("/delete/<int:id>", methods = ["POST"])
+def delete_recipe(id):
+    recipe = Recipe.query.filter_by(id = id).first()
+    if(recipe is not None):
+        try:
+            db.session.delete(recipe)
+            db.session.commit()
+            return jsonify({"message": "Recipe deleted successfully"}), 200
+        except Exception as e:
+            db.session.rollback() 
+            return jsonify({"message": "Error; Could not delete recipe", "error": str(e)}), 500
+    return jsonify({"message": "Error; Could not delete recipe"}), 500

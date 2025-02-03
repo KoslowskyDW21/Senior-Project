@@ -196,120 +196,118 @@ const Recipes: React.FC = () => {
       <Box
         sx={{
           flexGrow: 1,
-          fontSize: '6px',
+          fontSize: '12px',
           color: '#FFFFFF', 
       }}
 >
   <h1>e</h1>
 </Box>
-      <Box
-        sx={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          display: 'flex',
-          alignItems: 'center',
-          padding: '10px 20px',
-          backgroundColor: '#fff',
-          boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)',
-          zIndex: 1000,
-          height: '100px',
-        }}
-      >
-        <ButtonBase
-          onClick={handleGoToRecipes}
-        >
-        <Box
-          sx={{
-            width: 70,
-            height: 70,
-            backgroundColor: 'lightgray',
-            borderRadius: 2,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginRight: '20px',
-          }}
-        >
-          <img
-            src="http://127.0.0.1:5000/static\uploads\2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg"
-            alt="Image"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
-        </Box>
-        </ButtonBase>
-  
-        <Box
-          sx={{
-            flexGrow: 1,
-            display: 'flex',
-            justifyContent: 'flex-start', 
-            alignItems: 'center',
-            fontSize: '24px',
-            fontWeight: 'bold',
-          }}
-        >
-          <h1>Recipes</h1>
-        </Box>
-  
-        <IconButton
-          onClick={handleClick}
-          style={{ position: 'relative', top: 8, right: 8 }}
-        >
-          {profile_picture ? (
-            <Avatar
-              alt="Profile Picture"
-              src={profile_picture}
-              sx={{ width: 70, height: 70, border: '1px solid #000' }}
-            />
-          ) : (
-            <Avatar sx={{ width: 70, height: 70, backgroundColor: 'gray' }}>
-              <PersonIcon sx={{ color: 'white' }} />
-            </Avatar>
-          )}
-        </IconButton>
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-        >
-          <MenuItem onClick={handleGoToProfile}>Profile</MenuItem>
-          <MenuItem onClick={handleGoToSettings}>Settings</MenuItem>
-          {admin ? <MenuItem onClick={handleGoToAdmin}>Admin Controls</MenuItem> : <></>}
-          <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem>
-          <MenuItem onClick={handleGoToAchievements}>Achievements</MenuItem>
-        </Menu>
-      </Box>
-  
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'flex-start',
-          alignItems: 'center',
-          fontSize: '24px',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          mt: 4,
-        }}
-      >
-        <Box mt={4} mb={2} textAlign="center">
-          <TextField
-            label="Search Recipes"
-            variant="outlined"
-            fullWidth
-            value={searchQuery}
-            onChange={handleSearchChange}
-            sx={{
-              zIndex: 1001,
-              position: 'fixed',
-              top: screenTop + 5, // TODO: make these relative for mobile
-              left: 480,
-              right: 25,
-              width: 500,
-            }}
-          />
-        </Box>
+<Box
+  sx={{
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    display: 'flex',
+    alignItems: 'center',
+    padding: '10px 20px',
+    backgroundColor: '#fff',
+    boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)',
+    zIndex: 1000,
+    height: '100px',
+    justifyContent: 'space-between', 
+  }}
+>
+
+  <ButtonBase onClick={handleGoToRecipes}>
+    <Box
+      sx={{
+        width: 70,
+        height: 70,
+        backgroundColor: 'lightgray',
+        borderRadius: 2,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: '20px',
+      }}
+    >
+      <img
+        src="http://127.0.0.1:5000/static\uploads\2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg"
+        alt="Image"
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      />
+    </Box>
+  </ButtonBase>
+
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'center', 
+      flexGrow: 1,
+      alignItems: 'center',
+      fontSize: '24px',
+      fontWeight: 'bold',
+    }}
+  >
+    <h1>Recipes</h1>
+  </Box>
+
+
+  <Box mt={4} mb={2} textAlign="center" display="flex" justifyContent="center" sx={{ flexGrow: 1 }}>
+    <TextField
+      label="Search Recipes"
+      variant="outlined"
+      fullWidth
+      value={searchQuery}
+      onChange={handleSearchChange}
+      sx={{
+        zIndex: 1001,
+        width: 500, 
+      }}
+    />
+  </Box>
+
+  <IconButton
+    onClick={handleClick}
+    style={{ position: 'relative', top: 8, right: 8 }}
+  >
+    {profile_picture ? (
+      <Avatar
+        alt="Profile Picture"
+        src={profile_picture}
+        sx={{ width: 70, height: 70, border: '1px solid #000' }}
+      />
+    ) : (
+      <Avatar sx={{ width: 70, height: 70, backgroundColor: 'gray' }}>
+        <PersonIcon sx={{ color: 'white' }} />
+      </Avatar>
+    )}
+  </IconButton>
+
+  <Menu
+    anchorEl={anchorEl}
+    open={Boolean(anchorEl)}
+    onClose={handleClose}
+  >
+    <MenuItem onClick={handleGoToProfile}>Profile</MenuItem>
+    <MenuItem onClick={handleGoToSettings}>Settings</MenuItem>
+    <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem>
+    <MenuItem onClick={handleGoToAchievements}>Achievements</MenuItem>
+    {admin ? <MenuItem onClick={handleGoToAdmin}>Admin Controls</MenuItem> : <></>}
+  </Menu>
+  </Box>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        fontSize: '24px',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        mt: 4,
+      }}
+    >
       </Box>
       <Grid container spacing={3}>
         {filteredRecipes.map((recipe) => (
