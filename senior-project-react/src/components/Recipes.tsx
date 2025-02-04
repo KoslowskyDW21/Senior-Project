@@ -199,7 +199,7 @@ const Recipes: React.FC = () => {
           fontSize: '12px',
           color: '#FFFFFF', 
       }}
->
+      >
   <h1>e</h1>
 </Box>
 <Box

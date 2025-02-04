@@ -11,10 +11,20 @@ import {
   Box,
   Container,
   TextField,
+  MenuItem,
+  Menu,
+  IconButton,
+  Avatar,
+  ButtonBase
 } from "@mui/material";
+import PersonIcon from '@mui/icons-material/Person';
 
 interface UserId {
   id: number;
+}
+
+interface User {
+  profile_picture: string,
 }
 
 interface Challenge {
@@ -31,6 +41,7 @@ interface Challenge {
   num_reports: number;
 }
 
+
 const Challenges: React.FC = () => {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [myChallenges, setMyChallenges] = useState<Challenge[]>([]);
@@ -41,6 +52,8 @@ const Challenges: React.FC = () => {
   const [showMoreMyChallenges, setShowMoreMyChallenges] = useState<boolean>(false);
   const [showMoreJoinedChallenges, setShowMoreJoinedChallenges] = useState<boolean>(false);
   const navigate = useNavigate();
+  const[profile_picture, setProfile_picture] = useState<string>();
+  const [admin, setAdmin] = useState<boolean>(false);
 
   const getResponse = async () => {
     try {
@@ -95,9 +108,37 @@ const Challenges: React.FC = () => {
     }
   };
 
-  const handleGoToRecipes = async () => {
-    navigate(`/recipes`);
-  }
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget); 
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+   const getCurrentUser = async () => {
+     try {
+         const response = await axios.post(`http://127.0.0.1:5000/profile/get_profile_pic/`);
+         const data: User = response.data;
+         setProfile_picture(data.profile_picture)
+         console.log(profile_picture)
+     } catch (error) {
+         console.error("Error fetching user: ", error);
+     }
+ }
+
+ async function isAdmin() {
+  await axios.get("http://127.0.0.1:5000/admin/")
+    .then((response) => {
+      setAdmin(response.data.is_admin);
+    })
+    .catch((error) => {
+      console.error("Unable to check if user is admin", error)
+    })
+}
+
 
   const handleGoToGroups = async () => {
     navigate(`/groups`);
@@ -120,11 +161,154 @@ const Challenges: React.FC = () => {
     challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleGoToProfile = async () => {
+    navigate(`/profile`);
+  }
+
+  const handleGoToAchievements = async() => {
+    navigate(`/achievements`)
+  }
+
+  const handleGoToRecipeLists = async () => {
+    navigate(`/recipe-lists/`);
+  }
+  const handleGoToSettings = async () => {
+    navigate('/settings')
+  }
+
+  const handleGoToAdmin = async () => {
+    navigate('/admin');
+  }
+
+  const handleGoToRecipes = async () => {
+    navigate('/recipes');
+  }
+
   useEffect(() => {
     getResponse();
+    getCurrentUser();
+    isAdmin();
   }, []);
 
   return (
+    <div>
+      <Box
+        sx={{
+          flexGrow: 1,
+          fontSize: '12px',
+          color: '#FFFFFF', 
+      }}
+      >
+  <h1>e</h1>
+</Box>
+<Box
+  sx={{
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    display: 'flex',
+    alignItems: 'center',
+    padding: '10px 20px',
+    backgroundColor: '#fff',
+    boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)',
+    zIndex: 1000,
+    height: '100px',
+    justifyContent: 'space-between', 
+  }}
+>
+
+  <ButtonBase onClick={handleGoToRecipes}>
+    <Box
+      sx={{
+        width: 70,
+        height: 70,
+        backgroundColor: 'lightgray',
+        borderRadius: 2,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: '20px',
+      }}
+    >
+      <img
+        src="http://127.0.0.1:5000/static\uploads\2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg"
+        alt="Image"
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      />
+    </Box>
+  </ButtonBase>
+
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'center', 
+      flexGrow: 1,
+      alignItems: 'center',
+      fontSize: '24px',
+      fontWeight: 'bold',
+    }}
+  >
+    <h1>Challenges</h1>
+  </Box>
+
+
+  <Box mt={4} mb={2} textAlign="center" display="flex" justifyContent="center" sx={{ flexGrow: 1 }}>
+    <TextField
+      label="Search Challenges"
+      variant="outlined"
+      fullWidth
+      value={searchQuery}
+      onChange={handleSearchChange}
+      sx={{
+        zIndex: 1001,
+        width: 500, 
+      }}
+    />
+  </Box>
+
+  <IconButton
+    onClick={handleClick}
+    style={{ position: 'relative', top: 8, right: 8 }}
+  >
+    {profile_picture ? (
+      <Avatar
+        alt="Profile Picture"
+        src={profile_picture}
+        sx={{ width: 70, height: 70, border: '1px solid #000' }}
+      />
+    ) : (
+      <Avatar sx={{ width: 70, height: 70, backgroundColor: 'gray' }}>
+        <PersonIcon sx={{ color: 'white' }} />
+      </Avatar>
+    )}
+  </IconButton>
+
+  <Menu
+    anchorEl={anchorEl}
+    open={Boolean(anchorEl)}
+    onClose={handleClose}
+  >
+    <MenuItem onClick={handleGoToProfile}>Profile</MenuItem>
+    <MenuItem onClick={handleGoToSettings}>Settings</MenuItem>
+    <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem>
+    <MenuItem onClick={handleGoToAchievements}>Achievements</MenuItem>
+    {admin ? <MenuItem onClick={handleGoToAdmin}>Admin Controls</MenuItem> : <></>}
+  </Menu>
+  </Box>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        fontSize: '24px',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        mt: 4,
+      }}
+    >
+      </Box>
+    
     <Container>
       <div style={{
               position: 'fixed',
@@ -149,9 +333,6 @@ const Challenges: React.FC = () => {
               </Button>
             </div>
       <Box mt={4} mb={2} textAlign="center">
-        <Typography variant="h4" gutterBottom>
-          Challenges
-        </Typography>
         <Button
           variant="contained"
           color="primary"
@@ -159,16 +340,6 @@ const Challenges: React.FC = () => {
         >
           Create a Challenge
         </Button>
-      </Box>
-
-      <Box mt={4} mb={2} textAlign="center">
-        <TextField
-          label="Search Challenges"
-          variant="outlined"
-          fullWidth
-          value={searchQuery}
-          onChange={handleSearchChange}
-        />
       </Box>
 
       {filteredMyChallenges.length > 0 && (
@@ -323,7 +494,9 @@ const Challenges: React.FC = () => {
         </Grid>
       </Box>
     </Container>
+    </div>
   );
+  
 };
 
 export default Challenges;
