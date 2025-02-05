@@ -9,8 +9,15 @@ import {
   Grid,
   Box,
   Container,
-  Button
+  Button,
+  MenuItem,
+  Menu,
+  IconButton,
+  Avatar,
+  ButtonBase,
+  TextField
 } from "@mui/material";
+import PersonIcon from '@mui/icons-material/Person';
 
 interface UserGroup {
   id: number;
@@ -21,12 +28,19 @@ interface UserGroup {
   image?: string;
 }
 
+interface User {
+  profile_picture: string,
+}
+
 const Groups: React.FC = () => {
   const [groups, setGroups] = useState<UserGroup[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const navigate = useNavigate();
+  const [ searchQuery, setSearchQuery ] = useState<string>("");
+  const[profile_picture, setProfile_picture] = useState<string>();
+  const [admin, setAdmin] = useState<boolean>(false);
 
   const fetchGroups = async (page: number) => {
     try {
@@ -54,6 +68,8 @@ const Groups: React.FC = () => {
 
   useEffect(() => {
     loadMoreGroups();
+    getCurrentUser();
+    isAdmin()
   }, []);
 
   useEffect(() => {
@@ -71,11 +87,183 @@ const Groups: React.FC = () => {
     navigate(`/recipes`);
   }
 
+  const handleGoToProfile = async () => {
+    navigate(`/profile`);
+  }
+
+  const handleGoToAchievements = async() => {
+    navigate(`/achievements`)
+  }
+
+  const handleGoToRecipeLists = async () => {
+    navigate(`/recipe-lists/`);
+  }
+
   const handleGoToChallenges = async () => {
     navigate(`/challenges`);
   }
 
+  const handleGoToSettings = async () => {
+    navigate('/settings')
+  }
+
+  const handleGoToAdmin = async () => {
+    navigate('/admin');
+  }
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchQuery(event.target.value);
+    }
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget); 
+  };
+  
+  const handleClose = () => {
+    setAnchorEl(null);
+  }
+
+  const getCurrentUser = async () => {
+    try {
+        const response = await axios.post(`http://127.0.0.1:5000/profile/get_profile_pic/`);
+        const data: User = response.data;
+        setProfile_picture(data.profile_picture)
+        console.log(profile_picture)
+    } catch (error) {
+        console.error("Error fetching user: ", error);
+    }
+}
+async function isAdmin() {
+  await axios.get("http://127.0.0.1:5000/admin/")
+    .then((response) => {
+      setAdmin(response.data.is_admin);
+    })
+    .catch((error) => {
+      console.error("Unable to check if user is admin", error)
+    })
+}
+
   return (
+    
+    <div>
+      <Box
+        sx={{
+          flexGrow: 1,
+          fontSize: '12px',
+          color: '#FFFFFF', 
+      }}
+      >
+  <h1>e</h1>
+</Box>
+<Box
+  sx={{
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    display: 'flex',
+    alignItems: 'center',
+    padding: '10px 20px',
+    backgroundColor: '#fff',
+    boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)',
+    zIndex: 1000,
+    height: '100px',
+    justifyContent: 'space-between', 
+  }}
+>
+
+  <ButtonBase onClick={handleGoToRecipes}>
+    <Box
+      sx={{
+        width: 70,
+        height: 70,
+        backgroundColor: 'lightgray',
+        borderRadius: 2,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: '20px',
+      }}
+    >
+      <img
+        src="http://127.0.0.1:5000/static\uploads\2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg"
+        alt="Image"
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      />
+    </Box>
+  </ButtonBase>
+
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'center', 
+      flexGrow: 1,
+      alignItems: 'center',
+      fontSize: '24px',
+      fontWeight: 'bold',
+    }}
+  >
+    <h1>Groups</h1>
+  </Box>
+
+
+  <Box mt={4} mb={2} textAlign="center" display="flex" justifyContent="center" sx={{ flexGrow: 1 }}>
+    <TextField
+      label="Search Groups"
+      variant="outlined"
+      fullWidth
+      value={searchQuery}
+      onChange={handleSearchChange}
+      sx={{
+        zIndex: 1001,
+        width: 500, 
+      }}
+    />
+  </Box>
+
+  <IconButton
+    onClick={handleClick}
+    style={{ position: 'relative', top: 8, right: 8 }}
+  >
+    {profile_picture ? (
+      <Avatar
+        alt="Profile Picture"
+        src={profile_picture}
+        sx={{ width: 70, height: 70, border: '1px solid #000' }}
+      />
+    ) : (
+      <Avatar sx={{ width: 70, height: 70, backgroundColor: 'gray' }}>
+        <PersonIcon sx={{ color: 'white' }} />
+      </Avatar>
+    )}
+  </IconButton>
+
+  <Menu
+    anchorEl={anchorEl}
+    open={Boolean(anchorEl)}
+    onClose={handleClose}
+  >
+    <MenuItem onClick={handleGoToProfile}>Profile</MenuItem>
+    <MenuItem onClick={handleGoToSettings}>Settings</MenuItem>
+    <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem>
+    <MenuItem onClick={handleGoToAchievements}>Achievements</MenuItem>
+    {admin ? <MenuItem onClick={handleGoToAdmin}>Admin Controls</MenuItem> : <></>}
+  </Menu>
+  </Box>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        fontSize: '24px',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        mt: 4,
+      }}
+    >
+      </Box>
     <Container>
       <div style={{
               position: 'fixed',
@@ -142,6 +330,7 @@ const Groups: React.FC = () => {
         </Box>
       )}
     </Container>
+    </div>
   );
 };
 

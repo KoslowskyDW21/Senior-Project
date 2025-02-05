@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import React from "react";
-import { Button, IconButton } from "@mui/material";
+import { Button, IconButton, TextField } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
 
@@ -28,6 +28,7 @@ export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [userAdmin, setUserAdmin] = useState<boolean[]>([]);
   const navigate = useNavigate();
+  const [idInput, setIdInput] = useState('');
 
   async function isAdmin() {
     await axios.get("http://127.0.0.1:5000/admin/")
@@ -84,6 +85,16 @@ export default function AdminPage() {
     user.is_admin ? updateUser(false, id) : updateUser(true, id);
   }
 
+  const handleDeleteRecipe = async() =>{
+    try {
+      const response = await axios.post(`http://127.0.0.1:5000/admin/delete/${idInput}`);
+      console.log('Response from backend:', response);
+    } catch (error) {
+      console.error('Error submitting ID');
+    }
+
+  }
+
   if(admin) {
     return (
       <>
@@ -129,7 +140,18 @@ export default function AdminPage() {
             ))}
           </tbody>
         </table>
-      </>
+        <br />
+      <TextField
+        label="Enter Recipe ID"
+        variant="outlined"
+        value={idInput}
+        onChange={(e) => setIdInput(e.target.value)}
+        style={{ marginBottom: '20px' }}
+      />
+      <Button variant="contained" color="primary" onClick={handleDeleteRecipe}>
+        Delete Recipe
+      </Button>
+    </>
     )
   }
   else {

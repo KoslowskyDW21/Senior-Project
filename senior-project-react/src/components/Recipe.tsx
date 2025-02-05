@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button, FormControl, MenuItem, Select, InputLabel, Box, SelectChangeEvent, IconButton } from "@mui/material"; //matui components
+import { Button, FormControl, Avatar, MenuItem, Select, InputLabel, FormControlLabel, Checkbox, Typography, SelectChangeEvent, IconButton, Container } from "@mui/material"; //matui components
 import axios, { AxiosError } from "axios";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -51,8 +51,8 @@ interface AddRecipeToListResponse {
 function Step({ recipe_id, step_number, step_description }: Step) {
     return (
         <>
-        <h4>Step {step_number}</h4>
-        <p>{step_description}</p>
+            <FormControlLabel control={<Checkbox />} label={`${step_number}`} />
+            <p>{step_description}</p>
         </>
     );
 }
@@ -155,11 +155,11 @@ const IndividualRecipe: React.FC = () => {
 
     return (
         <>
-        <   IconButton
+            <IconButton
                 onClick={() => navigate(-1)}
                 style={{ position: "absolute", top: 30, left: 30 }} 
             >
-            <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+                <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
             </IconButton>
             <h1>{recipe_name}</h1>
             <Button
