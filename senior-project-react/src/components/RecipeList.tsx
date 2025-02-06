@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button, Grid2, Card, CardActionArea, CardHeader, CardMedia } from "@mui/material"; //matui components
-import { Star, StarBorder } from "@mui/icons-material"
+import { Button, Grid2, IconButton, Box, Card, CardActionArea, CardHeader, CardMedia } from "@mui/material"; //matui components
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import axios, { AxiosError } from "axios";
 
 interface Recipe {
@@ -24,61 +24,40 @@ interface RemoveRecipeFromListResponse {
 
 // @ts-expect-error
 function Difficulty({ difficulty }) {
-  if (difficulty === "1") {
-    return (
-      <>
-        <Star />
-        <StarBorder />
-        <StarBorder />
-        <StarBorder />
-        <StarBorder />
-      </>
-    );
-  }
-  else if (difficulty === "2") {
-    return (
-      <>
-        <Star />
-        <Star />
-        <StarBorder />
-        <StarBorder />
-        <StarBorder />
-      </>
-    );
-  }
-  else if (difficulty === "3") {
-    return (
-      <>
-        <Star />
-        <Star />
-        <Star />
-        <StarBorder />
-        <StarBorder />
-      </>
-    );
-  }
-  else if (difficulty === "4") {
-    return (
-      <>
-        <Star />
-        <Star />
-        <Star />
-        <Star />
-        <StarBorder />
-      </>
-    );
-  }
-  else {
-    return (
-      <>
-        <Star />
-        <Star />
-        <Star />
-        <Star />
-        <Star />
-      </>
-    );
-  }
+  const diamondStyle = {
+    width: 24,
+    height: 24,
+    backgroundColor: 'black', 
+    transform: 'rotate(45deg)', 
+    marginRight: 2, 
+  };
+
+  // @ts-expect-error
+  const renderDiamonds = (num) => {
+    const diamonds = [];
+    for (let i = 0; i < 5; i++) {
+      diamonds.push(
+        <Box
+          key={i}
+          sx={{
+            ...diamondStyle,
+            opacity: i < num ? 1 : 0.1, 
+          }}
+        />
+      );
+    }
+    return diamonds;
+  };
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', padding: '2px' }}>
+      {difficulty === "1" && renderDiamonds(1)}
+      {difficulty === "2" && renderDiamonds(2)}
+      {difficulty === "3" && renderDiamonds(3)}
+      {difficulty === "4" && renderDiamonds(4)}
+      {difficulty === "5" && renderDiamonds(5)}
+    </Box>
+  );
 }
 
 const RecipeLists: React.FC = () => {
@@ -154,21 +133,21 @@ function Recipe({ rid, name, difficulty, image, lid }) {
   
     return (
         <>
-        <Card variant="outlined"> {/* I'd like for the cards to be smaller but that's low priority */}
-            <CardActionArea
-            onClick={handleGoToRecipe}
-            >
-            <CardHeader
-                title={name}
-                subheader={Difficulty({difficulty})}
-            />
-            <CardMedia
-                component="img"
-                image={image}
-            />
-            </CardActionArea>
-        </Card>
-        <Button variant="outlined"
+        <Card variant="outlined">
+              <CardActionArea
+                onClick={handleGoToRecipe}
+              >
+                <CardHeader
+                  title={name}
+                  subheader={Difficulty({difficulty})}
+                />
+                <CardMedia
+                  component="img"
+                  image={image}
+                />
+              </CardActionArea>
+            </Card>
+        <Button variant="contained"
          color="error"
           onClick={handleRemoveRecipeFromList}
           >
@@ -192,14 +171,85 @@ function Recipe({ rid, name, difficulty, image, lid }) {
 
     return (
         <>
+
+        {/* Navbar */}
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            display: 'flex',
+            alignItems: 'center',
+            padding: '10px 20px',
+            backgroundColor: '#fff',
+            boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)',
+            zIndex: 1000,
+            height: '100px',
+            justifyContent: 'space-between',
+          }}
+        >
+        {/* Back button */}
+        <IconButton
+                onClick={() => navigate('/recipe-lists')}
+                style={{ position: "absolute", top: 30, left: 30 }} 
+        >
+            <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+        </IconButton>
+
+        <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center', 
+              flexGrow: 1,
+              alignItems: 'center',
+              fontSize: '24px',
+              fontWeight: 'bold',
+            }}
+          >
             <h1>{recipe_list.name}</h1>
+          </Box>
+        </Box>
+
+        {/* Spacer */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            mt: 12,
+          }}
+        >
+          </Box>
 
           {/* Implements a grid view of recipes */}
           <Grid2 container spacing={3}>
             {recipes.map((recipe) => (
                 <Grid2 size={4} key={recipe.id}>
-                    <Recipe rid={recipe.id} name={recipe.recipe_name} difficulty={recipe.difficulty} image={recipe.image} lid={id} />
-                </Grid2>
+                <Box
+                  sx={{
+                    border: '2px solid rgb(172, 169, 169)', 
+                    borderRadius: 2, 
+                    boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)', 
+                    transition: 'all 0.3s ease', 
+                    '&:hover': {
+                      borderColor: '#1976d2',
+                      boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)', 
+                    },
+                  }}
+                >
+                <Recipe
+                  rid={recipe.id}
+                  lid={id}
+                  name={recipe.recipe_name}
+                  difficulty={recipe.difficulty}
+                  image={recipe.image}
+                />
+              </Box>  
+              </Grid2>
             ))}
           </Grid2>
             <br />
