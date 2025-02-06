@@ -1,4 +1,5 @@
 from flask import Flask, request, current_app
+from flask_session import Session
 from config import Config
 from flask_login import LoginManager
 from flask_cors import CORS  
@@ -7,6 +8,7 @@ import string, random
 from datetime import datetime
 import requests
 import os
+import redis
 
 login_manager = LoginManager()
 
