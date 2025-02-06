@@ -28,7 +28,7 @@ import GroupDetails from "./components/GroupDetails";
 import CreateRecipeList from "./components/CreateRecipeList";
 import { PublicClientApplication } from "@azure/msal-browser";
 import ProtectedRoute from "./components/ProtectedRoute";
-import useIdTokenRefresher from "./components/refresh";
+import useIdTokenRefresher from "./hooks/refresh";
 
 const msalInstance = new PublicClientApplication(msalConfig);
 

@@ -159,7 +159,7 @@ def api_register():
     
     user = User.query.filter_by(email_address=email).first()
 
-    print(user)
+    #print(user)
 
     if user:
         login_user(user, remember=True)
@@ -179,8 +179,8 @@ def validate_user():
     username = request.json.get('username')
     email = request.json.get('email')
 
-    print(username)
-    print(email)
+    #print(username)
+    #print(email)
 
     if username and User.query.filter_by(username=username).first():
         print("invalid 1")
@@ -199,7 +199,6 @@ def sso_login():
     data = request.json
     token = data.get("token")
 
-    print("LOGIN TOKEN: ", token)
     decoded = jwt.decode(token, options={"verify_signature": False})
     print("DECODED TOKEN: ", decoded)
     exp = decoded.get("exp", 0)
@@ -228,7 +227,7 @@ def sso_login():
 
     user = User.query.filter_by(email_address=email).first()
 
-    print(user)
+   # print(user)
 
     if user:
         login_user(user, remember=True)
