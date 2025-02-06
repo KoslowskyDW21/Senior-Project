@@ -296,7 +296,8 @@ const Recipes: React.FC = () => {
     <MenuItem onClick={handleGoToAchievements}>Achievements</MenuItem>
     {admin ? <MenuItem onClick={handleGoToAdmin}>Admin Controls</MenuItem> : <></>}
   </Menu>
-  </Box>
+</Box> {/* End of menu bar Box */}
+
     <Box
       sx={{
         display: 'flex',

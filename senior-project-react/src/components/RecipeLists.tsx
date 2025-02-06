@@ -9,6 +9,7 @@ import {
     Typography,
     Grid2,
     IconButton,
+    Box,
 } from "@mui/material";
 
 interface RecipeList {
@@ -116,23 +117,23 @@ const RecipeLists: React.FC = () => {
         }
         return (
             <>
-                <Card>
+                <Card variant="outlined"
+                    onClick={handleGoToRecipeList}
+                    sx={{ cursor: "pointer" }}
+                >
                     <CardContent>
-                    <Typography variant="h6" component="div" gutterBottom>
+                    <Typography variant="h4" component="div" gutterBottom>
                         {name}
                     </Typography>
-                    <Button
-                        variant="outlined"
-                        onClick={handleGoToRecipeList}
-                    >
-                        View List
-                    </Button>
                     <br />
                     <br />
                     <Button
                         variant="outlined"
                         color="error"
-                        onClick={handleDeleteList}
+                        onClick={(e) => {{
+                            e.stopPropagation();
+                            handleDeleteList();
+                        }}}
                     >
                         Delete List
                     </Button>
@@ -148,25 +149,91 @@ const RecipeLists: React.FC = () => {
 
     return (
         <>
+        {/* Navbar */}
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            display: 'flex',
+            alignItems: 'center',
+            padding: '10px 20px',
+            backgroundColor: '#fff',
+            boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)',
+            zIndex: 1000,
+            height: '100px',
+            justifyContent: 'space-between',
+          }}
+        >
+        {/* Back button */}
         <IconButton
                 onClick={() => navigate('/recipes')}
                 style={{ position: "absolute", top: 30, left: 30 }} 
-            >
+        >
             <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
-            </IconButton>
-        <Typography variant="h5" gutterBottom>My Recipe Lists</Typography>
+        </IconButton>
+
+        <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center', 
+              flexGrow: 1,
+              alignItems: 'center',
+              fontSize: '24px',
+              fontWeight: 'bold',
+            }}
+          >
+            <h1>Recipe Lists</h1>
+          </Box>
+        </Box>
+
+        {/* Spacer */}
+        <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'flex-start',
+                alignItems: 'center',
+                fontSize: '24px',
+                fontWeight: 'bold',
+                textAlign: 'center',
+                mt: 12,
+              }}
+            >
+              </Box>
+
+        <Box>
         <Grid2 container spacing={2}>
             {recipeLists.map((recipeList) => (
-                <Grid2 xs={12} sm={6} md={4} key={recipeList.id}>
-                    <RecipeList lid={recipeList.id} name={recipeList.name} belongs_to={recipeList.belongs_to}/>
-                </Grid2>
+                <Grid2 size={4} key={recipeList.id}>
+                            <Box
+                              sx={{
+                                border: '2px solid rgb(172, 169, 169)', 
+                                borderRadius: 2, 
+                                boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)', 
+                                transition: 'all 0.3s ease', 
+                                '&:hover': {
+                                  borderColor: '#1976d2',
+                                  boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)', 
+                                },
+                              }}
+                            >
+                            <RecipeList
+                              lid={recipeList.id}
+                              name={recipeList.name}
+                              belongs_to={recipeList.belongs_to}
+                            />
+                          </Box>  
+                          </Grid2>
             ))}
         </Grid2>
+        </Box>
+
         <br />
         <br />
         <Button
             onClick={handleGoToRecipeCreation}
-            variant="outlined"
+            variant="contained"
         >
             Create new list
         </Button>
