@@ -1,70 +1,68 @@
-import { useState, useEffect } from "react"; //react
+import { useEffect } from "react";
 import axios from "axios";
-import { Box, Button, Container } from "@mui/material"; //matui components
-import { useNavigate } from "react-router-dom"; // React Router for nav
+import { Box, Button, Container } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
-import * as msal from "@azure/msal-browser";
-
-interface LoginResponse {
-  message: string;
-}
 
 const Login = () => {
-  useEffect(() => {
-    const token = localStorage.getItem("idToken");
-    console.log("Stored Token:", token);
-  }, []);
-
-  const [message, setMessage] = useState("");
   const navigate = useNavigate();
   const { instance } = useMsal();
 
-  // Retrieve the ID token from the active session
+  // Retrieve the ID token from the active session after redirect
   const getIdToken = async () => {
     try {
-      return (
-        await instance.acquireTokenSilent({
-          scopes: ["openid", "profile", "email"],
-          account: instance.getActiveAccount() || undefined,
-          forceRefresh: true,
-        })
-      ).idToken;
+      const activeAccount = instance.getActiveAccount();
+
+      // Use undefined if no active account is found
+      const response = await instance.acquireTokenSilent({
+        scopes: ["openid", "profile", "email"],
+        account: activeAccount || undefined, // Ensure account is either AccountInfo or undefined
+        forceRefresh: true,
+      });
+
+      const idToken = response.idToken;
+
+      // Check if idToken is undefined
+      if (!idToken) {
+        throw new Error("ID Token acquisition failed");
+      }
+
+      return idToken; // Return token only if it is not undefined
     } catch (error) {
       console.warn(
-        "Silent token acquisition failed, falling back to popup:",
+        "Silent token acquisition failed, trying redirect flow instead:",
         error
       );
-      return (
-        await instance.acquireTokenPopup({
-          scopes: ["openid", "profile", "email"],
-        })
-      ).idToken;
+      // If silent token acquisition fails, attempt redirect flow instead
+      await instance.acquireTokenRedirect({
+        scopes: ["openid", "profile", "email"],
+      });
     }
   };
 
   const handleSSOLogin = async () => {
     try {
-      // Check if there is already an active account
       let activeAccount = instance.getActiveAccount();
 
       if (!activeAccount) {
         const allAccounts = instance.getAllAccounts();
 
         if (allAccounts.length > 0) {
-          instance.setActiveAccount(allAccounts[0]); // Set active account only once
+          instance.setActiveAccount(allAccounts[0]);
           activeAccount = instance.getActiveAccount();
         } else {
-          // No existing account, proceed with login
-          const loginResponse = await instance.loginPopup();
-          instance.setActiveAccount(instance.getAllAccounts()[0]); // Set new account
-          activeAccount = instance.getActiveAccount();
+          // No existing account, initiate login redirect
+          instance.loginRedirect({
+            scopes: ["openid", "profile", "email"],
+          });
+          return; // Stop further execution until the redirect is complete
         }
       }
 
       const idToken = await getIdToken();
 
       // Send ID Token to backend
-      const response = await axios.post<LoginResponse>(
+      const response = await axios.post(
         "http://127.0.0.1:5000/api/login/sso/",
         { token: idToken },
         { withCredentials: true }
@@ -74,12 +72,10 @@ const Login = () => {
       axios.defaults.headers.common["Authorization"] = `Bearer ${idToken}`;
 
       if (response.data.message === "Login successful") {
-        console.log("ID Token:", idToken);
-        localStorage.setItem("idToken", idToken);
-        console.log("MSAL Account Info:", instance.getAccount);
-        console.log("All MSAL Accounts:", instance.getAllAccounts());
-        navigate("/recipes");
-        console.log("Stored Token:", localStorage.getItem("idToken"));
+        if (idToken) {
+          localStorage.setItem("idToken", idToken);
+          navigate("/recipes");
+        }
       } else if (response.data.message === "User not registered") {
         navigate("/registration-one");
       }
@@ -87,6 +83,23 @@ const Login = () => {
       console.error("SSO Login Failed", error);
     }
   };
+
+  useEffect(() => {
+    // Handle the redirect callback when the page is reloaded after successful login
+    instance
+      .handleRedirectPromise()
+      .then((response) => {
+        if (response) {
+          const idToken = response.idToken;
+          localStorage.setItem("idToken", idToken); // Save the token
+          // navigate("/recipes");
+        }
+      })
+      .catch((error) => {
+        console.error("Error in redirect handling", error);
+      });
+  }, [instance, navigate]);
+
   return (
     <Container>
       <Box
@@ -101,14 +114,14 @@ const Login = () => {
         }}
       >
         <img
-          src="http://127.0.0.1:5000/static\uploads\2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg"
+          src="http://127.0.0.1:5000/static/uploads/2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg"
           alt="Image"
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
       </Box>
-      <br></br>
+      <br />
       <Button
-        onClick={() => handleSSOLogin()}
+        onClick={handleSSOLogin}
         variant="contained"
         color="primary"
         fullWidth
