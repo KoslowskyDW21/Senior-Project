@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button, FormControl, Avatar, MenuItem, Select, InputLabel, FormControlLabel, Checkbox, Typography, SelectChangeEvent, IconButton, Container } from "@mui/material"; //matui components
 import axios, { AxiosError } from "axios";
+import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface Recipe {
     "id": string,
@@ -64,6 +66,7 @@ const IndividualRecipe: React.FC = () => {
     const [ lid, setLid ] = React.useState('');
     const [ recipeLists, setRecipeLists ] = React.useState<RecipeList[]>([]);
     const [ steps, setSteps ] = React.useState<Step[]>([]);
+    const [ snackbarOpen, setSnackBarOpen ] = React.useState(false);
     const { id } = useParams<{ id: string }>();
 
     const navigate = useNavigate();
@@ -98,7 +101,35 @@ const IndividualRecipe: React.FC = () => {
                 setMessage("An unknown error occurred");
             }
         }
+        setSnackBarOpen(true);
     }
+
+    const handleSnackBarClose = (
+        event: React.SyntheticEvent | Event,
+        reason?: SnackbarCloseReason,
+    ) => {
+        if (reason === 'clickaway') {
+            return;
+          }
+      
+          setSnackBarOpen(false);
+    };
+
+    const action = (
+        <React.Fragment>
+          {/* <Button color="secondary" size="small" onClick={handleSnackBarClose}>
+            Close
+          </Button> */}
+          <IconButton
+            size="small"
+            aria-label="close"
+            color="inherit"
+            onClick={handleSnackBarClose}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </React.Fragment>
+      );
 
     const getCurrentUser = async () => {
         console.log("Getting FULL JSON of current user");
@@ -189,6 +220,14 @@ const IndividualRecipe: React.FC = () => {
             {steps.map((step) => (
                 <Step recipe_id={step.recipe_id} step_number={step.step_number} step_description={step.step_description} />
             ))}
+
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleSnackBarClose}
+                message={message}
+                action={action}
+            />
         </>
     )
 }

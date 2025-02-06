@@ -66,7 +66,7 @@ def add_recipe_to_list():
         already_exists = RecipeRecipeList.query.filter_by(recipe_id=rid, recipe_list_id=lid).first()
         print(already_exists)
         if (already_exists):
-            return jsonify({"message": "duplicate recipe"}), 200
+            return jsonify({"message": "Recipe already in list"}), 200
         rrl = RecipeRecipeList(recipe_id=rid, recipe_list_id=lid)
         db.session.add(rrl)
         db.session.commit()
