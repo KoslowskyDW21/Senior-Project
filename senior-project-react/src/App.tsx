@@ -1,4 +1,4 @@
-import { useEffect, useId } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { RegistrationProvider } from "./components/RegistrationContext";
 import Login from "./components/Login";
@@ -30,25 +30,32 @@ import { PublicClientApplication } from "@azure/msal-browser";
 import ProtectedRoute from "./components/ProtectedRoute";
 import useIdTokenRefresher from "./components/refresh";
 
+const msalInstance = new PublicClientApplication(msalConfig);
+
 function App() {
-  // this allows cookies to be sent with all requests in the app
+  // State to indicate if MSAL instance is initialized
+  const [isMsalInitialized, setIsMsalInitialized] = useState(false);
+
   useEffect(() => {
+    // Initialize MSAL instance
+    msalInstance
+      .initialize()
+      .then(() => {
+        setIsMsalInitialized(true);
+      })
+      .catch((error) => {
+        console.error("MSAL initialization failed:", error);
+      });
+
+    // Allow cookies to be sent with all requests in the app
     axios.defaults.withCredentials = true;
   }, []);
 
-  // EXAMPLE FOR RETRIEVING DATA FROM FLASK
-  // const fetchAPI = async () => {
-  //   const response = await axios.get("http://127.0.0.1:5000");
-  //   console.log(response.data);
-  // };
-
-  // useEffect(() => {
-  //   fetchAPI();
-  // }, []);
-
-  const msalInstance = new PublicClientApplication(msalConfig);
-
   useIdTokenRefresher();
+
+  if (!isMsalInitialized) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <MsalProvider instance={msalInstance}>
@@ -57,12 +64,10 @@ function App() {
           <Routes>
             {/* Default route (login page) */}
             <Route path="/" element={<Login />} />
-
             {/* Registration pages */}
             <Route path="/registration-one" element={<RegistrationOne />} />
             <Route path="/registration-two" element={<RegistrationTwo />} />
             <Route path="/registration-three" element={<RegistrationThree />} />
-
             {/* Protected Routes for Authenticated Users */}
             <Route element={<ProtectedRoute />}>
               {/* recipes */}
@@ -109,7 +114,8 @@ function App() {
               <Route path="/admin" element={<AdminPage />} />
             </Route>
             {/* Redirect unknown routes to login */}
-            <Route path="/" element={<Login />} />
+            //
+            <Route path="*" element={<Login />} />
           </Routes>
         </RegistrationProvider>
       </Router>

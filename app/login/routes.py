@@ -16,8 +16,6 @@ from jwt.algorithms import RSAAlgorithm
 import redis
 import time
 
-revoked_tokens = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
-
 TENANT_ID = os.getenv("TENANT_ID")
 CLIENT_ID = os.getenv("CLIENT_ID")
 JWKS_URL = f"https://login.microsoftonline.com/{TENANT_ID}/discovery/v2.0/keys"
