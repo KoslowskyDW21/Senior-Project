@@ -1,8 +1,16 @@
 from __future__ import annotations
 from app.groups import bp
 from app.models import User, UserGroup, GroupMember, GroupBannedMember, Message, db
-from flask import jsonify, request
+from flask import jsonify, request, current_app
 from flask_login import login_required, current_user
+from werkzeug.utils import secure_filename
+import os
+import uuid
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS    
 
 @bp.route('/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -24,7 +32,7 @@ def join_group(group_id):
     if not group:
         return jsonify({"message": "Group not found"}), 404
 
-    member = GroupMember(group_id=group_id, member_id=current_user.id)
+    member = GroupMember(group_id=group_id, member_id=current_user.id, is_trusted=False)
     db.session.add(member)
     db.session.commit()
 
@@ -67,3 +75,39 @@ def get_my_groups():
     group_ids = [membership.group_id for membership in group_memberships]
     groups = UserGroup.query.filter(UserGroup.id.in_(group_ids)).all()
     return jsonify([group.to_json() for group in groups]), 200
+
+@bp.route('/create', methods=['POST'])
+@login_required
+def create_group():
+    name = request.form.get('name')
+    description = request.form.get('description')
+    is_public = request.form.get('is_public') == 'true'
+    image = request.files.get('image')
+
+    if not name or not description:
+        return jsonify({"message": "Name and description are required"}), 400
+
+    group = UserGroup(
+        name=name,
+        description=description,
+        is_public=is_public,
+        creator=current_user.id,
+        num_reports=0
+    )
+
+    if image and allowed_file(image.filename):
+        upload_folder = current_app.config['UPLOAD_FOLDER']
+        os.makedirs(upload_folder, exist_ok=True)
+        filename = f"{uuid.uuid4().hex}_{secure_filename(image.filename)}"
+        file_path = os.path.join(upload_folder, filename)
+        image.save(file_path)
+        group.image = os.path.join('static', 'uploads', filename)
+
+    db.session.add(group)
+    db.session.commit()
+
+    member = GroupMember(group_id=group.id, member_id=current_user.id, is_trusted=True)
+    db.session.add(member)
+    db.session.commit()
+
+    return jsonify({"message": "Group created successfully!", "group_id": group.id}), 200

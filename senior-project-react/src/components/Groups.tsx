@@ -43,11 +43,9 @@ const Groups: React.FC = () => {
   const[profile_picture, setProfile_picture] = useState<string>();
   const [admin, setAdmin] = useState<boolean>(false);
 
-  const fetchGroups = async (page: number) => {
+  const fetchGroups = async () => {
     try {
-      const response = await axios.get(`http://127.0.0.1:5000/groups`, {
-        params: { page, per_page: 10 },
-      });
+      const response = await axios.get(`http://127.0.0.1:5000/groups`);
       if (response.status === 200) {
         const newGroups = response.data;
         setGroups((prevGroups) => [...prevGroups, ...newGroups]);
@@ -290,6 +288,14 @@ const filteredGroups = groups.filter((group) =>
         </Typography>
       </Box>
 
+      <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate(`/groups/create`)}
+        >
+          Create a Group
+        </Button>
+
       {myGroups.length > 0 && (
         <Box mt={4}>
           <Typography variant="h5" gutterBottom>
@@ -313,12 +319,6 @@ const filteredGroups = groups.filter((group) =>
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       {group.description}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {group.is_public ? "Public" : "Private"}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      Reports: {group.num_reports}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -350,12 +350,6 @@ const filteredGroups = groups.filter((group) =>
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
                     {group.description}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    {group.is_public ? "Public" : "Private"}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Reports: {group.num_reports}
                   </Typography>
                 </CardContent>
               </Card>
