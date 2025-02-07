@@ -59,3 +59,11 @@ def get_members(group_id):
         user = User.query.get(member.member_id)
         member_data.append({"user_id": user.id, "username": user.username})
     return jsonify(member_data), 200
+
+@bp.route('/my_groups', methods=['GET'])
+@login_required
+def get_my_groups():
+    group_memberships = GroupMember.query.filter_by(member_id=current_user.id).all()
+    group_ids = [membership.group_id for membership in group_memberships]
+    groups = UserGroup.query.filter(UserGroup.id.in_(group_ids)).all()
+    return jsonify([group.to_json() for group in groups]), 200
