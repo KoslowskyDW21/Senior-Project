@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button, Grid2, IconButton, Box, Card, CardActionArea, CardHeader, CardMedia } from "@mui/material"; //matui components
+import { Button, Grid2, TextField, IconButton, Box, Card, CardActionArea, CardHeader, CardMedia } from "@mui/material"; //matui components
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import axios, { AxiosError } from "axios";
 
@@ -63,6 +63,7 @@ function Difficulty({ difficulty }) {
 const RecipeLists: React.FC = () => {
     const [ recipes, setRecipes ] = React.useState<Recipe[]>([]);
     const [ recipe_list, setRecipe_list ] = React.useState<RecipeList>();
+    const [ searchQuery, setSearchQuery ] = React.useState<String>("");
     const { id } = useParams<{ id: string }>();
 
     const navigate = useNavigate();
@@ -91,6 +92,14 @@ const RecipeLists: React.FC = () => {
             console.error("Error fetching recipeList: ", error);
         }
     };
+
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchQuery(event.target.value);
+    }
+
+    const filteredRecipes = recipes.filter((recipe) => 
+      recipe.recipe_name.toLowerCase().includes(searchQuery.toLocaleLowerCase())
+    );
 
 // @ts-expect-error
 function Recipe({ rid, name, difficulty, image, lid }) {
@@ -197,6 +206,7 @@ function Recipe({ rid, name, difficulty, image, lid }) {
             <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
         </IconButton>
 
+        {/* Recipe list name */}
         <Box
             sx={{
               display: 'flex',
@@ -209,7 +219,29 @@ function Recipe({ rid, name, difficulty, image, lid }) {
           >
             <h1>{recipe_list.name}</h1>
           </Box>
-        </Box>
+
+        {/* Search bar */}
+        <Box mt={4} mb={2}
+         textAlign="center"
+          display="flex"
+           justifyContent="center"
+            sx={{ flexGrow: 1 }}>
+            <TextField
+              label="Search Recipes"
+              variant="outlined"
+              fullWidth
+              value={searchQuery}
+              onChange={handleSearchChange}
+              sx={{
+                zIndex: 1001,
+                width: 500, 
+              }}
+            />
+          </Box>
+
+        </Box> {/* End of header bar */}
+
+        
 
         {/* Spacer */}
         <Box
@@ -227,7 +259,7 @@ function Recipe({ rid, name, difficulty, image, lid }) {
 
           {/* Implements a grid view of recipes */}
           <Grid2 container spacing={3}>
-            {recipes.map((recipe) => (
+            {filteredRecipes.map((recipe) => (
                 <Grid2 size={4} key={recipe.id}>
                 <Box
                   sx={{
@@ -254,21 +286,13 @@ function Recipe({ rid, name, difficulty, image, lid }) {
           </Grid2>
             <br />
             <br />
+            {/* Button to find more recipes (return to recipe page) */}
             <Button
                 onClick={handleGoToRecipes}
                 variant="contained"
                 color="primary"
             >
                 Find Recipes
-            </Button>
-            <br />
-            <br />
-            <Button
-                onClick={handleGoToRecipeLists}
-                variant="contained"
-                color="primary"
-            >
-                All Lists
             </Button>
         </>
     )
