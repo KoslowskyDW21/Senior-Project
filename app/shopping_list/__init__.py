@@ -5,7 +5,7 @@ from flask import Blueprint
 bp_dir:        str = os.path.abspath(os.path.dirname(__file__))
 templates_dir: str = os.path.join(bp_dir, 'templates')
 
-bp = Blueprint('recipe_lists', __name__, 
+bp = Blueprint('shopping_lists', __name__, 
                template_folder=templates_dir)
 
 from app.shopping_list import routes
