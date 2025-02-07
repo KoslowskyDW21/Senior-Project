@@ -11,6 +11,7 @@ import { msalConfig } from "./authConfig";
 import Recipes from "./components/Recipes";
 import RecipeList from "./components/RecipeList";
 import RecipeLists from "./components/RecipeLists";
+import ShoppingList from "./components/ShoppingList";
 import Profile from "./components/Profile";
 import Settings from "./components/Settings";
 import axios from "axios";
@@ -85,6 +86,9 @@ function App() {
                 path="/recipe-lists/create"
                 element={<CreateRecipeList />}
               />
+
+              {/* shoppinglist */}
+              <Route path="/shopping-list" element={<ShoppingList />} />
 
               {/* profile */}
               <Route path="/profile" element={<Profile />} />
