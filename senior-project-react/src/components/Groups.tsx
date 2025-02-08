@@ -110,6 +110,10 @@ const Groups: React.FC = () => {
     navigate(`/recipe-lists/`);
   }
 
+  const handleGoToShoppingList = async () => {
+    navigate('/shopping-list');
+  }
+
   const handleGoToChallenges = async () => {
     navigate(`/challenges`);
   }
@@ -264,6 +268,7 @@ const filteredGroups = groups.filter((group) =>
     <MenuItem onClick={handleGoToProfile}>Profile</MenuItem>
     <MenuItem onClick={handleGoToSettings}>Settings</MenuItem>
     <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem>
+    <MenuItem onClick={handleGoToShoppingList}>Shopping List</MenuItem>
     <MenuItem onClick={handleGoToAchievements}>Achievements</MenuItem>
     {admin ? <MenuItem onClick={handleGoToAdmin}>Admin Controls</MenuItem> : <></>}
   </Menu>

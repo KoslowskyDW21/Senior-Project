@@ -184,6 +184,10 @@ const Challenges: React.FC = () => {
     navigate('/recipes');
   }
 
+  const handleGoToShoppingList = async () => {
+    navigate('/shopping-list');
+  }
+
   useEffect(() => {
     getResponse();
     getCurrentUser();
@@ -292,6 +296,7 @@ const Challenges: React.FC = () => {
     <MenuItem onClick={handleGoToProfile}>Profile</MenuItem>
     <MenuItem onClick={handleGoToSettings}>Settings</MenuItem>
     <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem>
+    <MenuItem onClick={handleGoToShoppingList}>Shopping List</MenuItem>
     <MenuItem onClick={handleGoToAchievements}>Achievements</MenuItem>
     {admin ? <MenuItem onClick={handleGoToAdmin}>Admin Controls</MenuItem> : <></>}
   </Menu>
