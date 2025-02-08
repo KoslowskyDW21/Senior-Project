@@ -151,6 +151,7 @@ export default function AdminPage() {
   if(admin) {
     return (
       <>
+        <link rel="stylesheet" href="/src/AdminPage.css" />
         <IconButton
           onClick={() => navigate(-1)}
           style={{ position: "absolute", top: 30, left: 30 }} 

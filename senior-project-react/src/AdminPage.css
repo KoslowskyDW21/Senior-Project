@@ -1,0 +1,34 @@
+:root {
+  --dark: #d0d0d0;
+  --light: #ffffff;
+}
+
+table {
+  min-width: 1000px;
+  margin: auto;
+  /* background-color: #000000;
+  /* border-style: solid;
+  border-color: var(--dark); */
+}
+
+thead {
+  font-weight: bold;
+  background-color: var(--dark);
+}
+
+tbody {
+  text-align: left;
+}
+
+tbody tr:nth-child(even) {
+  background-color: var(--dark);
+}
+
+tbody tr:nth-child(odd) {
+  background-color: var(--light);
+}
+
+table tr td:nth-child(5) {
+  text-align: center;
+  background-color: var(--light);
+}
