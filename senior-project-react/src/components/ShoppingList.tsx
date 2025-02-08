@@ -1,8 +1,9 @@
 import React from 'react';
 import axios, { AxiosError } from "axios";
 import { useNavigate } from 'react-router-dom';
-import { Box, IconButton, TextField } from "@mui/material";
+import { Box, Card, Checkbox, IconButton, TextField } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { positions } from '@mui/system';
 
 interface ShoppingListInterface {
     id: number;
@@ -63,13 +64,22 @@ const ShoppingList: React.FC = () => {
         }
         return (
             <>
-            <Box
-                display="flex"
-                flexDirection="column"
-                justifyContent="left"
+            <Card
+                variant="outlined"
+                sx={{margin: 2,
+                    padding: 1,
+                    width: 300,
+                    display: "flex"
+                }}
             >
-                {ingredient_quantity} {ingredient_quantity_unit} {ingredients.filter(ingredient => ingredient.id==ingredient_id).map(ingredient => (<p>{ingredient.ingredient_name}</p>))}
-            </Box>
+                <Checkbox
+                    sx={{ '& .MuiSvgIcon-root': { fontSize: 28 }
+                }}
+                />
+                {ingredients.filter(ingredient => ingredient.id==ingredient_id).map(ingredient => (<p>{ingredient.ingredient_name}</p>))} 
+                {ingredient_quantity} 
+                {ingredient_quantity_unit}
+            </Card>
             
             </>
         )
@@ -140,6 +150,20 @@ const ShoppingList: React.FC = () => {
           </Box>
 
         </Box> {/* End of header bar */}
+
+        {/* Spacer */}
+        <Box
+            sx={{
+            display: 'flex',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            mt: 12,
+            }}
+        >
+        </Box>
 
         {shoppingListItems.map((shoppingListItem) => (
             <ListItem 
