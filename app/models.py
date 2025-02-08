@@ -180,10 +180,12 @@ class GroupMember(db.Model):
     __tablename__ = 'GroupMember'
     group_id = db.Column(db.Integer, db.ForeignKey('UserGroup.id'), primary_key=True)
     member_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    is_trusted = db.Column(db.Boolean, nullable=False)
     def to_json(self):
         return {
             "group_id": self.group_id,
             "member_id": self.member_id,
+            "is_trusted": self.is_trusted,
         }
 
 class GroupBannedMember(db.Model):

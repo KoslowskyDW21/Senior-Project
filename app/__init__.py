@@ -3,7 +3,7 @@ from flask_session import Session
 from config import Config
 from flask_login import LoginManager
 from flask_cors import CORS  
-from app.models import User, UserGroup, Recipe, RecipeIngredient, RecipeCuisine, RecipeStep, Ingredient, Cuisine, db
+from app.models import User, UserGroup, Recipe, RecipeIngredient, RecipeCuisine, RecipeStep, Ingredient, ShoppingList, ShoppingListItem, Cuisine, db
 import string, random
 from datetime import datetime
 import requests
@@ -41,6 +41,8 @@ def create_app(config=Config):
     app.register_blueprint(profile_bp, url_prefix='/profile')
     from app.recipe_lists import bp as recipe_lists_bp
     app.register_blueprint(recipe_lists_bp, url_prefix='/recipe_lists')
+    from app.shopping_list import bp as shopping_list_bp
+    app.register_blueprint(shopping_list_bp, url_prefix='/shopping_lists')
     from app.challenges import bp as challenge_bp
     app.register_blueprint(challenge_bp, url_prefix='/challenges')
     from app.achievements import bp as achievement_bp

@@ -9,7 +9,10 @@ import {
   Box,
   Container,
   IconButton,
+  Button,
 } from "@mui/material";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useNavigate } from "react-router-dom";
 
 interface UserGroup {
   id: number;
@@ -18,15 +21,18 @@ interface UserGroup {
   image: string;
   description: string;
   is_public: boolean;
-  num_reports: number;
 }
-import { useNavigate } from "react-router-dom";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+
+interface GroupMember {
+  user_id: number;
+  username: string;
+}
 
 const GroupDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [group, setGroup] = useState<UserGroup | null>(null);
-
+  const [isMember, setIsMember] = useState<boolean>(false);
+  const [members, setMembers] = useState<GroupMember[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,8 +47,48 @@ const GroupDetails: React.FC = () => {
       }
     };
 
+    const checkMembership = async () => {
+      try {
+        const response = await axios.get(`http://127.0.0.1:5000/groups/${id}/is_member`);
+        setIsMember(response.data.is_member);
+      } catch (error) {
+        console.error("Error checking membership:", error);
+      }
+    };
+
+    const fetchMembers = async () => {
+      try {
+        const response = await axios.get(`http://127.0.0.1:5000/groups/${id}/members`);
+        setMembers(response.data);
+      } catch (error) {
+        console.error("Error fetching group members:", error);
+      }
+    };
+
     fetchGroup();
+    checkMembership();
+    fetchMembers();
   }, [id]);
+
+  const handleJoinGroup = async () => {
+    try {
+      await axios.post(`http://127.0.0.1:5000/groups/${id}/join`);
+      setIsMember(true);
+      fetchMembers();
+    } catch (error) {
+      console.error("Error joining group:", error);
+    }
+  };
+
+  const handleLeaveGroup = async () => {
+    try {
+      await axios.post(`http://127.0.0.1:5000/groups/${id}/leave`);
+      setIsMember(false);
+      fetchMembers();
+    } catch (error) {
+      console.error("Error leaving group:", error);
+    }
+  };
 
   if (!group) {
     return (
@@ -68,6 +114,14 @@ const GroupDetails: React.FC = () => {
         </Typography>
       </Box>
       <Card>
+        {group.image && (
+          <CardMedia
+            component="img"
+            height="400"
+            image={`http://127.0.0.1:5000/${group.image}`}
+            alt={group.name}
+          />
+        )}
         <CardContent>
           <Typography variant="h6" component="div" gutterBottom>
             Description
@@ -78,9 +132,35 @@ const GroupDetails: React.FC = () => {
           <Typography variant="body2" color="textSecondary">
             {group.is_public ? "Public" : "Private"}
           </Typography>
-          <Typography variant="body2" color="textSecondary">
-            Reports: {group.num_reports}
-          </Typography>
+          <Box textAlign="center" mt={4}>
+            {isMember ? (
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={handleLeaveGroup}
+              >
+                Leave Group
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleJoinGroup}
+              >
+                Join Group
+              </Button>
+            )}
+          </Box>
+          <Box mt={4}>
+            <Typography variant="h5" gutterBottom>
+              Members
+            </Typography>
+            <ul>
+              {members.map((member) => (
+                <li key={member.user_id}>{member.username}</li>
+              ))}
+            </ul>
+          </Box>
         </CardContent>
       </Card>
     </Container>

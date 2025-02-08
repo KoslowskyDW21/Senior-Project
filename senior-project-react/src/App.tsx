@@ -26,6 +26,7 @@ import DeletedAccount from "./components/DeletedAccount";
 import AdminPage from "./components/AdminPage";
 import Groups from "./components/Groups";
 import GroupDetails from "./components/GroupDetails";
+import CreateGroup from "./components/CreateGroup";
 import CreateRecipeList from "./components/CreateRecipeList";
 import { PublicClientApplication } from "@azure/msal-browser";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -113,6 +114,7 @@ function App() {
               {/* groups */}
               <Route path="/groups" element={<Groups />} />
               <Route path="/groups/:id" element={<GroupDetails />} />
+              <Route path="/groups/create" element={<CreateGroup />} />
 
               {/* admin */}
               <Route path="/admin" element={<AdminPage />} />
