@@ -45,6 +45,8 @@ def create_app(config=Config):
     app.register_blueprint(shopping_list_bp, url_prefix='/shopping_lists')
     from app.challenges import bp as challenge_bp
     app.register_blueprint(challenge_bp, url_prefix='/challenges')
+    from app.ingredients import bp as ingredients_bp
+    app.register_blueprint(ingredients_bp, url_prefix='/ingredients')
     from app.achievements import bp as achievement_bp
     app.register_blueprint(achievement_bp, url_prefix='/achievements')
     from app.settings import bp as settings_bp
