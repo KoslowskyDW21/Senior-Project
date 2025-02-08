@@ -14,6 +14,7 @@ import {
   Checkbox,
   ListItemText,
   IconButton,
+  TextField,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -86,10 +87,12 @@ export default function Settings() {
     id: null,
     fname: null,
     lname: null,
+    username: "",
     profile_picture: null,
     colonial_floor: "",
     colonial_side: "",
   });
+  const [username, setUsername] = useState<string>("");
   const [colonialFloor, setColonialFloor] = useState<string>("");
   const [colonialSide, setColonialSide] = useState<string>("");
 
@@ -113,6 +116,7 @@ export default function Settings() {
       .get("http://127.0.0.1:5000/settings/")
       .then((response) => {
         setUser(response.data);
+        setUsername(user.username);
         setColonialFloor(user.colonial_floor);
         setColonialSide(user.colonial_side);
         console.log("Floor: " + user.colonial_floor);
@@ -364,6 +368,9 @@ export default function Settings() {
       <p>
         Name: {user.fname} {user.lname}
       </p>
+      <p>Username: {user.username}</p>
+      <p>Colonial Floor: {user.colonial_floor}</p>
+      <p>Colonial Side: {user.colonial_side}</p>
 
       <h2>Change Personal Details</h2>
 
@@ -413,6 +420,31 @@ export default function Settings() {
 
       <br />
       <br />
+
+      <h2>Change Account Details</h2>
+
+      <TextField
+        id="filled-helperText"
+        label="Username"
+        variant="filled"
+        defaultValue={username}
+        value={username} 
+        onChange={(e) => {
+          const newUsername = e.target.value;
+
+          setUsername(newUsername);
+          setUser((prevUser) => ({
+            ...prevUser,
+            username: newUsername,
+          }));
+        }}
+      />
+
+      <br />
+      <br />
+
+      <h2>Change Cuisine Preferences</h2>
+
       <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
         <InputLabel id="cuisine-select-label">Cuisines</InputLabel>
         <Select
