@@ -24,6 +24,7 @@ class User(UserMixin, db.Model):
     xp_points = db.Column(db.Integer, nullable=False)
     user_level = db.Column(db.Integer, nullable=False)
     is_admin = db.Column(db.Boolean, nullable=False)
+    is_super_admin = db.Column(db.Boolean, nullable=False)
     num_recipes_completed = db.Column(db.Integer, nullable=False)
     colonial_floor = db.Column(db.Enum('1', '2', '3', '4', 'ADMIN'))
     colonial_side = db.Column(db.Enum('Mens', 'Womens', 'ADMIN'))
@@ -52,6 +53,7 @@ class User(UserMixin, db.Model):
             "xp_points": self.xp_points,
             "user_level": self.user_level,
             "is_admin": self.is_admin,
+            "is_super_admin": self.is_super_admin,
             "num_recipes_completed": self.num_recipes_completed,
             "colonial_floor": self.colonial_floor,
             "colonial_side": self.colonial_side,
@@ -65,6 +67,7 @@ class User(UserMixin, db.Model):
             f"<User(id={self.id}, username='{self.username}', email_address='{self.email_address}', "
             f"fname='{self.fname}', lname='{self.lname}', colonial_floor='{self.colonial_floor}', "
             f"colonial_side='{self.colonial_side}', xp_points={self.xp_points}, is_admin={self.is_admin}, "
+            f"is_super_admin={self.is_super_admin}, "
             f"num_recipes_completed={self.num_recipes_completed}, date_created={self.date_created}, "
             f"num_reports={self.num_reports}, user_level={self.user_level}, "
             f"last_logged_in={self.last_logged_in})>"

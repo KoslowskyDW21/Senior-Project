@@ -15,6 +15,7 @@ interface User {
   xp_points: number;
   user_level: number;
   is_admin: boolean;
+  is_super_admin: boolean;
   num_recipes_completed: number;
   colonial_floor: string;
   colonial_side: string;
@@ -25,15 +26,64 @@ interface User {
 
 export default function AdminPage() {
   const [admin, setAdmin] = useState<boolean>(false);
+  const [superAdmin, setSuperAdmin] = useState<boolean>(false);
   const [users, setUsers] = useState<User[]>([]);
   const [userAdmin, setUserAdmin] = useState<boolean[]>([]);
   const navigate = useNavigate();
   const [idInput, setIdInput] = useState('');
 
+  // function AdminButton({ superAdmin, admin }) {
+  //   if(superAdmin) {
+  //     return (
+  //       <Button
+  //         onClick={() => {
+  //           handleAdminChange(user);
+  //         }}
+  //         variant="contained"
+  //         color={admin ? "error" : "success"}
+  //       >
+  //         {admin ? "Remove Status" : "Make Admin"}
+  //       </Button>
+  //     )
+  //   }
+  // }
+  function CreateAdminButton({ user, handleAdminChange }) {
+    if(superAdmin) {
+      return (
+        <Button
+          onClick={() => {
+            handleAdminChange(user);
+          }}
+          variant="contained"
+          color={user.is_admin ? "error" : "success"}
+        >
+          {user.is_admin ? "Remove Status" : "Make Admin"}
+        </Button>
+      );
+    }
+    else if(!user.is_admin) {
+      return (
+        <Button
+          onClick={() => {
+            handleAdminChange(user);
+          }}
+          variant="contained"
+          color="success"
+        >
+          Make Admin
+        </Button>
+      );
+    }
+    else {
+      return <></>;
+    }
+  }
+
   async function isAdmin() {
     await axios.get("http://127.0.0.1:5000/admin/")
       .then((response) => {
         setAdmin(response.data.is_admin);
+        setSuperAdmin(response.data.is_super_admin);
       })
       .catch((error) => {
         console.error("Unable to check if user is admin", error)
@@ -78,11 +128,14 @@ export default function AdminPage() {
     const id = user.id;
     for(const findUser of users) {
       if(findUser.id == id) {
-        findUser.is_admin = false;
+        findUser.is_admin = !user.is_admin;
       }
     }
 
-    user.is_admin ? updateUser(false, id) : updateUser(true, id);
+    console.log("User: " + user.fname + " " + user.lname);
+    console.log("is_admin: " + user.is_admin);
+
+    !user.is_admin ? updateUser(false, id) : updateUser(true, id);
   }
 
   const handleDeleteRecipe = async() =>{
@@ -115,7 +168,7 @@ export default function AdminPage() {
               <td>Username</td>
               <td>Admin Status</td>
               <td>Reports</td>
-              <td>Make Admin</td>
+              <td></td>
             </tr>
           </thead>
           <tbody>
@@ -126,15 +179,7 @@ export default function AdminPage() {
                 <td>{user.is_admin.toString()}</td>
                 <td>{user.num_reports}</td>
                 <td>
-                  <Button
-                    onClick={() => {
-                      handleAdminChange(user);
-                    }}
-                    variant="contained"
-                    color={user.is_admin ? "error" : "success"}
-                  >
-                    {user.is_admin ? "Remove Status" : "Make Admin"}
-                  </Button>
+                  {CreateAdminButton({ user, handleAdminChange })}
                 </td>
               </tr>
             ))}
