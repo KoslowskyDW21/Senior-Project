@@ -152,7 +152,6 @@ const RegisterThree = () => {
           justifyContent: "center",
           alignItems: "center",
           marginBottom: "16px",
-          marginLeft: "50px",
           cursor: "pointer",
           width: "150px",
           height: "150px",

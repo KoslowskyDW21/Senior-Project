@@ -15,7 +15,7 @@ import {
   ListItemText,
   IconButton,
 } from "@mui/material";
-import { ShouldRevalidateFunction, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useMsal } from "@azure/msal-react";
 
@@ -44,6 +44,11 @@ export interface User {
 interface UserCuisines {
   cuisines: [];
   userCuisines: [];
+}
+
+interface DietaryRestrictions {
+  dietaryRestrictions: [];
+  userDietaryRestrictions: [];
 }
 
 const modalStyle = {
@@ -94,8 +99,14 @@ export default function Settings() {
 
   const [cuisines, setCuisines] = useState<[]>([]);
   const [userCuisines, setUserCuisines] = useState<[]>([]);
-
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
+
+  const [dietaryRestrictions, setDietaryRestrictions] = useState<[]>([]);
+  const [userDietaryRestrictions, setUserDietaryRestrictions] = useState<[]>(
+    []
+  );
+  const [selectedDietaryRestrictions, setSelectedDietaryRestrictions] =
+    useState<string[]>([]);
 
   async function loadUser() {
     await axios
@@ -147,6 +158,42 @@ export default function Settings() {
     }
   }
 
+  const getDietaryRestrictions = async () => {
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/settings/dietary_restrictions/",
+        {},
+        { withCredentials: true }
+      );
+      const data: DietaryRestrictions = response.data;
+      setDietaryRestrictions(data.dietaryRestrictions);
+      setUserDietaryRestrictions(data.userDietaryRestrictions);
+    } catch (error) {
+      console.error("Could not fetch dietary restrictions:", error);
+    }
+  };
+
+  async function updateDietaryRestrictions(selectedIds: number[]) {
+    try {
+      const data = {
+        user_id: user.id,
+        selected_dietary_restrictions: selectedIds,
+      };
+      await axios.post(
+        "http://127.0.0.1:5000/settings/update_dietary_restrictions/",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Dietary restrictions updated successfully!");
+    } catch (error) {
+      console.error("Error updating dietary restrictions: ", error);
+    }
+  }
+
   async function handleDelete() {
     try {
       const response = await axios.post(
@@ -175,9 +222,12 @@ export default function Settings() {
 
   React.useEffect(() => {
     loadUser();
+    getDietaryRestrictions();
   }, []);
 
   React.useEffect(() => {
+    console.log("Dietary Restrictions:", dietaryRestrictions);
+    console.log("User Dietary Restrictions:", userDietaryRestrictions);
     const preselectedCuisines = cuisines
       .filter((cuisine) =>
         userCuisines.some(
@@ -190,6 +240,21 @@ export default function Settings() {
 
     setSelectedCuisines(preselectedCuisines);
   }, [cuisines, userCuisines]);
+
+  React.useEffect(() => {
+    const preselectedDietaryRestrictions = dietaryRestrictions
+      .filter((dietaryRestriction) =>
+        userDietaryRestrictions.some(
+          (userDietaryRestriction) =>
+            userDietaryRestriction.restriction_id === //use the actual ID attribute from the SQL table
+            dietaryRestriction.id
+        )
+      )
+      .map((dietaryRestriction) => dietaryRestriction.name);
+
+    setSelectedDietaryRestrictions(preselectedDietaryRestrictions);
+    console.log(preselectedDietaryRestrictions);
+  }, [dietaryRestrictions, userDietaryRestrictions]);
 
   const handleCuisineChange = (
     event: SelectChangeEvent<typeof selectedCuisines>
@@ -205,6 +270,20 @@ export default function Settings() {
     } else {
       alert("You can only select up to 5 cuisines.");
     }
+  };
+
+  const handleDietaryRestrictionsChange = (
+    event: SelectChangeEvent<typeof selectedDietaryRestrictions>
+  ) => {
+    const selectedNames = event.target.value;
+    const selectedIds = dietaryRestrictions
+      .filter((dietaryRestriction) =>
+        selectedNames.includes(dietaryRestriction.name)
+      )
+      .map((dietaryRestriction) => dietaryRestriction.id);
+
+    setSelectedDietaryRestrictions(selectedNames);
+    updateDietaryRestrictions(selectedIds);
   };
 
   const handleFloorChange = (event: SelectChangeEvent) => {
@@ -285,12 +364,10 @@ export default function Settings() {
       <p>
         Name: {user.fname} {user.lname}
       </p>
-      <p>Colonial Floor: {user.colonial_floor}</p>
-      <p>Colonial Side: {user.colonial_side}</p>
 
       <h2>Change Personal Details</h2>
 
-      <FormControl variant="filled" sx={{ m: 1, minWidth: 200 }} size="small">
+      <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
         <Select
           displayEmpty
           value={colonialFloor}
@@ -313,7 +390,7 @@ export default function Settings() {
         <FormHelperText>Colonial Floor</FormHelperText>
       </FormControl>
 
-      <FormControl variant="filled" sx={{ m: 1, minWidth: 200 }} size="small">
+      <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
         <Select
           displayEmpty
           value={colonialSide}
@@ -336,8 +413,8 @@ export default function Settings() {
 
       <br />
       <br />
-      <FormControl variant="filled" sx={{ m: 1, minWidth: 200 }} size="small">
-        <InputLabel id="cuisine-select-label">Select Cuisine(s)</InputLabel>
+      <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
+        <InputLabel id="cuisine-select-label">Cuisines</InputLabel>
         <Select
           labelId="cuisine-select-label"
           multiple
@@ -359,20 +436,48 @@ export default function Settings() {
               </MenuItem>
             ))}
         </Select>
-        <FormHelperText>Favorite Cuisines</FormHelperText>
+        <FormHelperText>Select Favorite Cuisines</FormHelperText>
       </FormControl>
 
-      <Button
-        onClick={handleOpenModal}
-        variant="contained"
-        color="error"
-        fullWidth
-      >
-        DELETE ACCOUNT
-      </Button>
-      <Button variant="contained" color="primary" onClick={handleLogout}>
-        Logout
-      </Button>
+      <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
+        <InputLabel id="dietary_restriction-select-label">
+          Dietary Restrictions
+        </InputLabel>
+        <Select
+          labelId="dietary_restriction-select-label"
+          multiple
+          value={selectedDietaryRestrictions}
+          onChange={handleDietaryRestrictionsChange}
+          renderValue={(selected) => selected.join(", ")}
+          displayEmpty
+        >
+          <MenuItem value="" disabled>
+            <em>Choose a dietary restriction</em>
+          </MenuItem>
+          {dietaryRestrictions.map((restriction) => (
+            <MenuItem key={restriction.id} value={restriction.name}>
+              <Checkbox
+                checked={selectedDietaryRestrictions.includes(restriction.name)}
+              />
+              <ListItemText primary={restriction.name} />
+            </MenuItem>
+          ))}
+        </Select>
+        <FormHelperText>Select Dietary Restrictions</FormHelperText>
+      </FormControl>
+
+      <br />
+      <br />
+
+      <Box mt={4} display="flex" flexDirection="column" gap={2}>
+        <Button variant="contained" color="error" onClick={handleOpenModal}>
+          Delete Account
+        </Button>
+        <Button variant="contained" color="primary" onClick={handleLogout}>
+          Logout
+        </Button>
+      </Box>
+
       <Modal open={openModal} onClose={handleCloseModal}>
         <Box sx={modalStyle}>
           <h2>Are you sure you want to delete your account?</h2>

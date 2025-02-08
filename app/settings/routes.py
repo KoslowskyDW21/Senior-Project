@@ -138,4 +138,42 @@ def update_user_cuisines():
     
     return jsonify({"message": "Cuisines updated successfully"})
 
+
+@bp.route('/dietary_restrictions/', methods = ['POST'])
+def dietary_restrictions():
+    restrictions = DietaryRestriction.query.all()
+    print(restrictions)
+    user_restrictions = UserDietaryRestriction.query.filter_by(user_id = current_user.id).all()
+    print(user_restrictions)
+    return jsonify({
+        "dietaryRestrictions": [restriction.to_json() for restriction in restrictions],
+        "userDietaryRestrictions": [ur.to_json() for ur in user_restrictions],
+    }), 200
+
+@bp.route('/update_dietary_restrictions/', methods=['POST'])
+def update_dietary_restrictions():
+    data = request.get_json()
+    user_id = data['user_id']
+    selected_dietary_restrictions = data['selected_dietary_restrictions']
+    print("User id:")
+    print(user_id)
+    print("Selected restrictions:")
+    print(selected_dietary_restrictions)
+
+    for dietary_restriction in selected_dietary_restrictions:
+        entry = UserDietaryRestriction.query.filter_by(user_id=current_user.id, restriction_id=dietary_restriction).first()
+
+        if entry is None:
+            e = UserDietaryRestriction(user_id=current_user.id, restriction_id=dietary_restriction) #type:ignore
+            db.session.add(e)
+
+    all_dietary_restrictions = UserDietaryRestriction.query.filter_by(user_id=current_user.id).all()
+    for restriction in all_dietary_restrictions:
+        if restriction.restriction_id not in [restriction for restriction in selected_dietary_restrictions]:
+            db.session.delete(restriction)
+    db.session.commit()
+
+    
+    return jsonify({"message": "Restrictions updated successfully"})
+
     
