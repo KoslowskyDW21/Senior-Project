@@ -131,9 +131,9 @@ export default function AdminPage() {
                       handleAdminChange(user);
                     }}
                     variant="contained"
-                    color="success"
+                    color={user.is_admin ? "error" : "success"}
                   >
-                    Make Admin
+                    {user.is_admin ? "Remove Status" : "Make Admin"}
                   </Button>
                 </td>
               </tr>
