@@ -471,3 +471,15 @@ class RecipeRecipeList(db.Model):
             "recipe_id": self.recipe_id,
             "recipe_list_id": self.recipe_list_id,
         }
+
+class UserNotifications(db.Model):
+    __tablename__ = 'UserNotifications'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    notification_text = db.Column(db.Text, nullable=False)
+    def to_json(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "notification_text": self.notification_text,
+        }
