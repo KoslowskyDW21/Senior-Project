@@ -1,6 +1,4 @@
-import { useState } from "react"; //react
 import { useRegistration } from "./RegistrationContext";
-import axios, { AxiosError } from "axios";
 import {
   Button,
   Checkbox,

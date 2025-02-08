@@ -87,6 +87,20 @@ def add_dietary_restrictions(restriction_ids, user_id):
         db.session.rollback()
         print(f"Error adding dietary restrictions for user {user_id}: {e}")
 
+def add_cuisines(cuisine_ids, user_id):
+    # theoretically this will prevent duplicate data
+    UserCuisinePreference.query.filter_by(user_id=user_id).delete()
+
+    for cuisine_id in cuisine_ids:
+        new_cuisine = UserCuisinePreference(user_id=user_id, cuisine_id=cuisine_id, numComplete = 0, userSelected = 1)
+        db.session.add(new_cuisine)
+
+    try:
+        db.session.commit()
+    except IntegrityError as e:
+        db.session.rollback()
+        print(f"Error adding cuisines for user {user_id}: {e}")
+
 
 # route for registering through API
 @bp.route('/api/register/', methods=['POST'])
@@ -99,6 +113,7 @@ def api_register():
     colonial_side = request.form.get('colonial_side')
     profile_picture = request.files.get('profile_picture')
     dietary_restrictions = request.form.get('dietaryRestrictions')
+    cuisines = request.form.get('cuisines')
 
     lname = lname.replace(",", "")
 
@@ -158,6 +173,17 @@ def api_register():
         restriction_ids = [restriction_mapping[restriction] for restriction in dietary_restriction_list if restriction in restriction_mapping]
 
         add_dietary_restrictions(restriction_ids, new_user.id)
+
+    if cuisines:
+        cuisine_mapping = {
+            "British": 1, "Malaysian": 2, "Indian": 3, "American": 4, "Mexican": 5, "Russian": 6, "French": 7, "Canadian": 8, "Jamaican": 9, "Chinese": 10, 
+            "Italian": 11, "Dutch": 12, "Vietnamese": 13, "Polish": 14, "Irish": 15, "Croatian": 16, "Filipino": 17, "Ukrainian": 18, "Unknown": 19, "Japanese": 20, 
+            "Moroccan": 21, "Tunisian": 22, "Turkish": 23, "Greek": 24, "Egyptian": 25, "Portuguese": 26, "Kenyan": 27, "Thai": 28, "Spanish": 29
+        }
+        cuisine_list = cuisines.split(',')
+        cuisine_ids = [cuisine_mapping[cuisine] for cuisine in cuisine_list if cuisine in cuisine_mapping]
+
+        add_cuisines(cuisine_ids, new_user.id)
     
     user = User.query.filter_by(email_address=email).first()
 

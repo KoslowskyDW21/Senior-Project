@@ -5,6 +5,7 @@ import Login from "./components/Login";
 import RegistrationOne from "./components/RegistrationOne";
 import RegistrationTwo from "./components/RegistrationTwo";
 import RegistrationThree from "./components/RegistrationThree";
+import RegistrationFour from "./components/RegistrationFour";
 import IndividualRecipe from "./components/Recipe";
 import { MsalProvider } from "@azure/msal-react";
 import { msalConfig } from "./authConfig";
@@ -70,6 +71,7 @@ function App() {
             <Route path="/registration-one" element={<RegistrationOne />} />
             <Route path="/registration-two" element={<RegistrationTwo />} />
             <Route path="/registration-three" element={<RegistrationThree />} />
+            <Route path="/registration-four" element={<RegistrationFour />} />
             {/* Protected Routes for Authenticated Users */}
             <Route element={<ProtectedRoute />}>
               {/* recipes */}
