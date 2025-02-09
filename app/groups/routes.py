@@ -111,3 +111,35 @@ def create_group():
     db.session.commit()
 
     return jsonify({"message": "Group created successfully!", "group_id": group.id}), 200
+
+@bp.route('/<int:group_id>/messages', methods=['GET'])
+@login_required
+def get_messages(group_id):
+    messages = Message.query.filter_by(group_id=group_id).order_by(Message.id.asc()).all()
+    message_data = []
+    for message in messages:
+        user = User.query.get(message.user_id)
+        message_data.append({
+            "id": message.id,
+            "user_id": message.user_id,
+            "username": user.username,
+            "text": message.text
+        })
+    return jsonify(message_data), 200
+
+@bp.route('/<int:group_id>/messages', methods=['POST'])
+@login_required
+def send_message(group_id):
+    group = UserGroup.query.get(group_id)
+    if not group:
+        return jsonify({"message": "Group not found"}), 404
+
+    text = request.json.get('text')
+    if not text:
+        return jsonify({"message": "Message text is required"}), 400
+
+    message = Message(group_id=group_id, user_id=current_user.id, text=text, is_reported=False)
+    db.session.add(message)
+    db.session.commit()
+
+    return jsonify({"message": "Message sent successfully!"}), 200

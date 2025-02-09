@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import {
@@ -10,6 +10,12 @@ import {
   Container,
   IconButton,
   Button,
+  TextField,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  Divider
 } from "@mui/material";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from "react-router-dom";
@@ -23,8 +29,10 @@ interface UserGroup {
   is_public: boolean;
 }
 
-interface GroupMember {
+interface Message {
+  id: number;
   user_id: number;
+  text: string;
   username: string;
 }
 
@@ -33,7 +41,18 @@ const GroupDetails: React.FC = () => {
   const [group, setGroup] = useState<UserGroup | null>(null);
   const [isMember, setIsMember] = useState<boolean>(false);
   const [members, setMembers] = useState<GroupMember[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState<string>("");
+  const messagesEndRef = useRef(null);
   const navigate = useNavigate();
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     const fetchGroup = async () => {
@@ -65,9 +84,19 @@ const GroupDetails: React.FC = () => {
       }
     };
 
+    const fetchMessages = async () => {
+      try {
+        const response = await axios.get(`http://127.0.0.1:5000/groups/${id}/messages`);
+        setMessages(response.data);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+
     fetchGroup();
     checkMembership();
     fetchMembers();
+    fetchMessages();
   }, [id]);
 
   const handleJoinGroup = async () => {
@@ -87,6 +116,19 @@ const GroupDetails: React.FC = () => {
       fetchMembers();
     } catch (error) {
       console.error("Error leaving group:", error);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!newMessage.trim()) return;
+
+    try {
+      await axios.post(`http://127.0.0.1:5000/groups/${id}/messages`, { text: newMessage });
+      setNewMessage("");
+      const response = await axios.get(`http://127.0.0.1:5000/groups/${id}/messages`);
+      setMessages(response.data);
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
   };
 
@@ -163,6 +205,43 @@ const GroupDetails: React.FC = () => {
           </Box>
         </CardContent>
       </Card>
+
+      <Box mt={4} mb={2}>
+        <Typography variant="h5" gutterBottom>
+          Messages
+        </Typography>
+        <Paper style={{ maxHeight: 300, overflow: 'auto' }}>
+          <List>
+            {messages.map((message) => (
+              <ListItem key={message.id} alignItems="flex-start">
+                <ListItemText
+                  primary={message.username}
+                  secondary={message.text}
+                />
+                <Divider variant="inset" component="li" />
+              </ListItem>
+            ))}
+            <div ref={messagesEndRef} />
+          </List>
+        </Paper>
+        <Box mt={2} display="flex">
+          <TextField
+            label="Type a message"
+            variant="outlined"
+            fullWidth
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={sendMessage}
+            style={{ marginLeft: '10px' }}
+          >
+            Send
+          </Button>
+        </Box>
+      </Box>
     </Container>
   );
 };
