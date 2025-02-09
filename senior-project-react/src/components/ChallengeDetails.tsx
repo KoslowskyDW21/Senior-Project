@@ -197,15 +197,17 @@ const ChallengeDetail: React.FC = () => {
               ))}
             </ul>
           </Box>
-          <Box textAlign="center" mt={3}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => window.history.back()}
-            >
-              Go Back
-            </Button>
-          </Box>
+          {isParticipant && (
+            <Box textAlign="center" mt={3}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => navigate(`/challenges/${id}/vote`)}
+              >
+                Vote for Winner
+              </Button>
+            </Box>
+          )}
         </CardContent>
       </Card>
     </Container>

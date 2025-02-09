@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from flask_login import login_required, current_user
 from app.challenges import bp
-from app.models import User, Challenge, ChallengeParticipant, db
+from app.models import User, Challenge, ChallengeParticipant, ChallengeVote, db
 from flask import request, jsonify, abort, current_app
 from datetime import datetime, timedelta, UTC
 from werkzeug.utils import secure_filename
@@ -193,3 +193,38 @@ def delete_challenge(challenge_id):
     db.session.commit()
 
     return jsonify({"message": "Challenge deleted successfully!"}), 200
+
+@bp.route('/<int:challenge_id>/vote', methods=['POST'])
+@login_required
+def submit_vote(challenge_id):
+    data = request.get_json()
+    voter_id = data.get('voter_id')
+    votee_id = data.get('votee_id')
+
+    if voter_id == votee_id:
+        return jsonify({"message": "You cannot vote for yourself"}), 400
+
+    # Check if the voter is a participant of the challenge
+    participant = ChallengeParticipant.query.filter_by(challenge_id=challenge_id, user_id=voter_id).first()
+    if not participant:
+        return jsonify({"message": "You must be a participant to vote"}), 403
+
+    # Check if the votee is a participant of the challenge
+    votee = ChallengeParticipant.query.filter_by(challenge_id=challenge_id, user_id=votee_id).first()
+    if not votee:
+        return jsonify({"message": "The selected user is not a participant"}), 400
+
+    # Check if the user has already voted
+    existing_vote = ChallengeVote.query.filter_by(challenge_id=challenge_id, given_by=voter_id).first()
+    if existing_vote:
+        # Update the existing vote
+        existing_vote.given_to = votee_id
+    else:
+        # Create a new vote
+        vote = ChallengeVote(challenge_id=challenge_id, given_by=voter_id, given_to=votee_id)
+        db.session.add(vote)
+
+    db.session.commit()
+
+    return jsonify({"message": "Vote submitted successfully"}), 201
+
