@@ -102,6 +102,8 @@ def create_group():
         file_path = os.path.join(upload_folder, filename)
         image.save(file_path)
         group.image = os.path.join('static', 'uploads', filename)
+    else:
+        group.image = "static/uploads/default_image.jpg"
 
     db.session.add(group)
     db.session.commit()

@@ -116,6 +116,8 @@ def create_challenge():
             challenge.image = os.path.join('static', 'uploads', filename)
         except Exception as e:
             return jsonify({"message": f"File upload failed: {str(e)}"}), 500
+    else:
+        challenge.image = "static/uploads/default_image.jpg"
 
     # Save to the database
     db.session.add(challenge)
