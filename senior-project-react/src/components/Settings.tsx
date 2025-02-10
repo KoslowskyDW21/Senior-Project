@@ -358,11 +358,11 @@ export default function Settings() {
 
   return (
     <>
-      <IconButton
+      <IconButton aria-label="back"
         onClick={() => navigate(-1)}
         style={{ position: "absolute", top: 30, left: 30 }}
       >
-        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" } } />
       </IconButton>
       <h1>Settings Page</h1>
       <main role="main">
@@ -375,7 +375,7 @@ export default function Settings() {
 
       <h2>Change Personal Details</h2>
 
-      <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
+      <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small" >
         <Select
           displayEmpty
           value={colonialFloor}
@@ -398,7 +398,7 @@ export default function Settings() {
         <FormHelperText>Colonial Floor</FormHelperText>
       </FormControl>
 
-      <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
+      <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small" aria-label="side-select">
         <Select
           displayEmpty
           value={colonialSide}
@@ -410,7 +410,7 @@ export default function Settings() {
             return selected;
           }}
         >
-          <MenuItem disabled value="">
+          <MenuItem disabled value="" aria-label="default-text">
             {user.colonial_side}
           </MenuItem>
           <MenuItem value={"Mens"}>Men's</MenuItem>
@@ -425,7 +425,7 @@ export default function Settings() {
       <h2>Change Account Details</h2>
 
       <TextField
-        id="filled-helperText"
+        aria-label="filled-helperText"
         label="Username"
         variant="filled"
         defaultValue={username}
