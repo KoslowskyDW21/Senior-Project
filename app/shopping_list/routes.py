@@ -25,6 +25,13 @@ def get_all_shopping_list_items_of_shopping_list(id):
 @bp.post("/items/add/<int:recipe_id>")
 def add_recipe_to_shopping_list_items_of_current_user(recipe_id):
     print(f"Trying to add recipe {id}'s ingredients to the shopping list of user number {current_user.id}")
-    recipe_ingredients = RecipeIngredient.query.filter_by(recipe_id=recipe_id).all()
-    # TODO: implement
-    return jsonify() # TODO: implement
+    try:
+        recipe_ingredients = RecipeIngredient.query.filter_by(recipe_id=recipe_id).all()
+        curr_shopping_list = ShoppingList.query.filter_by(user_id=current_user.id)
+        for recipe_ingredient in recipe_ingredients:
+            sli: ShoppingListItem = ShoppingListItem(shopping_list_id=curr_shopping_list.id, ingredient_id=recipe_ingredient.id, measure=recipe_ingredient.measure) #type: ignore
+            db.session.add(sli)
+        db.session.commit()
+    except:
+        return jsonify("Error"), 500
+    return jsonify("Success"), 200
