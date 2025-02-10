@@ -365,6 +365,7 @@ export default function Settings() {
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
       <h1>Settings Page</h1>
+      <main role="main">
       <p>
         Name: {user.fname} {user.lname}
       </p>
@@ -530,6 +531,7 @@ export default function Settings() {
           </Button>
         </Box>
       </Modal>
+      </main>
     </>
   );
 }

@@ -315,6 +315,7 @@ const Recipes: React.FC = () => {
       }}
     >
       </Box>
+      <main role="main">
       <Grid container spacing={3}>
         {filteredRecipes.map((recipe) => (
           <Grid size={4} key={recipe.id}>
@@ -340,6 +341,7 @@ const Recipes: React.FC = () => {
           </Grid>
         ))}
       </Grid>
+      </main>
   
       <div
         style={{
