@@ -442,14 +442,12 @@ class ShoppingListItem(db.Model):
     __tablename__ = 'ShoppingListItem'
     shopping_list_id = db.Column(db.Integer, db.ForeignKey('ShoppingList.id'), primary_key=True)
     ingredient_id = db.Column(db.Integer, db.ForeignKey('Ingredient.id'), primary_key=True)
-    ingredient_quantity = db.Column(db.Integer, nullable=False)
-    ingredient_quantity_unit = db.Column(db.Text)
+    measure = db.Column(db.Text)
     def to_json(self):
         return {
             "shopping_list_id": self.shopping_list_id,
             "ingredient_id": self.ingredient_id,
-            "ingredient_quantity": self.ingredient_quantity,
-            "ingredient_quantity_unit": self.ingredient_quantity_unit,
+            "measure": self.measure
         }
 
 class RecipeList(db.Model):

@@ -13,8 +13,7 @@ interface ShoppingListInterface {
 interface ShoppingListItem {
     shopping_list_id: number;
     ingredient_id: number;
-    ingredient_quantity: number;
-    ingredient_quantity_unit: string;
+    measure: string;
 }
 
 interface Ingredient {
@@ -58,10 +57,11 @@ const ShoppingList: React.FC = () => {
         setSearchQuery(event.target.value);
     };
 
-    function ListItem({ shopping_list_id, ingredient_id, ingredient_quantity, ingredient_quantity_unit }: ShoppingListItem) {
+    function ListItem({ shopping_list_id, ingredient_id, measure }: ShoppingListItem) {
         if (ingredients.length == 0) {
             return <p>Loading or empty...</p>
         }
+        console.log(`measure of ingredient id ${ingredient_id}: ${measure}`);
         return (
             <>
             <Card
@@ -77,8 +77,7 @@ const ShoppingList: React.FC = () => {
                 }}
                 />
                 {ingredients.filter(ingredient => ingredient.id==ingredient_id).map(ingredient => (<p>{ingredient.ingredient_name}</p>))} 
-                {ingredient_quantity} 
-                {ingredient_quantity_unit}
+                {measure}
             </Card>
             
             </>
@@ -169,8 +168,7 @@ const ShoppingList: React.FC = () => {
             <ListItem 
             shopping_list_id={shoppingListItem.shopping_list_id}
             ingredient_id={shoppingListItem.ingredient_id}
-            ingredient_quantity={shoppingListItem.ingredient_quantity}
-            ingredient_quantity_unit={shoppingListItem.ingredient_quantity_unit}
+            measure={shoppingListItem.measure}
             ></ListItem>
         ))}
 

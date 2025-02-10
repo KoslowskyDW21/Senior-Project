@@ -2,7 +2,7 @@ from __future__ import annotations
 from flask import jsonify
 from flask_login import current_user, login_required
 from app.shopping_list import bp
-from app.models import ShoppingList, ShoppingListItem, db
+from app.models import ShoppingList, ShoppingListItem, RecipeIngredient, db
 
 @bp.get("/user_list")
 def get_all_shopping_lists_of_current_user():
@@ -21,3 +21,10 @@ def get_all_shopping_list_items_of_shopping_list(id):
     shopping_list_items = ShoppingListItem.query.filter_by(shopping_list_id=id).all()
     print(f"Shopping list items of shopping list {id}: {shopping_list_items}")
     return jsonify([shopping_list_item.to_json() for shopping_list_item in shopping_list_items]), 200
+
+@bp.post("/items/add/<int:recipe_id>")
+def add_recipe_to_shopping_list_items_of_current_user(recipe_id):
+    print(f"Trying to add recipe {id}'s ingredients to the shopping list of user number {current_user.id}")
+    recipe_ingredients = RecipeIngredient.query.filter_by(recipe_id=recipe_id).all()
+    # TODO: implement
+    return jsonify() # TODO: implement
