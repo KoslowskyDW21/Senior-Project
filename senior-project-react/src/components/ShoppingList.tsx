@@ -1,9 +1,8 @@
 import React from 'react';
 import axios, { AxiosError } from "axios";
 import { useNavigate } from 'react-router-dom';
-import { Box, Card, Checkbox, IconButton, TextField } from "@mui/material";
+import { Box, Card, Checkbox, IconButton, TextField, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { positions } from '@mui/system';
 
 interface ShoppingListInterface {
     id: number;
@@ -21,11 +20,32 @@ interface Ingredient {
     ingredient_name: string;
 }
 
+interface Recipe {
+    id: number;
+    recipe_name: string;
+    xp_amount: number;
+    difficulty: "1" | "2" | "3" | "4" | "5";
+    image: string;
+  }
+
+interface RecipeList {
+    id: number;
+    name: string;
+    belongs_to: number;
+}
+
 const ShoppingList: React.FC = () => {
     const [ shoppingList, setShoppingList ] = React.useState<ShoppingListInterface>();
     const [ shoppingListItems, setShoppingListItems ] = React.useState<ShoppingListItem[]>([]);
     const [ ingredients, setIngredients ] = React.useState<Ingredient[]>([]);
     const [ searchQuery, setSearchQuery ] = React.useState<String>("");
+    const [ recipeLists, setRecipeLists ] = React.useState<RecipeList[]>([]);
+    const [ recipeList, setRecipeList ] = React.useState<RecipeList>();
+    const [ recipes, setRecipes ] = React.useState<Recipe[]>([]);
+    const [ selectedRecipeListId, setSelectedRecipeListId] = React.useState<string>("");
+    const [ selectedRecipeId, setSelectedRecipeId ] = React.useState<string>("");
+    const [ message, setMessage ] = React.useState<String>("");
+
     const navigate = useNavigate();
 
     async function getShoppingListInfo() {
@@ -53,8 +73,49 @@ const ShoppingList: React.FC = () => {
         }
     };
 
+    async function getAllRecipeListsOfUser() {
+        try {
+            const response = await axios.get(`http://127.0.0.1:5000/recipe_lists/all`);
+            const recipe_lists: RecipeList[] = response.data;
+            setRecipeLists(recipe_lists);
+            console.log(`Recipe lists:`);
+            for (const rl of recipe_lists) {
+                console.log(`${rl.id} ${rl.name}`)
+            }
+        } catch (error) {
+            console.error("Error fetching recipe lists of user: ", error);
+        }
+    }
+
+    async function getAllRecipesInRecipeList() {
+        if (recipeList == undefined) {
+            console.log("No recipeList selected but getAllRecipesInRecipeList() ran");
+            return;
+        }
+        try {
+            const response = await axios.post(`http://127.0.0.1:5000/recipe_lists/recipes/${recipeList.id}`);
+            const _recipes: Recipe[] = response.data;
+            setRecipes(_recipes);
+            console.log(`Recipes in list ${recipeList.id}`);
+            for (const r of _recipes) {
+                console.log(`${r.id} ${r.recipe_name}`);
+            }
+        } catch (error) {
+            console.error(`Error fetching recipes in recipeList ${recipeList}: `, error);
+        }
+    }
+
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(event.target.value);
+    };
+
+    const handleSelectRecipeList = async (event: SelectChangeEvent) => {
+        setRecipeList(recipeLists.filter(id=event.target.value)[0]); // we expect this filter to reduce recipeLists to only one value
+        console.log(`recipeList has been set to ${event.target.value}`);
+    };
+
+    const handleSelectRecipe = async (event: SelectChangeEvent) => {
+        //TODO: stuff
     };
 
     function ListItem({ shopping_list_id, ingredient_id, measure }: ShoppingListItem) {
@@ -86,6 +147,7 @@ const ShoppingList: React.FC = () => {
     
     React.useEffect(() => {
         getShoppingListInfo();
+        getAllRecipeListsOfUser();
     }, []);
 
     return (
@@ -164,8 +226,36 @@ const ShoppingList: React.FC = () => {
         >
         </Box>
 
+        {/* Add the ingredients of a recipe from a recipe list to the shopping list */}
+        <FormControl fullWidth>
+            <InputLabel id="recipe-list-select-label">Add ingredients from a recipe in a list</InputLabel>
+            <Select
+                labelId="recipe-list-select-label"
+                id="recipe-list-select"
+                value={selectedRecipeListId}
+                onChange={handleSelectRecipeList}
+            >
+                {recipeLists.map((recipeList) => (
+                    // <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
+                    <FormControl fullWidth>
+                        <InputLabel id="recipe-select-label">{recipeList.name}</InputLabel>
+                        <Select
+                            labelId="recipe-select-label"
+                            value={selectedRecipeId}
+                            onChange={handleSelectRecipe}
+                        >
+                            {recipes.map((recipe) => (
+                                <MenuItem value={recipe.id}>{recipe.recipe_name}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                ))}
+            </Select>
+        </FormControl>
+
+
         {shoppingListItems.map((shoppingListItem) => (
-            <ListItem 
+            <ListItem // TODO: add key
             shopping_list_id={shoppingListItem.shopping_list_id}
             ingredient_id={shoppingListItem.ingredient_id}
             measure={shoppingListItem.measure}

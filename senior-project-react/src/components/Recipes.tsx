@@ -472,31 +472,33 @@ const Recipes: React.FC = () => {
           mt: 4,
         }}
       ></Box>
-      <Grid container spacing={3}>
-        {filteredRecipes.map((recipe) => (
-          <Grid size={4} key={recipe.id}>
-            <Box
-              sx={{
-                border: "2px solid rgb(172, 169, 169)",
-                borderRadius: 2,
-                boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  borderColor: "#1976d2",
-                  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-                },
-              }}
-            >
-              <Recipe
-                id={recipe.id}
-                name={recipe.recipe_name}
-                difficulty={recipe.difficulty}
-                image={recipe.image}
-              />
-            </Box>
-          </Grid>
-        ))}
-      </Grid>
+      <main role="main">
+        <Grid container spacing={3}>
+          {filteredRecipes.map((recipe) => (
+            <Grid size={4} key={recipe.id}>
+              <Box
+                sx={{
+                  border: "2px solid rgb(172, 169, 169)",
+                  borderRadius: 2,
+                  boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    borderColor: "#1976d2",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                  },
+                }}
+              >
+                <Recipe
+                  id={recipe.id}
+                  name={recipe.recipe_name}
+                  difficulty={recipe.difficulty}
+                  image={recipe.image}
+                />
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
+      </main>
       <div
         style={{
           position: "fixed",
