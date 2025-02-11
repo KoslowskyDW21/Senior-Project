@@ -15,8 +15,8 @@ def post_recipes():
     recipes = Recipe.query.all()
     return jsonify([recipe.to_json() for recipe in recipes])
 
-@bp.post("/<int:id>/")
-def post_recipe_page(id):
+@bp.get("/<int:id>/")
+def get_recipe_page(id):
     print("searching for recipe " + str(id))
     recipe = Recipe.query.filter_by(id=id).first()
     if recipe is not None:

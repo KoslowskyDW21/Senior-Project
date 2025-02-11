@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button, FormControl, Avatar, MenuItem, Select, InputLabel, FormControlLabel, Checkbox, Typography, SelectChangeEvent, IconButton, Container } from "@mui/material"; //matui components
+import { Button, FormControl, Avatar, MenuItem, Box, Select, InputLabel, FormControlLabel, Checkbox, Typography, SelectChangeEvent, IconButton, Container } from "@mui/material"; //matui components
 import axios, { AxiosError } from "axios";
 import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -53,8 +53,17 @@ interface AddRecipeToListResponse {
 function Step({ recipe_id, step_number, step_description }: Step) {
     return (
         <>
-            <FormControlLabel control={<Checkbox />} label={`${step_number}`} />
-            <p>{step_description}</p>
+            <Box
+                sx={{
+                    
+                }}
+            >
+                <FormControlLabel
+                 control={<Checkbox />}
+                 label={`Step ${step_number}:`}
+                  />
+                <Typography>{step_description}</Typography>
+            </Box>
         </>
     );
 }
@@ -78,6 +87,7 @@ const IndividualRecipe: React.FC = () => {
 
     const handleAddRecipeToList = async (event: SelectChangeEvent) => {
         if (id == undefined) {
+            console.log("id is undefined!");
             return;
         }
         console.log(`Trying to add this recipe to list number ${event.target.value} `);
@@ -102,6 +112,17 @@ const IndividualRecipe: React.FC = () => {
             }
         }
         setSnackBarOpen(true);
+    }
+
+    const handleRemoveRecipeFromList = async (event: SelectChangeEvent) => {
+        if (id == undefined) {
+            console.log("id is undefined!");
+            return;
+        }
+        console.log(`Trying to reove this recipe from list number ${event.target.value}`);
+        const formData = new FormData();
+        formData.append("rid", id.toString());
+        formData.append("lid", event.target.value);
     }
 
     const handleSnackBarClose = (
@@ -171,6 +192,9 @@ const IndividualRecipe: React.FC = () => {
         try {
             const response = await axios.post(`http://127.0.0.1:5000/recipes/steps/${id}`);
             const data: Step[] = response.data;
+            for (const step of data) {
+                console.log(step.step_description);
+            }
             setSteps(data);
         } catch (error) {
             console.error("Error fetching steps: ", error);
@@ -192,7 +216,20 @@ const IndividualRecipe: React.FC = () => {
             >
                 <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
             </IconButton>
-            <h1>{recipe_name}</h1>
+            
+            <Box
+            sx={{
+                display: "flex",
+                justifyContent: "center",
+                flexGrow: 1,
+                alignItems: "center",
+                fontSize: "24px",
+                fontWeight: "bold",
+            }}
+            >
+                <h1>{recipe_name}</h1>
+            </Box>
+
             <Button
                 onClick={handleGoToCompletedRecipe}
                 variant="contained"
@@ -202,11 +239,11 @@ const IndividualRecipe: React.FC = () => {
             </Button>
             <br/>
             <br/>
-            <FormControl fullWidth>
+            <FormControl sx={{width: 400}}>
             <InputLabel id="demo-simple-select-label">Add to a list</InputLabel>
             <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
+                labelId="add-to-list-select-label"
+                id="add-to-list-select"
                 label="Add to a list"
                 value={lid}
                 onChange={handleAddRecipeToList}
@@ -216,10 +253,42 @@ const IndividualRecipe: React.FC = () => {
                 ))}
             </Select>
             </FormControl>
+            <FormControl sx={{width: 400}}>
+            <InputLabel id="demo-simple-select-label">Remove from a list</InputLabel>
+            <Select
+                labelId="remove-from-list-select-label"
+                id="remove-from-list-select"
+                label="Remove from a list"
+                value={lid}
+                onChange={handleRemoveRecipeFromList}
+            >
+                {recipeLists.map((recipeList) => ( // TODO: remove lists the recipe is not in
+                    <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
+                ))}
+            </Select>
+            </FormControl>
+            
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    fontSize: "24px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    mt: 4,
+                }}
+            ></Box>
 
-            {steps.map((step) => (
-                <Step recipe_id={step.recipe_id} step_number={step.step_number} step_description={step.step_description} />
-            ))}
+            <Box
+                sx={{
+                    textAlign: "left"
+                }}
+            >
+                {steps.map((step) => (
+                    <Step recipe_id={step.recipe_id} step_number={step.step_number} step_description={step.step_description} />
+                ))}
+            </Box>
 
             <Snackbar
                 open={snackbarOpen}

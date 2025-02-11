@@ -110,7 +110,7 @@ const ShoppingList: React.FC = () => {
     };
 
     const handleSelectRecipeList = async (event: SelectChangeEvent) => {
-        setRecipeList(recipeLists.filter(id=event.target.value)[0]); // we expect this filter to reduce recipeLists to only one value
+        setRecipeList(recipeLists.filter(recipeL => recipeL.id.toString() === event.target.value)[0]); // we expect this filter to reduce recipeLists to only one value
         console.log(`recipeList has been set to ${event.target.value}`);
     };
 
@@ -148,6 +148,7 @@ const ShoppingList: React.FC = () => {
     React.useEffect(() => {
         getShoppingListInfo();
         getAllRecipeListsOfUser();
+        getAllRecipesInRecipeList();
     }, []);
 
     return (
