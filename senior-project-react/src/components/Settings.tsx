@@ -169,7 +169,9 @@ export default function Settings() {
         {},
         { withCredentials: true }
       );
+      console.log("response: ", response);
       const data: DietaryRestrictions = response.data;
+      console.log("data: " + data);
       setDietaryRestrictions(data.dietaryRestrictions);
       setUserDietaryRestrictions(data.userDietaryRestrictions);
     } catch (error) {
@@ -193,6 +195,7 @@ export default function Settings() {
         }
       );
       console.log("Dietary restrictions updated successfully!");
+      console.log(dietaryRestrictions);
     } catch (error) {
       console.error("Error updating dietary restrictions: ", error);
     }
@@ -428,7 +431,7 @@ export default function Settings() {
         label="Username"
         variant="filled"
         defaultValue={username}
-        value={username} 
+        value={username}
         onChange={(e) => {
           const newUsername = e.target.value;
 

@@ -27,6 +27,7 @@ def post_update_user():
     print("Received data - Floor: " + newFloor)
     print("Received data - Side: " + newSide)
     user = current_user
+    print(user)
     user.colonial_floor = newFloor
     user.colonial_side = newSide
     try:
@@ -175,5 +176,30 @@ def update_dietary_restrictions():
 
     
     return jsonify({"message": "Restrictions updated successfully"})
+
+@bp.route('/get_notifications/', methods=['POST'])
+def get_notifications():
+    user = current_user
+    notifications = UserNotifications.query.filter_by(user_id=user.id).all()
+    return jsonify({
+        "notifications": [notification.to_json() for notification in notifications]
+    }), 200
+
+@bp.route('/read_notification/', methods=['POST'])
+def read_notification():
+    data = request.get_json()
+    id = data['id']
+    print(id)
+    notification = UserNotifications.query.filter_by(id=id).first()
+    print(notification.notification_text)
+    notification.isRead = 1
+    try:
+        db.session.commit()
+        return jsonify({"message": "Notification read successfully"}), 200
+    except Exception as e:
+        db.session.rollback() 
+        print(f"Error updating notification: {e}")
+        return jsonify({"message": "Error updating notification"}), 500
+
 
     

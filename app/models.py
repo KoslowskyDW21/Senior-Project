@@ -478,9 +478,13 @@ class UserNotifications(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
     notification_text = db.Column(db.Text, nullable=False)
+    isRead = db.Column(db.Integer, default=0, nullable=False)  
+    notification_type = db.Column(db.Enum('friend_request', 'group_message', 'challenge_reminder'), nullable=True)
     def to_json(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
             "notification_text": self.notification_text,
+            "isRead": self.isRead,
+            "notification_type": self.notification_type
         }
