@@ -149,10 +149,10 @@ export default function AdminPage() {
     !user.is_admin ? updateUser(false, id) : updateUser(true, id);
   }
 
-  async function banUser(userId: number) {
+  async function banUser(userId: number, banUser: boolean) {
     const data = {
       id: userId,
-      ban: true,
+      ban: banUser,
     };
 
     await axios.post("http://127.0.0.1:5000/admin/ban/", data, {
@@ -169,25 +169,32 @@ export default function AdminPage() {
       });
   }
 
+  const changeBan = (user: User, id: number) => {
+    if(user.id === id) {
+      user.is_banned = !user.is_banned;
+    }
+
+    return user
+  }
+
   const handleBan = () => {
     console.log("handleBan called");
 
     const id = userToBan!.id;
 
-    const change = (user: User) => {
-      if(user.id === id) {
-        user.is_banned = !user.is_banned;
-      }
-
-      return user
-    }
-
-    const newUsers = users.map((oldUser) => change(oldUser));
+    const newUsers = users.map((oldUser) => changeBan(oldUser, id));
     setUsers(newUsers);
 
-    banUser(id);
+    banUser(id, true);
 
     setUserToBan(null);
+  }
+
+  const handleUnban = (id: number) => {
+    const newUsers = users.map((oldUser) => changeBan(oldUser, id));
+    setUsers(newUsers);
+
+    banUser(id, false);
   }
 
   const handleDeleteRecipe = async() =>{
@@ -223,6 +230,7 @@ export default function AdminPage() {
               <td>Reports</td>
               <td></td>
               <td></td>
+              <td></td>
             </tr>
           </thead>
           <tbody>
@@ -232,6 +240,11 @@ export default function AdminPage() {
                 <td>{user.username}</td>
                 <td>{user.is_admin.toString()}</td>
                 <td>{user.num_reports}</td>
+                <td>{user.is_banned ?
+                  <p style={{color: "#ff0000", fontWeight: "bold"}}>BANNED</p>
+                  :
+                  ""}
+                </td>
                 <td>
                   {CreateAdminButton({ user, handleAdminChange })}
                 </td>
@@ -252,7 +265,7 @@ export default function AdminPage() {
                     variant="contained"
                     color="success"
                     onClick={() => {
-                      // TODO: complete this method
+                      handleUnban(user.id);
                     }}
                   >
                     Unban User
