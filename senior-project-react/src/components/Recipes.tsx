@@ -73,7 +73,6 @@ function Recipe({ id, name, difficulty, image }) {
     console.log(`Navigating to recipe page of recipe with id=${id}`);
     navigate(`/recipes/${id}`);
   };
-
   return (
     <Card
       variant="outlined"
@@ -84,24 +83,21 @@ function Recipe({ id, name, difficulty, image }) {
           title={name}
           subheader={Difficulty({ difficulty })}
           sx={{
-            display: "flex",
-            justifyContent: "center", // Center the title and difficulty
-            flexShrink: 0, // Prevent shrinking of header section
-            maxWidth: "100%", // Ensure header doesn't exceed the card width
-            overflow: "hidden", // Hide overflowed text
-            textOverflow: "ellipsis", // Add ellipsis if title is too long
-            whiteSpace: "nowrap", // Prevent text from wrapping
-            paddingBottom: "10px", // Add some bottom padding to allow space for title
-            width: "100%", // Ensure the title is contained within the card
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            flexShrink: 0,
+            width: "90%",
+            fontSize: "clamp(1rem, 4vw, 2rem)",
           }}
         />
         <CardMedia
           component="img"
           image={image}
           sx={{
-            height: 200, // Fixed height for the images
-            objectFit: "cover", // Ensures the image covers the area without distortion
-            width: "100%", // Ensure the image takes the full width of the card
+            height: 200,
+            objectFit: "cover",
+            width: "100%",
           }}
         />
       </CardActionArea>
@@ -113,6 +109,13 @@ const Recipes: React.FC = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
 
   const navigate = useNavigate();
+
+  const handleGoToChallenges = async () => {
+    navigate(`/challenges`);
+  };
+  const handleGoToGroups = async () => {
+    navigate(`/groups`);
+  };
 
   async function loadRecipes() {
     try {
@@ -191,10 +194,20 @@ const Recipes: React.FC = () => {
         <Button variant="outlined" color="primary" sx={{ flex: 1 }}>
           Recipes
         </Button>
-        <Button variant="contained" color="primary" sx={{ flex: 1 }}>
+        <Button
+          onClick={handleGoToChallenges}
+          variant="contained"
+          color="primary"
+          sx={{ flex: 1 }}
+        >
           Challenges
         </Button>
-        <Button variant="contained" color="primary" sx={{ flex: 1 }}>
+        <Button
+          onClick={handleGoToGroups}
+          variant="contained"
+          color="primary"
+          sx={{ flex: 1 }}
+        >
           Community
         </Button>
       </div>
