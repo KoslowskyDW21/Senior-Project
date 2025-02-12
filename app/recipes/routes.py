@@ -139,6 +139,15 @@ def upload_review(id):
 
     return jsonify({"message": "No valid review data provided"}), 400
 
+@bp.route("/reviews/<int:id>/", methods=['GET'])
+def reviews(id):
+    reviews = Review.query.filter_by(recipe_id  = id).all()
+    return jsonify({
+        "reviews": [review.to_json() for review in reviews],
+    }), 200
+
+
+
 
 def completionAchievements(id):
         specA = UserAchievement(achievement_id = id, user_id = current_user.id) #type:ignore
