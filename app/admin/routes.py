@@ -37,6 +37,24 @@ def make_admin():
         print(f"Error updating admin status: {e}")
         return jsonify({"message": "Error: Could not update user"}), 500
     
+@login_required
+@bp.route("/ban/", methods=["POST"])
+def ban_user():
+    data = request.get_json()
+    userId = data.get("id")
+    isBanned = data.get("ban")
+    print("Received data - ID: " + str(userId))
+    print("Received data - banned: " + str(isBanned))
+    user = User.query.filter_by(id=userId).first()
+    user.is_banned = isBanned # type: ignore
+    try:
+        db.session.commit()
+        return jsonify({"message": "User ban status updated"}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating ban status: {e}")
+        return jsonify({"message": "Error: Could not update user's ban status"})
+    
 @bp.route("/delete/<int:id>", methods = ["POST"])
 def delete_recipe(id):
     recipe = Recipe.query.filter_by(id = id).first()

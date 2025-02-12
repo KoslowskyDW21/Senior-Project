@@ -1,6 +1,6 @@
 :root {
   --dark: #d0d0d0;
-  --light: #ffffff;
+  --light: #f0f0f0;
 }
 
 table {
@@ -28,7 +28,7 @@ tbody tr:nth-child(odd) {
   background-color: var(--light);
 }
 
-table tr td:nth-child(5) {
+table tr td:nth-child(n+5) {
   text-align: center;
-  background-color: var(--light);
+  background-color: #ffffff;
 }
