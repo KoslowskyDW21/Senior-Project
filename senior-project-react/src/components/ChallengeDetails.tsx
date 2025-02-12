@@ -206,6 +206,14 @@ const ChallengeDetail: React.FC = () => {
               >
                 Vote for Winner
               </Button>
+
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => navigate(`/challenges/${id}/vote_results`)}
+              >
+                View Vote Results
+              </Button>
             </Box>
           )}
         </CardContent>

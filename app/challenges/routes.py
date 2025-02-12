@@ -242,3 +242,30 @@ def submit_vote(challenge_id):
     db.session.commit()
 
     return jsonify({"message": "Vote submitted successfully"}), 201
+
+
+@bp.route('/<int:challenge_id>/vote_results', methods=['GET'])
+@login_required
+def get_vote_results(challenge_id):
+    votes = ChallengeVote.query.filter_by(challenge_id=challenge_id).all()
+    participants = {participant.user_id: 0 for participant in ChallengeParticipant.query.filter_by(challenge_id=challenge_id).all()}
+
+    for vote in votes:
+        if vote.first_choice:
+            participants[vote.first_choice] = participants.get(vote.first_choice, 0) + 5
+        if vote.second_choice:
+            participants[vote.second_choice] = participants.get(vote.second_choice, 0) + 3
+        if vote.third_choice:
+            participants[vote.third_choice] = participants.get(vote.third_choice, 0) + 1
+
+    results = []
+    for user_id, points in participants.items():
+        user = User.query.get(user_id)
+        results.append({
+            "user_id": user_id,
+            "username": user.username,
+            "points": points
+        })
+
+    results.sort(key=lambda x: x['points'], reverse=True)
+    return jsonify(results), 200
