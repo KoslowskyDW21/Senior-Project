@@ -31,6 +31,7 @@ import Groups from "./components/Groups";
 import GroupDetails from "./components/GroupDetails";
 import CreateGroup from "./components/CreateGroup";
 import CreateRecipeList from "./components/CreateRecipeList";
+import Banned from "./components/Banned";
 import { PublicClientApplication } from "@azure/msal-browser";
 import ProtectedRoute from "./components/ProtectedRoute";
 import useIdTokenRefresher from "./hooks/refresh";
@@ -124,6 +125,9 @@ function App() {
 
               {/* admin */}
               <Route path="/admin" element={<AdminPage />} />
+
+              {/* banned */}
+              <Route path="/banned" element={<Banned />} />
             </Route>
             {/* Redirect unknown routes to login */}
             //
