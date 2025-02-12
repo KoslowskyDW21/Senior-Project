@@ -76,24 +76,24 @@ class User(UserMixin, db.Model):
         )
     
     # TODO: Figure out why this method is broken
-    @staticmethod
-    def from_json(o: dict):
-        return User(
-            fname=o.get("fname"), #type: ignore
-            lname=o.get("lname"), #type: ignore
-            email_address=o.get("email_address"),
-            username=o.get("username"),
-            profile_picture=o.get("profile_picture"),
-            xp_points=o.get("xp_points"),
-            user_level=o.get("user_level"),
-            is_admin=o.get("is_admin"),
-            num_recipes_completed=o.get("num_recipes_completed"),
-            colonial_floor=o.get("colonial_floor"),
-            colonial_side=o.get("colonial_side"),
-            date_created=o.get("date_created"),
-            last_logged_in=o.get("last_logged_in"),
-            num_reports=o.get("num_reports"),
-        )
+    # @staticmethod
+    # def from_json(o: dict):
+    #     return User(
+    #         fname=o.get("fname"), #type: ignore
+    #         lname=o.get("lname"), #type: ignore
+    #         email_address=o.get("email_address"),
+    #         username=o.get("username"),
+    #         profile_picture=o.get("profile_picture"),
+    #         xp_points=o.get("xp_points"),
+    #         user_level=o.get("user_level"),
+    #         is_admin=o.get("is_admin"),
+    #         num_recipes_completed=o.get("num_recipes_completed"),
+    #         colonial_floor=o.get("colonial_floor"),
+    #         colonial_side=o.get("colonial_side"),
+    #         date_created=o.get("date_created"),
+    #         last_logged_in=o.get("last_logged_in"),
+    #         num_reports=o.get("num_reports"),
+    #     )
 
 class UserBlock(db.Model):
     __tablename__ = 'UserBlock'
@@ -182,6 +182,11 @@ class UserGroup(db.Model):
             "is_public": self.is_public,
             "num_reports": self.num_reports,
         }
+    
+class GroupReport(db.Model):
+    __tablename__ = "GroupReport"
+    group_id = db.Column(db.Integer, db.ForeignKey("UserGroup.id"), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("User.id"), primary_key=True)
 
 class GroupMember(db.Model):
     __tablename__ = 'GroupMember'
@@ -309,7 +314,7 @@ class Review(db.Model):
     recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id', ondelete="CASCADE"), nullable=False)
     text = db.Column(db.Text, nullable=False)
     image = db.Column(db.Text)
-    rating = db.Column(db.Enum('0','1','1.5', '2','2.5', '3','3.5', '4','4.5', '5'), nullable=True)
+    rating = db.Column(db.Enum('0', '0.5','1','1.5', '2','2.5', '3','3.5', '4','4.5', '5'), nullable=True)
     difficulty = db.Column(db.Enum('0','1', '2', '3', '4', '5'), nullable=True)
     num_reports = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id', ondelete="CASCADE"), nullable=False)

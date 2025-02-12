@@ -143,8 +143,14 @@ const Challenges: React.FC = () => {
     navigate(`/groups`);
   };
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
+  const filterChallenges = () => {
+    const urlParams = new URLSearchParams(location.search);
+    const searchQuery = urlParams.get("search")?.toLowerCase() || "";
+    if (searchQuery) {
+      setSearchQuery(searchQuery)
+    } else {
+      setSearchQuery("")
+    }
   };
 
   const filteredMyChallenges = myChallenges.filter((challenge) =>
@@ -168,6 +174,10 @@ const Challenges: React.FC = () => {
     getResponse();
     getCurrentUser();
   }, []);
+
+  React.useEffect(() => {
+      filterChallenges()
+    }, [location.search, challenges]); 
 
   return (
     <div>
