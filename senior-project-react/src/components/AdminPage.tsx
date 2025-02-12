@@ -28,25 +28,9 @@ export default function AdminPage() {
   const [admin, setAdmin] = useState<boolean>(false);
   const [superAdmin, setSuperAdmin] = useState<boolean>(false);
   const [users, setUsers] = useState<User[]>([]);
-  const [userAdmin, setUserAdmin] = useState<boolean[]>([]);
   const navigate = useNavigate();
   const [idInput, setIdInput] = useState('');
 
-  // function AdminButton({ superAdmin, admin }) {
-  //   if(superAdmin) {
-  //     return (
-  //       <Button
-  //         onClick={() => {
-  //           handleAdminChange(user);
-  //         }}
-  //         variant="contained"
-  //         color={admin ? "error" : "success"}
-  //       >
-  //         {admin ? "Remove Status" : "Make Admin"}
-  //       </Button>
-  //     )
-  //   }
-  // }
   function CreateAdminButton({ user, handleAdminChange }) {
     if(superAdmin) {
       return (
@@ -126,11 +110,18 @@ export default function AdminPage() {
     console.log("handleAdminChange called");
 
     const id = user.id;
-    for(const findUser of users) {
-      if(findUser.id == id) {
-        findUser.is_admin = !user.is_admin;
+
+    const change = (user: User) => {
+      if(user.id === id) {
+        user.is_admin = !user.is_admin;
       }
+      
+      return user;
     }
+
+    const newUsers = users.map((oldUser) => change(oldUser));
+
+    setUsers(newUsers);
 
     console.log("User: " + user.fname + " " + user.lname);
     console.log("is_admin: " + user.is_admin);
