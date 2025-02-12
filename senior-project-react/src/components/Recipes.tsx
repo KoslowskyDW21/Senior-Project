@@ -528,7 +528,7 @@ const Recipes: React.FC = () => {
           color="primary"
           sx={{ flex: 1 }}
         >
-          Groups
+          Community
         </Button>
       </div>
     </div>

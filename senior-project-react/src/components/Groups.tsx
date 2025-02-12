@@ -302,7 +302,7 @@ const Groups: React.FC = () => {
             fontWeight: "bold",
           }}
         >
-          <h1>Groups</h1>
+          <h1>Community</h1>
         </Box>
 
         <Box
@@ -512,6 +512,40 @@ const Groups: React.FC = () => {
           </Box>
         )}
       </Container>
+      <div
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          display: "flex",
+          justifyContent: "space-around",
+          padding: "10px",
+          backgroundColor: "#fff",
+          boxShadow: "0px -2px 5px rgba(0, 0, 0, 0.1)",
+          zIndex: 1000,
+        }}
+      >
+        <Button
+          onClick={handleGoToRecipes}
+          variant="contained"
+          color="primary"
+          sx={{ flex: 1 }}
+        >
+          Recipes
+        </Button>
+        <Button
+          onClick={handleGoToChallenges}
+          variant="contained"
+          color="primary"
+          sx={{ flex: 1 }}
+        >
+          Challenges
+        </Button>
+        <Button variant="outlined" color="primary" sx={{ flex: 1 }}>
+          Community
+        </Button>
+      </div>
     </div>
   );
 };
