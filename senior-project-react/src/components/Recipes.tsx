@@ -123,7 +123,6 @@ const Recipes: React.FC = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [profile_picture, setProfile_picture] = useState<string>();
   const [notifications, setNotifications] = useState<[]>([]);
-  const [readNotifications, setReadNotifications] = useState<[]>([]);
 
   const navigate = useNavigate();
 
@@ -374,7 +373,6 @@ const Recipes: React.FC = () => {
           />
         </Box>
         {/* Notification */}
-        {/* TODO: Make it such that it's red when you have a new notification*/}
         <IconButton
           onClick={handleClickNotification}
           style={{ position: "relative", top: 8, right: 6 }}
