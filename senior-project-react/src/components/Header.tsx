@@ -42,6 +42,24 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
 
   const navigate = useNavigate();
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+
+    if (query) {
+      navigate({
+        pathname: location.pathname,
+        search: `?search=${query}`, 
+      });
+    } else {
+      navigate({
+        pathname: location.pathname,
+        search: "", 
+      });
+    }
+  };
+
+
   const handleGoToProfile = async () => {
     navigate(`/profile`);
   };
@@ -169,10 +187,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         console.error("Unable to check if user is admin", error);
       });
   }
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
-  };
 
 
   React.useEffect(() => {
