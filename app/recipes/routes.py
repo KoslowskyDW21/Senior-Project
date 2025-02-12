@@ -1,9 +1,12 @@
 from __future__ import annotations
 import math
-from flask import request, jsonify, render_template, redirect, url_for, abort, flash
+from flask import request, jsonify, render_template, redirect, url_for, abort, flash, current_app
 from flask_login import current_user, login_required
 from app.recipes import bp
-from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, db
+from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, Review, db
+import os
+import uuid
+from werkzeug.utils import secure_filename
 
 # @bp.get('/')
 # def home():
@@ -32,7 +35,7 @@ def post_recipe_steps(id):
     return f"<h1>404: steps not found for recipe {id}</h1>", 404
 
 
-@bp.post("/completed/<int:id>/")
+@bp.route("/completed/<int:id>/", methods  = ['POST'])
 def post_completed_recipe_page(id):
     print("searching for recipe" + str(id))
     recipe = Recipe.query.filter_by(id=id).first()
@@ -93,6 +96,58 @@ def delete_recipe():
     db.session.commit()
     flash('recipe deleted successfully')
     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@bp.route("/review/<int:id>/", methods=['POST'])
+def upload_review(id):
+    # Get review data from the request
+    rating = request.form.get('rating')
+    notes = request.form.get('notes')
+    image = request.files.get('image')
+    difficulty = request.form.get('difficulty')
+
+    # Handle image upload
+    image_path = None
+    if image and allowed_file(image.filename):
+        upload_folder = current_app.config['UPLOAD_FOLDER']
+        os.makedirs(upload_folder, exist_ok=True)
+        filename = f"{uuid.uuid4().hex}_{secure_filename(image.filename)}" # type: ignore
+        file_path = os.path.join(upload_folder, filename)
+
+        image.save(file_path)
+
+        image_path = os.path.join('static', 'uploads', filename)
+
+    if rating or notes or image or difficulty:
+        if rating == "":
+            rating = '0'
+        if notes == "":
+            notes = ""
+        if difficulty == "":
+            difficulty = '0'
+        if image_path is None:
+            image_path = "NULL"
+        review = Review(recipe_id=id,text=notes,image=image_path,rating=rating,difficulty=difficulty, num_reports=0,author=current_user.id) # type: ignore
+        db.session.add(review)
+        db.session.commit()
+
+        return jsonify({"message": "Review submitted successfully"}), 200
+
+    return jsonify({"message": "No valid review data provided"}), 400
+
+@bp.route("/reviews/<int:id>/", methods=['GET'])
+def reviews(id):
+    reviews = Review.query.filter_by(recipe_id  = id).all()
+    return jsonify({
+        "reviews": [review.to_json() for review in reviews],
+    }), 200
+
+
+
 
 def completionAchievements(id):
         specA = UserAchievement(achievement_id = id, user_id = current_user.id) #type:ignore

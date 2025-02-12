@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button, FormControl, Avatar, MenuItem, Box, Select, InputLabel, FormControlLabel, Checkbox, Typography, SelectChangeEvent, IconButton, Container } from "@mui/material"; //matui components
+import { Button, FormControl, Avatar, MenuItem, Box, Select, InputLabel, FormControlLabel, Checkbox, Typography, SelectChangeEvent, IconButton, Container, Card, CardContent, CardMedia } from "@mui/material"; //matui components
 import axios, { AxiosError } from "axios";
 import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -77,6 +77,7 @@ const IndividualRecipe: React.FC = () => {
     const [ steps, setSteps ] = React.useState<Step[]>([]);
     const [ snackbarOpen, setSnackBarOpen ] = React.useState(false);
     const { id } = useParams<{ id: string }>();
+    const [reviews, setReviews] = React.useState<Review[]>([]);
 
     const navigate = useNavigate();
 
@@ -84,6 +85,15 @@ const IndividualRecipe: React.FC = () => {
         console.log("Navigating to completed recipe page");
         navigate(`/recipes/completed/${id}`);
     }
+
+    const getReviews = async () => {
+        try {
+            const response = await axios.get(`http://127.0.0.1:5000/recipes/reviews/${id}`);
+            setReviews(response.data.reviews); 
+        } catch (error) {
+            console.error("Error fetching reviews: ", error);
+        }
+    };
 
     const handleAddRecipeToList = async (event: SelectChangeEvent) => {
         if (id == undefined) {
@@ -206,6 +216,7 @@ const IndividualRecipe: React.FC = () => {
         getCurrentUser();
         getRecipeLists();
         getSteps();
+        getReviews();
     }, []);
 
     return (
@@ -289,6 +300,51 @@ const IndividualRecipe: React.FC = () => {
                     <Step recipe_id={step.recipe_id} step_number={step.step_number} step_description={step.step_description} />
                 ))}
             </Box>
+
+            <h2>Reviews: </h2>
+
+            <Box sx={{ textAlign: "left" }}>
+                {reviews.length > 0 ? (
+                reviews.map((review) => (
+                    <Card 
+                    key={review.id}
+                    sx={{
+                        marginBottom: 2,
+                        border: "1px solid #ccc", // Adds outline to the card
+                        borderRadius: 2,
+                        boxShadow: 2,
+                    }}
+                    >
+                    <CardContent>
+                        <Typography variant="h6">{review.author}</Typography>
+                    <   Typography variant="body2" color="text.secondary">{review.text}</Typography>
+                    {review.difficulty !== "0" && (
+                        <Typography variant="body2" color="text.secondary">Difficulty: {review.difficulty}</Typography>
+                    )}
+                    {review.rating !== "0" && (
+                        <Typography variant="body2" color="text.secondary">Rating: {review.rating}</Typography>
+                    )}
+                    {review.image != "NULL" && (
+                        <CardMedia
+                            component="img"
+                            height="200" 
+                            image={`http://127.0.0.1:5000/${review.image}`} 
+                            alt="Review Image"
+                            sx={{
+                                objectFit: "contain",
+                                maxWidth: "100%", 
+                                marginBottom: 2, 
+                            }}
+                        />
+                    )}
+                </CardContent>
+            </Card>
+        ))
+    ) : (
+        <Typography>No reviews yet.</Typography>
+    )}
+</Box>
+
 
             <Snackbar
                 open={snackbarOpen}
