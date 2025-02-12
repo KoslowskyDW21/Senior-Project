@@ -74,27 +74,30 @@ function Recipe({ id, name, difficulty, image }) {
     navigate(`/recipes/${id}`);
   };
   return (
-    <Card variant="outlined" sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <Card
+      variant="outlined"
+      sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+    >
       <CardActionArea onClick={handleGoToRecipe}>
-      <CardHeader
-        title={name}
-        subheader={Difficulty({ difficulty })}
-        sx={{
-          justifyContent: "center", 
-          alignItems: "center",  
-          textAlign: "center",  
-          flexShrink: 0,    
-          width: "90%",  
-          fontSize: "clamp(1rem, 4vw, 2rem)",
-        }}
-      />
+        <CardHeader
+          title={name}
+          subheader={Difficulty({ difficulty })}
+          sx={{
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            flexShrink: 0,
+            width: "90%",
+            fontSize: "clamp(1rem, 4vw, 2rem)",
+          }}
+        />
         <CardMedia
           component="img"
           image={image}
           sx={{
-            height: 200, 
-            objectFit: "cover", 
-            width: "100%", 
+            height: 200,
+            objectFit: "cover",
+            width: "100%",
           }}
         />
       </CardActionArea>
@@ -160,7 +163,7 @@ const Recipes: React.FC = () => {
           mt: 4,
         }}
       ></Box>
-      <main role="main" style={{ paddingTop: '100px' }}>
+      <main role="main" style={{ paddingTop: "100px" }}>
         <Grid container spacing={3}>
           {filteredRecipes.map((recipe) => (
             <Grid size={3} key={recipe.id}> 
@@ -208,7 +211,7 @@ const Recipes: React.FC = () => {
           Recipes
         </Button>
         <Button
-        onClick={handleGoToChallenges}
+          onClick={handleGoToChallenges}
           variant="contained"
           color="primary"
           sx={{ flex: 1 }}
@@ -216,7 +219,7 @@ const Recipes: React.FC = () => {
           Challenges
         </Button>
         <Button
-        onClick={handleGoToGroups}
+          onClick={handleGoToGroups}
           variant="contained"
           color="primary"
           sx={{ flex: 1 }}

@@ -35,6 +35,10 @@ interface User {
 }
 
 
+interface Friendship {
+  friends: [];
+}
+
 const Groups: React.FC = () => {
   const [groups, setGroups] = useState<UserGroup[]>([]);
   const [myGroups, setMyGroups] = useState<UserGroup[]>([]);
@@ -44,6 +48,7 @@ const Groups: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [profile_picture, setProfile_picture] = useState<string>();
+  const [friends, setFriends] = useState<[]>([]);
 
   const fetchGroups = async () => {
     try {
@@ -84,6 +89,7 @@ const Groups: React.FC = () => {
     loadMoreGroups();
     fetchMyGroups();
     getCurrentUser();
+    getFriends();
   }, []);
 
   useEffect(() => {
@@ -127,6 +133,68 @@ const Groups: React.FC = () => {
     }
   };
 
+  const getNotifications = async () => {
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/settings/get_notifications/",
+        {},
+        { withCredentials: true }
+      );
+      const data: UserNotifications = response.data;
+      setNotifications(data.notifications);
+    } catch (error) {
+      console.log("Error fetching notifications: ", error);
+    }
+  };
+
+  const getFriends = async () => {
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/friends/get_friends/",
+        {},
+        { withCredentials: true }
+      );
+      const data: Friendship = response.data;
+      console.log("data:");
+      console.log(data);
+      setFriends(data.friends);
+      console.log("Friends", data.friends);
+    } catch (error) {
+      console.log("Error fetching friends: ", error);
+    }
+  };
+
+  async function readNotificationsApi(id: any) {
+    try {
+      const data = {
+        id: id,
+      };
+      console.log(data);
+      await axios.post(
+        "http://127.0.0.1:5000/settings/read_notification/",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Notification read successfully!");
+    } catch (error) {
+      console.error("Error reading notification: ", error);
+    }
+  }
+  async function isAdmin() {
+    await axios
+      .get("http://127.0.0.1:5000/admin/")
+      .then((response) => {
+        setAdmin(response.data.is_admin);
+      })
+      .catch((error) => {
+        console.error("Unable to check if user is admin", error);
+      });
+  }
+
   const filteredGroups = groups.filter(
     (group) =>
       group.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -148,6 +216,12 @@ const Groups: React.FC = () => {
         }}
       ></Box>
     <main role="main" style={{ paddingTop: '90px' }}>
+      <Container></Container>
+      <Box mt={4} mb={2} textAlign="center">
+        <Typography variant="h4" gutterBottom>
+          Friends
+        </Typography>
+      </Box>
       <Container>
         <Box mt={4} mb={2} textAlign="center">
           <Typography variant="h4" gutterBottom>
