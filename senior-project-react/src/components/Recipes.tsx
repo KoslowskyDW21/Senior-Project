@@ -8,18 +8,10 @@ import {
   CardHeader,
   CardMedia,
   CardActionArea,
-  Menu,
-  MenuItem,
-  IconButton,
-  Avatar,
-  TextField,
   Box,
-} from "@mui/material"; //matui components
+} from "@mui/material"; // matui components
 import Grid from "@mui/material/Grid2";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import { Star, StarBorder } from "@mui/icons-material";
-import PersonIcon from "@mui/icons-material/Person";
-import Header from "./Header"
+import Header from "./Header";
 
 interface Recipe {
   id: number;
@@ -29,7 +21,6 @@ interface Recipe {
   rating: number;
   image: string;
 }
-
 
 function Difficulty({ difficulty }) {
   const diamondStyle = {
@@ -60,8 +51,7 @@ function Difficulty({ difficulty }) {
     <Box
       sx={{
         display: "flex",
-        flexDirection: "row",
-        justifyContent: "center",
+        justifyContent: "center", // Centers the diamonds
         padding: "2px",
       }}
     >
@@ -76,7 +66,7 @@ function Difficulty({ difficulty }) {
 
 // @ts-expect-error
 function Recipe({ id, name, difficulty, image }) {
-  const navigate = useNavigate(); //for navigation
+  const navigate = useNavigate(); // for navigation
   id = id.toString(); // hacky insurance against mistakes
 
   const handleGoToRecipe = async () => {
@@ -85,49 +75,41 @@ function Recipe({ id, name, difficulty, image }) {
   };
 
   return (
-    <Card variant="outlined">
+    <Card variant="outlined" sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <CardActionArea onClick={handleGoToRecipe}>
-        <CardHeader title={name} subheader={Difficulty({ difficulty })} />
-        <CardMedia component="img" image={image} />
+        <CardHeader
+          title={name}
+          subheader={Difficulty({ difficulty })}
+          sx={{
+            display: "flex",
+            justifyContent: "center", // Center the title and difficulty
+            flexShrink: 0, // Prevent shrinking of header section
+            maxWidth: "100%", // Ensure header doesn't exceed the card width
+            overflow: "hidden", // Hide overflowed text
+            textOverflow: "ellipsis", // Add ellipsis if title is too long
+            whiteSpace: "nowrap", // Prevent text from wrapping
+            paddingBottom: "10px", // Add some bottom padding to allow space for title
+            width: "100%", // Ensure the title is contained within the card
+          }}
+        />
+        <CardMedia
+          component="img"
+          image={image}
+          sx={{
+            height: 200, // Fixed height for the images
+            objectFit: "cover", // Ensures the image covers the area without distortion
+            width: "100%", // Ensure the image takes the full width of the card
+          }}
+        />
       </CardActionArea>
     </Card>
   );
 }
 
-function createRecipe(recipe: Recipe) {
-  console.log(recipe.id);
-  console.log(recipe.recipe_name);
-  console.log(recipe.difficulty);
-  console.log(recipe.image);
-
-  return (
-    <Recipe
-      id={recipe.id}
-      name={recipe.recipe_name}
-      difficulty={recipe.difficulty}
-      image={recipe.image}
-    />
-  );
-  // return <Recipe id="1" name="Apple Frangipan Tart" difficulty="1" image="" />;
-}
-
 const Recipes: React.FC = () => {
-  const [admin, setAdmin] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>("");
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [profile_picture, setProfile_picture] = useState<string>();
-  const [notifications, setNotifications] = useState<[]>([]);
 
   const navigate = useNavigate();
-
-  const handleGoToChallenges = async () => {
-    console.log("setNotifications: " + notifications);
-    navigate(`/challenges`);
-  };
-
-  const handleGoToGroups = async () => {
-    navigate(`/groups`);
-  };
 
   async function loadRecipes() {
     try {
@@ -139,19 +121,13 @@ const Recipes: React.FC = () => {
     }
   }
 
-
   React.useEffect(() => {
     loadRecipes();
   }, []);
 
-  //for debugging:
-  // React.useEffect(() => {
-  //   console.log("Current notifications state:", notifications);
-  // }, [notifications]);
-
   return (
     <div>
-      <Header />
+      <Header title="Recipes" />
       <Box
         sx={{
           display: "flex",
@@ -163,10 +139,10 @@ const Recipes: React.FC = () => {
           mt: 4,
         }}
       ></Box>
-      <main role="main">
+      <main role="main" style={{ paddingTop: '100px' }}>
         <Grid container spacing={3}>
           {recipes.map((recipe) => (
-            <Grid size={4} key={recipe.id}>
+            <Grid size={3} key={recipe.id}> {/* 5 items per row */}
               <Box
                 sx={{
                   border: "2px solid rgb(172, 169, 169)",
@@ -177,6 +153,9 @@ const Recipes: React.FC = () => {
                     borderColor: "#1976d2",
                     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
                   },
+                  display: "flex",
+                  flexDirection: "column", // Ensure that content is aligned vertically
+                  height: "100%", // Make sure box takes full height
                 }}
               >
                 <Recipe
@@ -208,7 +187,6 @@ const Recipes: React.FC = () => {
           Recipes
         </Button>
         <Button
-          onClick={handleGoToChallenges}
           variant="contained"
           color="primary"
           sx={{ flex: 1 }}
@@ -216,7 +194,6 @@ const Recipes: React.FC = () => {
           Challenges
         </Button>
         <Button
-          onClick={handleGoToGroups}
           variant="contained"
           color="primary"
           sx={{ flex: 1 }}

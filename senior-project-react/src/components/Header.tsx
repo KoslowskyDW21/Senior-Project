@@ -21,6 +21,10 @@ import { Star, StarBorder } from "@mui/icons-material";
 import PersonIcon from "@mui/icons-material/Person";
 
 
+interface HeaderProps {
+    title: string;
+}
+
 interface User {
   profile_picture: string;
 }
@@ -30,8 +34,7 @@ interface UserNotifications {
 }
 
 
-
-const Header: React.FC = () => {
+const Header: React.FC<HeaderProps> = ({ title }) => {
   const [admin, setAdmin] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [profile_picture, setProfile_picture] = useState<string>();
@@ -182,15 +185,6 @@ const Header: React.FC = () => {
     <div>
       <Box
         sx={{
-          flexGrow: 1,
-          fontSize: "12px",
-          color: "#FFFFFF",
-        }}
-      >
-        <h1>e</h1>
-      </Box>
-      <Box
-        sx={{
           position: "fixed",
           top: 0,
           left: 0,
@@ -236,7 +230,7 @@ const Header: React.FC = () => {
             fontWeight: "bold",
           }}
         >
-          <h1>Recipes</h1>
+          <h1>{title}</h1>
         </Box>
 
         <Box
