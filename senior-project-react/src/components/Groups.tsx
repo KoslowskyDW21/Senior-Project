@@ -37,6 +37,10 @@ interface UserNotifications {
   notifications: [];
 }
 
+interface Friendship {
+  friends: [];
+}
+
 const Groups: React.FC = () => {
   const [groups, setGroups] = useState<UserGroup[]>([]);
   const [myGroups, setMyGroups] = useState<UserGroup[]>([]);
@@ -48,6 +52,7 @@ const Groups: React.FC = () => {
   const [profile_picture, setProfile_picture] = useState<string>();
   const [admin, setAdmin] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<[]>([]);
+  const [friends, setFriends] = useState<[]>([]);
 
   const fetchGroups = async () => {
     try {
@@ -90,6 +95,7 @@ const Groups: React.FC = () => {
     getCurrentUser();
     isAdmin();
     getNotifications();
+    getFriends();
   }, []);
 
   useEffect(() => {
@@ -204,6 +210,23 @@ const Groups: React.FC = () => {
       setNotifications(data.notifications);
     } catch (error) {
       console.log("Error fetching notifications: ", error);
+    }
+  };
+
+  const getFriends = async () => {
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/friends/get_friends/",
+        {},
+        { withCredentials: true }
+      );
+      const data: Friendship = response.data;
+      console.log("data:");
+      console.log(data);
+      setFriends(data.friends);
+      console.log("Friends", data.friends);
+    } catch (error) {
+      console.log("Error fetching friends: ", error);
     }
   };
 
@@ -422,6 +445,12 @@ const Groups: React.FC = () => {
         }}
       ></Box>
 
+      <Container></Container>
+      <Box mt={4} mb={2} textAlign="center">
+        <Typography variant="h4" gutterBottom>
+          Friends
+        </Typography>
+      </Box>
       <Container>
         <Box mt={4} mb={2} textAlign="center">
           <Typography variant="h4" gutterBottom>

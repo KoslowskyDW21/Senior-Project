@@ -55,6 +55,8 @@ def create_app(config=Config):
     app.register_blueprint(groups_bp, url_prefix='/groups')
     from app.admin import bp as admin_bp
     app.register_blueprint(admin_bp, url_prefix='/admin')
+    from app.friends import bp as friends_bp
+    app.register_blueprint(friends_bp, url_prefix='/friends')
     
     return app
 

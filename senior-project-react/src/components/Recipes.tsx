@@ -75,7 +75,10 @@ function Recipe({ id, name, difficulty, image }) {
   };
 
   return (
-    <Card variant="outlined" sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <Card
+      variant="outlined"
+      sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+    >
       <CardActionArea onClick={handleGoToRecipe}>
         <CardHeader
           title={name}
@@ -139,10 +142,12 @@ const Recipes: React.FC = () => {
           mt: 4,
         }}
       ></Box>
-      <main role="main" style={{ paddingTop: '100px' }}>
+      <main role="main" style={{ paddingTop: "100px" }}>
         <Grid container spacing={3}>
           {recipes.map((recipe) => (
-            <Grid size={3} key={recipe.id}> {/* 5 items per row */}
+            <Grid size={3} key={recipe.id}>
+              {" "}
+              {/* 5 items per row */}
               <Box
                 sx={{
                   border: "2px solid rgb(172, 169, 169)",
@@ -186,18 +191,10 @@ const Recipes: React.FC = () => {
         <Button variant="outlined" color="primary" sx={{ flex: 1 }}>
           Recipes
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ flex: 1 }}
-        >
+        <Button variant="contained" color="primary" sx={{ flex: 1 }}>
           Challenges
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ flex: 1 }}
-        >
+        <Button variant="contained" color="primary" sx={{ flex: 1 }}>
           Community
         </Button>
       </div>
