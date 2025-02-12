@@ -307,7 +307,7 @@ class Review(db.Model):
     recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id', ondelete="CASCADE"), nullable=False)
     text = db.Column(db.Text, nullable=False)
     image = db.Column(db.Text)
-    rating = db.Column(db.Enum('0','1','1.5', '2','2.5', '3','3.5', '4','4.5', '5'), nullable=True)
+    rating = db.Column(db.Enum('0', '0.5','1','1.5', '2','2.5', '3','3.5', '4','4.5', '5'), nullable=True)
     difficulty = db.Column(db.Enum('0','1', '2', '3', '4', '5'), nullable=True)
     num_reports = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id', ondelete="CASCADE"), nullable=False)
