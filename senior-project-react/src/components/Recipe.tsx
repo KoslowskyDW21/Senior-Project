@@ -310,13 +310,13 @@ const IndividualRecipe: React.FC = () => {
                     key={review.id}
                     sx={{
                         marginBottom: 2,
-                        border: "1px solid #ccc", // Adds outline to the card
+                        border: "1px solid #ccc",
                         borderRadius: 2,
                         boxShadow: 2,
                     }}
                     >
                     <CardContent>
-                        <Typography variant="h6">{review.author}</Typography>
+                        <Typography variant="h6">{review.username}</Typography>
                     <   Typography variant="body2" color="text.secondary">{review.text}</Typography>
                     {review.difficulty !== "0" && (
                         <Typography variant="body2" color="text.secondary">Difficulty: {review.difficulty}</Typography>
