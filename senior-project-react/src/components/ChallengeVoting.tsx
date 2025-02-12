@@ -20,7 +20,9 @@ interface Participant {
 const ChallengeVoting: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const [selectedParticipant, setSelectedParticipant] = useState<number | null>(null);
+  const [firstChoice, setFirstChoice] = useState<number | null>(null);
+  const [secondChoice, setSecondChoice] = useState<number | null>(null);
+  const [thirdChoice, setThirdChoice] = useState<number | null>(null);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const navigate = useNavigate();
 
@@ -48,18 +50,25 @@ const ChallengeVoting: React.FC = () => {
   }, [id]);
 
   const handleVote = async () => {
-    if (selectedParticipant && currentUserId !== selectedParticipant) {
+    if (
+      firstChoice &&
+      currentUserId !== firstChoice &&
+      (secondChoice === null || (secondChoice !== firstChoice && currentUserId !== secondChoice)) &&
+      (thirdChoice === null || (thirdChoice !== firstChoice && thirdChoice !== secondChoice && currentUserId !== thirdChoice))
+    ) {
       try {
         await axios.post(`http://127.0.0.1:5000/challenges/${id}/vote`, {
           voter_id: currentUserId,
-          votee_id: selectedParticipant,
+          first_choice: firstChoice,
+          second_choice: secondChoice,
+          third_choice: thirdChoice,
         });
         alert("Vote submitted successfully!");
       } catch (error) {
         console.error("Error submitting vote:", error);
       }
     } else {
-      alert("You cannot vote for yourself or no participant selected.");
+      alert("You must select a vote for the first place winner");
     }
   };
 
@@ -70,11 +79,11 @@ const ChallengeVoting: React.FC = () => {
           Vote for Challenge Winner
         </Typography>
         <FormControl fullWidth>
-          <InputLabel id="participant-select-label">Select Participant</InputLabel>
+          <InputLabel id="first-choice-label">First Choice</InputLabel>
           <Select
-            labelId="participant-select-label"
-            value={selectedParticipant}
-            onChange={(e) => setSelectedParticipant(e.target.value as number)}
+            labelId="first-choice-label"
+            value={firstChoice}
+            onChange={(e) => setFirstChoice(e.target.value as number)}
           >
             {participants
               .filter((participant) => participant.user_id !== currentUserId)
@@ -85,6 +94,50 @@ const ChallengeVoting: React.FC = () => {
               ))}
           </Select>
         </FormControl>
+        {participants.length > 2 && (
+          <FormControl fullWidth>
+            <InputLabel id="second-choice-label">Second Choice</InputLabel>
+            <Select
+              labelId="second-choice-label"
+              value={secondChoice}
+              onChange={(e) => setSecondChoice(e.target.value as number)}
+            >
+              {participants
+                .filter(
+                  (participant) =>
+                    participant.user_id !== currentUserId && participant.user_id !== firstChoice
+                )
+                .map((participant) => (
+                  <MenuItem key={participant.user_id} value={participant.user_id}>
+                    {participant.username}
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl>
+        )}
+        {participants.length > 3 && (
+          <FormControl fullWidth>
+            <InputLabel id="third-choice-label">Third Choice</InputLabel>
+            <Select
+              labelId="third-choice-label"
+              value={thirdChoice}
+              onChange={(e) => setThirdChoice(e.target.value as number)}
+            >
+              {participants
+                .filter(
+                  (participant) =>
+                    participant.user_id !== currentUserId &&
+                    participant.user_id !== firstChoice &&
+                    participant.user_id !== secondChoice
+                )
+                .map((participant) => (
+                  <MenuItem key={participant.user_id} value={participant.user_id}>
+                    {participant.username}
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl>
+        )}
         <Box mt={2}>
           <Button variant="contained" color="primary" onClick={handleVote}>
             Submit Vote

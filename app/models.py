@@ -367,12 +367,17 @@ class ChallengeResult(db.Model):
 class ChallengeVote(db.Model):
     __tablename__ = 'ChallengeVote'
     challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id'), primary_key=True)
-    given_to = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    first_choice = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    second_choice = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=True)
+    third_choice = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=True)
     given_by = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+
     def to_json(self):
         return {
             "challenge_id": self.challenge_id,
-            "given_to": self.given_to,
+            "first_choice": self.first_choice,
+            "second_choice": self.second_choice,
+            "third_choice": self.third_choice,
             "given_by": self.given_by,
         }
 

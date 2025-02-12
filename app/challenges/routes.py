@@ -199,10 +199,15 @@ def delete_challenge(challenge_id):
 def submit_vote(challenge_id):
     data = request.get_json()
     voter_id = data.get('voter_id')
-    votee_id = data.get('votee_id')
+    first_choice = data.get('first_choice')
+    second_choice = data.get('second_choice')
+    third_choice = data.get('third_choice')
 
-    if voter_id == votee_id:
+    if voter_id in [first_choice, second_choice, third_choice]:
         return jsonify({"message": "You cannot vote for yourself"}), 400
+
+    if len({first_choice} - {None}) < 1:
+        return jsonify({"message": "You must select a vote for the first place winner"}), 400
 
     # Check if the voter is a participant of the challenge
     participant = ChallengeParticipant.query.filter_by(challenge_id=challenge_id, user_id=voter_id).first()
@@ -210,21 +215,30 @@ def submit_vote(challenge_id):
         return jsonify({"message": "You must be a participant to vote"}), 403
 
     # Check if the votee is a participant of the challenge
-    votee = ChallengeParticipant.query.filter_by(challenge_id=challenge_id, user_id=votee_id).first()
-    if not votee:
-        return jsonify({"message": "The selected user is not a participant"}), 400
+    for votee_id in [first_choice, second_choice, third_choice]:
+        if votee_id is not None:
+            votee = ChallengeParticipant.query.filter_by(challenge_id=challenge_id, user_id=votee_id).first()
+            if not votee:
+                return jsonify({"message": f"User {votee_id} is not a participant"}), 400
 
     # Check if the user has already voted
     existing_vote = ChallengeVote.query.filter_by(challenge_id=challenge_id, given_by=voter_id).first()
     if existing_vote:
         # Update the existing vote
-        existing_vote.given_to = votee_id
+        existing_vote.first_choice = first_choice
+        existing_vote.second_choice = second_choice
+        existing_vote.third_choice = third_choice
     else:
         # Create a new vote
-        vote = ChallengeVote(challenge_id=challenge_id, given_by=voter_id, given_to=votee_id)
+        vote = ChallengeVote(
+            challenge_id=challenge_id,
+            given_by=voter_id,
+            first_choice=first_choice,
+            second_choice=second_choice,
+            third_choice=third_choice,
+        )
         db.session.add(vote)
 
     db.session.commit()
 
     return jsonify({"message": "Vote submitted successfully"}), 201
-
