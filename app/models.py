@@ -108,10 +108,12 @@ class UserBlock(db.Model):
 
 class Friendship(db.Model):
     __tablename__ = 'Friendship'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user1 = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
     user2 = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
     def to_json(self):
         return {
+            "id": self.id,
             "user1": self.user1,
             "user2": self.user2,
         }
