@@ -119,6 +119,12 @@ const GroupDetails: React.FC = () => {
     }
   };
 
+  const handleReportGroup = async () => {
+    console.log("Attempting to report this group...");
+    //TODO: Implement this method
+    await axios.get(`http://127.0.0.1:5000/groups/${id}/report`)
+  }
+
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
 
@@ -192,6 +198,13 @@ const GroupDetails: React.FC = () => {
                 Join Group
               </Button>
             )}
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleReportGroup}
+            >
+              Report
+            </Button>
           </Box>
           <Box mt={4}>
             <Typography variant="h5" gutterBottom>

@@ -34,7 +34,6 @@ interface User {
   profile_picture: string;
 }
 
-
 interface Friendship {
   friends: [];
 }
@@ -110,7 +109,6 @@ const Groups: React.FC = () => {
     navigate(`/recipes`);
   };
 
-
   const handleGoToChallenges = async () => {
     navigate(`/challenges`);
   };
@@ -118,7 +116,6 @@ const Groups: React.FC = () => {
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
   };
-
 
   const getCurrentUser = async () => {
     try {
@@ -130,20 +127,6 @@ const Groups: React.FC = () => {
       console.log(profile_picture);
     } catch (error) {
       console.error("Error fetching user: ", error);
-    }
-  };
-
-  const getNotifications = async () => {
-    try {
-      const response = await axios.post(
-        "http://127.0.0.1:5000/settings/get_notifications/",
-        {},
-        { withCredentials: true }
-      );
-      const data: UserNotifications = response.data;
-      setNotifications(data.notifications);
-    } catch (error) {
-      console.log("Error fetching notifications: ", error);
     }
   };
 
@@ -163,37 +146,6 @@ const Groups: React.FC = () => {
       console.log("Error fetching friends: ", error);
     }
   };
-
-  async function readNotificationsApi(id: any) {
-    try {
-      const data = {
-        id: id,
-      };
-      console.log(data);
-      await axios.post(
-        "http://127.0.0.1:5000/settings/read_notification/",
-        data,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      console.log("Notification read successfully!");
-    } catch (error) {
-      console.error("Error reading notification: ", error);
-    }
-  }
-  async function isAdmin() {
-    await axios
-      .get("http://127.0.0.1:5000/admin/")
-      .then((response) => {
-        setAdmin(response.data.is_admin);
-      })
-      .catch((error) => {
-        console.error("Unable to check if user is admin", error);
-      });
-  }
 
   const filteredGroups = groups.filter(
     (group) =>
@@ -215,35 +167,71 @@ const Groups: React.FC = () => {
           mt: 4,
         }}
       ></Box>
-    <main role="main" style={{ paddingTop: '90px' }}>
-      <Container></Container>
-      <Box mt={4} mb={2} textAlign="center">
-        <Typography variant="h4" gutterBottom>
-          Friends
-        </Typography>
-      </Box>
-      <Container>
-        <Box mt={4} mb={2} textAlign="center">
-          <Typography variant="h4" gutterBottom>
-            User Groups
-          </Typography>
-        </Box>
+      <main role="main" style={{ paddingTop: "90px" }}>
+        <Container>
+          <Box mt={4} mb={2} textAlign="center">
+            <Typography variant="h4" gutterBottom>
+              Friends
+            </Typography>
+          </Box>
+        </Container>
 
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => navigate(`/groups/create`)}
-        >
-          Create a Group
-        </Button>
+        <Container>
+          <Box mt={4} mb={2} textAlign="center">
+            <Typography variant="h4" gutterBottom>
+              User Groups
+            </Typography>
+          </Box>
 
-        {myGroups.length > 0 && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate(`/groups/create`)}
+          >
+            Create a Group
+          </Button>
+
+          {myGroups.length > 0 && (
+            <Box mt={4}>
+              <Typography variant="h5" gutterBottom>
+                My Groups
+              </Typography>
+              <Grid container spacing={2}>
+                {myGroups.map((group) => (
+                  <Grid item xs={12} sm={6} md={4} key={group.id}>
+                    <Card
+                      onClick={() => navigate(`/groups/${group.id}`)}
+                      sx={{ cursor: "pointer" }}
+                    >
+                      {group.image && (
+                        <CardMedia
+                          component="img"
+                          height="140"
+                          image={`http://127.0.0.1:5000/${group.image}`}
+                          alt={group.name}
+                        />
+                      )}
+                      <CardContent>
+                        <Typography variant="h6" component="div" gutterBottom>
+                          {group.name}
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          {group.description}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          )}
+
           <Box mt={4}>
             <Typography variant="h5" gutterBottom>
-              My Groups
+              All Groups
             </Typography>
             <Grid container spacing={2}>
-              {myGroups.map((group) => (
+              {filteredGroups.map((group) => (
                 <Grid item xs={12} sm={6} md={4} key={group.id}>
                   <Card
                     onClick={() => navigate(`/groups/${group.id}`)}
@@ -270,82 +258,48 @@ const Groups: React.FC = () => {
               ))}
             </Grid>
           </Box>
-        )}
-
-        <Box mt={4}>
-          <Typography variant="h5" gutterBottom>
-            All Groups
-          </Typography>
-          <Grid container spacing={2}>
-            {filteredGroups.map((group) => (
-              <Grid item xs={12} sm={6} md={4} key={group.id}>
-                <Card
-                  onClick={() => navigate(`/groups/${group.id}`)}
-                  sx={{ cursor: "pointer" }}
-                >
-                  {group.image && (
-                    <CardMedia
-                      component="img"
-                      height="140"
-                      image={`http://127.0.0.1:5000/${group.image}`}
-                      alt={group.name}
-                    />
-                  )}
-                  <CardContent>
-                    <Typography variant="h6" component="div" gutterBottom>
-                      {group.name}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {group.description}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-        {loading && (
-          <Box textAlign="center" mt={4}>
-            <Typography variant="body2" color="textSecondary">
-              Loading...
-            </Typography>
-          </Box>
-        )}
-      </Container>
-      <div
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          display: "flex",
-          justifyContent: "space-around",
-          padding: "10px",
-          backgroundColor: "#fff",
-          boxShadow: "0px -2px 5px rgba(0, 0, 0, 0.1)",
-          zIndex: 1000,
-        }}
-      >
-        <Button
-          onClick={handleGoToRecipes}
-          variant="contained"
-          color="primary"
-          sx={{ flex: 1 }}
+          {loading && (
+            <Box textAlign="center" mt={4}>
+              <Typography variant="body2" color="textSecondary">
+                Loading...
+              </Typography>
+            </Box>
+          )}
+        </Container>
+        <div
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            display: "flex",
+            justifyContent: "space-around",
+            padding: "10px",
+            backgroundColor: "#fff",
+            boxShadow: "0px -2px 5px rgba(0, 0, 0, 0.1)",
+            zIndex: 1000,
+          }}
         >
-          Recipes
-        </Button>
-        <Button
-          onClick={handleGoToChallenges}
-          variant="contained"
-          color="primary"
-          sx={{ flex: 1 }}
-        >
-          Challenges
-        </Button>
-        <Button variant="outlined" color="primary" sx={{ flex: 1 }}>
-          Community
-        </Button>
-      </div>
+          <Button
+            onClick={handleGoToRecipes}
+            variant="contained"
+            color="primary"
+            sx={{ flex: 1 }}
+          >
+            Recipes
+          </Button>
+          <Button
+            onClick={handleGoToChallenges}
+            variant="contained"
+            color="primary"
+            sx={{ flex: 1 }}
+          >
+            Challenges
+          </Button>
+          <Button variant="outlined" color="primary" sx={{ flex: 1 }}>
+            Community
+          </Button>
+        </div>
       </main>
     </div>
   );
