@@ -32,6 +32,7 @@ import GroupDetails from "./components/GroupDetails";
 import CreateGroup from "./components/CreateGroup";
 import CreateRecipeList from "./components/CreateRecipeList";
 import Banned from "./components/Banned";
+import Friends from "./components/Friends";
 import { PublicClientApplication } from "@azure/msal-browser";
 import ProtectedRoute from "./components/ProtectedRoute";
 import useIdTokenRefresher from "./hooks/refresh";
@@ -104,8 +105,14 @@ function App() {
               <Route path="/challenges" element={<Challenges />} />
               <Route path="/challenges/:id" element={<ChallengeDetail />} />
               <Route path="/challenges/create" element={<CreateChallenge />} />
-              <Route path="/challenges/:id/vote" element={<ChallengeVoting />} />
-              <Route path="/challenges/:id/vote_results" element={<ChallengeResults />} />
+              <Route
+                path="/challenges/:id/vote"
+                element={<ChallengeVoting />}
+              />
+              <Route
+                path="/challenges/:id/vote_results"
+                element={<ChallengeResults />}
+              />
 
               {/*achievements*/}
               <Route path="/achievements" element={<Achievements />} />
@@ -122,6 +129,9 @@ function App() {
               <Route path="/groups" element={<Groups />} />
               <Route path="/groups/:id" element={<GroupDetails />} />
               <Route path="/groups/create" element={<CreateGroup />} />
+
+              {/* friends */}
+              <Route path="/friends" element={<Friends />} />
 
               {/* admin */}
               <Route path="/admin" element={<AdminPage />} />

@@ -31,3 +31,9 @@ def get_friends():
     return jsonify({
         "friends": friends_list
     }), 200
+
+@bp.route('/add_friend/', methods=['POST'])
+def add_friend():
+    pass#
+
+#TODO: maybe add table: friend_request?
