@@ -108,6 +108,7 @@ function Recipe({ id, name, difficulty, image }) {
 const Recipes: React.FC = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
+  const [searchLabel, setSearchLabel] = useState<string>("Search for recipes");
 
   const navigate = useNavigate();
 
@@ -137,7 +138,7 @@ const Recipes: React.FC = () => {
       );
       setFilteredRecipes(filtered);
     } else {
-      setFilteredRecipes(recipes); 
+      setFilteredRecipes(recipes);
     }
   };
 
@@ -147,11 +148,11 @@ const Recipes: React.FC = () => {
 
   React.useEffect(() => {
     filterRecipes(recipes);
-  }, [location.search, recipes]); 
+  }, [location.search, recipes]);
 
   return (
     <div>
-      <Header title="Recipes" />
+      <Header title="Recipes" searchLabel="Search for recipes" />
       <Box
         sx={{
           display: "flex",
@@ -166,7 +167,7 @@ const Recipes: React.FC = () => {
       <main role="main" style={{ paddingTop: "100px" }}>
         <Grid container spacing={3}>
           {filteredRecipes.map((recipe) => (
-            <Grid size={3} key={recipe.id}> 
+            <Grid size={3} key={recipe.id}>
               <Box
                 sx={{
                   border: "2px solid rgb(172, 169, 169)",

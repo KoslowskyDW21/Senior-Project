@@ -52,6 +52,7 @@ const Challenges: React.FC = () => {
     {}
   );
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchLabel, setSearchLabel] = useState<string>("");
   const [showMoreMyChallenges, setShowMoreMyChallenges] =
     useState<boolean>(false);
   const [showMoreJoinedChallenges, setShowMoreJoinedChallenges] =
@@ -147,9 +148,9 @@ const Challenges: React.FC = () => {
     const urlParams = new URLSearchParams(location.search);
     const searchQuery = urlParams.get("search")?.toLowerCase() || "";
     if (searchQuery) {
-      setSearchQuery(searchQuery)
+      setSearchQuery(searchQuery);
     } else {
-      setSearchQuery("")
+      setSearchQuery("");
     }
   };
 
@@ -169,19 +170,18 @@ const Challenges: React.FC = () => {
     navigate("/recipes");
   };
 
-
   useEffect(() => {
     getResponse();
     getCurrentUser();
   }, []);
 
   React.useEffect(() => {
-      filterChallenges()
-    }, [location.search, challenges]); 
+    filterChallenges();
+  }, [location.search, challenges]);
 
   return (
     <div>
-      <Header title="Challenges" />
+      <Header title="Challenges" searchLabel="Search for challenges" />
       <Box
         sx={{
           display: "flex",
@@ -193,8 +193,217 @@ const Challenges: React.FC = () => {
           mt: 4,
         }}
       ></Box>
-      <main role="main" style={{ paddingTop: '90px' }}>
-      <Container>
+      <main role="main" style={{ paddingTop: "90px" }}>
+        <Container>
+          <div
+            style={{
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              display: "flex",
+              justifyContent: "space-around",
+              padding: "10px",
+              backgroundColor: "#fff",
+              boxShadow: "0px -2px 5px rgba(0, 0, 0, 0.1)",
+              zIndex: 1000,
+            }}
+          >
+            <Button
+              onClick={handleGoToRecipes}
+              variant="contained"
+              color="primary"
+              sx={{ flex: 1 }}
+            >
+              Recipes
+            </Button>
+            <Button variant="outlined" color="primary" sx={{ flex: 1 }}>
+              Challenges
+            </Button>
+            <Button
+              onClick={handleGoToGroups}
+              variant="contained"
+              color="primary"
+              sx={{ flex: 1 }}
+            >
+              Community
+            </Button>
+          </div>
+          <Box mt={4} mb={2} textAlign="center">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => navigate(`/challenges/create`)}
+            >
+              Create a Challenge
+            </Button>
+          </Box>
+
+          {filteredMyChallenges.length > 0 && (
+            <Box mt={4}>
+              <Typography variant="h5" gutterBottom>
+                My Challenges
+              </Typography>
+              <Box
+                sx={{
+                  maxHeight: showMoreMyChallenges ? "none" : 300,
+                  overflowY: "auto",
+                }}
+              >
+                <Grid container spacing={2}>
+                  {filteredMyChallenges.map((challenge) => (
+                    <Grid item xs={12} sm={6} md={4} key={challenge.id}>
+                      <Card
+                        onClick={() => navigate(`/challenges/${challenge.id}`)}
+                        sx={{ cursor: "pointer" }}
+                      >
+                        {challenge.image && (
+                          <CardMedia
+                            component="img"
+                            height="140"
+                            image={`http://127.0.0.1:5000/${challenge.image}`}
+                            alt={challenge.name}
+                          />
+                        )}
+                        <CardContent>
+                          <Typography variant="h6" component="div" gutterBottom>
+                            {challenge.name}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+              {filteredMyChallenges.length > 3 && (
+                <Box textAlign="center" mt={2}>
+                  <Button
+                    variant="contained"
+                    onClick={() =>
+                      setShowMoreMyChallenges(!showMoreMyChallenges)
+                    }
+                  >
+                    {showMoreMyChallenges ? "Show Less" : "Show More"}
+                  </Button>
+                </Box>
+              )}
+            </Box>
+          )}
+
+          {filteredJoinedChallenges.length > 0 && (
+            <Box mt={4}>
+              <Typography variant="h5" gutterBottom>
+                Joined Challenges
+              </Typography>
+              <Box
+                sx={{
+                  maxHeight: showMoreJoinedChallenges ? "none" : 300,
+                  overflowY: "auto",
+                }}
+              >
+                <Grid container spacing={2}>
+                  {filteredJoinedChallenges.map((challenge) => (
+                    <Grid item xs={12} sm={6} md={4} key={challenge.id}>
+                      <Card
+                        onClick={() => navigate(`/challenges/${challenge.id}`)}
+                        sx={{ cursor: "pointer" }}
+                      >
+                        {challenge.image && (
+                          <CardMedia
+                            component="img"
+                            height="140"
+                            image={`http://127.0.0.1:5000/${challenge.image}`}
+                            alt={challenge.name}
+                          />
+                        )}
+                        <CardContent>
+                          <Typography variant="h6" component="div" gutterBottom>
+                            {challenge.name}
+                          </Typography>
+                          <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleLeaveChallenge(challenge.id);
+                            }}
+                          >
+                            Leave Challenge
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+              {filteredJoinedChallenges.length > 3 && (
+                <Box textAlign="center" mt={2}>
+                  <Button
+                    variant="contained"
+                    onClick={() =>
+                      setShowMoreJoinedChallenges(!showMoreJoinedChallenges)
+                    }
+                  >
+                    {showMoreJoinedChallenges ? "Show Less" : "Show More"}
+                  </Button>
+                </Box>
+              )}
+            </Box>
+          )}
+
+          <Box mt={4}>
+            <Typography variant="h5" gutterBottom>
+              All Challenges
+            </Typography>
+            <Grid container spacing={2}>
+              {filteredAllChallenges.map((challenge) => (
+                <Grid item xs={12} sm={6} md={4} key={challenge.id}>
+                  <Card
+                    onClick={() => navigate(`/challenges/${challenge.id}`)}
+                    sx={{ cursor: "pointer" }}
+                  >
+                    {challenge.image && (
+                      <CardMedia
+                        component="img"
+                        height="140"
+                        image={`http://127.0.0.1:5000/${challenge.image}`}
+                        alt={challenge.name}
+                      />
+                    )}
+                    <CardContent>
+                      <Typography variant="h6" component="div" gutterBottom>
+                        {challenge.name}
+                      </Typography>
+                      {participants[challenge.id] ? (
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleLeaveChallenge(challenge.id);
+                          }}
+                        >
+                          Leave Challenge
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleJoinChallenge(challenge.id);
+                          }}
+                        >
+                          Join Challenge
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        </Container>
         <div
           style={{
             position: "fixed",
@@ -229,213 +438,6 @@ const Challenges: React.FC = () => {
             Community
           </Button>
         </div>
-        <Box mt={4} mb={2} textAlign="center">
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => navigate(`/challenges/create`)}
-          >
-            Create a Challenge
-          </Button>
-        </Box>
-
-        {filteredMyChallenges.length > 0 && (
-          <Box mt={4}>
-            <Typography variant="h5" gutterBottom>
-              My Challenges
-            </Typography>
-            <Box
-              sx={{
-                maxHeight: showMoreMyChallenges ? "none" : 300,
-                overflowY: "auto",
-              }}
-            >
-              <Grid container spacing={2}>
-                {filteredMyChallenges.map((challenge) => (
-                  <Grid item xs={12} sm={6} md={4} key={challenge.id}>
-                    <Card
-                      onClick={() => navigate(`/challenges/${challenge.id}`)}
-                      sx={{ cursor: "pointer" }}
-                    >
-                      {challenge.image && (
-                        <CardMedia
-                          component="img"
-                          height="140"
-                          image={`http://127.0.0.1:5000/${challenge.image}`}
-                          alt={challenge.name}
-                        />
-                      )}
-                      <CardContent>
-                        <Typography variant="h6" component="div" gutterBottom>
-                          {challenge.name}
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-            {filteredMyChallenges.length > 3 && (
-              <Box textAlign="center" mt={2}>
-                <Button
-                  variant="contained"
-                  onClick={() => setShowMoreMyChallenges(!showMoreMyChallenges)}
-                >
-                  {showMoreMyChallenges ? "Show Less" : "Show More"}
-                </Button>
-              </Box>
-            )}
-          </Box>
-        )}
-
-        {filteredJoinedChallenges.length > 0 && (
-          <Box mt={4}>
-            <Typography variant="h5" gutterBottom>
-              Joined Challenges
-            </Typography>
-            <Box
-              sx={{
-                maxHeight: showMoreJoinedChallenges ? "none" : 300,
-                overflowY: "auto",
-              }}
-            >
-              <Grid container spacing={2}>
-                {filteredJoinedChallenges.map((challenge) => (
-                  <Grid item xs={12} sm={6} md={4} key={challenge.id}>
-                    <Card
-                      onClick={() => navigate(`/challenges/${challenge.id}`)}
-                      sx={{ cursor: "pointer" }}
-                    >
-                      {challenge.image && (
-                        <CardMedia
-                          component="img"
-                          height="140"
-                          image={`http://127.0.0.1:5000/${challenge.image}`}
-                          alt={challenge.name}
-                        />
-                      )}
-                      <CardContent>
-                        <Typography variant="h6" component="div" gutterBottom>
-                          {challenge.name}
-                        </Typography>
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleLeaveChallenge(challenge.id);
-                          }}
-                        >
-                          Leave Challenge
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-            {filteredJoinedChallenges.length > 3 && (
-              <Box textAlign="center" mt={2}>
-                <Button
-                  variant="contained"
-                  onClick={() =>
-                    setShowMoreJoinedChallenges(!showMoreJoinedChallenges)
-                  }
-                >
-                  {showMoreJoinedChallenges ? "Show Less" : "Show More"}
-                </Button>
-              </Box>
-            )}
-          </Box>
-        )}
-
-        <Box mt={4}>
-          <Typography variant="h5" gutterBottom>
-            All Challenges
-          </Typography>
-          <Grid container spacing={2}>
-            {filteredAllChallenges.map((challenge) => (
-              <Grid item xs={12} sm={6} md={4} key={challenge.id}>
-                <Card
-                  onClick={() => navigate(`/challenges/${challenge.id}`)}
-                  sx={{ cursor: "pointer" }}
-                >
-                  {challenge.image && (
-                    <CardMedia
-                      component="img"
-                      height="140"
-                      image={`http://127.0.0.1:5000/${challenge.image}`}
-                      alt={challenge.name}
-                    />
-                  )}
-                  <CardContent>
-                    <Typography variant="h6" component="div" gutterBottom>
-                      {challenge.name}
-                    </Typography>
-                    {participants[challenge.id] ? (
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleLeaveChallenge(challenge.id);
-                        }}
-                      >
-                        Leave Challenge
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleJoinChallenge(challenge.id);
-                        }}
-                      >
-                        Join Challenge
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-      </Container>
-      <div
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          display: "flex",
-          justifyContent: "space-around",
-          padding: "10px",
-          backgroundColor: "#fff",
-          boxShadow: "0px -2px 5px rgba(0, 0, 0, 0.1)",
-          zIndex: 1000,
-        }}
-      >
-        <Button
-          onClick={handleGoToRecipes}
-          variant="contained"
-          color="primary"
-          sx={{ flex: 1 }}
-        >
-          Recipes
-        </Button>
-        <Button variant="outlined" color="primary" sx={{ flex: 1 }}>
-          Challenges
-        </Button>
-        <Button
-          onClick={handleGoToGroups}
-          variant="contained"
-          color="primary"
-          sx={{ flex: 1 }}
-        >
-          Community
-        </Button>
-      </div>
       </main>
     </div>
   );

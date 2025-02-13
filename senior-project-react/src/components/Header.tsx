@@ -20,9 +20,9 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import { Star, StarBorder } from "@mui/icons-material";
 import PersonIcon from "@mui/icons-material/Person";
 
-
 interface HeaderProps {
-    title: string;
+  title: string;
+  searchLabel: string;
 }
 
 interface User {
@@ -33,8 +33,7 @@ interface UserNotifications {
   notifications: [];
 }
 
-
-const Header: React.FC<HeaderProps> = ({ title }) => {
+const Header: React.FC<HeaderProps> = ({ title, searchLabel }) => {
   const [admin, setAdmin] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [profile_picture, setProfile_picture] = useState<string>();
@@ -49,21 +48,19 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     if (query) {
       navigate({
         pathname: location.pathname,
-        search: `?search=${query}`, 
+        search: `?search=${query}`,
       });
     } else {
       navigate({
         pathname: location.pathname,
-        search: "", 
+        search: "",
       });
     }
   };
 
-
   const handleGoToProfile = async () => {
     navigate(`/profile`);
   };
-
 
   const handleGoToAchievements = async () => {
     navigate(`/achievements`);
@@ -176,7 +173,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     }
   }
 
-
   async function isAdmin() {
     await axios
       .get("http://127.0.0.1:5000/admin/")
@@ -187,7 +183,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         console.error("Unable to check if user is admin", error);
       });
   }
-
 
   React.useEffect(() => {
     getCurrentUser();
@@ -256,7 +251,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           sx={{ flexGrow: 1 }}
         >
           <TextField
-            label="Search"
+            label={searchLabel}
             variant="outlined"
             fullWidth
             value={searchQuery}

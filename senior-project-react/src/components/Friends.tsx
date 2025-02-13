@@ -57,7 +57,7 @@ const Friends: React.FC = () => {
 
   return (
     <div>
-      <Header title="Friends" />
+      <Header title="Friends" searchLabel="Find new friends" />
       <main role="main" style={{ paddingTop: "90px" }}>
         <Container>
           <Box mt={4} mb={2} textAlign="center">

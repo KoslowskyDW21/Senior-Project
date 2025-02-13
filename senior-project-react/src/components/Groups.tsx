@@ -49,6 +49,7 @@ const Groups: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [profile_picture, setProfile_picture] = useState<string>();
   const [friends, setFriends] = useState<[]>([]);
+  const [searchLabel, setSearchLabel] = useState<string>("");
 
   const fetchGroups = async () => {
     try {
@@ -156,7 +157,7 @@ const Groups: React.FC = () => {
 
   return (
     <div>
-      <Header title="Community" />
+      <Header title="Community" searchLabel="Search for groups" />
       <Box
         sx={{
           display: "flex",
