@@ -18,7 +18,8 @@ import {
   TextField,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
-import NotificationsIcon from "@mui/icons-material/Notifications";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+
 import Header from "./Header";
 
 interface UserGroup {
@@ -175,6 +176,109 @@ const Groups: React.FC = () => {
             </Typography>
           </Box>
         </Container>
+
+        <main role="main" style={{ paddingTop: "50px" }}>
+          <Grid
+            container
+            spacing={1}
+            columnSpacing={0.5}
+            justifyContent="center"
+            sx={{ flexWrap: "wrap" }}
+            alignItems="stretch"
+          >
+            {friends.slice(0, 5).map((friend) => (
+              <Grid
+                item
+                xs={6}
+                sm={4}
+                md={2}
+                lg={2}
+                sx={{ display: "block" }}
+                key={friend.id}
+              >
+                <Box
+                  sx={{
+                    width: "100px",
+                    minHeight: "120px",
+                    border: "2px solid rgb(172, 169, 169)",
+                    borderRadius: 2,
+                    boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                    transition: "all 0.3s ease",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    p: 1,
+                    height: "100%",
+                    "&:hover": {
+                      borderColor: "#1976d2",
+                      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                    },
+                  }}
+                >
+                  {friend.profile_picture ? (
+                    <Avatar
+                      alt="Profile Picture"
+                      src={`http://127.0.0.1:5000/${friend.profile_picture}`}
+                      sx={{ width: 70, height: 70, border: "1px solid #000" }}
+                    />
+                  ) : (
+                    <Avatar
+                      sx={{ width: 70, height: 70, backgroundColor: "gray" }}
+                    >
+                      <PersonIcon sx={{ color: "white" }} />
+                    </Avatar>
+                  )}
+                  <Typography variant="body2" mt={1}>
+                    {friend.username}
+                  </Typography>
+                </Box>
+              </Grid>
+            ))}
+
+            {/* Add Friend Button placed as the last item */}
+            <Grid item xs={6} sm={4} md={2}>
+              <Box
+                sx={{
+                  width: "100px",
+                  border: "2px solid rgb(172, 169, 169)",
+                  borderRadius: 2,
+                  boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.3s ease",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  p: 1,
+                  height: "100%",
+                  "&:hover": {
+                    borderColor: "#1976d2",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                  },
+                }}
+              >
+                <IconButton onClick={() => console.log("Add Friend clicked")}>
+                  <AddCircleIcon sx={{ fontSize: 60, color: "#1976d2" }} />
+                </IconButton>
+                <Typography variant="body1" sx={{ color: "#1976d2", mt: 1 }}>
+                  Add Friend
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+
+          {friends.length > 5 && (
+            <Box mt={10} textAlign="center">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => navigate("/friends")}
+              >
+                View All Friends
+              </Button>
+            </Box>
+          )}
+        </main>
 
         <Container>
           <Box mt={4} mb={2} textAlign="center">
