@@ -65,7 +65,7 @@ const Friends: React.FC = () => {
       <Header
         title="Friends"
         searchLabel="Find new friends"
-        searchVisible={false}
+        searchVisible={true}
       />
       <main role="main" style={{ paddingTop: "90px" }}>
         <Container>

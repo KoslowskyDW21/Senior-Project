@@ -15,6 +15,9 @@ import {
 import Achievement from "./Achievements";
 import Confetti from "react-confetti";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import Header from "./Header";
+
+//TODO: If profile doesn't exist, display a message saying so instead of loading an empty profile
 
 interface ProfileResponse {
   lname: string;

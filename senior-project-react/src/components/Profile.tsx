@@ -15,6 +15,7 @@ import {
 import Achievement from "./Achievements";
 import Confetti from "react-confetti";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import Header from "./Header";
 
 interface ProfileResponse {
   lname: string;

@@ -257,6 +257,7 @@ const Groups: React.FC = () => {
                   boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
                 },
               }}
+              onClick={() => navigate("/friends")}
             >
               <IconButton onClick={() => console.log("Add Friend clicked")}>
                 <AddCircleIcon sx={{ fontSize: 60, color: "#1976d2" }} />
