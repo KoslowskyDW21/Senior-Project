@@ -11,6 +11,7 @@ interface ShoppingListInterface {
 }
 
 interface ShoppingListItem {
+    id: number;
     shopping_list_id: number;
     ingredient_id: number;
     measure: string;
@@ -36,6 +37,11 @@ interface Recipe {
     image: string;
   }
 
+interface AddRecipeToListResponse {
+    message: string
+    objects: ShoppingListItem[]
+}
+
 const ShoppingList: React.FC = () => {
     const [ shoppingList, setShoppingList ] = React.useState<ShoppingListInterface>();
     const [ shoppingListItems, setShoppingListItems ] = React.useState<ShoppingListItem[]>([]);
@@ -43,8 +49,8 @@ const ShoppingList: React.FC = () => {
     const [ shoppingListItemIngredients, setShoppingListItemIngredients ] = React.useState<_ShoppingListItemIngredient[]>([]);
     const [ filteredShoppingListItemIngredients, setFilteredShoppingListItemIngredients] = React.useState<_ShoppingListItemIngredient[]>([]);
     const [ recipes, setRecipes ] = React.useState<Recipe[]>([]);
-    const [ message, setMessage ] = React.useState<String>("");
-    const [ recipe_id, setRecipe_id ] = React.useState<String>("");
+    const [ message, setMessage ] = React.useState<string>("");
+    const [ recipe_id, setRecipe_id ] = React.useState<string>("");
 
     const navigate = useNavigate();
 
@@ -93,7 +99,7 @@ const ShoppingList: React.FC = () => {
             console.log("Grabbed all recipes");
         }
         catch (error) {
-            console.error("Error fetching all recipes of user: ", error);
+            console.error("Error fetching all recipes: ", error);
         }
     }
 
@@ -120,6 +126,8 @@ const ShoppingList: React.FC = () => {
             const response = await axios.post(`http://127.0.0.1:5000/shopping_lists/items/add/${event.target.value}`);
             if (response.status == 200) {
                 setMessage("Recipe successfully added to list");
+                const data: AddRecipeToListResponse = response.data
+                getShoppingListInfo();
             } else {
                 setMessage("Recipe failed to be added to list");
             }
@@ -127,6 +135,7 @@ const ShoppingList: React.FC = () => {
             setMessage("Error in trying to add recipe's ingredients to shopping list");
             console.error("Error in trying to add recipe's ingredients to shopping list", error);
         }
+        
     }
 
     function ShoppingListItemIngredient({ shopping_list_id, ingredient_id, measure, ingredient_name }: _ShoppingListItemIngredient) {

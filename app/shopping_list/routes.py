@@ -25,23 +25,23 @@ def get_all_shopping_list_items_of_shopping_list(id):
 @bp.post("/items/add/<int:recipe_id>")
 def add_recipe_to_shopping_list_items_of_current_user(recipe_id):
     print(f"Trying to add recipe {recipe_id}'s ingredients to the shopping list of user number {current_user.id}")
+    slis: list[ShoppingListItem] = []
     try:
         recipe_ingredients = RecipeIngredient.query.filter_by(recipe_id=recipe_id).all()
-        print(recipe_ingredients)
+        print(f"RecipeIngredients: {recipe_ingredients}")
         curr_shopping_list = ShoppingList.query.filter_by(user_id=current_user.id).first()
         print(curr_shopping_list)
         for recipe_ingredient in recipe_ingredients:
             print(f"RecipeIngredient: {recipe_ingredient}")
-            already_exists: ShoppingListItem | None = ShoppingListItem.query.filter_by(shopping_list_id=curr_shopping_list.id, ingredient_id=recipe_ingredient.recipe_id).first() #type: ignore
-            print(f"Already exists state: {already_exists}")
-            if (already_exists):
-                print("Dup")
-                continue
-            sli: ShoppingListItem = ShoppingListItem(shopping_list_id=curr_shopping_list.id, ingredient_id=recipe_ingredient.ingredient_id, measure=recipe_ingredient.measure)
+            sli: ShoppingListItem = ShoppingListItem()
+            sli.shopping_list_id = curr_shopping_list.id
+            sli.ingredient_id = recipe_ingredient.ingredient_id
+            sli.measure = recipe_ingredient.measure
             print(sli)
+            slis.append(sli)
             db.session.add(sli)
         db.session.commit()
     except:
         print("Error")
-        return jsonify("Error"), 500
-    return jsonify("Success"), 200
+        return jsonify({"message": "Error", "objects": None}), 500
+    return jsonify({"message": "Success", "objects": slis}), 200
