@@ -161,7 +161,11 @@ const Groups: React.FC = () => {
 
   return (
     <div>
-      <Header title="Community" searchLabel="Search for groups" />
+      <Header
+        title="Community"
+        searchLabel="Search for groups"
+        searchVisible={true}
+      />
       <Box
         sx={{
           display: "flex",

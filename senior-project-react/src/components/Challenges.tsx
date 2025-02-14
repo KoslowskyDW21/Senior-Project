@@ -181,7 +181,11 @@ const Challenges: React.FC = () => {
 
   return (
     <div>
-      <Header title="Challenges" searchLabel="Search for challenges" />
+      <Header
+        title="Challenges"
+        searchLabel="Search for challenges"
+        searchVisible={true}
+      />
       <Box
         sx={{
           display: "flex",
