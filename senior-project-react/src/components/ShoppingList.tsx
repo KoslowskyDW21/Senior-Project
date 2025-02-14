@@ -1,7 +1,7 @@
 import React from 'react';
 import axios, { AxiosError } from "axios";
 import { useNavigate } from 'react-router-dom';
-import { Box, Card, Checkbox, IconButton, TextField, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
+import { Box, Button, Card, Checkbox, Grid2, IconButton, TextField, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Header from "./Header";
 
@@ -23,6 +23,7 @@ interface Ingredient {
 }
 
 class _ShoppingListItemIngredient {
+    id: number = -1;
     shopping_list_id: number = -1;
     ingredient_id: number = -1;
     measure: string = "uninitialized";
@@ -64,7 +65,7 @@ const ShoppingList: React.FC = () => {
             response = await axios.get(`http://127.0.0.1:5000/shopping_lists/items/${shopping_list.id}`);
             const shopping_list_items: ShoppingListItem[] = response.data;
             setShoppingListItems(shopping_list_items);
-            console.log(`Shopping list items now set: ${shopping_list_items}`);
+            // console.log(`Shopping list items now set: ${shopping_list_items}`);
 
             response = await axios.get(`http://127.0.0.1:5000/ingredients/shopping_list/${shopping_list.id}`);
             const ingredients_list: Ingredient[] = response.data;
@@ -80,6 +81,7 @@ const ShoppingList: React.FC = () => {
                     ingredient.id == shopping_list_item.ingredient_id
                 )[0];
                 const shoppingListItemIngredient = new _ShoppingListItemIngredient();
+                shoppingListItemIngredient.id = shopping_list_item.id;
                 shoppingListItemIngredient.shopping_list_id = shopping_list_item.shopping_list_id;
                 shoppingListItemIngredient.ingredient_id = shopping_list_item.ingredient_id;
                 shoppingListItemIngredient.measure = shopping_list_item.measure;
@@ -136,6 +138,24 @@ const ShoppingList: React.FC = () => {
             console.error("Error in trying to add recipe's ingredients to shopping list", error);
         }
         
+    }
+
+    async function handleRemoveSLI(sli_id: number) {
+        console.log(`Trying to remove SLI with id=${sli_id}`);
+        try {
+            const response = await axios.post(`http://127.0.0.1:5000/shopping_lists/items/remove/${sli_id}`);
+            if (response.status == 200) {
+                setMessage("Item successfully removed from list");
+                getShoppingListInfo();
+                return;
+            } else {
+                setMessage("Failed to remove item from list");
+                return;
+            }
+        } catch (error) {
+            setMessage(`An error occurred while trying to remove item ${sli_id} from list`);
+            return;
+        }
     }
 
     function ShoppingListItemIngredient({ shopping_list_id, ingredient_id, measure, ingredient_name }: _ShoppingListItemIngredient) {
@@ -221,19 +241,34 @@ const ShoppingList: React.FC = () => {
             >
                 {/* Replace with better UX */}
                 {recipes.map((recipe) => (
-                    <MenuItem value={recipe.id}>{recipe.recipe_name}</MenuItem>
+                    <>
+                        <MenuItem value={recipe.id}>{recipe.recipe_name}</MenuItem>
+                    </>
                 ))}
             </Select>
         </FormControl>
 
         {/* Items of shopping list */}
         {filteredShoppingListItemIngredients.map((shoppingListItemIngredient) => (
-            <ShoppingListItemIngredient
-                shopping_list_id={shoppingListItemIngredient.shopping_list_id}
-                ingredient_id={shoppingListItemIngredient.ingredient_id}
-                measure={shoppingListItemIngredient.measure}
-                ingredient_name={shoppingListItemIngredient.ingredient_name}
-            />
+            <>
+                <Card>
+                    <ShoppingListItemIngredient
+                        id={shoppingListItemIngredient.id}
+                        shopping_list_id={shoppingListItemIngredient.shopping_list_id}
+                        ingredient_id={shoppingListItemIngredient.ingredient_id}
+                        measure={shoppingListItemIngredient.measure}
+                        ingredient_name={shoppingListItemIngredient.ingredient_name}
+                    />
+                    <Button
+                        onClick={() => {
+                            handleRemoveSLI(shoppingListItemIngredient.id);
+                        }}
+                        variant="contained"
+                        color="error"
+                    >Remove</Button>
+                </Card>
+                <br/>
+            </>
         ))}
 
         </>

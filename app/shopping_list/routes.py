@@ -19,7 +19,7 @@ def get_all_shopping_lists_of_current_user():
 def get_all_shopping_list_items_of_shopping_list(id):
     print(f"Attempting to return all shopping list items of shopping list {id}")
     shopping_list_items = ShoppingListItem.query.filter_by(shopping_list_id=id).all()
-    print(f"Shopping list items of shopping list {id}: {shopping_list_items}")
+    # print(f"Shopping list items of shopping list {id}: {shopping_list_items}")
     return jsonify([shopping_list_item.to_json() for shopping_list_item in shopping_list_items]), 200
 
 @bp.post("/items/add/<int:recipe_id>")
@@ -45,3 +45,15 @@ def add_recipe_to_shopping_list_items_of_current_user(recipe_id):
         print("Error")
         return jsonify({"message": "Error", "objects": None}), 500
     return jsonify({"message": "Success", "objects": slis}), 200
+
+@bp.post("/items/remove/<int:sli_id>")
+def remove_shopping_list_item_from_shopping_list_of_cu(sli_id):
+    print(f"Trying to remove sli with id={sli_id} from db")
+    try:
+        sli = ShoppingListItem.query.filter_by(id=sli_id).first()
+        db.session.delete(sli)
+        db.session.commit()
+        print(f"sli={sli_id} has been cast into the fire")
+    except:
+        print(f"Failed to remove sli={sli_id} from db")
+    return jsonify("It is done"), 200
