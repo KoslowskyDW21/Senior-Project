@@ -250,8 +250,16 @@ const ShoppingList: React.FC = () => {
 
         {/* Items of shopping list */}
         {filteredShoppingListItemIngredients.map((shoppingListItemIngredient) => (
-            <>
-                <Card>
+            <Box
+            key={shoppingListItemIngredient.id} // my attempt at appeasing React
+            >
+                <Card
+                variant="outlined"
+                sx={{
+                    padding: 2,
+                    margin: 2
+                }}
+                >
                     <ShoppingListItemIngredient
                         id={shoppingListItemIngredient.id}
                         shopping_list_id={shoppingListItemIngredient.shopping_list_id}
@@ -267,8 +275,7 @@ const ShoppingList: React.FC = () => {
                         color="error"
                     >Remove</Button>
                 </Card>
-                <br/>
-            </>
+            </Box>
         ))}
 
         </>
