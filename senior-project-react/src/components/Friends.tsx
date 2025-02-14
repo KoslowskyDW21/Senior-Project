@@ -29,9 +29,14 @@ interface Friendship {
 const Friends: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [friends, setFriends] = useState<[]>([]);
+  const navigate = useNavigate();
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
+  };
+
+  const handleGoToOtherProfile = (id: number) => {
+    navigate(`/otherProfile/${id}`);
   };
 
   const getFriends = async () => {
@@ -96,6 +101,7 @@ const Friends: React.FC = () => {
                   boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
                 },
               }}
+              onClick={() => handleGoToOtherProfile(friend.id)}
             >
               {friend.profile_picture ? (
                 <Avatar

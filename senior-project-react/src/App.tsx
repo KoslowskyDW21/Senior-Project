@@ -14,6 +14,7 @@ import RecipeList from "./components/RecipeList";
 import RecipeLists from "./components/RecipeLists";
 import ShoppingList from "./components/ShoppingList";
 import Profile from "./components/Profile";
+import OtherProfile from "./components/otherProfile";
 import Settings from "./components/Settings";
 import axios from "axios";
 import "./App.css";
@@ -100,6 +101,7 @@ function App() {
               {/* profile */}
               <Route path="/profile" element={<Profile />} />
               <Route path="/profile/:id" element={<Profile />} />
+              <Route path="/otherProfile/:id" element={<OtherProfile />} />
 
               {/* challenges */}
               <Route path="/challenges" element={<Challenges />} />
@@ -140,7 +142,6 @@ function App() {
               <Route path="/banned" element={<Banned />} />
             </Route>
             {/* Redirect unknown routes to login */}
-            //
             <Route path="*" element={<Login />} />
           </Routes>
         </RegistrationProvider>
