@@ -456,11 +456,13 @@ class ShoppingList(db.Model):
 
 class ShoppingListItem(db.Model):
     __tablename__ = 'ShoppingListItem'
-    shopping_list_id = db.Column(db.Integer, db.ForeignKey('ShoppingList.id'), primary_key=True)
-    ingredient_id = db.Column(db.Integer, db.ForeignKey('Ingredient.id'), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    shopping_list_id = db.Column(db.Integer, db.ForeignKey('ShoppingList.id'), primary_key=False)
+    ingredient_id = db.Column(db.Integer, db.ForeignKey('Ingredient.id'), primary_key=False)
     measure = db.Column(db.Text)
     def to_json(self):
         return {
+            "id": self.id,
             "shopping_list_id": self.shopping_list_id,
             "ingredient_id": self.ingredient_id,
             "measure": self.measure
