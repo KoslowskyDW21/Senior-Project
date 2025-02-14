@@ -30,6 +30,7 @@ def create_app(config=Config):
         # UNCOMMENT (and get rid of pass) TO REPOPULATE DATABASE
         # populate_database()
         #create_dummy_groups()
+
         pass
         
 

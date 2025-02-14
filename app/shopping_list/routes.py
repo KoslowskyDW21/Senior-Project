@@ -13,7 +13,7 @@ def get_all_shopping_lists_of_current_user():
         db.session.add(newList)
         db.session.commit()
     print(f"User {current_user.id}'s shopping list metadata: {shopping_list}")
-    return jsonify(shopping_list.to_json()), 200
+    return jsonify(shopping_list.to_json()), 200 # type: ignore
 
 @bp.get("/items/<int:id>")
 def get_all_shopping_list_items_of_shopping_list(id):
@@ -24,14 +24,24 @@ def get_all_shopping_list_items_of_shopping_list(id):
 
 @bp.post("/items/add/<int:recipe_id>")
 def add_recipe_to_shopping_list_items_of_current_user(recipe_id):
-    print(f"Trying to add recipe {id}'s ingredients to the shopping list of user number {current_user.id}")
+    print(f"Trying to add recipe {recipe_id}'s ingredients to the shopping list of user number {current_user.id}")
     try:
         recipe_ingredients = RecipeIngredient.query.filter_by(recipe_id=recipe_id).all()
-        curr_shopping_list = ShoppingList.query.filter_by(user_id=current_user.id)
+        print(recipe_ingredients)
+        curr_shopping_list = ShoppingList.query.filter_by(user_id=current_user.id).first()
+        print(curr_shopping_list)
         for recipe_ingredient in recipe_ingredients:
-            sli: ShoppingListItem = ShoppingListItem(shopping_list_id=curr_shopping_list.id, ingredient_id=recipe_ingredient.id, measure=recipe_ingredient.measure) #type: ignore
+            print(f"RecipeIngredient: {recipe_ingredient}")
+            already_exists: ShoppingListItem | None = ShoppingListItem.query.filter_by(shopping_list_id=curr_shopping_list.id, ingredient_id=recipe_ingredient.recipe_id).first() #type: ignore
+            print(f"Already exists state: {already_exists}")
+            if (already_exists):
+                print("Dup")
+                continue
+            sli: ShoppingListItem = ShoppingListItem(shopping_list_id=curr_shopping_list.id, ingredient_id=recipe_ingredient.ingredient_id, measure=recipe_ingredient.measure)
+            print(sli)
             db.session.add(sli)
         db.session.commit()
     except:
+        print("Error")
         return jsonify("Error"), 500
     return jsonify("Success"), 200

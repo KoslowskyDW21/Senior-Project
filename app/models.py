@@ -456,8 +456,10 @@ class ShoppingList(db.Model):
 
 class ShoppingListItem(db.Model):
     __tablename__ = 'ShoppingListItem'
-    shopping_list_id = db.Column(db.Integer, db.ForeignKey('ShoppingList.id'), primary_key=True)
-    ingredient_id = db.Column(db.Integer, db.ForeignKey('Ingredient.id'), primary_key=True)
+    # TODO: recreate this table
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    shopping_list_id = db.Column(db.Integer, db.ForeignKey('ShoppingList.id'), autoincrement=False)
+    ingredient_id = db.Column(db.Integer, db.ForeignKey('Ingredient.id'), autoincrement=False)
     measure = db.Column(db.Text)
     def to_json(self):
         return {

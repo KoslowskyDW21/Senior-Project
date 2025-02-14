@@ -28,13 +28,13 @@ class _ShoppingListItemIngredient {
     ingredient_name: string = "uninitialized";
 }
 
-// interface Recipe {
-//     id: number;
-//     recipe_name: string;
-//     xp_amount: number;
-//     difficulty: "1" | "2" | "3" | "4" | "5";
-//     image: string;
-//   }
+interface Recipe {
+    id: number;
+    recipe_name: string;
+    xp_amount: number;
+    difficulty: "1" | "2" | "3" | "4" | "5";
+    image: string;
+  }
 
 const ShoppingList: React.FC = () => {
     const [ shoppingList, setShoppingList ] = React.useState<ShoppingListInterface>();
@@ -42,9 +42,9 @@ const ShoppingList: React.FC = () => {
     const [ ingredients, setIngredients ] = React.useState<Ingredient[]>([]);
     const [ shoppingListItemIngredients, setShoppingListItemIngredients ] = React.useState<_ShoppingListItemIngredient[]>([]);
     const [ filteredShoppingListItemIngredients, setFilteredShoppingListItemIngredients] = React.useState<_ShoppingListItemIngredient[]>([]);
-    // const [ recipes, setRecipes ] = React.useState<Recipe[]>([]);
-    // const [ selectedRecipeId, setSelectedRecipeId ] = React.useState<string>("");
+    const [ recipes, setRecipes ] = React.useState<Recipe[]>([]);
     const [ message, setMessage ] = React.useState<String>("");
+    const [ recipe_id, setRecipe_id ] = React.useState<String>("");
 
     const navigate = useNavigate();
 
@@ -81,25 +81,53 @@ const ShoppingList: React.FC = () => {
                 shopping_list_item_ingredients.push(shoppingListItemIngredient);
             }
             setShoppingListItemIngredients(shopping_list_item_ingredients);
-            
-
         } catch (error) {
             console.error("Error fetching shopping list info: ", error);
         }
     };
 
-      const filterShoppingListItemIngredients = (shoppingListItemIngredients_: _ShoppingListItemIngredient[]) => {
-        const urlParams = new URLSearchParams(location.search);
-        const searchQuery = urlParams.get("search")?.toLowerCase() || "";
-        if (searchQuery) {
-          const filtered = shoppingListItemIngredients_.filter((_shoppingListItemIngredient) =>
-            _shoppingListItemIngredient.ingredient_name.toLowerCase().includes(searchQuery)
-          );
-          setFilteredShoppingListItemIngredients(filtered);
-        } else {
-          setFilteredShoppingListItemIngredients(shoppingListItemIngredients_); 
+    async function getRecipes() {
+        try {
+            const response = await axios.post('http://127.0.0.1:5000/recipes');
+            setRecipes(response.data);
+            console.log("Grabbed all recipes");
         }
-      };
+        catch (error) {
+            console.error("Error fetching all recipes of user: ", error);
+        }
+    }
+
+    const filterShoppingListItemIngredients = (shoppingListItemIngredients_: _ShoppingListItemIngredient[]) => {
+    const urlParams = new URLSearchParams(location.search);
+    const searchQuery = urlParams.get("search")?.toLowerCase() || "";
+    if (searchQuery) {
+        const filtered = shoppingListItemIngredients_.filter((_shoppingListItemIngredient) =>
+        _shoppingListItemIngredient.ingredient_name.toLowerCase().includes(searchQuery)
+        );
+        setFilteredShoppingListItemIngredients(filtered);
+    } else {
+        setFilteredShoppingListItemIngredients(shoppingListItemIngredients_); 
+    }
+    };
+
+    async function handleAddIngredientsOfRecipe(event: SelectChangeEvent) {
+        if (event.target.value == undefined) {
+            console.log("How did that happen? Selected recipe_id is undefined!");
+            return;
+        }
+        console.log(`Trying to add all ingredients of recipe ${event.target.value} to shopping list`);
+        try {
+            const response = await axios.post(`http://127.0.0.1:5000/shopping_lists/items/add/${event.target.value}`);
+            if (response.status == 200) {
+                setMessage("Recipe successfully added to list");
+            } else {
+                setMessage("Recipe failed to be added to list");
+            }
+        } catch (error) {
+            setMessage("Error in trying to add recipe's ingredients to shopping list");
+            console.error("Error in trying to add recipe's ingredients to shopping list", error);
+        }
+    }
 
     function ShoppingListItemIngredient({ shopping_list_id, ingredient_id, measure, ingredient_name }: _ShoppingListItemIngredient) {
         return (
@@ -131,10 +159,14 @@ const ShoppingList: React.FC = () => {
         filterShoppingListItemIngredients(shoppingListItemIngredients);
     }, [location.search, shoppingListItemIngredients]);
 
+    React.useEffect(() => {
+        getRecipes();
+    }, []);
+
     return (
         <>
         {/* Header bar */}
-        <Header title="Shopping List" />
+        <Header title="Shopping List" searchLabel="Search Shopping List" />
             <Box
                 sx={{
                 display: "flex",
@@ -169,6 +201,23 @@ const ShoppingList: React.FC = () => {
             <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" } } />
         </IconButton>
 
+        {/* Button to add a recipe's ingredients to shopping list */}
+        <FormControl
+            sx={{width: 400}}
+        >
+            <InputLabel>Add all ingredients of a recipe</InputLabel>
+            <Select
+                value={recipe_id}
+                onChange={handleAddIngredientsOfRecipe}
+            >
+                {/* Replace with better UX */}
+                {recipes.map((recipe) => (
+                    <MenuItem value={recipe.id}>{recipe.recipe_name}</MenuItem>
+                ))}
+            </Select>
+        </FormControl>
+
+        {/* Items of shopping list */}
         {filteredShoppingListItemIngredients.map((shoppingListItemIngredient) => (
             <ShoppingListItemIngredient
                 shopping_list_id={shoppingListItemIngredient.shopping_list_id}

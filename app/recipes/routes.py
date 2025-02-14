@@ -16,7 +16,7 @@ from werkzeug.utils import secure_filename
 def post_recipes():
     print("Fetching recipes")
     recipes = Recipe.query.all()
-    return jsonify([recipe.to_json() for recipe in recipes])
+    return jsonify([recipe.to_json() for recipe in recipes]), 200
 
 @bp.get("/<int:id>/")
 def get_recipe_page(id):
