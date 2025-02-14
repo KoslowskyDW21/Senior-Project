@@ -28,6 +28,59 @@ def post_profile_page(id=1):
                          }), 200
     return "<h1>404: profile not found</h1>", 404
 
+@bp.route('/get_other_profile/<int:id>', methods=['GET'])
+def get_other_profile(id):
+    user_data = (
+        db.session.query(
+            User.id,
+            User.lname,
+            User.fname,
+            User.username,
+            User.profile_picture,
+            User.user_level,
+            User.xp_points,
+            Achievement.id.label("achievement_id"),
+            Achievement.image.label("achievement_image"),
+            Achievement.title.label("achievement_title"),  
+            Achievement.isVisible.label("achievement_isVisible"),
+            Achievement.description.label("achievement_description")
+        )
+        .outerjoin(UserAchievement, User.id == UserAchievement.user_id)
+        .outerjoin(Achievement, UserAchievement.achievement_id == Achievement.id)
+        .filter(User.id == id)
+        .all()
+    )
+
+    if not user_data:
+        return "<h1>404: profile not found</h1>", 404
+    
+    profilePicturePath = None
+    if user_data[0].profile_picture:
+        profilePicturePath = f'http://127.0.0.1:5000/{user_data[0].profile_picture}'
+        print(profilePicturePath)
+
+    user_info = {
+        "lname": user_data[0].lname,
+        "fname": user_data[0].fname,
+        "username": user_data[0].username,
+        "profile_picture": profilePicturePath,
+        "user_level": user_data[0].user_level,
+        "xp_points": user_data[0].xp_points,
+        "achievements": []
+    }
+
+    for row in user_data:
+        if row.achievement_id:  
+            user_info["achievements"].append({
+                "id": row.achievement_id,
+                "image": row.achievement_image,
+                "title": row.achievement_title,
+                "isVisible": row.achievement_isVisible,
+                "description": row.achievement_description
+            })
+
+    return jsonify(user_info), 200
+
 @bp.route('/current_user/', methods=['POST'])
 def post_current_user():
     return jsonify(

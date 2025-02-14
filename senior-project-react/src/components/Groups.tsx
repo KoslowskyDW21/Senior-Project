@@ -115,6 +115,10 @@ const Groups: React.FC = () => {
     navigate(`/challenges`);
   };
 
+  const handleGoToOtherProfile = (id: number) => {
+    navigate(`/otherProfile/${id}`);
+  };
+
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
   };
@@ -157,7 +161,11 @@ const Groups: React.FC = () => {
 
   return (
     <div>
-      <Header title="Community" searchLabel="Search for groups" />
+      <Header
+        title="Community"
+        searchLabel="Search for groups"
+        searchVisible={true}
+      />
       <Box
         sx={{
           display: "flex",
@@ -208,6 +216,7 @@ const Groups: React.FC = () => {
                     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
                   },
                 }}
+                onClick={() => handleGoToOtherProfile(friend.id)}
               >
                 {friend.profile_picture ? (
                   <Avatar

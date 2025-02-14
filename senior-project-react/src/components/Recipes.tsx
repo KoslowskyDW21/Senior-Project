@@ -152,7 +152,11 @@ const Recipes: React.FC = () => {
 
   return (
     <div>
-      <Header title="Recipes" searchLabel="Search for recipes" />
+      <Header
+        title="Recipes"
+        searchLabel="Search for recipes"
+        searchVisible={true}
+      />
       <Box
         sx={{
           display: "flex",

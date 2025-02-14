@@ -20,6 +20,7 @@ interface ProfileResponse {
   lname: string;
   fname: string;
   username: string;
+  profile_picture: string;
   achievements: Achievement[];
   user_level: number;
   xp_points: number;
@@ -41,7 +42,7 @@ const modalStyle = {
   borderRadius: 2,
 };
 
-const Profile: React.FC = () => {
+const OtherProfile: React.FC = () => {
   const navigate = useNavigate();
   let { id } = useParams<{ id: string }>();
   if (id == undefined) {
@@ -53,7 +54,6 @@ const Profile: React.FC = () => {
   const [username, setUsername] = useState<String>();
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
-  const [openPfpModal, setOpenPfpModal] = useState(false);
   const [message, setMessage] = useState("");
   const [user_level, setLevel] = useState<number>(0);
   const [xp_points, setXp_points] = useState<number>(0);
@@ -93,47 +93,33 @@ const Profile: React.FC = () => {
   const [hovered, setHovered] = useState(false);
 
   const getResponse = async () => {
-    const response = await axios.post(
-      `http://127.0.0.1:5000/profile/${id}`,
-      {},
-      { withCredentials: true }
-    );
-    const data: ProfileResponse = response.data;
-    setLname(data.lname);
-    setFname(data.fname);
-    setUsername(data.username);
-    setAchievements(data.achievements);
-    setLevel(data.user_level);
-    setXp_points(data.xp_points);
-    setHasLeveled(data.hasLeveled);
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:5000/profile/get_other_profile/${id}`,
+        {}
+      );
+      console.log("response", response);
+      const data: ProfileResponse = response.data;
+      setLname(data.lname);
+      setFname(data.fname);
+      setUsername(data.username);
+      setAchievements(data.achievements);
+      setLevel(data.user_level);
+      setXp_points(data.xp_points);
+      setHasLeveled(data.hasLeveled);
+      const profilePicturePath = response.data.profile_picture;
+      if (profilePicturePath) {
+        console.log(data.profile_picture);
+        setProfilePicUrl(profilePicturePath);
+      }
+    } catch (error) {
+      console.error("Error getting profile:", error);
+    }
   };
 
   useEffect(() => {
     getResponse();
-    getProfilePic();
   }, []);
-
-  const getProfilePic = async () => {
-    try {
-      const response = await axios.post(
-        "http://127.0.0.1:5000/profile/get_profile_pic/",
-        {},
-        { withCredentials: true }
-      );
-      const profilePicturePath = response.data.profile_picture;
-      if (profilePicturePath) {
-        setProfilePicUrl(profilePicturePath);
-      }
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      if (axiosError.response && axiosError.response.data) {
-        const errorData = axiosError.response.data;
-        setMessage(errorData.message);
-      } else {
-        setMessage("An unknown error occurred");
-      }
-    }
-  };
 
   const handleGoToRecipes = async () => {
     navigate(`/recipes`);
@@ -141,74 +127,6 @@ const Profile: React.FC = () => {
 
   const handleGoToAchievements = () => {
     navigate("/achievements");
-  };
-
-  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      const formData = new FormData();
-      formData.append("profile_picture", file);
-
-      try {
-        const response = await axios.post(
-          "http://127.0.0.1:5000/profile/change_profile_pic/",
-          formData,
-          {
-            withCredentials: true,
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-        const updatedProfilePicUrl = response.data.profile_picture;
-        setProfilePicUrl(updatedProfilePicUrl);
-        setMessage("Profile picture updated successfully!");
-        getProfilePic();
-      } catch (error) {
-        const axiosError = error as AxiosError;
-        if (axiosError.response && axiosError.response.data) {
-          const errorData = axiosError.response.data;
-          setMessage(errorData.message);
-        } else {
-          setMessage("An error occurred while updating the profile picture.");
-        }
-      }
-    }
-  };
-
-  const handleOpenPfpModal = () => {
-    setOpenPfpModal(true);
-  };
-
-  const handleClosePfpModal = () => {
-    setOpenPfpModal(false);
-  };
-
-  const handleChangePfp = () => {
-    document.getElementById("profile-picture-input")?.click();
-    handleClosePfpModal();
-  };
-
-  const handleRemovePfp = async () => {
-    handleClosePfpModal();
-    try {
-      const response = await axios.post(
-        "http://127.0.0.1:5000/profile/remove_profile_pic/",
-        {},
-        { withCredentials: true }
-      );
-      setProfilePicUrl(null);
-      setMessage("Profile picture removed successfully!");
-      getProfilePic();
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      if (axiosError.response && axiosError.response.data) {
-        const errorData = axiosError.response.data;
-        setMessage(errorData.message);
-      } else {
-        setMessage("An unknown error occurred");
-      }
-    }
   };
 
   const resetHasLeveled = async () => {
@@ -224,33 +142,7 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleConfettiComplete = () => {
-    resetHasLeveled();
-  };
-
-  const [confettiVisible, setConfettiVisible] = useState(false);
-  const [confettiSource, setConfettiSource] = useState({ x: 0, y: 0 });
-
   const xpBarRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (hasLeveled) {
-      if (xpBarRef.current) {
-        const rect = xpBarRef.current.getBoundingClientRect();
-        setConfettiSource({
-          x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2,
-        });
-      }
-
-      setConfettiVisible(true);
-
-      setTimeout(() => {
-        setConfettiVisible(false);
-        handleConfettiComplete();
-      }, 3000);
-    }
-  }, [hasLeveled]);
 
   return (
     <>
@@ -260,14 +152,6 @@ const Profile: React.FC = () => {
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
-      {confettiVisible && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          confettiSource={confettiSource}
-          onConfettiComplete={handleConfettiComplete}
-        />
-      )}
 
       <h1>This is {username}'s profile!</h1>
       <div
@@ -283,7 +167,6 @@ const Profile: React.FC = () => {
           marginLeft: "auto",
           marginRight: "auto",
         }}
-        onClick={handleOpenPfpModal}
       >
         {profilePicUrl ? (
           <Avatar src={profilePicUrl} sx={{ width: 120, height: 120 }} />
@@ -294,20 +177,9 @@ const Profile: React.FC = () => {
       <input
         type="file"
         accept="image/*"
-        onChange={handleFileChange}
         style={{ display: "none" }}
         id="profile-picture-input"
       />
-      <Modal open={openPfpModal} onClose={handleClosePfpModal}>
-        <Box sx={modalStyle}>
-          <Button onClick={handleChangePfp} fullWidth>
-            Change Profile Picture
-          </Button>
-          <Button onClick={handleRemovePfp} fullWidth color="error">
-            Remove Profile Picture
-          </Button>
-        </Box>
-      </Modal>
 
       <Box
         sx={{
@@ -425,4 +297,4 @@ const Profile: React.FC = () => {
   );
 };
 
-export default Profile;
+export default OtherProfile;
