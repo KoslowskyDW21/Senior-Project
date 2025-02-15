@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {
@@ -18,7 +18,6 @@ import {
   TextField,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 import Header from "./Header";
 
@@ -26,14 +25,58 @@ interface Friendship {
   friends: [];
 }
 
+interface User {
+  users: [];
+}
+
 const Friends: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchResults, setSearchResults] = useState<[]>([]);
   const [friends, setFriends] = useState<[]>([]);
   const navigate = useNavigate();
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
+  const handleSearchChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+
+    if (query) {
+      navigate({
+        pathname: location.pathname,
+        search: `?search=${query}`,
+      });
+
+      try {
+        const response = await axios.post(
+          "http://127.0.0.1:5000/friends/search_for_friends/",
+          { search_query: query },
+          {
+            withCredentials: true,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        const data: User = response.data;
+        console.log("user data:");
+        console.log(data);
+        setSearchResults(data.users);
+        console.log("Search results:", data.users);
+      } catch (error) {
+        console.error("Error fetching search results:", error);
+      }
+    } else {
+      navigate({
+        pathname: location.pathname,
+        search: "",
+      });
+      setSearchResults([]);
+    }
   };
+
+  useEffect(() => {
+    console.log("searchResults updated useEffect:", searchResults);
+    console.log(searchResults.length);
+  }, [searchResults]);
 
   const handleGoToOtherProfile = (id: number) => {
     navigate(`/otherProfile/${id}`);
@@ -65,28 +108,91 @@ const Friends: React.FC = () => {
       <Header
         title="Friends"
         searchLabel="Find new friends"
-        searchVisible={true}
+        searchVisible={false}
       />
-      <main role="main" style={{ paddingTop: "90px" }}>
-        <Container>
-          <Box mt={4} mb={2} textAlign="center">
-            <Typography variant="h4" gutterBottom>
-              Friends
-            </Typography>
+
+      <main role="main">
+        <Box
+          mt={20}
+          mb={0}
+          textAlign="center"
+          display="flex"
+          justifyContent="center"
+          sx={{ flexGrow: 1 }}
+        >
+          <TextField
+            label="Find new friends"
+            variant="outlined"
+            fullWidth
+            value={searchQuery}
+            onChange={handleSearchChange}
+            sx={{ zIndex: 1 }}
+          />
+        </Box>
+
+        {/* Search Results Container */}
+        {searchResults.length > 0 && (
+          <Box
+            sx={{
+              position: "relative",
+              top: "0",
+              margin: "0px",
+              backgroundColor: "white",
+              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+              borderRadius: "4px",
+              maxHeight: "300px",
+              overflowY: "auto",
+              zIndex: 10,
+            }}
+          >
+            {searchResults.map((user) => (
+              <Box
+                key={user.id}
+                sx={{
+                  padding: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  cursor: "pointer",
+                  "&:hover": { backgroundColor: "#f5f5f5" },
+                }}
+                onClick={() => navigate(`/OtherProfile/${user.id}`)}
+              >
+                {user.profile_picture ? (
+                  <Avatar
+                    alt="Profile Picture"
+                    src={`http://127.0.0.1:5000/${user.profile_picture}`}
+                    sx={{ width: 40, height: 40, marginRight: "10px" }}
+                  />
+                ) : (
+                  <Avatar
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      marginRight: "10px",
+                      backgroundColor: "gray",
+                    }}
+                  >
+                    <PersonIcon sx={{ color: "white" }} />
+                  </Avatar>
+                )}
+                <Typography>{user.username}</Typography>
+              </Box>
+            ))}
           </Box>
-        </Container>
+        )}
 
         <Box
           sx={{
             display: "flex",
-            flexWrap: "wrap", // Prevents overlapping on smaller screens
+            flexWrap: "wrap",
             justifyContent: "center",
-            gap: 2, // Adds spacing between boxes
+            gap: 2,
           }}
         >
           {friends.map((friend) => (
             <Box
               key={friend.id}
+              mt={10}
               sx={{
                 width: "100px",
                 minHeight: "100px",
