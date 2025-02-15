@@ -121,8 +121,38 @@ const GroupDetails: React.FC = () => {
 
   const handleReportGroup = async () => {
     console.log("Attempting to report this group...");
-    //TODO: Implement this method
+    let data;
+
     await axios.get(`http://127.0.0.1:5000/groups/${id}/report`)
+      .then((response) => {
+        data = response.data;
+      })
+      .catch((error) => {
+        console.error("Could not get if already reported", error);
+      });
+    
+    if(data!.alreadyReported) {
+      const newData = {
+        user_id: data!.id,
+        group_id: id,
+      }
+  
+      await axios.post(`http://127.0.0.1:5000/groups/${id}/report`, newData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => {
+          console.log("Group successfully reported.");
+          console.log(response.data.message);
+        })
+        .catch((error) => {
+          console.log("Could not report group", error);
+        });
+    }
+    else {
+      console.log("Group already reported");
+    }
   }
 
   const sendMessage = async () => {

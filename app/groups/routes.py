@@ -1,6 +1,6 @@
 from __future__ import annotations
 from app.groups import bp
-from app.models import User, UserGroup, GroupMember, GroupBannedMember, Message, db
+from app.models import User, UserGroup, GroupMember, GroupBannedMember, Message, GroupReport, db
 from flask import jsonify, request, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
@@ -145,3 +145,36 @@ def send_message(group_id):
     db.session.commit()
 
     return jsonify({"message": "Message sent successfully!"}), 200
+
+@login_required
+@bp.get("/<int:group_id>/report")
+def get_report_group():
+    user = current_user._get_current_object()
+    
+    if GroupReport.query.filter_by(user_id=user.id, group_id=group_id).first() != None: # type: ignore
+        return jsonify({"alreadyReported": True, "id": user.id}) # type: ignore
+    
+    return jsonify({"alreadyReported": False, "id": user.id}) # type: ignore
+
+@login_required
+@bp.post("/<int:group_id>/report")
+def post_report_group():
+    data = request.get_json()
+    userId = data.get("user_id")
+    groupId = data.get("group_id")
+
+    print("Received data - userID: " + str(userId))
+    print("Received data - groupID: " + str(groupId))
+
+    newReport: GroupReport = GroupReport(group_id=groupId, user_id=userId) # type: ignore
+    group: UserGroup = UserGroup.query.filter_by(id=groupId).first() # type: ignore
+    group.num_reports += 1
+
+    try:
+        db.session.add(newReport)
+        db.session.commit()
+        return jsonify({"message": f"Group {groupId} reported"})
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error reporting group: {e}")
+        return jsonify({"message": "Error: could not report group"})
