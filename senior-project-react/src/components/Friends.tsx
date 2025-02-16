@@ -292,7 +292,107 @@ const Friends: React.FC = () => {
             ))}
           </Box>
           <Box>
-            <h2> Friend Requests </h2>
+            <Typography variant="h4" mt={5}>
+              Friend Requests
+            </Typography>
+            <Typography
+              variant="h5"
+              mt={5}
+              sx={{ textAlign: "left", fontWeight: "bold" }}
+            >
+              To you:
+            </Typography>
+            {friendRequestsTo.map((friend) => (
+              <Box
+                key={friend.id}
+                mt={5}
+                sx={{
+                  width: "100px",
+                  minHeight: "100px",
+                  border: "2px solid rgb(172, 169, 169)",
+                  borderRadius: 2,
+                  boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.3s ease",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  p: 1,
+                  height: "100%",
+                  "&:hover": {
+                    borderColor: "#1976d2",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                  },
+                }}
+                onClick={() => handleGoToOtherProfile(friend.id)}
+              >
+                {friend.profile_picture ? (
+                  <Avatar
+                    alt="Profile Picture"
+                    src={`http://127.0.0.1:5000/${friend.profile_picture}`}
+                    sx={{ width: 70, height: 70, border: "1px solid #000" }}
+                  />
+                ) : (
+                  <Avatar
+                    sx={{ width: 70, height: 70, backgroundColor: "gray" }}
+                  >
+                    <PersonIcon sx={{ color: "white" }} />
+                  </Avatar>
+                )}
+                <Typography variant="body2" mt={1}>
+                  {friend.username}
+                </Typography>
+              </Box>
+            ))}
+            <Typography
+              variant="h5"
+              mt={5}
+              sx={{ textAlign: "left", fontWeight: "bold" }}
+            >
+              From you:
+            </Typography>
+            {friendRequestsFrom.map((friend) => (
+              <Box
+                key={friend.id}
+                mt={5}
+                sx={{
+                  width: "100px",
+                  minHeight: "100px",
+                  border: "2px solid rgb(172, 169, 169)",
+                  borderRadius: 2,
+                  boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.3s ease",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  p: 1,
+                  height: "100%",
+                  "&:hover": {
+                    borderColor: "#1976d2",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                  },
+                }}
+                onClick={() => handleGoToOtherProfile(friend.id)}
+              >
+                {friend.profile_picture ? (
+                  <Avatar
+                    alt="Profile Picture"
+                    src={`http://127.0.0.1:5000/${friend.profile_picture}`}
+                    sx={{ width: 70, height: 70, border: "1px solid #000" }}
+                  />
+                ) : (
+                  <Avatar
+                    sx={{ width: 70, height: 70, backgroundColor: "gray" }}
+                  >
+                    <PersonIcon sx={{ color: "white" }} />
+                  </Avatar>
+                )}
+                <Typography variant="body2" mt={1}>
+                  {friend.username}
+                </Typography>
+              </Box>
+            ))}
           </Box>
         </main>
       </Box>
