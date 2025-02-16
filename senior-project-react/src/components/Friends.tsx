@@ -21,6 +21,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import Header from "./Header";
+import { set } from "date-fns";
 
 interface Friendship {
   friends: [];
@@ -30,10 +31,20 @@ interface User {
   users: [];
 }
 
+interface FriendRequestTo {
+  friend_requests_to: [];
+}
+
+interface FriendRequestFrom {
+  friend_requests_from: [];
+}
+
 const Friends: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResults, setSearchResults] = useState<[]>([]);
   const [friends, setFriends] = useState<[]>([]);
+  const [friendRequestsTo, setFriendRequestsTo] = useState<[]>([]);
+  const [friendRequestsFrom, setFriendRequestsFrom] = useState<[]>([]);
   const navigate = useNavigate();
 
   const handleSearchChange = async (
@@ -58,10 +69,7 @@ const Friends: React.FC = () => {
           }
         );
         const data: User = response.data;
-        console.log("user data:");
-        console.log(data);
         setSearchResults(data.users);
-        console.log("Search results:", data.users);
       } catch (error) {
         console.error("Error fetching search results:", error);
       }
@@ -74,10 +82,21 @@ const Friends: React.FC = () => {
     }
   };
 
+  //DEBUGGING
   useEffect(() => {
     console.log("searchResults updated useEffect:", searchResults);
     console.log(searchResults.length);
   }, [searchResults]);
+
+  useEffect(() => {
+    console.log("useEffect FriendRequestsFrom:", friendRequestsFrom);
+  }, [friendRequestsFrom]);
+
+  useEffect(() => {
+    console.log("useEffect FriendRequestsTo:", friendRequestsTo);
+  }, [friendRequestsTo]);
+
+  // end debugging
 
   const handleGoToOtherProfile = (id: number) => {
     navigate(`/otherProfile/${id}`);
@@ -91,17 +110,44 @@ const Friends: React.FC = () => {
         { withCredentials: true }
       );
       const data: Friendship = response.data;
-      console.log("data:");
-      console.log(data);
       setFriends(data.friends);
-      console.log("Friends", data.friends);
     } catch (error) {
-      console.log("Error fetching friends: ", error);
+      console.error("Error fetching friends: ", error);
+    }
+  };
+
+  const getFriendRequestsTo = async () => {
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/friends/get_requests_to/",
+        {},
+        { withCredentials: true }
+      );
+      const data: FriendRequestTo = response.data;
+      setFriendRequestsTo(data.friend_requests_to);
+    } catch (error) {
+      console.error("Error fetching friend requests to: ", error);
+    }
+  };
+
+  const getFriendRequestsFrom = async () => {
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/friends/get_requests_from/",
+        {},
+        { withCredentials: true }
+      );
+      const data: FriendRequestFrom = response.data;
+      setFriendRequestsFrom(data.friend_requests_from);
+    } catch (error) {
+      console.error("Error fetching friend requests from: ", error);
     }
   };
 
   useEffect(() => {
     getFriends();
+    getFriendRequestsTo();
+    getFriendRequestsFrom();
   }, []);
 
   return (
@@ -244,6 +290,9 @@ const Friends: React.FC = () => {
                 </Typography>
               </Box>
             ))}
+          </Box>
+          <Box>
+            <h2> Friend Requests </h2>
           </Box>
         </main>
       </Box>

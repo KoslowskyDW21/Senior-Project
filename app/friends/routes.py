@@ -61,8 +61,61 @@ def search_for_friends():
 
     return jsonify({"users": users_list}), 200
 
-@bp.route('/add_friend/', methods=['POST'])
-def add_friend():
+@bp.route('/get_requests_to/', methods=['POST'])
+def get_requests_to():
+    friend_requests_to = db.session.query(
+        FriendRequest,
+        User.id,
+        User.username,
+        User.profile_picture
+    ).join(
+        User, (FriendRequest.requestTo == User.id)
+    ).filter(
+        (FriendRequest.requestFrom == current_user.id)
+    ).all()
+
+    users_list = [
+        {
+            'requestFrom': fr.requestFrom,
+            'requestTo': fr.requestTo,
+            'id': user_id,
+            'username': username,
+            'profile_picture': profile_picture
+        }
+        for fr, user_id, username, profile_picture in friend_requests_to
+    ]
+    return jsonify({"friend_requests_to": users_list}), 200
+
+@bp.route('/get_requests_from/', methods=['POST'])
+def get_requests_from():
+    friend_requests_from = db.session.query(
+        FriendRequest,
+        User.id,
+        User.username,
+        User.profile_picture
+    ).join(
+        User, (FriendRequest.requestFrom == User.id)
+    ).filter(
+        (FriendRequest.requestTo == current_user.id)
+    ).all()
+
+    users_list = [
+        {
+            'requestFrom': fr.requestFrom,
+            'requestTo': fr.requestTo,
+            'id': user_id,
+            'username': username,
+            'profile_picture': profile_picture
+        }
+        for fr, user_id, username, profile_picture in friend_requests_from
+    ]
+    return jsonify({"friend_requests_from": users_list}), 200
+
+@bp.route('/send_request/', methods=['POST'])
+def send_request():
     pass#
 
-#TODO: maybe add table: friend_request?
+@bp.route('/accept_request/', methods=['POST'])
+def accept_request():
+    pass#
+

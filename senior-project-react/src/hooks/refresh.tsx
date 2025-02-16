@@ -18,19 +18,22 @@ const useIdTokenRefresher = () => {
   const refreshIdToken = async () => {
     try {
       const response = await msalInstance.acquireTokenSilent({
-        scopes: ["openid", "profile", "email"], // Add other scopes as necessary
+        scopes: ["openid", "profile", "email"],
         account: msalInstance.getActiveAccount() || undefined,
       });
       setIdToken(response.idToken || null);
       return response.idToken;
-    } catch (error) {
-      console.warn("Token renewal failed using silent request:", error);
-      // If silent request fails, try acquiring the token via popup
-      const response = await msalInstance.acquireTokenPopup({
-        scopes: ["openid", "profile", "email"],
-      });
-      setIdToken(response.idToken);
-      return response.idToken;
+    } catch (error: any) {
+      if (error.name === "InteractionRequiredAuthError") {
+        console.warn("Silent token request failed, requesting popup...");
+        const response = await msalInstance.acquireTokenPopup({
+          scopes: ["openid", "profile", "email"],
+        });
+        setIdToken(response.idToken);
+        return response.idToken;
+      }
+      console.error("Token refresh failed:", error);
+      return null;
     }
   };
 
@@ -38,7 +41,11 @@ const useIdTokenRefresher = () => {
   useEffect(() => {
     const storedToken = localStorage.getItem("idToken");
     if (storedToken && isTokenExpired(storedToken)) {
-      refreshIdToken();
+      refreshIdToken().then((newToken) => {
+        if (newToken) {
+          localStorage.setItem("idToken", newToken);
+        }
+      });
     } else {
       setIdToken(storedToken);
     }
