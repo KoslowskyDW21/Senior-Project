@@ -18,6 +18,7 @@ import {
   TextField,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import Header from "./Header";
 
@@ -105,132 +106,147 @@ const Friends: React.FC = () => {
 
   return (
     <div>
-      <Header
-        title="Friends"
-        searchLabel="Find new friends"
-        searchVisible={false}
-      />
-
-      <main role="main">
-        <Box
-          mt={20}
-          mb={0}
-          textAlign="center"
-          display="flex"
-          justifyContent="center"
-          sx={{ flexGrow: 1 }}
-        >
-          <TextField
-            label="Find new friends"
-            variant="outlined"
-            fullWidth
-            value={searchQuery}
-            onChange={handleSearchChange}
-            sx={{ zIndex: 1 }}
-          />
-        </Box>
-
-        {/* Search Results Container */}
-        {searchResults.length > 0 && (
-          <Box
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
+          paddingTop: "150px",
+        }}
+      >
+        <Header
+          title="Friends"
+          searchLabel="Find new friends"
+          searchVisible={false}
+        />
+        <Box sx={{ position: "relative", width: "100%" }}>
+          <IconButton
+            onClick={() => navigate("/groups/")}
             sx={{
-              position: "relative",
-              top: "0",
-              margin: "0px",
-              backgroundColor: "white",
-              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-              borderRadius: "4px",
-              maxHeight: "300px",
-              overflowY: "auto",
-              zIndex: 10,
+              position: "absolute",
+              top: 0,
+              left: 0,
             }}
           >
-            {searchResults.map((user) => (
+            <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+          </IconButton>
+        </Box>
+
+        <main role="main">
+          <Box sx={{ position: "relative", width: "50%", margin: "auto" }}>
+            <TextField
+              label="Find new friends"
+              variant="outlined"
+              fullWidth
+              value={searchQuery}
+              onChange={handleSearchChange}
+              sx={{ zIndex: 1 }}
+            />
+            {searchResults.length > 0 && (
               <Box
-                key={user.id}
                 sx={{
-                  padding: "10px",
-                  display: "flex",
-                  alignItems: "center",
-                  cursor: "pointer",
-                  "&:hover": { backgroundColor: "#f5f5f5" },
+                  position: "absolute",
+                  top: "100%",
+                  left: 0,
+                  width: "100%",
+                  backgroundColor: "white",
+                  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                  borderRadius: "4px",
+                  maxHeight: "300px",
+                  overflowY: "auto",
+                  zIndex: 1000,
                 }}
-                onClick={() => navigate(`/OtherProfile/${user.id}`)}
               >
-                {user.profile_picture ? (
+                {searchResults.map((user) => (
+                  <Box
+                    key={user.id}
+                    sx={{
+                      padding: "10px",
+                      display: "flex",
+                      alignItems: "center",
+                      cursor: "pointer",
+                      "&:hover": { backgroundColor: "#f5f5f5" },
+                    }}
+                    onClick={() => navigate(`/OtherProfile/${user.id}`)}
+                  >
+                    {user.profile_picture ? (
+                      <Avatar
+                        alt="Profile Picture"
+                        src={`http://127.0.0.1:5000/${user.profile_picture}`}
+                        sx={{ width: 40, height: 40, marginRight: "10px" }}
+                      />
+                    ) : (
+                      <Avatar
+                        sx={{
+                          width: 40,
+                          height: 40,
+                          marginRight: "10px",
+                          backgroundColor: "gray",
+                        }}
+                      >
+                        <PersonIcon sx={{ color: "white" }} />
+                      </Avatar>
+                    )}
+                    <Typography>{user.username}</Typography>
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              gap: 2,
+            }}
+          >
+            {friends.map((friend) => (
+              <Box
+                key={friend.id}
+                mt={10}
+                sx={{
+                  width: "100px",
+                  minHeight: "100px",
+                  border: "2px solid rgb(172, 169, 169)",
+                  borderRadius: 2,
+                  boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.3s ease",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  p: 1,
+                  height: "100%",
+                  "&:hover": {
+                    borderColor: "#1976d2",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                  },
+                }}
+                onClick={() => handleGoToOtherProfile(friend.id)}
+              >
+                {friend.profile_picture ? (
                   <Avatar
                     alt="Profile Picture"
-                    src={`http://127.0.0.1:5000/${user.profile_picture}`}
-                    sx={{ width: 40, height: 40, marginRight: "10px" }}
+                    src={`http://127.0.0.1:5000/${friend.profile_picture}`}
+                    sx={{ width: 70, height: 70, border: "1px solid #000" }}
                   />
                 ) : (
                   <Avatar
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      marginRight: "10px",
-                      backgroundColor: "gray",
-                    }}
+                    sx={{ width: 70, height: 70, backgroundColor: "gray" }}
                   >
                     <PersonIcon sx={{ color: "white" }} />
                   </Avatar>
                 )}
-                <Typography>{user.username}</Typography>
+                <Typography variant="body2" mt={1}>
+                  {friend.username}
+                </Typography>
               </Box>
             ))}
           </Box>
-        )}
-
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: 2,
-          }}
-        >
-          {friends.map((friend) => (
-            <Box
-              key={friend.id}
-              mt={10}
-              sx={{
-                width: "100px",
-                minHeight: "100px",
-                border: "2px solid rgb(172, 169, 169)",
-                borderRadius: 2,
-                boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
-                transition: "all 0.3s ease",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                p: 1,
-                height: "100%",
-                "&:hover": {
-                  borderColor: "#1976d2",
-                  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-                },
-              }}
-              onClick={() => handleGoToOtherProfile(friend.id)}
-            >
-              {friend.profile_picture ? (
-                <Avatar
-                  alt="Profile Picture"
-                  src={`http://127.0.0.1:5000/${friend.profile_picture}`}
-                  sx={{ width: 70, height: 70, border: "1px solid #000" }}
-                />
-              ) : (
-                <Avatar sx={{ width: 70, height: 70, backgroundColor: "gray" }}>
-                  <PersonIcon sx={{ color: "white" }} />
-                </Avatar>
-              )}
-              <Typography variant="body2" mt={1}>
-                {friend.username}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-      </main>
+        </main>
+      </Box>
     </div>
   );
 };

@@ -132,19 +132,6 @@ const OtherProfile: React.FC = () => {
     navigate("/achievements");
   };
 
-  const resetHasLeveled = async () => {
-    try {
-      await axios.post(
-        `http://127.0.0.1:5000/profile/leveled/`,
-        {},
-        { withCredentials: true }
-      );
-      setHasLeveled(false);
-    } catch (error) {
-      console.error("Error resetting hasLeveled:", error);
-    }
-  };
-
   const xpBarRef = useRef<HTMLDivElement | null>(null);
 
   return (

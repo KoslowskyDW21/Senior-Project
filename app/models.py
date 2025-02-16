@@ -506,3 +506,17 @@ class UserNotifications(db.Model):
             "isRead": self.isRead,
             "notification_type": self.notification_type
         }
+
+class FriendRequest(db.Model):
+    __tablename__ = 'FriendRequest'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    requestFrom = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    requestTo = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    accepted = db.Column(db.Boolean, nullable=False)
+    def to_json(self):
+        return {
+            "id": self.id,
+            "requestFrom": self.requestFrom,
+            "requestTo": self.requestTo,
+            "accepted": self.accepted
+        }
