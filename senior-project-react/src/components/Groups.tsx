@@ -268,7 +268,6 @@ const Groups: React.FC = () => {
             </Box>
           </Box>
 
-          {friends.length > 6 && (
             <Box mt={10} textAlign="center">
               <Button
                 variant="contained"
@@ -278,7 +277,6 @@ const Groups: React.FC = () => {
                 View All Friends
               </Button>
             </Box>
-          )}
         </main>
 
         <Container>

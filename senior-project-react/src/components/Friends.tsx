@@ -292,7 +292,7 @@ const Friends: React.FC = () => {
             ))}
           </Box>
           <Box>
-            <Typography variant="h4" mt={5}>
+            <Typography variant="h4" mt={7} sx={{ fontWeight: "bold" }}>
               Friend Requests
             </Typography>
             <Typography

@@ -57,7 +57,6 @@ const OtherProfile: React.FC = () => {
   const [username, setUsername] = useState<String>();
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
-  const [message, setMessage] = useState("");
   const [user_level, setLevel] = useState<number>(0);
   const [xp_points, setXp_points] = useState<number>(0);
   const [hasLeveled, setHasLeveled] = useState<boolean>(false);
@@ -144,26 +143,44 @@ const OtherProfile: React.FC = () => {
       </IconButton>
 
       <h1>This is {username}'s profile!</h1>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          marginBottom: "16px",
-          width: "150px",
-          height: "150px",
-          borderRadius: "50%",
-          border: "2px solid #ccc",
-          marginLeft: "auto",
-          marginRight: "auto",
-        }}
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        gap={2} // Space between avatar and button container
+        marginBottom={2}
       >
-        {profilePicUrl ? (
-          <Avatar src={profilePicUrl} sx={{ width: 120, height: 120 }} />
-        ) : (
-          <FolderIcon sx={{ fontSize: 80 }} />
-        )}
-      </div>
+        {/* Profile Picture */}
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          width={150}
+          height={150}
+          borderRadius="50%"
+          border="2px solid #ccc"
+        >
+          {profilePicUrl ? (
+            <Avatar src={profilePicUrl} sx={{ width: 120, height: 120 }} />
+          ) : (
+            <FolderIcon sx={{ fontSize: 80 }} />
+          )}
+        </Box>
+
+        {/* Button Container (Stacked Vertically) */}
+        <Box display="flex" flexDirection="column" gap={1}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate("/friends")}
+          >
+            View All Friends
+          </Button>
+          <Button variant="contained" color="warning">
+            block button 4 jeff
+          </Button>
+        </Box>
+      </Box>
       <input
         type="file"
         accept="image/*"
