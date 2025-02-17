@@ -302,7 +302,7 @@ const Friends: React.FC = () => {
             >
               To you:
             </Typography>
-            {friendRequestsTo.map((friend) => (
+            {friendRequestsFrom.map((friend) => (
               <Box
                 key={friend.id}
                 mt={5}
@@ -351,7 +351,7 @@ const Friends: React.FC = () => {
             >
               From you:
             </Typography>
-            {friendRequestsFrom.map((friend) => (
+            {friendRequestsTo.map((friend) => (
               <Box
                 key={friend.id}
                 mt={5}
