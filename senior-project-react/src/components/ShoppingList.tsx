@@ -119,6 +119,7 @@ const ShoppingList: React.FC = () => {
     };
 
     async function handleAddIngredientsOfRecipe(event: SelectChangeEvent) {
+        console.log(`Trying to add recipe id=${event.target.value}'s ingredients to list`);
         if (event.target.value == undefined) {
             console.log("How did that happen? Selected recipe_id is undefined!");
             return;
@@ -128,7 +129,7 @@ const ShoppingList: React.FC = () => {
             const response = await axios.post(`http://127.0.0.1:5000/shopping_lists/items/add/${event.target.value}`);
             if (response.status == 200) {
                 setMessage("Recipe successfully added to list");
-                const data: AddRecipeToListResponse = response.data
+                console.log(`Recipe id=${event.target.value} added to list`);
                 getShoppingListInfo();
             } else {
                 setMessage("Recipe failed to be added to list");
@@ -154,6 +155,23 @@ const ShoppingList: React.FC = () => {
             }
         } catch (error) {
             setMessage(`An error occurred while trying to remove item ${sli_id} from list`);
+            return;
+        }
+    }
+
+    async function handleRemoveAllSLIs() {
+        console.log("Trying to remove all SLIs for user");
+        try {
+            const response = await axios.post(`http://127.0.0.1:5000/shopping_lists/items/remove-all`);
+            if (response.status == 200) {
+                setMessage("All items successfully cleared from list");
+                getShoppingListInfo();
+                return;
+            } else {
+                setMessage("Failed to remove all items from list");
+            }
+        } catch (error) {
+            setMessage("An error occurred while trying to remove all items from list");
             return;
         }
     }
@@ -236,13 +254,13 @@ const ShoppingList: React.FC = () => {
         >
             <InputLabel>Add all ingredients of a recipe</InputLabel>
             <Select
-                value={recipe_id}
-                onChange={handleAddIngredientsOfRecipe}
+                value={""}
+                onClick={handleAddIngredientsOfRecipe} // ignore this erro and *do not* change to onChange
             >
                 {/* Replace with better UX */}
                 {recipes.map((recipe) => (
                     <>
-                        <MenuItem value={recipe.id}>{recipe.recipe_name}</MenuItem>
+                        <MenuItem value={recipe.id} onClick={() => {setRecipe_id(recipe.id.toString())}}>{recipe.recipe_name}</MenuItem>
                     </>
                 ))}
             </Select>
@@ -277,7 +295,16 @@ const ShoppingList: React.FC = () => {
                 </Card>
             </Box>
         ))}
-
+        <br />
+        <br />
+        <Button
+            onClick={() => {
+                handleRemoveAllSLIs();
+            }}
+            variant="contained"
+            color="error"
+        >Remove All
+        </Button>
         </>
     )
 }
