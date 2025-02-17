@@ -31,6 +31,7 @@ import AdminPage from "./components/AdminPage";
 import Groups from "./components/Groups";
 import GroupDetails from "./components/GroupDetails";
 import CreateGroup from "./components/CreateGroup";
+import GroupMessages from "./components/GroupMessages";
 import CreateRecipeList from "./components/CreateRecipeList";
 import Banned from "./components/Banned";
 import Friends from "./components/Friends";
@@ -131,6 +132,7 @@ function App() {
               <Route path="/groups" element={<Groups />} />
               <Route path="/groups/:id" element={<GroupDetails />} />
               <Route path="/groups/create" element={<CreateGroup />} />
+              <Route path="/groups/:id/messages" element={<GroupMessages />} />
 
               {/* friends */}
               <Route path="/friends" element={<Friends />} />

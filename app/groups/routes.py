@@ -36,6 +36,16 @@ def join_group(group_id):
     db.session.add(member)
     db.session.commit()
 
+    # Create a message indicating the user has joined the group
+    message = Message(
+        group_id=group_id,
+        user_id=current_user.id,
+        text=f"{current_user.username} has joined the group.",
+        is_reported=False
+    )
+    db.session.add(message)
+    db.session.commit()
+
     return jsonify({"message": "Joined group successfully!"}), 200
 
 @bp.route('/<int:group_id>/leave', methods=['POST'])
@@ -48,6 +58,16 @@ def leave_group(group_id):
     member = GroupMember.query.filter_by(group_id=group_id, member_id=current_user.id).first()
     if member:
         db.session.delete(member)
+        db.session.commit()
+
+        # Create a message indicating the user has left the group
+        message = Message(
+            group_id=group_id,
+            user_id=current_user.id,
+            text=f"{current_user.username} has left the group.",
+            is_reported=False
+        )
+        db.session.add(message)
         db.session.commit()
 
     return jsonify({"message": "Left group successfully!"}), 200
@@ -178,3 +198,42 @@ def post_report_group():
         db.session.rollback()
         print(f"Error reporting group: {e}")
         return jsonify({"message": "Error: could not report group"})
+
+
+@bp.route('/<int:group_id>/set_trusted', methods=['POST'])
+@login_required
+def set_trusted(group_id):
+    user_id = request.json.get('user_id')
+    group = UserGroup.query.get(group_id)
+    if not group:
+        return jsonify({"message": "Group not found"}), 404
+
+    if group.creator != current_user.id and not GroupMember.query.filter_by(group_id=group_id, member_id=current_user.id, is_trusted=True).first():
+        return jsonify({"message": "Permission denied"}), 403
+
+    member = GroupMember.query.filter_by(group_id=group_id, member_id=user_id).first()
+    if member:
+        member.is_trusted = True
+        db.session.commit()
+        return jsonify({"message": "Member set as trusted successfully!"}), 200
+    else:
+        return jsonify({"message": "Member not found"}), 404
+    
+@bp.route('/<int:group_id>/revoke_trusted', methods=['POST'])
+@login_required
+def revoke_trusted(group_id):
+    user_id = request.json.get('user_id')
+    group = UserGroup.query.get(group_id)
+    if not group:
+        return jsonify({"message": "Group not found"}), 404
+
+    if group.creator != current_user.id:
+        return jsonify({"message": "Permission denied"}), 403
+
+    member = GroupMember.query.filter_by(group_id=group_id, member_id=user_id).first()
+    if member:
+        member.is_trusted = False
+        db.session.commit()
+        return jsonify({"message": "Member's trusted status revoked successfully!"}), 200
+    else:
+        return jsonify({"message": "Member not found"}), 404
