@@ -75,22 +75,30 @@ const ChallengeDetail: React.FC = () => {
   }, [id]);
 
   const handleJoinChallenge = async () => {
-    try {
-      await axios.post(`http://127.0.0.1:5000/challenges/${id}/join`);
-      const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}/participants`);
-      setParticipants(response.data);
-    } catch (error) {
-      console.error("Error joining challenge:", error);
+    if (new Date(challenge!.start_time) > new Date()) {
+      try {
+        await axios.post(`http://127.0.0.1:5000/challenges/${id}/join`);
+        const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}/participants`);
+        setParticipants(response.data);
+      } catch (error) {
+        console.error("Error joining challenge:", error);
+      }
+    } else {
+      alert("You cannot join the challenge after it has started.");
     }
   };
 
   const handleLeaveChallenge = async () => {
-    try {
-      await axios.post(`http://127.0.0.1:5000/challenges/${id}/leave`);
-      const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}/participants`);
-      setParticipants(response.data);
-    } catch (error) {
-      console.error("Error leaving challenge:", error);
+    if (new Date(challenge!.start_time) > new Date()) {
+      try {
+        await axios.post(`http://127.0.0.1:5000/challenges/${id}/leave`);
+        const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}/participants`);
+        setParticipants(response.data);
+      } catch (error) {
+        console.error("Error leaving challenge:", error);
+      }
+    } else {
+      alert("You cannot leave the challenge after it has started.");
     }
   };
 
@@ -115,6 +123,10 @@ const ChallengeDetail: React.FC = () => {
 
   const isParticipant = participants.some((p) => p.user_id === currentUserId);
   const isCreator = challenge.creator === currentUserId;
+  const now = new Date();
+  const startTime = new Date(challenge.start_time);
+  const endTime = new Date(challenge.end_time);
+  const votingEndTime = new Date(endTime.getTime() + 24 * 60 * 60 * 1000);
 
   return (
     <Container>
@@ -153,15 +165,15 @@ const ChallengeDetail: React.FC = () => {
             </Typography>
             <Typography variant="body1">
               <strong>Start Time:</strong>{" "}
-              {new Date(challenge.start_time).toLocaleString()}
+              {startTime.toLocaleString()}
             </Typography>
             <Typography variant="body1">
               <strong>End Time:</strong>{" "}
-              {new Date(challenge.end_time).toLocaleString()}
+              {endTime.toLocaleString()}
             </Typography>
           </Box>
           <Box textAlign="center" mt={3}>
-            {isCreator ? (
+            {isCreator && (
               <Button
                 variant="contained"
                 color="error"
@@ -169,21 +181,23 @@ const ChallengeDetail: React.FC = () => {
               >
                 Delete Challenge
               </Button>
-            ) : isParticipant ? (
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleLeaveChallenge}
-              >
-                Leave Challenge
-              </Button>
-            ) : (
+            )}
+            {!isCreator && !isParticipant && now < startTime && (
               <Button
                 variant="contained"
                 color="primary"
                 onClick={handleJoinChallenge}
               >
                 Join Challenge
+              </Button>
+            )}
+            {!isCreator && isParticipant && now < startTime && (
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={handleLeaveChallenge}
+              >
+                Leave Challenge
               </Button>
             )}
           </Box>
@@ -197,7 +211,7 @@ const ChallengeDetail: React.FC = () => {
               ))}
             </ul>
           </Box>
-          {isParticipant && (
+          {isParticipant && now >= startTime && now <= votingEndTime && (
             <Box textAlign="center" mt={3}>
               <Button
                 variant="contained"
@@ -206,7 +220,10 @@ const ChallengeDetail: React.FC = () => {
               >
                 Vote for Winner
               </Button>
-
+            </Box>
+          )}
+          {now > votingEndTime && (
+            <Box textAlign="center" mt={3}>
               <Button
                 variant="contained"
                 color="primary"

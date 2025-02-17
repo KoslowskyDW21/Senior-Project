@@ -13,6 +13,13 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def get_localized_time(time):
+    if type(time) is str:
+        time = datetime.fromisoformat(time)
+    if time.tzinfo is None:
+        time = pytz.utc.localize(time)
+    return time
+
 @login_required
 @bp.route('/', methods=['GET', 'POST'])
 def challenges():
@@ -53,32 +60,27 @@ def create_challenge():
     theme = request.form.get('theme')
     location = request.form.get('location')
     start_time = request.form.get('start_time')
-    end_time = request.form.get('end_time')
+    duration = request.form.get('duration')
     image = request.files.get('image')
 
     # Validate required fields
-    if not all([name, difficulty, theme, location, start_time, end_time]):
+    if not all([name, difficulty, theme, location, start_time, duration]):
         return jsonify({"message": "All fields are required"}), 400
 
-    # Parse and validate datetime fields
+    start_time_dt = get_localized_time(start_time)
     try:
-        start_time_dt = datetime.fromisoformat(start_time)
-        end_time_dt = datetime.fromisoformat(end_time)
-
-        if start_time_dt.tzinfo is None:
-            start_time_dt = pytz.utc.localize(start_time_dt)
-        if end_time_dt.tzinfo is None:
-            end_time_dt = pytz.utc.localize(end_time_dt)
+        duration_hours = int(duration)
     except ValueError:
-        return jsonify({"message": "Invalid date format"}), 400
+        return jsonify({"message": "Duration must be a valid number"}), 400
+    
+    if duration_hours > 24:
+        return jsonify({"message": "Duration cannot be more than 24 hours"}), 400
+
+    end_time_dt = start_time_dt + timedelta(hours=duration_hours)
 
     # Check if start time is before end time
     if start_time_dt >= end_time_dt:
         return jsonify({"message": "Start time must be before end time"}), 400
-
-    # Check if the time difference is not more than 24 hours
-    if end_time_dt - start_time_dt > timedelta(hours=24):
-        return jsonify({"message": "Start time and end time cannot be more than 24 hours apart"}), 400
 
     # Check if start time is at least 24 hours from now
     if start_time_dt < datetime.now(UTC) + timedelta(hours=24):
@@ -137,7 +139,10 @@ def post_current_user():
 def join_challenge(challenge_id):
     challenge = Challenge.query.get(challenge_id)
     if not challenge:
-        abort(404, description="Challenge not found")
+        return jsonify({"message": "Challenge not found"}), 404
+
+    if datetime.now(UTC) >= get_localized_time(challenge.start_time):
+        return jsonify({"message": "Cannot join challenge after it has started"}), 403
 
     participant = ChallengeParticipant(challenge_id=challenge_id, user_id=current_user.id)
     db.session.add(participant)
@@ -150,7 +155,10 @@ def join_challenge(challenge_id):
 def leave_challenge(challenge_id):
     challenge = Challenge.query.get(challenge_id)
     if not challenge:
-        abort(404, description="Challenge not found")
+        return jsonify({"message": "Challenge not found"}), 404
+
+    if datetime.now(UTC) >= get_localized_time(challenge.start_time):
+        return jsonify({"message": "Cannot leave challenge after it has started"}), 403
 
     participant = ChallengeParticipant.query.filter_by(challenge_id=challenge_id, user_id=current_user.id).first()
     if participant:
@@ -158,7 +166,6 @@ def leave_challenge(challenge_id):
         db.session.commit()
 
     return jsonify({"message": "Left challenge successfully!"}), 200
-
 @bp.route('/<int:challenge_id>/participants', methods=['GET'])
 @login_required
 def get_participants(challenge_id):
@@ -203,33 +210,34 @@ def submit_vote(challenge_id):
     second_choice = data.get('second_choice')
     third_choice = data.get('third_choice')
 
+    challenge = Challenge.query.get(challenge_id)
+    if not challenge:
+        return jsonify({"message": "Challenge not found"}), 404
+
+    now = datetime.now(UTC)
+    start_time = get_localized_time(challenge.start_time)
+    end_time = get_localized_time(challenge.end_time)
+    voting_end_time = end_time + timedelta(hours=24)
+
+    if not (start_time <= now <= voting_end_time):
+        return jsonify({"message": "Voting is not allowed at this time"}), 403
+
     if voter_id in [first_choice, second_choice, third_choice]:
         return jsonify({"message": "You cannot vote for yourself"}), 400
 
     if len({first_choice} - {None}) < 1:
         return jsonify({"message": "You must select a vote for the first place winner"}), 400
 
-    # Check if the voter is a participant of the challenge
     participant = ChallengeParticipant.query.filter_by(challenge_id=challenge_id, user_id=voter_id).first()
     if not participant:
         return jsonify({"message": "You must be a participant to vote"}), 403
 
-    # Check if the votee is a participant of the challenge
-    for votee_id in [first_choice, second_choice, third_choice]:
-        if votee_id is not None:
-            votee = ChallengeParticipant.query.filter_by(challenge_id=challenge_id, user_id=votee_id).first()
-            if not votee:
-                return jsonify({"message": f"User {votee_id} is not a participant"}), 400
-
-    # Check if the user has already voted
     existing_vote = ChallengeVote.query.filter_by(challenge_id=challenge_id, given_by=voter_id).first()
     if existing_vote:
-        # Update the existing vote
         existing_vote.first_choice = first_choice
         existing_vote.second_choice = second_choice
         existing_vote.third_choice = third_choice
     else:
-        # Create a new vote
         vote = ChallengeVote(
             challenge_id=challenge_id,
             given_by=voter_id,
@@ -242,7 +250,6 @@ def submit_vote(challenge_id):
     db.session.commit()
 
     return jsonify({"message": "Vote submitted successfully"}), 201
-
 
 @bp.route('/<int:challenge_id>/vote_results', methods=['GET'])
 @login_required

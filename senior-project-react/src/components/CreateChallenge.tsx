@@ -16,7 +16,7 @@ const CreateChallenge: React.FC = () => {
   const [theme, setTheme] = useState("");
   const [location, setLocation] = useState("");
   const [startTime, setStartTime] = useState<Date | null>(null);
-  const [endTime, setEndTime] = useState<Date | null>(null);
+  const [duration, setDuration] = useState<number | null>(null); // Duration in hours
   const [message, setMessage] = useState("");
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
 
@@ -30,7 +30,7 @@ const CreateChallenge: React.FC = () => {
     formData.append("theme", theme);
     formData.append("location", location);
     formData.append("start_time", startTime ? startTime.toISOString() : "");
-    formData.append("end_time", endTime ? endTime.toISOString() : "");
+    formData.append("duration", duration ? duration.toString() : "");
 
     try {
       const response = await axios.post(
@@ -99,13 +99,14 @@ const CreateChallenge: React.FC = () => {
         />
       </Box>
       <Box mt={2}>
-        <Typography>End Time</Typography>
-        <DatePicker
-          selected={endTime}
-          onChange={(date: Date) => setEndTime(date)}
-          showTimeSelect
-          dateFormat="Pp"
-          className="form-control"
+        <TextField
+          label="Duration (hours)"
+          variant="outlined"
+          fullWidth
+          type="number"
+          value={duration !== null ? duration : ""}
+          onChange={(e) => setDuration(parseInt(e.target.value))}
+          margin="normal"
         />
       </Box>
       <TextField

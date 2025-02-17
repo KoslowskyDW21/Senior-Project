@@ -10,15 +10,7 @@ import {
   Grid,
   Box,
   Container,
-  TextField,
-  MenuItem,
-  Menu,
-  IconButton,
-  Avatar,
-  ButtonBase,
 } from "@mui/material";
-import PersonIcon from "@mui/icons-material/Person";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import Header from "./Header";
 
 interface UserId {
@@ -52,7 +44,6 @@ const Challenges: React.FC = () => {
     {}
   );
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [searchLabel, setSearchLabel] = useState<string>("");
   const [showMoreMyChallenges, setShowMoreMyChallenges] =
     useState<boolean>(false);
   const [showMoreJoinedChallenges, setShowMoreJoinedChallenges] =
@@ -324,16 +315,18 @@ const Challenges: React.FC = () => {
                           <Typography variant="h6" component="div" gutterBottom>
                             {challenge.name}
                           </Typography>
-                          <Button
-                            variant="contained"
-                            color="secondary"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleLeaveChallenge(challenge.id);
-                            }}
-                          >
-                            Leave Challenge
-                          </Button>
+                          {new Date(challenge.start_time) > new Date() && (
+                            <Button
+                              variant="contained"
+                              color="secondary"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleLeaveChallenge(challenge.id);
+                              }}
+                            >
+                              Leave Challenge
+                            </Button>
+                          )}
                         </CardContent>
                       </Card>
                     </Grid>
@@ -378,29 +371,31 @@ const Challenges: React.FC = () => {
                       <Typography variant="h6" component="div" gutterBottom>
                         {challenge.name}
                       </Typography>
-                      {participants[challenge.id] ? (
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleLeaveChallenge(challenge.id);
-                          }}
-                        >
-                          Leave Challenge
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleJoinChallenge(challenge.id);
-                          }}
-                        >
-                          Join Challenge
-                        </Button>
-                      )}
+                      {new Date(challenge.start_time) > new Date() ? (
+                        participants[challenge.id] ? (
+                          <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleLeaveChallenge(challenge.id);
+                            }}
+                          >
+                            Leave Challenge
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleJoinChallenge(challenge.id);
+                            }}
+                          >
+                            Join Challenge
+                          </Button>
+                        )
+                      ) : null}
                     </CardContent>
                   </Card>
                 </Grid>
