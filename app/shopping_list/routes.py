@@ -3,6 +3,7 @@ from flask import jsonify
 from flask_login import current_user, login_required
 from app.shopping_list import bp
 from app.models import ShoppingList, ShoppingListItem, RecipeIngredient, db
+import sys
 
 @bp.get("/user_list")
 def get_all_shopping_lists_of_current_user():
@@ -55,5 +56,27 @@ def remove_shopping_list_item_from_shopping_list_of_cu(sli_id):
         db.session.commit()
         print(f"sli={sli_id} has been cast into the fire")
     except:
-        print(f"Failed to remove sli={sli_id} from db")
+        print(f"Failed to remove sli={sli_id} from db", sys.stderr)
     return jsonify("It is done"), 200
+
+@bp.post("items/remove-all")
+def remove_all_shopping_list_items_from_shopping_list_of_cu():
+    print(f"Trying to remove all slis from sli with id={current_user.id}")
+    try:
+        user_list = ShoppingList.query.filter_by(user_id=current_user.id).first()
+        if user_list is None:
+            print("User shopping list not found", file=sys.stderr)
+            return jsonify("Sadge"), 500
+        all_slis = ShoppingListItem.query.filter_by(shopping_list_id=user_list.id).all()
+        if all_slis is None:
+            print("Shopping list items of user list not found", file=sys.stderr)
+            return jsonify("Sadge"), 500
+        for sli in all_slis:
+            db.session.delete(sli)
+        db.session.commit()
+        print("All shopping list items have been utterly committed to destruction")
+        return jsonify("Hurray"), 200
+    except:
+        print(f"Failed to remove all shopping list items from current user's list", file=sys.stderr)
+        return jsonify("Sadge"), 500
+
