@@ -172,9 +172,8 @@ def get_report_group(group_id: int):
     user = current_user._get_current_object()
 
     report = GroupReport.query.filter_by(user_id=user.id, group_id=group_id).first() # type: ignore
-    print(report)
-    
-    if GroupReport.query.filter_by(user_id=user.id, group_id=group_id).first() != None: # type: ignore
+        
+    if report != None:
         return jsonify({"alreadyReported": True, "id": user.id}) # type: ignore
     
     return jsonify({"alreadyReported": False, "id": user.id}) # type: ignore
