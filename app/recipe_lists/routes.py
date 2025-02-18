@@ -84,7 +84,7 @@ def remove_recipe_from_list():
     try:
         rrl = RecipeRecipeList.query.filter_by(recipe_id=rid, recipe_list_id=lid).first()
         if not rrl:
-            return jsonify({"message": f"recipe {rid} does not exist in list {lid}"}), 400
+            return jsonify({"message": f"This recipe does not exist in that list"}), 404
         db.session.delete(rrl)
         db.session.commit()
         stillExists = RecipeRecipeList.query.filter_by(recipe_id=rid, recipe_list_id=lid).first()
