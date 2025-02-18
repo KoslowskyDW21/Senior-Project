@@ -11,6 +11,10 @@ import {
   IconButton,
   Button,
   Modal,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
 } from "@mui/material";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from "@mui/icons-material/Close";
@@ -288,6 +292,16 @@ const GroupDetails: React.FC = () => {
               <Typography id="modal-description" variant="body1" component="p">
                 {`Reporting group ${id}`}
               </Typography>
+
+              <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small" >
+                <InputLabel id="reason-label">Reason</InputLabel>
+                <Select
+                  labelId="reason-label"
+                >
+                  <MenuItem value={"N/A"}>N/A</MenuItem>
+                </Select>
+              </FormControl>
+              <br />
               <Button
                 variant="contained"
                 color="error"
