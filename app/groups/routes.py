@@ -168,8 +168,11 @@ def send_message(group_id):
 
 @login_required
 @bp.get("/<int:group_id>/report")
-def get_report_group():
+def get_report_group(group_id: int):
     user = current_user._get_current_object()
+
+    report = GroupReport.query.filter_by(user_id=user.id, group_id=group_id).first() # type: ignore
+    print(report)
     
     if GroupReport.query.filter_by(user_id=user.id, group_id=group_id).first() != None: # type: ignore
         return jsonify({"alreadyReported": True, "id": user.id}) # type: ignore
@@ -178,7 +181,7 @@ def get_report_group():
 
 @login_required
 @bp.post("/<int:group_id>/report")
-def post_report_group():
+def post_report_group(group_id: int):
     data = request.get_json()
     userId = data.get("user_id")
     groupId = data.get("group_id")

@@ -125,7 +125,7 @@ const GroupDetails: React.FC = () => {
         console.error("Could not get if already reported", error);
       });
     
-    if(data!.alreadyReported) {
+    if(!data!.alreadyReported) {
       const newData = {
         user_id: data!.id,
         group_id: id,
