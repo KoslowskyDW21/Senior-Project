@@ -111,11 +111,24 @@ def get_requests_from():
     ]
     return jsonify({"friend_requests_from": users_list}), 200
 
-@bp.route('/send_request/', methods=['POST'])
-def send_request():
-    pass#
+@bp.route('/send_request/<int:id>', methods=['POST'])
+def send_request(id):
+    new_request = FriendRequest(requestFrom=current_user.id, requestTo=id, accepted=false)
+    db.session.add(new_request)
+    try:
+        db.session.commit()
+    except IntegrityError as e:
+        db.session.rollback()
+        print(f"Error sending friend request to {id}: {e}")
+    
 
-@bp.route('/accept_request/', methods=['POST'])
-def accept_request():
-    pass#
+@bp.route('/accept_request/<int:id>', methods=['POST'])
+def accept_request(id):
+    request = FriendRequest.query.filter_by(requestFrom=id, requestTo=current_user.id).all()
+    request.accepted = True
+    try:
+        db.session.commit()
+    except IntegrityError as e:
+        db.session.rollback()
+        print(f"Error accepting friend request from {id}: {e}")
 
