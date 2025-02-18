@@ -237,3 +237,19 @@ def revoke_trusted(group_id):
         return jsonify({"message": "Member's trusted status revoked successfully!"}), 200
     else:
         return jsonify({"message": "Member not found"}), 404
+    
+    
+@bp.route('/<int:group_id>/delete', methods=['DELETE'])
+@login_required
+def delete_group(group_id):
+    group = UserGroup.query.get(group_id)
+    if not group:
+        return jsonify({"message": "Group not found"}), 404
+
+    if group.creator != current_user.id:
+        return jsonify({"message": "Permission denied"}), 403
+
+    db.session.delete(group)
+    db.session.commit()
+
+    return jsonify({"message": "Group deleted successfully!"}), 200

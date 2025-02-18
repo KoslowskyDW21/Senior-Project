@@ -104,6 +104,15 @@ const GroupDetails: React.FC = () => {
     }
   };
 
+  const handleDeleteGroup = async () => {
+    try {
+      await axios.delete(`http://127.0.0.1:5000/groups/${id}/delete`);
+      navigate("/groups");
+    } catch (error) {
+      console.error("Error deleting group:", error);
+    }
+  };
+
   const handleReportGroup = async () => {
     console.log("Attempting to report this group...");
     let data;
@@ -201,7 +210,15 @@ const GroupDetails: React.FC = () => {
             {group.is_public ? "Public" : "Private"}
           </Typography>
           <Box textAlign="center" mt={4}>
-            {isMember ? (
+            {group.creator === currentUserId ? (
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleDeleteGroup}
+              >
+                Delete Group
+              </Button>
+            ) : isMember ? (
               <Button
                 variant="contained"
                 color="secondary"
