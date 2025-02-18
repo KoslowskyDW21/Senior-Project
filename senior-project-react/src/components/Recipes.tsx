@@ -1,17 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // React Router for nav
-import {
-  Button,
-  ButtonBase,
-  Card,
-  CardHeader,
-  CardMedia,
-  CardActionArea,
-  Box,
-} from "@mui/material"; // matui components
+import { useNavigate } from "react-router-dom";
+import { Button, Card, CardHeader, CardMedia, CardActionArea, Box } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import Header from "./Header";
+import { ContactPageSharp } from "@mui/icons-material";
 
 interface Recipe {
   id: number;
@@ -48,13 +41,7 @@ function Difficulty({ difficulty }) {
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center", // Centers the diamonds
-        padding: "2px",
-      }}
-    >
+    <Box sx={{ display: "flex", justifyContent: "center", padding: "2px" }}>
       {difficulty === "1" && renderDiamonds(1)}
       {difficulty === "2" && renderDiamonds(2)}
       {difficulty === "3" && renderDiamonds(3)}
@@ -64,24 +51,22 @@ function Difficulty({ difficulty }) {
   );
 }
 
-// @ts-expect-error
 function Recipe({ id, name, difficulty, image }) {
-  const navigate = useNavigate(); // for navigation
-  id = id.toString(); // hacky insurance against mistakes
+  const navigate = useNavigate();
+  id = id.toString();
 
   const handleGoToRecipe = async () => {
     console.log(`Navigating to recipe page of recipe with id=${id}`);
     navigate(`/recipes/${id}`);
   };
+
+
   return (
-    <Card
-      variant="outlined"
-      sx={{ display: "flex", flexDirection: "column", height: "100%" }}
-    >
+    <Card variant="outlined" sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <CardActionArea onClick={handleGoToRecipe}>
         <CardHeader
           title={name}
-          subheader={Difficulty({ difficulty })}
+          subheader={<Difficulty difficulty={difficulty} />}
           sx={{
             justifyContent: "center",
             alignItems: "center",
@@ -108,9 +93,14 @@ function Recipe({ id, name, difficulty, image }) {
 const Recipes: React.FC = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [searchLabel, setSearchLabel] = useState<string>("Search for recipes");
+  const hasMounted = useRef(false);
 
   const navigate = useNavigate();
+  const hasScrolled = useRef(false); 
 
   const handleGoToChallenges = async () => {
     navigate(`/challenges`);
@@ -119,15 +109,33 @@ const Recipes: React.FC = () => {
     navigate(`/groups`);
   };
 
-  async function loadRecipes() {
+  
+
+  const loadRecipes = async () => {
+    if (loading || page > totalPages) return;
+  
+    setLoading(true);
     try {
-      const response = await axios.post("http://127.0.0.1:5000/recipes/");
-      const data = response.data;
-      setRecipes(data);
+      const response = await axios.post("http://127.0.0.1:5000/recipes/", null, {
+        params: {
+          page: page,
+          per_page: 20,
+        },
+      });
+  
+      const { recipes: newRecipes, total_pages } = response.data;
+      setRecipes((prevRecipes) => [...prevRecipes, ...newRecipes]);
+      setTotalPages(total_pages);
+  
+      setPage((prevPage) => prevPage + 1);
     } catch (error) {
       console.error("Unable to fetch recipes", error);
+    } finally {
+      setLoading(false);
+      hasScrolled.current = false; // Reset the scroll flag after loading is done
     }
-  }
+  };
+  
 
   const filterRecipes = (recipes: Recipe[]) => {
     const urlParams = new URLSearchParams(location.search);
@@ -142,62 +150,82 @@ const Recipes: React.FC = () => {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if (hasMounted.current) return;
+    hasMounted.current = true;
     loadRecipes();
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     filterRecipes(recipes);
   }, [location.search, recipes]);
 
+  const handleScroll = () => {
+    if (loading || page > totalPages || hasScrolled.current) return;
+  
+    const container = document.getElementById("scroll-container");
+    if (container) {
+      const nearBottom = container.scrollHeight - container.scrollTop === container.clientHeight;
+  
+      if (nearBottom) {
+        hasScrolled.current = true; 
+        loadRecipes(); 
+      }
+    }
+  };
+  
+
+  useEffect(() => {
+    const container = document.getElementById("scroll-container");
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [loading, page, totalPages]);
+
   return (
     <div>
-      <Header
-        title="Recipes"
-        searchLabel="Search for recipes"
-        searchVisible={true}
-      />
+      <Header title="Recipes" searchLabel="Search for recipes" searchVisible={true} />
       <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-start",
-          alignItems: "center",
-          fontSize: "24px",
-          fontWeight: "bold",
-          textAlign: "center",
-          mt: 4,
-        }}
-      ></Box>
-      <main role="main" style={{ paddingTop: "100px" }}>
-        <Grid container spacing={3}>
-          {filteredRecipes.map((recipe) => (
-            <Grid size={3} key={recipe.id}>
-              <Box
-                sx={{
-                  border: "2px solid rgb(172, 169, 169)",
-                  borderRadius: 2,
-                  boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    borderColor: "#1976d2",
-                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-                  },
-                  display: "flex",
-                  flexDirection: "column", // Ensure that content is aligned vertically
-                  height: "100%", // Make sure box takes full height
-                }}
-              >
-                <Recipe
-                  id={recipe.id}
-                  name={recipe.recipe_name}
-                  difficulty={recipe.difficulty}
-                  image={recipe.image}
-                />
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
-      </main>
+        id="scroll-container"
+        sx={{ overflowY: "scroll", height: "80vh", mt: 4 }}
+      >
+        <main role="main" style={{ paddingTop: "60px" }}>
+          <Grid container spacing={3}>
+            {filteredRecipes.map((recipe) => (
+              <Grid size={3} key={recipe.id}>
+                <Box
+                  sx={{
+                    border: "2px solid rgb(172, 169, 169)",
+                    borderRadius: 2,
+                    boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      borderColor: "#1976d2",
+                      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                    },
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
+                  }}
+                >
+                  <Recipe
+                    id={recipe.id}
+                    name={recipe.recipe_name}
+                    difficulty={recipe.difficulty}
+                    image={recipe.image}
+                  />
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </main>
+      </Box>
       <div
         style={{
           position: "fixed",
@@ -215,20 +243,10 @@ const Recipes: React.FC = () => {
         <Button variant="outlined" color="primary" sx={{ flex: 1 }}>
           Recipes
         </Button>
-        <Button
-          onClick={handleGoToChallenges}
-          variant="contained"
-          color="primary"
-          sx={{ flex: 1 }}
-        >
+        <Button onClick={handleGoToChallenges} variant="contained" color="primary" sx={{ flex: 1 }}>
           Challenges
         </Button>
-        <Button
-          onClick={handleGoToGroups}
-          variant="contained"
-          color="primary"
-          sx={{ flex: 1 }}
-        >
+        <Button onClick={handleGoToGroups} variant="contained" color="primary" sx={{ flex: 1 }}>
           Community
         </Button>
       </div>

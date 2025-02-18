@@ -7,16 +7,35 @@ from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserC
 import os
 import uuid
 from werkzeug.utils import secure_filename
+from math import ceil
 
 # @bp.get('/')
 # def home():
 #     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
 
+#@bp.post("/")
+#def post_recipes():
+    #print("Fetching recipes")
+    #recipes = Recipe.query.all()
+    #return jsonify([recipe.to_json() for recipe in recipes]), 200
+
 @bp.post("/")
 def post_recipes():
     print("Fetching recipes")
-    recipes = Recipe.query.all()
-    return jsonify([recipe.to_json() for recipe in recipes]), 200
+    search_query = request.args.get('search_query', '')
+    page = int(request.args.get('page', 1)) 
+    per_page = int(request.args.get('per_page', 20)) 
+    recipes_query = Recipe.query
+    if search_query:
+        recipes_query = recipes_query.filter(Recipe.name.ilike(f"%{search_query}%"))#type: ignore
+    recipes_paginated = recipes_query.paginate(page=page, per_page=per_page, error_out=False)
+    total_pages = ceil(recipes_paginated.total / per_page) # type: ignore
+    recipes = [recipe.to_json() for recipe in recipes_paginated.items]
+    return jsonify({
+        'recipes': recipes,
+        'total_pages': total_pages,
+        'current_page': page
+    }), 200
 
 @bp.get("/<int:id>/")
 def get_recipe_page(id):
