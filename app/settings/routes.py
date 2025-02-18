@@ -16,7 +16,24 @@ def post_settings_page():
 
     return jsonify(user.to_json()), 200 # type: ignore
 
+@bp.route("/update_username/", methods=["POST"])
+@login_required
+def post_update_username():
+    data = request.get_json()
+    username = str(data.get("username"))
 
+    print("Received data - Username: " + username)
+
+    user = current_user._get_current_object()
+    user.username = username # type: ignore
+
+    try: 
+        db.session.commit()
+        return jsonify({"message": "Username updated succesfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating username: {e}")
+        return jsonify({"message": "Error updating username"}), 500
 
 @bp.route("/update/", methods=['POST'])
 @login_required  
