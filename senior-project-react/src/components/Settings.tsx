@@ -119,6 +119,7 @@ export default function Settings() {
         setUsername(user.username);
         setColonialFloor(user.colonial_floor);
         setColonialSide(user.colonial_side);
+        console.log("Username: " + username);
         console.log("Floor: " + user.colonial_floor);
         console.log("Side: " + user.colonial_side);
         loadCuisines();
@@ -226,6 +227,24 @@ export default function Settings() {
       }
     }
   }
+  
+  async function updateUsername() {
+    const data = {
+      username: username,
+    };
+    await axios.post("http://127.0.0.1:5000/settings/update_username/", data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        console.log("Username succesfully updated");
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not update username", error);
+      });
+  }
 
   React.useEffect(() => {
     loadUser();
@@ -317,6 +336,10 @@ export default function Settings() {
     updateUser(user.colonial_floor, newSide);
   };
 
+  const handleUsernameChange = () => {
+    updateUsername();
+  }
+
   const handleOpenModal = () => {
     setOpenModal(true);
   };
@@ -358,6 +381,8 @@ export default function Settings() {
       console.error("Logout failed", error);
     }
   };
+
+  console.log("Username: " + username);
 
   return (
     <>
@@ -428,11 +453,11 @@ export default function Settings() {
       <h2>Change Account Details</h2>
 
       <TextField
-        aria-label="filled-helperText"
-        label="Username"
+        aria-label="username-textfield"
+        size="small"
+        helperText="Username"
+        value={user.username}
         variant="filled"
-        defaultValue={username}
-        value={username}
         onChange={(e) => {
           const newUsername = e.target.value;
 
@@ -443,6 +468,15 @@ export default function Settings() {
           }));
         }}
       />
+
+      <Button
+        sx={{ marginLeft: 2 }}
+        variant="contained"
+        color="primary"
+        onClick={handleUsernameChange}
+      >
+        Save
+      </Button>
 
       <br />
       <br />

@@ -133,6 +133,28 @@ const IndividualRecipe: React.FC = () => {
         const formData = new FormData();
         formData.append("rid", id.toString());
         formData.append("lid", event.target.value);
+        try {
+            const response = await axios.post(
+                "http://127.0.0.1:5000/recipe_lists/remove-recipe-from-list", formData,
+                { headers: { "Content-Type": "multipart/form-data"} }
+            );
+            if (response.status != 200) {
+                console.error("Error while trying to remove recipe from list");
+                setMessage(response.data.message);
+            } else {
+                console.log(`Successfully removed recipe id=${id.toString} from RecipeList id=${event.target.value}`);
+                setMessage("Successfully removed recipe from list");
+            }
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            if (axiosError.response && axiosError.response.data) {
+                const errorData = axiosError.response.data as AddRecipeToListResponse;
+                setMessage(errorData.message);
+            } else {
+                setMessage("An unknown error occurred");
+            }
+        }
+        setSnackBarOpen(true);
     }
 
     const handleSnackBarClose = (
@@ -190,7 +212,7 @@ const IndividualRecipe: React.FC = () => {
 
     const getRecipeName = async () => {
         try {
-            const response = await axios.post(`http://127.0.0.1:5000/recipes/${id}`);
+            const response = await axios.get(`http://127.0.0.1:5000/recipes/${id}`);
             const data: Recipe = response.data;
             setRecipe_name(data.recipe_name);
         } catch (error) {
@@ -234,11 +256,11 @@ const IndividualRecipe: React.FC = () => {
                 justifyContent: "center",
                 flexGrow: 1,
                 alignItems: "center",
-                fontSize: "24px",
+                fontSize: "48px",
                 fontWeight: "bold",
             }}
             >
-                <h1>{recipe_name}</h1>
+                {recipe_name}
             </Box>
 
             <Button

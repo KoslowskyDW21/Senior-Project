@@ -10,8 +10,14 @@ import {
   Container,
   IconButton,
   Button,
+  Modal,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
 } from "@mui/material";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 
 interface UserGroup {
@@ -29,6 +35,20 @@ interface GroupMember {
   is_trusted: boolean;
 }
 
+const reportModalStyle = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  bgcolor: "#ffffff",
+  boxShadow: 24,
+  paddingTop: 3,
+  paddingLeft: 7,
+  paddingRight: 7,
+  paddingBottom: 3,
+  textAlign: "center",
+}
+
 const GroupDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [group, setGroup] = useState<UserGroup | null>(null);
@@ -36,6 +56,12 @@ const GroupDetails: React.FC = () => {
   const [members, setMembers] = useState<GroupMember[]>([]);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [isTrusted, setIsTrusted] = useState<boolean>(false);
+
+  // States for report modal
+  const [open, setOpen] = useState(false);
+  const handleOpenModal = () => setOpen(true);
+  const handleCloseModal = () => setOpen(false);
+
   const navigate = useNavigate();
 
   const fetchGroup = async () => {
@@ -125,7 +151,7 @@ const GroupDetails: React.FC = () => {
         console.error("Could not get if already reported", error);
       });
     
-    if(data!.alreadyReported) {
+    if(!data!.alreadyReported) {
       const newData = {
         user_id: data!.id,
         group_id: id,
@@ -235,11 +261,57 @@ const GroupDetails: React.FC = () => {
             <Button
               variant="contained"
               color="error"
-              onClick={handleReportGroup}
+              onClick={() => {
+                handleOpenModal();
+              }}
             >
               Report
             </Button>
           </Box>
+
+          <Modal
+            open={open}
+            onClose={handleCloseModal}
+            aria-labelledby="modal-title"
+            aria-describedby="modal-description"
+          >
+            <Box sx={reportModalStyle}>
+              <IconButton
+                onClick={handleCloseModal}
+                style={{ position: "absolute", top: 5, right: 5 }}
+              >
+                <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+              </IconButton>
+
+              <Typography id="modal-title" variant="h4" component="h2">
+                Report Group
+              </Typography>
+              <Typography id="modal-description" variant="body1" component="p">
+                {`Reporting group ${id}`}
+              </Typography>
+
+              <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small" >
+                <InputLabel id="reason-label">Reason</InputLabel>
+                <Select
+                  labelId="reason-label"
+                >
+                  <MenuItem value={"N/A"}>N/A</MenuItem>
+                </Select>
+              </FormControl>
+              <br />
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() => {
+                  handleReportGroup();
+                  handleCloseModal();
+                }}
+              >
+                Confirm Report
+              </Button>
+            </Box>
+          </Modal>
+
           <Box mt={4}>
             <Typography variant="h5" gutterBottom>
               Members

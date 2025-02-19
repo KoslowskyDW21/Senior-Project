@@ -188,6 +188,9 @@ class GroupReport(db.Model):
     group_id = db.Column(db.Integer, db.ForeignKey("UserGroup.id"), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("User.id"), primary_key=True)
 
+    def __str__(self):
+        return f"Group {self.group_id} reported by User {self.user_id}"
+
 class GroupMember(db.Model):
     __tablename__ = 'GroupMember'
     group_id = db.Column(db.Integer, db.ForeignKey('UserGroup.id'), primary_key=True)
