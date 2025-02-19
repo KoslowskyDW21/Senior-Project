@@ -37,6 +37,7 @@ import GroupMessages from "./components/GroupMessages";
 import CreateRecipeList from "./components/CreateRecipeList";
 import Banned from "./components/Banned";
 import Friends from "./components/Friends";
+import ReportPage from "./components/ReportPage";
 import { PublicClientApplication } from "@azure/msal-browser";
 import ProtectedRoute from "./components/ProtectedRoute";
 import useIdTokenRefresher from "./hooks/refresh";
@@ -143,6 +144,7 @@ function App() {
 
               {/* admin */}
               <Route path="/admin" element={<AdminPage />} />
+              <Route path="/reported_content" element={<ReportPage />} />
 
               {/* banned */}
               <Route path="/banned" element={<Banned />} />

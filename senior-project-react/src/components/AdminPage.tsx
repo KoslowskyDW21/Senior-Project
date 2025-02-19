@@ -339,6 +339,19 @@ export default function AdminPage() {
         </Modal>
 
         <br />
+
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            navigate("/reported_content")
+          }}
+        >
+          View Reported Content
+        </Button>
+        
+        <br />
+        <br />
       <TextField
         label="Enter Recipe ID"
         variant="outlined"
