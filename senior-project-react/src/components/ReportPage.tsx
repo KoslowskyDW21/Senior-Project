@@ -18,6 +18,7 @@ interface UserGroup {
 interface Report {
   user_id: number;
   group_id: number;
+  reason: string;
 }
 
 const modalStyle = {
@@ -77,6 +78,32 @@ export default function ReportPage() {
     })
   }
 
+  async function deleteReports() {
+    await axios.delete(`http://127.0.0.1:5000/groups/${group!.id}/delete_reports`)
+    .then((response) => {
+      console.log(response.data);
+    })
+    .catch((error) => {
+      console.error("Could not delete reports ", error);
+    });
+  }
+  
+  async function deleteGroup() {
+    await axios.delete(`http://127.0.0.1:5000/groups/${group!.id}/delete`)
+    .then((response) => {
+      console.log(response.data);
+    })
+    .catch((error) => {
+      console.error("Could not delete group ", error);
+    });
+  }
+
+  function handleRemoveGroup() {
+    deleteReports();
+
+    // TODO: Also delete group itself, but talk to David first
+  }
+
   React.useEffect(() => {isAdmin(); loadGroups();}, []);
 
   if(admin) {
@@ -93,12 +120,13 @@ export default function ReportPage() {
 
         <h2>Reported Groups</h2>
 
+        {groups.length > 0 ?
         <table>
           <thead>
             <tr>
               <td>ID</td>
               <td>Name</td>
-              <td>num_reports</td>
+              <td>Reports</td>
               <td></td>
             </tr>
           </thead>
@@ -125,6 +153,9 @@ export default function ReportPage() {
             ))}
           </tbody>
         </table>
+        :
+        <p>No Groups Reported</p>
+        }
 
         <Modal
           open={openGroup}
@@ -154,11 +185,22 @@ export default function ReportPage() {
                 {reports.map((report) => (
                   <tr key={report.user_id}>
                     <td>{report.user_id}</td>
-                    <td>N/A</td>
+                    <td>{report.reason}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                handleRemoveGroup();
+                handleCloseGroupModal();
+              }}
+            >
+              Remove Group
+            </Button>
           </Box>
         </Modal>
       </>

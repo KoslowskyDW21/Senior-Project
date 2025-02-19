@@ -207,7 +207,7 @@ def post_report_group(group_id: int):
     print("Received data - userID: " + str(userId))
     print("Received data - groupID: " + str(groupId))
 
-    newReport: GroupReport = GroupReport(group_id=groupId, user_id=userId) # type: ignore
+    newReport: GroupReport = GroupReport(group_id=groupId, user_id=userId, reason="N/A") # type: ignore
     group: UserGroup = UserGroup.query.filter_by(id=groupId).first() # type: ignore
     group.num_reports += 1
 
@@ -259,7 +259,18 @@ def revoke_trusted(group_id):
     else:
         return jsonify({"message": "Member not found"}), 404
     
+
+@bp.route("/<int:group_id>/delete_reports", methods=["DELETE"])
+@login_required
+def delete_reports(group_id: int):
+    reports = GroupReport.query.filter_by(group_id=group_id).all()
+
+    for report in reports:
+        db.session.delete(report)
     
+    db.session.commit()
+    return jsonify({"message": "Reports succesfully deleted"}), 200
+
 @bp.route('/<int:group_id>/delete', methods=['DELETE'])
 @login_required
 def delete_group(group_id):

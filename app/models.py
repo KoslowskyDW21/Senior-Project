@@ -187,14 +187,16 @@ class GroupReport(db.Model):
     __tablename__ = "GroupReport"
     group_id = db.Column(db.Integer, db.ForeignKey("UserGroup.id"), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("User.id"), primary_key=True)
+    reason = db.Column(db.String(255), nullable=False)
 
     def __str__(self):
-        return f"Group {self.group_id} reported by User {self.user_id}"
+        return f"Group {self.group_id} reported by User {self.user_id} because {self.reason}"
     
     def to_json(self):
         return {
             "group_id": self.group_id,
             "user_id": self.user_id,
+            "reason": self.reason,
         }
 
 class GroupMember(db.Model):
