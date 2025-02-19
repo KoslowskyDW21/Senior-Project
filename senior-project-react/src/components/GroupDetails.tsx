@@ -201,13 +201,10 @@ const GroupDetails: React.FC = () => {
         )}
         <CardContent>
           <Typography variant="h6" component="div" gutterBottom>
-            Description
+            {group.is_public ? "Public" : "Private"} Group
           </Typography>
           <Typography variant="body2" color="textSecondary">
             {group.description}
-          </Typography>
-          <Typography variant="body2" color="textSecondary">
-            {group.is_public ? "Public" : "Private"}
           </Typography>
           <Box textAlign="center" mt={4}>
             {group.creator === currentUserId ? (
