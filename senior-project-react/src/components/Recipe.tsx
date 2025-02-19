@@ -268,7 +268,7 @@ const IndividualRecipe: React.FC = () => {
                 review_id: reviewId,
             }
 
-            await axios.post(`http://127.0.0.1:5000/${reviewId}/report`, newData, {
+            await axios.post(`http://127.0.0.1:5000/recipes/${reviewId}/report`, newData, {
                 headers: {
                     "Content-Type": "application/json",
                 },

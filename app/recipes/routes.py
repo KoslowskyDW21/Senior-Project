@@ -205,6 +205,7 @@ def post_report_review(review_id: int):
     print("Received data - reviewID: " + str(review_id))
 
     newReport: ReviewReport = ReviewReport(review_id=reviewId, user_id=userId, reason="N/A") # type: ignore
+    print(newReport)
     review: Review = Review.query.filter_by(id=reviewId).first() # type: ignore
     review.num_reports += 1
 
