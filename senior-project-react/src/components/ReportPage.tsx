@@ -78,7 +78,7 @@ export default function ReportPage() {
     })
   }
 
-  async function deleteReports() {
+  async function deleteGroupReports() {
     await axios.delete(`http://127.0.0.1:5000/groups/${group!.id}/delete_reports`)
     .then((response) => {
       console.log(response.data);
@@ -99,9 +99,8 @@ export default function ReportPage() {
   }
 
   function handleRemoveGroup() {
-    deleteReports();
-
-    // TODO: Also delete group itself, but talk to David first
+    deleteGroupReports();
+    deleteGroup();
   }
 
   React.useEffect(() => {isAdmin(); loadGroups();}, []);
