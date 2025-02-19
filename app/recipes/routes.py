@@ -1,10 +1,10 @@
 from __future__ import annotations
 import math
-from sqlalchemy import case, or_
+from sqlalchemy import case, func, not_, or_
 from flask import request, jsonify, render_template, redirect, url_for, abort, flash, current_app
 from flask_login import current_user, login_required
 from app.recipes import bp
-from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, Review, ReviewReport, Cuisine, db
+from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, Review, ReviewReport, Cuisine, RecipeDietaryRestriction, db
 import os
 import uuid
 from werkzeug.utils import secure_filename
@@ -28,11 +28,18 @@ def post_recipes():
     search_query = request.args.get('search_query', '').strip()  # Clean search query
     page = max(1, int(request.args.get('page', 1)))  # Ensure page is at least 1
     per_page = int(request.args.get('per_page', 20))
-    allergen_query = request.args.get('allergen_query', '')
+    #allergen_query = request.args.getlist('allergen_query')
 
     print(f"Search query: {search_query}, Page: {page}, Per page: {per_page}")
     
     recipes_query = Recipe.query
+
+    #if allergen_query:
+        #allergen_filters = [
+            #not_(func.lower(func.regexp_replace(RecipeDietaryRestriction.dietary_restrictions, r'\s*,\s*', ','))).ilike(f"%{allergen}%")
+            #for allergen in allergen_query
+        #]
+        #recipes_query = recipes_query.outerjoin(RecipeDietaryRestriction).filter(*allergen_filters)
 
     if search_query != "":
         name_filter_start = Recipe.recipe_name.ilike(f"{search_query}%")
@@ -61,6 +68,9 @@ def post_recipes():
             category_filter.desc(),
             cuisine_filter.desc()
         )
+
+
+
 
     recipes_paginated = recipes_query.paginate(page=page, per_page=per_page, error_out=False)
     total_pages = ceil(recipes_paginated.total / per_page)  # type: ignore

@@ -112,7 +112,7 @@ const Header: React.FC<HeaderProps> = ({
 
     navigate({
       pathname: location.pathname,
-      search: `?search=${query}&allergens=${selectedDietaryRestrictions.join(",")}`,
+      search: `?search=${query}}`,
     });
   };
   
@@ -120,10 +120,10 @@ const Header: React.FC<HeaderProps> = ({
     const newAllergens = event.target.value as string[];
     setSelectedDietaryRestrictions(newAllergens); 
   
-    navigate({
+    /*navigate({
       pathname: location.pathname,
       search: `?search=${searchQuery}&allergens=${newAllergens.join(",")}`,
-    });
+    });*/
   };
   
   
@@ -140,7 +140,7 @@ const Header: React.FC<HeaderProps> = ({
   React.useEffect(() => {
     navigate({
       pathname: location.pathname,
-      search: `?search=${searchQuery}&allergens=${selectedDietaryRestrictions.join(",")}`,
+      search: `?search=${searchQuery}`,
     });
   }, [searchQuery, selectedDietaryRestrictions, navigate, location.pathname]);
   
