@@ -305,7 +305,7 @@ const GroupDetails: React.FC = () => {
             <Button
               variant="contained"
               color="error"
-              onClick={handleReportGroup}
+              onClick={handleOpenModal}
             >
               Report
             </Button>
