@@ -262,7 +262,7 @@ def delete_group(group_id):
     return jsonify({"message": "Group deleted successfully!"}), 200
 
 
-@bp.route('/<int:group_id>/invite', methods=['POST'])
+@bp.route('/<int:group_id>/invite', methods=['GET', 'POST'])
 @login_required
 def invite_friends(group_id):
     group = UserGroup.query.get(group_id)
@@ -277,7 +277,7 @@ def invite_friends(group_id):
         notification = UserNotifications(
             user_id=friend_id,
             notification_text=f"You have been invited to join the group {group.name}.",
-            notification_type='group_invite'
+            notification_type='group_message'
         )
         db.session.add(notification)
     db.session.commit()

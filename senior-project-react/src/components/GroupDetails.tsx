@@ -310,32 +310,61 @@ const GroupDetails: React.FC = () => {
               Report
             </Button>
             {(group.creator === currentUserId || isTrusted) && (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => setInviteModalOpen(true)}
-                sx={{ ml: 2 }}
-              >
-                Invite Friends
-              </Button>
+              <>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => setInviteModalOpen(true)}
+                  sx={{ ml: 2 }}
+                >
+                  Invite Friends
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => navigate(`/groups/${id}/invite`)}
+                  sx={{ ml: 2 }}
+                >
+                  Invite Friends (New Page)
+                </Button>
+              </>
             )}
           </Box>
           {isMember && (
-            <Box textAlign="center" mt={3}>
+            <>
+              <Box textAlign="center" mt={3}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => navigate(`/groups/${id}/messages`)}
+                >
+                  View Messages
+                </Button>
+              </Box>
+
+              <Box textAlign="center" mt={3}>
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => navigate(`/groups/${id}/messages`)}
+                onClick={() => navigate(`/groups/${id}/invite`)}
               >
-                View Messages
+                Invite Friends
               </Button>
-            </Box>
+              </Box>
+            </>
           )}
           <Box mt={4}>
             <Typography variant="h5" gutterBottom>
               Members
             </Typography>
-            <GroupMembersList members={members} />
+            <GroupMembersList
+              members={members}
+              currentUserId={currentUserId!}
+              groupCreatorId={group.creator}
+              trustedMemberIds={members.filter(member => member.is_trusted).map(member => member.user_id)}
+              groupId={group.id}
+              fetchMembers={fetchMembers}
+            />
           </Box>
 
           <Modal
