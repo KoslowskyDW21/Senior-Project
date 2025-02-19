@@ -4,7 +4,7 @@ from sqlalchemy import case, or_
 from flask import request, jsonify, render_template, redirect, url_for, abort, flash, current_app
 from flask_login import current_user, login_required
 from app.recipes import bp
-from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, Review, ReviewReport, db
+from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, Review, ReviewReport, Cuisine, db
 import os
 import uuid
 from werkzeug.utils import secure_filename
@@ -32,33 +32,39 @@ def post_recipes():
     print(f"Search query: {search_query}, Page: {page}, Per page: {per_page}")
     
     recipes_query = Recipe.query
-    
+
     if search_query != "":
-        # Build the filter for name and category
-        name_filter = Recipe.recipe_name.ilike(f"%{search_query}%")
+        name_filter_start = Recipe.recipe_name.ilike(f"{search_query}%")
+        name_filter_contains = Recipe.recipe_name.ilike(f"%{search_query}%")
         category_filter = Recipe.category.ilike(f"%{search_query}%")
-        
+        cuisine_filter = Cuisine.name.ilike(f"%{search_query}%")
+
+        recipes_query = recipes_query.join(
+            RecipeCuisine, RecipeCuisine.recipe_id == Recipe.id
+        ).join(
+            Cuisine, Cuisine.id == RecipeCuisine.cuisine_id
+        )
+
         recipes_query = recipes_query.filter(
             or_(
-                name_filter, 
-                category_filter
+                name_filter_start,
+                name_filter_contains,
+                category_filter,
+                cuisine_filter
             )
         )
-        
-        # Apply conditional ordering: prioritize name match over category match
+
         recipes_query = recipes_query.order_by(
-            # First, prioritize results with name matching
-            name_filter.desc(),
-            # Then, if name matches less, prioritize category matching
-            category_filter.desc()
+            name_filter_start.desc(),
+            name_filter_contains.desc(),
+            category_filter.desc(),
+            cuisine_filter.desc()
         )
-    
-    # Apply pagination
+
     recipes_paginated = recipes_query.paginate(page=page, per_page=per_page, error_out=False)
     total_pages = ceil(recipes_paginated.total / per_page)  # type: ignore
     recipes = [recipe.to_json() for recipe in recipes_paginated.items]
 
-    # Return the filtered and ordered recipes with pagination info
     return jsonify({
         'recipes': recipes,
         'total_pages': total_pages,

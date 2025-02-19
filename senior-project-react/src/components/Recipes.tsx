@@ -140,12 +140,7 @@ const Recipes: React.FC = () => {
   useEffect(() => {
     if (hasMounted.current) return;
     hasMounted.current = true;
-    loadRecipes();
-  }, []);
-
-
-  useEffect(() => {
-    if(getSearchQuery() == "") return;
+    window.scrollTo(0, 0)
     setRecipes([]);  
     setPage(1);  
     loadRecipes();  
