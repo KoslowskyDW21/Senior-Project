@@ -1,6 +1,6 @@
 from __future__ import annotations
 import math
-from sqlalchemy import or_
+from sqlalchemy import case, or_
 from flask import request, jsonify, render_template, redirect, url_for, abort, flash, current_app
 from flask_login import current_user, login_required
 from app.recipes import bp
@@ -20,31 +20,45 @@ from math import ceil
     #recipes = Recipe.query.all()
     #return jsonify([recipe.to_json() for recipe in recipes]), 200
 
+
+
 @bp.post("/")
 def post_recipes():
     print("Fetching recipes")
-    search_query = request.args.get('search_query', '').strip()  
-    page = max(1, int(request.args.get('page', 1)))  
+    search_query = request.args.get('search_query', '').strip()  # Clean search query
+    page = max(1, int(request.args.get('page', 1)))  # Ensure page is at least 1
     per_page = int(request.args.get('per_page', 20))
-    
+
     print(f"Search query: {search_query}, Page: {page}, Per page: {per_page}")
     
     recipes_query = Recipe.query
     
     if search_query != "":
+        # Build the filter for name and category
+        name_filter = Recipe.recipe_name.ilike(f"%{search_query}%")
+        category_filter = Recipe.category.ilike(f"%{search_query}%")
+        
         recipes_query = recipes_query.filter(
             or_(
-                Recipe.recipe_name.startswith(search_query),  # type: ignore
-                Recipe.recipe_name.ilike(f"%{search_query}%"),  # type: ignore
-                Recipe.recipe_name.ilike(f"{search_query}%"),  # type: ignore
-                Recipe.recipe_name.ilike(f"%{search_query}"),  # type: ignore
-                Recipe.category.ilike(f"%{search_query}%")  # type: ignore
+                name_filter, 
+                category_filter
             )
         )
+        
+        # Apply conditional ordering: prioritize name match over category match
+        recipes_query = recipes_query.order_by(
+            # First, prioritize results with name matching
+            name_filter.desc(),
+            # Then, if name matches less, prioritize category matching
+            category_filter.desc()
+        )
     
+    # Apply pagination
     recipes_paginated = recipes_query.paginate(page=page, per_page=per_page, error_out=False)
     total_pages = ceil(recipes_paginated.total / per_page)  # type: ignore
     recipes = [recipe.to_json() for recipe in recipes_paginated.items]
+
+    # Return the filtered and ordered recipes with pagination info
     return jsonify({
         'recipes': recipes,
         'total_pages': total_pages,

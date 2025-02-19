@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Card, CardHeader, CardMedia, CardActionArea, Box } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import Header from "./Header";
-import { ContactPageSharp } from "@mui/icons-material";
 
 interface Recipe {
   id: number;
@@ -60,7 +59,6 @@ function Recipe({ id, name, difficulty, image }) {
     navigate(`/recipes/${id}`);
   };
 
-
   return (
     <Card variant="outlined" sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <CardActionArea onClick={handleGoToRecipe}>
@@ -95,12 +93,11 @@ const Recipes: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [searchLabel, setSearchLabel] = useState<string>("Search for recipes");
   const hasMounted = useRef(false);
   const location = useLocation();
 
   const navigate = useNavigate();
-  const hasScrolled = useRef(false); 
+  const hasScrolled = useRef(false);
 
   const handleGoToChallenges = async () => {
     navigate(`/challenges`);
@@ -123,49 +120,51 @@ const Recipes: React.FC = () => {
         params: {
           page: page,
           per_page: 20,
-          search_query: searchQuery
+          search_query: searchQuery,
         },
       });
-  
+
       const { recipes: newRecipes, total_pages } = response.data;
       setRecipes((prevRecipes) => [...prevRecipes, ...newRecipes]);
       setTotalPages(total_pages);
-  
       setPage((prevPage) => prevPage + 1);
     } catch (error) {
       console.error("Unable to fetch recipes", error);
     } finally {
       setLoading(false);
-      hasScrolled.current = false; // Reset the scroll flag after loading is done
+      hasScrolled.current = false; 
     }
   };
-  
+
+
   useEffect(() => {
     if (hasMounted.current) return;
     hasMounted.current = true;
     loadRecipes();
   }, []);
 
+
   useEffect(() => {
-    setRecipes([]);
-    setPage(1); 
-    loadRecipes();
+    if(getSearchQuery() == "") return;
+    setRecipes([]);  
+    setPage(1);  
+    loadRecipes();  
   }, [location.search]);
 
+  // Infinite scroll handler
   const handleScroll = () => {
     if (loading || page > totalPages || hasScrolled.current) return;
-  
+
     const container = document.getElementById("scroll-container");
     if (container) {
       const nearBottom = container.scrollHeight - container.scrollTop === container.clientHeight;
-  
+
       if (nearBottom) {
-        hasScrolled.current = true; 
-        loadRecipes(); 
+        hasScrolled.current = true;
+        loadRecipes();
       }
     }
   };
-  
 
   useEffect(() => {
     const container = document.getElementById("scroll-container");
