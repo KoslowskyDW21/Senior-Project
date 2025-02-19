@@ -37,6 +37,12 @@ def post_recipes():
         'current_page': page
     }), 200
 
+@bp.get("/all/")
+def get_all_recipes_at_once():
+    print("Fetching all recipes")
+    recipes = Recipe.query.all()
+    return jsonify({'recipes': [recipe.to_json() for recipe in recipes]})
+
 @bp.get("/<int:id>/")
 def get_recipe_page(id):
     print("searching for recipe " + str(id))

@@ -44,8 +44,8 @@ def add_recipe_to_shopping_list_items_of_current_user(recipe_id):
         db.session.commit()
     except:
         print("Error")
-        return jsonify({"message": "Error", "objects": None}), 500
-    return jsonify({"message": "Success", "objects": slis}), 200
+        return jsonify({"message": "Error"}), 500
+    return jsonify({"message": "Success"}), 200
 
 @bp.post("/items/remove/<int:sli_id>")
 def remove_shopping_list_item_from_shopping_list_of_cu(sli_id):

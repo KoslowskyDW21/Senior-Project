@@ -50,6 +50,13 @@ interface AddRecipeToListResponse {
     message: string;
 }
 
+interface ShoppingListItem {
+    id: number;
+    shopping_list_id: number;
+    ingredient_id: number;
+    measure: string;
+}
+
 function Step({ recipe_id, step_number, step_description }: Step) {
     return (
         <>
@@ -153,6 +160,29 @@ const IndividualRecipe: React.FC = () => {
             } else {
                 setMessage("An unknown error occurred");
             }
+        }
+        setSnackBarOpen(true);
+    }
+
+    async function handleAddIngredientsOfRecipe() {
+        console.log(`Trying to add recipe id=${id}'s ingredients to list`);
+        if (id == undefined) {
+            console.error("id is undefined!");
+            return;
+        }
+        console.log(`Trying to add all ingredients of this recipe to shopping list`);
+        try {
+            const response = await axios.post(`http://127.0.0.1:5000/shopping_lists/items/add/${id}`);
+            if (response.status == 200) {
+                setMessage("Recipe successfully added to list");
+                console.log(`This recipe added to list`);
+            } else {
+                setMessage("Recipe failed to be added to list");
+                console.log("Recipe failed to be added to list");
+            }
+        } catch (error) {
+            setMessage("Error in trying to add recipe's ingredients to shopping list");
+            console.error("Error in trying to add recipe's ingredients to shopping list", error);
         }
         setSnackBarOpen(true);
     }
@@ -299,6 +329,15 @@ const IndividualRecipe: React.FC = () => {
                     <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
                 ))}
             </Select>
+            </FormControl>
+
+            {/* Add recipe's ingredients to the shopping list */}
+            <FormControl sx={{width: 400}}>
+                <InputLabel>Add ingredients to shopping list</InputLabel>
+                    <Button sx={{width: 400, height: 55}}
+                        variant="outlined"
+                        onClick={() => {handleAddIngredientsOfRecipe()}}
+                    ></Button>
             </FormControl>
             
             <Box
