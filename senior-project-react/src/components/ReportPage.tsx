@@ -96,14 +96,24 @@ export default function ReportPage() {
     });
   }
 
-  async function loadReports(id: number) {
+  async function loadGroupReports(id: number) {
     await axios.get(`http://127.0.0.1:5000/groups/reports/${id}/`)
     .then((response) => {
       setGroupReports(response.data);
     })
     .catch((error) => {
       console.error("Could not fetch reports ", error);
+    });
+  }
+
+  async function loadReviewReports(id: number) {
+    await axios.get(`http://127.0.0.1:5000/recipes/reports/${id}`)
+    .then((response) => {
+      setReviewReports(response.data);
     })
+    .catch((error) => {
+      console.error("Could not fetch reports ", error);
+    });
   }
 
   async function deleteGroupReports() {
@@ -141,9 +151,19 @@ export default function ReportPage() {
     });
   }
 
+  async function deleteReview() {
+    await axios.delete(`http://127.0.0.1:5000/recipes/${review!.id}/delete`)
+    .then((response) => {
+      console.log(response.data);
+    })
+    .catch((error) => {
+      console.error("Could not delete review ", error);
+    });
+  }
+
   function handleRemoveReview() {
     deleteReviewReports();
-    // TODO: delete the review itself
+    deleteReview();
   }
 
   React.useEffect(() => {isAdmin(); loadGroups(); loadReviews();}, []);
@@ -184,7 +204,7 @@ export default function ReportPage() {
                     color="primary"
                     onClick={() => {
                       setGroup(group);
-                      loadReports(group.id);
+                      loadGroupReports(group.id);
                       handleOpenGroupModal();
                     }}
                   >
@@ -221,7 +241,7 @@ export default function ReportPage() {
                     color="primary"
                     onClick={() => {
                       setReview(review);
-                      // TODO: load reports
+                      loadReviewReports(review.id);
                       handleOpenReviewModal();
                     }}
                   >

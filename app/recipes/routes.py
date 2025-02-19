@@ -182,6 +182,18 @@ def delete_reports(review_id: int):
     db.session.commit()
     return jsonify({"message": "Reports successfully deleted"}), 200
 
+@bp.route("/<int:review_id>/delete", methods=["DELETE"])
+@login_required
+def delete_review(review_id):
+    review = Review.query.get(review_id)
+    if not review:
+        return jsonify({"message": "Review not found"}), 404
+    
+    db.session.delete(review)
+    db.session.commit()
+
+    return jsonify({"message": "Review deleted successfully"}), 200
+
 @bp.get("/<int:review_id>/report")
 @login_required
 def get_report_review(review_id: int):
@@ -217,6 +229,12 @@ def post_report_review(review_id: int):
         db.session.rollback()
         print(f"Error reporting review: {e}")
         return jsonify({"message": "Error: could not report review"}), 500
+    
+@bp.route("/reports/<int:id>", methods=["GET"])
+@login_required
+def get_reports(id: int):
+    reports = ReviewReport.query.filter_by(review_id=id).all()
+    return jsonify([report.to_json() for report in reports]), 200
 
 
 def completionAchievements(id):
