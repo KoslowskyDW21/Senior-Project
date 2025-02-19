@@ -15,10 +15,15 @@ import {
   Select,
   MenuItem,
   InputLabel,
+  List,
+  ListItem,
+  ListItemText,
+  Checkbox,
 } from "@mui/material";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
+import GroupMembersList from "./GroupMembersList"; // Import the new component
 
 interface UserGroup {
   id: number;
@@ -32,7 +37,13 @@ interface UserGroup {
 interface GroupMember {
   user_id: number;
   username: string;
+  profile_picture: string | null;
   is_trusted: boolean;
+}
+
+interface Friend {
+  id: number;
+  username: string;
 }
 
 const reportModalStyle = {
@@ -56,6 +67,9 @@ const GroupDetails: React.FC = () => {
   const [members, setMembers] = useState<GroupMember[]>([]);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [isTrusted, setIsTrusted] = useState<boolean>(false);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [selectedFriends, setSelectedFriends] = useState<number[]>([]);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   // States for report modal
   const [open, setOpen] = useState(false);
@@ -103,11 +117,21 @@ const GroupDetails: React.FC = () => {
     }
   };
 
+  const fetchFriends = async () => {
+    try {
+      const response = await axios.post("http://127.0.0.1:5000/friends/get_friends/");
+      setFriends(response.data.friends);
+    } catch (error) {
+      console.error("Error fetching friends:", error);
+    }
+  };
+
   useEffect(() => {
     fetchGroup();
     checkMembership();
     fetchMembers();
     fetchCurrentUser();
+    fetchFriends();
   }, [id]);
 
   const handleJoinGroup = async () => {
@@ -151,7 +175,7 @@ const GroupDetails: React.FC = () => {
         console.error("Could not get if already reported", error);
       });
     
-    if(!data!.alreadyReported) {
+    if(data!.alreadyReported) {
       const newData = {
         user_id: data!.id,
         group_id: id,
@@ -193,6 +217,23 @@ const GroupDetails: React.FC = () => {
     }
   };
 
+  const handleInviteFriends = async () => {
+    try {
+      await axios.post(`http://127.0.0.1:5000/groups/${id}/invite`, { friend_ids: selectedFriends });
+      setInviteModalOpen(false);
+    } catch (error) {
+      console.error("Error inviting friends:", error);
+    }
+  };
+
+  const handleToggleFriend = (friendId: number) => {
+    setSelectedFriends((prevSelected) =>
+      prevSelected.includes(friendId)
+        ? prevSelected.filter((id) => id !== friendId)
+        : [...prevSelected, friendId]
+    );
+  };
+
   if (!group) {
     return (
       <Container>
@@ -227,10 +268,13 @@ const GroupDetails: React.FC = () => {
         )}
         <CardContent>
           <Typography variant="h6" component="div" gutterBottom>
-            {group.is_public ? "Public" : "Private"} Group
+            Description
           </Typography>
           <Typography variant="body2" color="textSecondary">
             {group.description}
+          </Typography>
+          <Typography variant="body2" color="textSecondary">
+            {group.is_public ? "Public" : "Private"}
           </Typography>
           <Box textAlign="center" mt={4}>
             {group.creator === currentUserId ? (
@@ -261,12 +305,37 @@ const GroupDetails: React.FC = () => {
             <Button
               variant="contained"
               color="error"
-              onClick={() => {
-                handleOpenModal();
-              }}
+              onClick={handleReportGroup}
             >
               Report
             </Button>
+            {(group.creator === currentUserId || isTrusted) && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setInviteModalOpen(true)}
+                sx={{ ml: 2 }}
+              >
+                Invite Friends
+              </Button>
+            )}
+          </Box>
+          {isMember && (
+            <Box textAlign="center" mt={3}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => navigate(`/groups/${id}/messages`)}
+              >
+                View Messages
+              </Button>
+            </Box>
+          )}
+          <Box mt={4}>
+            <Typography variant="h5" gutterBottom>
+              Members
+            </Typography>
+            <GroupMembersList members={members} />
           </Box>
 
           <Modal
@@ -295,7 +364,7 @@ const GroupDetails: React.FC = () => {
                 <Select
                   labelId="reason-label"
                 >
-                  <MenuItem value={"N/A"}>N/A</MenuItem>
+                  
                 </Select>
               </FormControl>
               <br />
@@ -312,49 +381,45 @@ const GroupDetails: React.FC = () => {
             </Box>
           </Modal>
 
-          <Box mt={4}>
-            <Typography variant="h5" gutterBottom>
-              Members
-            </Typography>
-            <ul>
-              {members.map((member) => (
-                <li key={member.user_id}>
-                  {member.username}
-                  {(group.creator === currentUserId || isTrusted) && !member.is_trusted && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleSetTrusted(member.user_id)}
-                      sx={{ ml: 2 }}
-                    >
-                      Set as Trusted
-                    </Button>
-                  )}
-                  {group.creator === currentUserId && member.is_trusted && (
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      onClick={() => handleRevokeTrusted(member.user_id)}
-                      sx={{ ml: 2 }}
-                    >
-                      Revoke Trusted
-                    </Button>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </Box>
-          {isMember && (
-            <Box textAlign="center" mt={3}>
+          <Modal
+            open={inviteModalOpen}
+            onClose={() => setInviteModalOpen(false)}
+            aria-labelledby="invite-modal-title"
+            aria-describedby="invite-modal-description"
+          >
+            <Box sx={reportModalStyle}>
+              <IconButton
+                onClick={() => setInviteModalOpen(false)}
+                style={{ position: "absolute", top: 5, right: 5 }}
+              >
+                <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+              </IconButton>
+
+              <Typography id="invite-modal-title" variant="h4" component="h2">
+                Invite Friends
+              </Typography>
+              <List>
+                {friends.map((friend) => (
+                  <ListItem key={friend.id} button onClick={() => handleToggleFriend(friend.id)}>
+                    <Checkbox
+                      checked={selectedFriends.includes(friend.id)}
+                      tabIndex={-1}
+                      disableRipple
+                    />
+                    <ListItemText primary={friend.username} />
+                  </ListItem>
+                ))}
+              </List>
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => navigate(`/groups/${id}/messages`)}
+                onClick={handleInviteFriends}
               >
-                View Messages
+                Send Invites
               </Button>
             </Box>
-          )}
+          </Modal>
+
         </CardContent>
       </Card>
     </Container>

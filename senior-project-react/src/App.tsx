@@ -30,6 +30,8 @@ import DeletedAccount from "./components/DeletedAccount";
 import AdminPage from "./components/AdminPage";
 import Groups from "./components/Groups";
 import GroupDetails from "./components/GroupDetails";
+import GroupMembersList from "./components/GroupMembersList";
+import GroupInviteResponse from "./components/GroupInviteResponse";
 import CreateGroup from "./components/CreateGroup";
 import GroupMessages from "./components/GroupMessages";
 import CreateRecipeList from "./components/CreateRecipeList";
@@ -133,6 +135,8 @@ function App() {
               <Route path="/groups/:id" element={<GroupDetails />} />
               <Route path="/groups/create" element={<CreateGroup />} />
               <Route path="/groups/:id/messages" element={<GroupMessages />} />
+              <Route path="/groups/:id/members" element={<GroupMembersList />} />
+              <Route path="/groups/:id/invite_response" element={<GroupInviteResponse />} />
 
               {/* friends */}
               <Route path="/friends" element={<Friends />} />
