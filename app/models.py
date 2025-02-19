@@ -190,6 +190,12 @@ class GroupReport(db.Model):
 
     def __str__(self):
         return f"Group {self.group_id} reported by User {self.user_id}"
+    
+    def to_json(self):
+        return {
+            "group_id": self.group_id,
+            "user_id": self.user_id,
+        }
 
 class GroupMember(db.Model):
     __tablename__ = 'GroupMember'

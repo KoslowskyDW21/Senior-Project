@@ -31,6 +31,14 @@ def get_reported_groups():
     reportedGroups = UserGroup.query.filter(UserGroup.num_reports > 0).all()
     return jsonify([group.to_json() for group in reportedGroups]), 200
 
+@bp.route("/reports/<int:id>/", methods=["GET"])
+@login_required
+def get_reports(id):
+    print(id)
+    reports = GroupReport.query.filter_by(group_id=id).all()
+    print(reports)
+    return jsonify([report.to_json() for report in reports]), 200
+
 @bp.route('/<int:group_id>/join', methods=['POST'])
 @login_required
 def join_group(group_id):

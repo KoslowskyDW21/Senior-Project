@@ -15,6 +15,11 @@ interface UserGroup {
   image?: string;
 }
 
+interface Report {
+  user_id: number;
+  group_id: number;
+}
+
 const modalStyle = {
   position: "absolute",
   top: "50%",
@@ -33,6 +38,7 @@ export default function ReportPage() {
   const [admin, setAdmin] = useState<boolean>(false);
   const [groups, setGroups] = useState<UserGroup[]>([]);
   const [group, setGroup] = useState<UserGroup | null>(null);
+  const [reports, setReports] = useState<Report[]>([]);
   const [openGroup, setOpenGroup] = useState(false);
   const handleOpenGroupModal = () => setOpenGroup(true);
   const handleCloseGroupModal = () => setOpenGroup(false);
@@ -59,6 +65,16 @@ export default function ReportPage() {
     .catch((error) => {
       console.error("Could not fetch reported groups ", error);
     });
+  }
+
+  async function loadReports(id: number) {
+    await axios.get(`http://127.0.0.1:5000/groups/reports/${id}/`)
+    .then((response) => {
+      setReports(response.data);
+    })
+    .catch((error) => {
+      console.error("Could not fetch reports ", error);
+    })
   }
 
   React.useEffect(() => {isAdmin(); loadGroups();}, []);
@@ -98,6 +114,7 @@ export default function ReportPage() {
                     color="primary"
                     onClick={() => {
                       setGroup(group);
+                      loadReports(group.id);
                       handleOpenGroupModal();
                     }}
                   >
@@ -125,6 +142,23 @@ export default function ReportPage() {
             <Typography id="modal-title" variant="h4" component="h2">
               {group !== null ? group.name : ""}
             </Typography>
+
+            <table>
+              <thead>
+                <tr>
+                  <td>User ID</td>
+                  <td>Reason</td>
+                </tr>
+              </thead>
+              <tbody>
+                {reports.map((report) => (
+                  <tr key={report.user_id}>
+                    <td>{report.user_id}</td>
+                    <td>N/A</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </Box>
         </Modal>
       </>
