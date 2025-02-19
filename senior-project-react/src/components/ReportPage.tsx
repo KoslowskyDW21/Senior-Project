@@ -15,9 +15,21 @@ interface UserGroup {
   image?: string;
 }
 
-interface Report {
+interface GroupReport {
   user_id: number;
   group_id: number;
+  reason: string;
+}
+
+interface Review {
+  id: number;
+  num_reports: number;
+  username: string;
+}
+
+interface ReviewReport {
+  review_id: number;
+  user_id: number;
   reason: string;
 }
 
@@ -39,10 +51,16 @@ export default function ReportPage() {
   const [admin, setAdmin] = useState<boolean>(false);
   const [groups, setGroups] = useState<UserGroup[]>([]);
   const [group, setGroup] = useState<UserGroup | null>(null);
-  const [reports, setReports] = useState<Report[]>([]);
+  const [groupReports, setGroupReports] = useState<GroupReport[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [review, setReview] = useState<Review | null>(null);
+  const [reviewReports, setReviewReports] = useState<ReviewReport[]>([]);
   const [openGroup, setOpenGroup] = useState(false);
   const handleOpenGroupModal = () => setOpenGroup(true);
   const handleCloseGroupModal = () => setOpenGroup(false);
+  const [openReview, setOpenReview] = useState(false);
+  const handleOpenReviewModal = () => setOpenReview(true);
+  const handleCloseReviewModal = () => setOpenReview(false);
   const navigate = useNavigate();
   
 
@@ -68,10 +86,20 @@ export default function ReportPage() {
     });
   }
 
+  async function loadReviews() {
+    await axios.get("http://127.0.0.1:5000/recipes/reported_reviews")
+    .then((response) => {
+      setReviews(response.data)
+    })
+    .catch((error) => {
+      console.error("Could not fetch reported reviews ", error);
+    });
+  }
+
   async function loadReports(id: number) {
     await axios.get(`http://127.0.0.1:5000/groups/reports/${id}/`)
     .then((response) => {
-      setReports(response.data);
+      setGroupReports(response.data);
     })
     .catch((error) => {
       console.error("Could not fetch reports ", error);
@@ -103,7 +131,22 @@ export default function ReportPage() {
     deleteGroup();
   }
 
-  React.useEffect(() => {isAdmin(); loadGroups();}, []);
+  async function deleteReviewReports() {
+    await axios.delete(`http://127.0.0.1:5000/recipes/${review!.id}/delete_reports`)
+    .then((response) => {
+      console.log(response.data);
+    })
+    .catch((error) => {
+      console.error("Could not delete reports ", error);
+    });
+  }
+
+  function handleRemoveReview() {
+    deleteReviewReports();
+    // TODO: delete the review itself
+  }
+
+  React.useEffect(() => {isAdmin(); loadGroups(); loadReviews();}, []);
 
   if(admin) {
     return (
@@ -156,6 +199,43 @@ export default function ReportPage() {
         <p>No Groups Reported</p>
         }
 
+        <h2>Reported Reviews</h2>
+
+        {reviews.length > 0 ?
+        <table>
+          <thead>
+            <tr>
+              <td>ID</td>
+              <td>Reports</td>
+              <td></td>
+            </tr>
+          </thead>
+          <tbody>
+            {reviews.map((review) => (
+              <tr key={review.id}>
+                <td>{review.id}</td>
+                <td>{review.num_reports}</td>
+                <td>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                      setReview(review);
+                      // TODO: load reports
+                      handleOpenReviewModal();
+                    }}
+                  >
+                    View Reports
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        :
+        <p>No Reviews Reported</p>
+        }
+
         <Modal
           open={openGroup}
           onClose={handleCloseGroupModal}
@@ -181,7 +261,7 @@ export default function ReportPage() {
                 </tr>
               </thead>
               <tbody>
-                {reports.map((report) => (
+                {groupReports.map((report) => (
                   <tr key={report.user_id}>
                     <td>{report.user_id}</td>
                     <td>{report.reason}</td>
@@ -199,6 +279,53 @@ export default function ReportPage() {
               }}
             >
               Remove Group
+            </Button>
+          </Box>
+        </Modal>
+
+        <Modal
+          open={openReview}
+          onClose={handleCloseReviewModal}
+          aria-labelledby="modal-title"
+        >
+          <Box sx={modalStyle}>
+            <IconButton
+              onClick={handleCloseReviewModal}
+              style={{ position: "absolute", top: 5, right: 5 }}
+            >
+              <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+            </IconButton>
+
+            <Typography id="modal-title" variant="h4" component="h2">
+              {`Review submitted by ${review !== null ? review.username : "null"}`}
+            </Typography>
+
+            <table>
+              <thead>
+                <tr>
+                  <td>User ID</td>
+                  <td>Reason</td>
+                </tr>
+              </thead>
+              <tbody>
+                {reviewReports.map((report) => (
+                  <tr key={report.user_id}>
+                    <td>{report.user_id}</td>
+                    <td>{report.reason}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                handleRemoveReview();
+                handleCloseReviewModal();
+              }}
+            >
+              Remove Review
             </Button>
           </Box>
         </Modal>

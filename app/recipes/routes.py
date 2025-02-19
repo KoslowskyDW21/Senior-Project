@@ -165,6 +165,23 @@ def reviews(id):
         "reviews": [review.to_json() for review in reviews],
     }), 200
 
+@bp.route("/reported_reviews", methods=["GET"])
+@login_required
+def get_reported_reviews():
+    reportedReviews = Review.query.filter(Review.num_reports > 0).all()
+    return jsonify([review.to_json() for review in reportedReviews]), 200
+
+@bp.route("/<int:review_id>/delete_reports", methods=["DELETE"])
+@login_required
+def delete_reports(review_id: int):
+    reports = ReviewReport.query.filter_by(review_id=review_id).all()
+
+    for report in reports:
+        db.session.delete(report)
+
+    db.session.commit()
+    return jsonify({"message": "Reports successfully deleted"}), 200
+
 @bp.get("/<int:review_id>/report")
 @login_required
 def get_report_review(review_id: int):
