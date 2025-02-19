@@ -1,6 +1,6 @@
 from __future__ import annotations
 from app.groups import bp
-from app.models import User, UserGroup, GroupMember, GroupBannedMember, Message, GroupReport, db
+from app.models import User, UserGroup, GroupMember, GroupBannedMember, Message, GroupReport, UserNotifications, db
 from flask import jsonify, request, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
@@ -24,6 +24,20 @@ def get_group(id):
 def get_groups():
     groups = UserGroup.query.filter_by(is_public=True).all()
     return jsonify([group.to_json() for group in groups]), 200
+
+@bp.route('/reported/', methods=["GET"])
+@login_required
+def get_reported_groups():
+    reportedGroups = UserGroup.query.filter(UserGroup.num_reports > 0).all()
+    return jsonify([group.to_json() for group in reportedGroups]), 200
+
+@bp.route("/reports/<int:id>/", methods=["GET"])
+@login_required
+def get_reports(id):
+    print(id)
+    reports = GroupReport.query.filter_by(group_id=id).all()
+    print(reports)
+    return jsonify([report.to_json() for report in reports]), 200
 
 @bp.route('/<int:group_id>/join', methods=['POST'])
 @login_required
@@ -85,7 +99,12 @@ def get_members(group_id):
     member_data = []
     for member in members:
         user = User.query.get(member.member_id)
-        member_data.append({"user_id": user.id, "username": user.username})
+        profile_picture_url = f'http://127.0.0.1:5000/{user.profile_picture}' if user.profile_picture else None
+        member_data.append({
+            "user_id": user.id,
+            "username": user.username,
+            "profile_picture": profile_picture_url
+        })
     return jsonify(member_data), 200
 
 @bp.route('/my_groups', methods=['GET'])
@@ -188,7 +207,7 @@ def post_report_group(group_id: int):
     print("Received data - userID: " + str(userId))
     print("Received data - groupID: " + str(groupId))
 
-    newReport: GroupReport = GroupReport(group_id=groupId, user_id=userId) # type: ignore
+    newReport: GroupReport = GroupReport(group_id=groupId, user_id=userId, reason="N/A") # type: ignore
     group: UserGroup = UserGroup.query.filter_by(id=groupId).first() # type: ignore
     group.num_reports += 1
 
@@ -240,7 +259,18 @@ def revoke_trusted(group_id):
     else:
         return jsonify({"message": "Member not found"}), 404
     
+
+@bp.route("/<int:group_id>/delete_reports", methods=["DELETE"])
+@login_required
+def delete_reports(group_id: int):
+    reports = GroupReport.query.filter_by(group_id=group_id).all()
+
+    for report in reports:
+        db.session.delete(report)
     
+    db.session.commit()
+    return jsonify({"message": "Reports succesfully deleted"}), 200
+
 @bp.route('/<int:group_id>/delete', methods=['DELETE'])
 @login_required
 def delete_group(group_id):
@@ -255,3 +285,45 @@ def delete_group(group_id):
     db.session.commit()
 
     return jsonify({"message": "Group deleted successfully!"}), 200
+
+
+@bp.route('/<int:group_id>/invite', methods=['GET', 'POST'])
+@login_required
+def invite_friends(group_id):
+    group = UserGroup.query.get(group_id)
+    if not group:
+        return jsonify({"message": "Group not found"}), 404
+
+    if group.creator != current_user.id and not GroupMember.query.filter_by(group_id=group_id, member_id=current_user.id, is_trusted=True).first():
+        return jsonify({"message": "Permission denied"}), 403
+
+    friend_ids = request.json.get('friend_ids', [])
+    for friend_id in friend_ids:
+        notification = UserNotifications(
+            user_id=friend_id,
+            notification_text=f"You have been invited to join the group {group.name}.",
+            notification_type='group_message',
+            group_id=group_id
+        )
+        db.session.add(notification)
+    db.session.commit()
+
+    return jsonify({"message": "Invitations sent successfully!"}), 200
+
+@bp.route('/<int:group_id>/invite_response', methods=['POST'])
+@login_required
+def invite_response(group_id):
+    group = UserGroup.query.get(group_id)
+    if not group:
+        return jsonify({"message": "Group not found"}), 404
+
+    response = request.json.get('response')
+    if response == 'accept':
+        member = GroupMember(group_id=group_id, member_id=current_user.id, is_trusted=False)
+        db.session.add(member)
+        db.session.commit()
+        return jsonify({"message": "You have joined the group!"}), 200
+    elif response == 'deny':
+        return jsonify({"message": "You have denied the invitation."}), 200
+    else:
+        return jsonify({"message": "Invalid response."}), 400

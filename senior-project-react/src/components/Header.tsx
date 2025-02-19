@@ -31,7 +31,13 @@ interface User {
 }
 
 interface UserNotifications {
-  notifications: [];
+  notifications: {
+    id: number;
+    notification_text: string;
+    isRead: number;
+    notification_type: string;
+    group_id?: number; // Add this line
+  }[];
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -114,16 +120,17 @@ const Header: React.FC<HeaderProps> = ({
 
   const handleReadNotification = (
     event: React.MouseEvent<HTMLElement>,
-    id: any,
-    notification_type: any
+    id: number,
+    notification_type: string,
+    group_id?: number // Add this parameter
   ) => {
     console.log(id);
     setNotificationAnchorEl(event.currentTarget);
     readNotificationsApi(id);
     if (notification_type === "friend_request") {
       navigate("/groups");
-    } else if (notification_type === "group_message") {
-      navigate("/groups");
+    } else if (notification_type === "group_message" && group_id) {
+      navigate(`/groups/${group_id}/invite_response`); // Update this line
     } else if (notification_type === "challenge_reminder") {
       navigate("/challenges");
     }
@@ -312,7 +319,8 @@ const Header: React.FC<HeaderProps> = ({
                     handleReadNotification(
                       event,
                       notification.id,
-                      notification.notification_type
+                      notification.notification_type,
+                      notification.group_id // Pass the group_id here
                     )
                   }
                 >

@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Card, CardHeader, CardMedia, CardActionArea, Box } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import Header from "./Header";
-import { ContactPageSharp } from "@mui/icons-material";
 
 interface Recipe {
   id: number;
@@ -60,7 +59,6 @@ function Recipe({ id, name, difficulty, image }) {
     navigate(`/recipes/${id}`);
   };
 
-
   return (
     <Card variant="outlined" sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <CardActionArea onClick={handleGoToRecipe}>
@@ -92,15 +90,14 @@ function Recipe({ id, name, difficulty, image }) {
 
 const Recipes: React.FC = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [searchLabel, setSearchLabel] = useState<string>("Search for recipes");
   const hasMounted = useRef(false);
+  const location = useLocation();
 
   const navigate = useNavigate();
-  const hasScrolled = useRef(false); 
+  const hasScrolled = useRef(false);
 
   const handleGoToChallenges = async () => {
     navigate(`/challenges`);
@@ -109,46 +106,36 @@ const Recipes: React.FC = () => {
     navigate(`/groups`);
   };
 
-  
+  const getSearchQuery = () => {
+    const queryParams = new URLSearchParams(location.search);
+    return queryParams.get("search") || "";
+  };
 
   const loadRecipes = async () => {
     if (loading || page > totalPages) return;
-  
+    const searchQuery = getSearchQuery();
     setLoading(true);
     try {
       const response = await axios.post("http://127.0.0.1:5000/recipes/", null, {
         params: {
           page: page,
           per_page: 20,
+          search_query: searchQuery,
         },
       });
-  
+
       const { recipes: newRecipes, total_pages } = response.data;
       setRecipes((prevRecipes) => [...prevRecipes, ...newRecipes]);
       setTotalPages(total_pages);
-  
       setPage((prevPage) => prevPage + 1);
     } catch (error) {
       console.error("Unable to fetch recipes", error);
     } finally {
       setLoading(false);
-      hasScrolled.current = false; // Reset the scroll flag after loading is done
+      hasScrolled.current = false; 
     }
   };
-  
 
-  const filterRecipes = (recipes: Recipe[]) => {
-    const urlParams = new URLSearchParams(location.search);
-    const searchQuery = urlParams.get("search")?.toLowerCase() || "";
-    if (searchQuery) {
-      const filtered = recipes.filter((recipe) =>
-        recipe.recipe_name.toLowerCase().includes(searchQuery)
-      );
-      setFilteredRecipes(filtered);
-    } else {
-      setFilteredRecipes(recipes);
-    }
-  };
 
   useEffect(() => {
     if (hasMounted.current) return;
@@ -156,24 +143,28 @@ const Recipes: React.FC = () => {
     loadRecipes();
   }, []);
 
-  useEffect(() => {
-    filterRecipes(recipes);
-  }, [location.search, recipes]);
 
+  useEffect(() => {
+    if(getSearchQuery() == "") return;
+    setRecipes([]);  
+    setPage(1);  
+    loadRecipes();  
+  }, [location.search]);
+
+  // Infinite scroll handler
   const handleScroll = () => {
     if (loading || page > totalPages || hasScrolled.current) return;
-  
+
     const container = document.getElementById("scroll-container");
     if (container) {
       const nearBottom = container.scrollHeight - container.scrollTop === container.clientHeight;
-  
+
       if (nearBottom) {
-        hasScrolled.current = true; 
-        loadRecipes(); 
+        hasScrolled.current = true;
+        loadRecipes();
       }
     }
   };
-  
 
   useEffect(() => {
     const container = document.getElementById("scroll-container");
@@ -197,7 +188,7 @@ const Recipes: React.FC = () => {
       >
         <main role="main" style={{ paddingTop: "60px" }}>
           <Grid container spacing={3}>
-            {filteredRecipes.map((recipe) => (
+            {recipes.map((recipe) => (
               <Grid size={3} key={recipe.id}>
                 <Box
                   sx={{

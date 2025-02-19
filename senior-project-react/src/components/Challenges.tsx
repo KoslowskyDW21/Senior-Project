@@ -10,8 +10,11 @@ import {
   Grid,
   Box,
   Container,
+  CardActionArea,
+  CardHeader,
 } from "@mui/material";
 import Header from "./Header";
+import Challenge from "./Challenge";
 
 interface UserId {
   id: number;
@@ -21,7 +24,7 @@ interface User {
   profile_picture: string;
 }
 
-interface Challenge {
+interface ChallengeData {
   id: number;
   name: string;
   creator: number;
@@ -36,9 +39,9 @@ interface Challenge {
 }
 
 const Challenges: React.FC = () => {
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const [myChallenges, setMyChallenges] = useState<Challenge[]>([]);
-  const [joinedChallenges, setJoinedChallenges] = useState<Challenge[]>([]);
+  const [challenges, setChallenges] = useState<ChallengeData[]>([]);
+  const [myChallenges, setMyChallenges] = useState<ChallengeData[]>([]);
+  const [joinedChallenges, setJoinedChallenges] = useState<ChallengeData[]>([]);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [participants, setParticipants] = useState<{ [key: number]: boolean }>(
     {}
@@ -54,7 +57,7 @@ const Challenges: React.FC = () => {
   const getResponse = async () => {
     try {
       const response = await axios.get("http://127.0.0.1:5000/challenges/");
-      const data: Challenge[] = response.data;
+      const data: ChallengeData[] = response.data;
       setChallenges(data);
 
       const userResponse: UserId = await axios.get(
@@ -75,7 +78,7 @@ const Challenges: React.FC = () => {
 
       // Fetch participant status for each challenge
       const participantStatus: { [key: number]: boolean } = {};
-      const joinedChallengesList: Challenge[] = [];
+      const joinedChallengesList: ChallengeData[] = [];
       for (const challenge of data) {
         const participantResponse = await axios.get(
           `http://127.0.0.1:5000/challenges/${challenge.id}/is_participant`
@@ -248,24 +251,7 @@ const Challenges: React.FC = () => {
                 <Grid container spacing={2}>
                   {filteredMyChallenges.map((challenge) => (
                     <Grid item xs={12} sm={6} md={4} key={challenge.id}>
-                      <Card
-                        onClick={() => navigate(`/challenges/${challenge.id}`)}
-                        sx={{ cursor: "pointer" }}
-                      >
-                        {challenge.image && (
-                          <CardMedia
-                            component="img"
-                            height="140"
-                            image={`http://127.0.0.1:5000/${challenge.image}`}
-                            alt={challenge.name}
-                          />
-                        )}
-                        <CardContent>
-                          <Typography variant="h6" component="div" gutterBottom>
-                            {challenge.name}
-                          </Typography>
-                        </CardContent>
-                      </Card>
+                      <Challenge {...challenge} />
                     </Grid>
                   ))}
                 </Grid>
