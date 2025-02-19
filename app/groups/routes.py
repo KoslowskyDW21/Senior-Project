@@ -278,7 +278,7 @@ def delete_group(group_id):
     if not group:
         return jsonify({"message": "Group not found"}), 404
 
-    if group.creator != current_user.id:
+    if (group.creator != current_user.id) and (not current_user.is_admin):
         return jsonify({"message": "Permission denied"}), 403
 
     db.session.delete(group)

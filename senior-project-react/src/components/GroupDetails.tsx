@@ -13,7 +13,6 @@ import {
   Modal,
   FormControl,
   Select,
-  MenuItem,
   InputLabel,
   List,
   ListItem,
@@ -46,6 +45,24 @@ interface Friend {
   username: string;
 }
 
+interface User {
+  id: number;
+  fname: string;
+  lname: string;
+  email_address: string;
+  username: string;
+  profile_picture: string;
+  xp_points: number;
+  user_level: number;
+  is_admin: boolean;
+  num_recipes_completed: number;
+  colonial_floor: string;
+  colonial_side: string;
+  date_created: Date;
+  last_logged_in: Date;
+  num_reports: number;
+}
+
 const reportModalStyle = {
   position: "absolute",
   top: "50%",
@@ -65,7 +82,7 @@ const GroupDetails: React.FC = () => {
   const [group, setGroup] = useState<UserGroup | null>(null);
   const [isMember, setIsMember] = useState<boolean>(false);
   const [members, setMembers] = useState<GroupMember[]>([]);
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isTrusted, setIsTrusted] = useState<boolean>(false);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedFriends, setSelectedFriends] = useState<number[]>([]);
@@ -83,6 +100,7 @@ const GroupDetails: React.FC = () => {
       const response = await axios.get(`http://127.0.0.1:5000/groups/${id}`);
       if (response.status === 200) {
         setGroup(response.data);
+        console.log("Group creator ID:", response.data.creator);
       }
     } catch (error) {
       console.error("Error fetching group details:", error);
@@ -111,7 +129,9 @@ const GroupDetails: React.FC = () => {
   const fetchCurrentUser = async () => {
     try {
       const response = await axios.get("http://127.0.0.1:5000/current_user");
-      setCurrentUserId(response.data.id);
+      setCurrentUser(response.data);
+      console.log("Current user ID:", response.data.id);
+      console.log("Current user is admin:", response.data.is_admin);
     } catch (error) {
       console.error("Error fetching current user:", error);
     }
@@ -199,24 +219,6 @@ const GroupDetails: React.FC = () => {
     }
   }
 
-  const handleSetTrusted = async (userId: number) => {
-    try {
-      await axios.post(`http://127.0.0.1:5000/groups/${id}/set_trusted`, { user_id: userId });
-      fetchMembers();
-    } catch (error) {
-      console.error("Error setting trusted member:", error);
-    }
-  };
-
-  const handleRevokeTrusted = async (userId: number) => {
-    try {
-      await axios.post(`http://127.0.0.1:5000/groups/${id}/revoke_trusted`, { user_id: userId });
-      fetchMembers();
-    } catch (error) {
-      console.error("Error revoking trusted member:", error);
-    }
-  };
-
   const handleInviteFriends = async () => {
     try {
       await axios.post(`http://127.0.0.1:5000/groups/${id}/invite`, { friend_ids: selectedFriends });
@@ -277,60 +279,64 @@ const GroupDetails: React.FC = () => {
             {group.is_public ? "Public" : "Private"}
           </Typography>
           <Box textAlign="center" mt={4}>
-            {group.creator === currentUserId ? (
+            {(currentUser && (group.creator === currentUser.id || currentUser.is_admin)) && (
               <Button
                 variant="contained"
                 color="error"
                 onClick={handleDeleteGroup}
+                sx={{ mb: 2 }}
               >
                 Delete Group
               </Button>
-            ) : isMember ? (
+            )}
+            </Box>
+            <Box>
+            {isMember && currentUser && group.creator !== currentUser.id && (
               <Button
                 variant="contained"
                 color="secondary"
                 onClick={handleLeaveGroup}
+                sx={{ mb: 2 }}
               >
                 Leave Group
               </Button>
-            ) : (
+            )}
+            </Box>
+            <Box>
+            {!isMember && (
               <Button
                 variant="contained"
                 color="primary"
                 onClick={handleJoinGroup}
+                sx={{ mb: 2 }}
               >
                 Join Group
               </Button>
             )}
+            </Box>
+            <Box>
             <Button
               variant="contained"
               color="error"
               onClick={handleOpenModal}
+              sx={{ mb: 2 }}
             >
               Report
             </Button>
-            {(group.creator === currentUserId || isTrusted) && (
-              <>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => setInviteModalOpen(true)}
-                  sx={{ ml: 2 }}
-                >
-                  Invite Friends
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => navigate(`/groups/${id}/invite`)}
-                  sx={{ ml: 2 }}
-                >
-                  Invite Friends (New Page)
-                </Button>
-              </>
+            </Box>
+            <Box>
+            {(currentUser && (group.creator === currentUser.id || isTrusted)) && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setInviteModalOpen(true)}
+                sx={{ mb: 2 }}
+              >
+                Invite Friends
+              </Button>
             )}
           </Box>
-          {isMember && (
+          {(isMember || currentUser?.is_admin) && (
             <>
               <Box textAlign="center" mt={3}>
                 <Button
@@ -341,16 +347,6 @@ const GroupDetails: React.FC = () => {
                   View Messages
                 </Button>
               </Box>
-
-              <Box textAlign="center" mt={3}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => navigate(`/groups/${id}/invite`)}
-              >
-                Invite Friends
-              </Button>
-              </Box>
             </>
           )}
           <Box mt={4}>
@@ -359,7 +355,7 @@ const GroupDetails: React.FC = () => {
             </Typography>
             <GroupMembersList
               members={members}
-              currentUserId={currentUserId!}
+              currentUserId={currentUser?.id!}
               groupCreatorId={group.creator}
               trustedMemberIds={members.filter(member => member.is_trusted).map(member => member.user_id)}
               groupId={group.id}

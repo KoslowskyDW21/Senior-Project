@@ -344,4 +344,5 @@ def logout():
 
 @bp.route('/current_user/', methods=['GET'])
 def get_current_user():
-    return jsonify({"user": current_user.username}), 200
+    return current_user.to_json(), 200
+
