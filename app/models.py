@@ -549,3 +549,13 @@ class FriendRequest(db.Model):
             "requestTo": self.requestTo,
             "accepted": self.accepted
         }
+    
+class RecipeDietaryRestriction(db.Model):
+    __tablename__ =  'RecipeDietaryRestriction'
+    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), primary_key=True)
+    dietary_restrictions = db.Column(db.Text)
+    def  to_json(self): 
+        return {
+            "recipe_id": self.recipe_id,
+            "dietary_restrictions": self.dietary_restrictions
+        }

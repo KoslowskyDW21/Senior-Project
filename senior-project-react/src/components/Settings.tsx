@@ -93,6 +93,7 @@ export default function Settings() {
     colonial_side: "",
   });
   const [username, setUsername] = useState<string>("");
+  const [usernameTaken, setUsernameTaken] = useState<boolean>(false);
   const [colonialFloor, setColonialFloor] = useState<string>("");
   const [colonialSide, setColonialSide] = useState<string>("");
 
@@ -238,8 +239,8 @@ export default function Settings() {
       },
     })
       .then((response) => {
-        console.log("Username succesfully updated");
-        console.log(response.data);
+        console.log(response.data.message);
+        setUsernameTaken(response.data.alreadyTaken);
       })
       .catch((error) => {
         console.error("Could not update username", error);
@@ -451,23 +452,44 @@ export default function Settings() {
       <br />
 
       <h2>Change Account Details</h2>
+      
+      {!usernameTaken ?
+        <TextField
+          aria-label="username-textfield"
+          size="small"
+          helperText="Username"
+          value={user.username}
+          variant="filled"
+          onChange={(e) => {
+            const newUsername = e.target.value;
 
-      <TextField
-        aria-label="username-textfield"
-        size="small"
-        helperText="Username"
-        value={user.username}
-        variant="filled"
-        onChange={(e) => {
-          const newUsername = e.target.value;
+            setUsername(newUsername);
+            setUser((prevUser) => ({
+              ...prevUser,
+              username: newUsername,
+            }));
+          }}
+        />
+      :
+        <TextField
+          error
+          aria-label="username-textfield"
+          size="small"
+          helperText="Error: Username already taken"
+          value={user.username}
+          variant="filled"
+          onChange={(e) => {
+            const newUsername = e.target.value;
 
-          setUsername(newUsername);
-          setUser((prevUser) => ({
-            ...prevUser,
-            username: newUsername,
-          }));
-        }}
-      />
+            setUsernameTaken(false);
+            setUsername(newUsername);
+            setUser((prevUser) => ({
+              ...prevUser,
+              username: newUsername,
+            }));
+          }}
+        />
+      }
 
       <Button
         sx={{ marginLeft: 2 }}

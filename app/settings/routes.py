@@ -22,14 +22,17 @@ def post_update_username():
     data = request.get_json()
     username = str(data.get("username"))
 
-    print("Received data - Username: " + username)
+    print("Received data - Username: " + username) 
+
+    if username in [user.username for user in User.query.all()]:
+        return jsonify({"message": "Username already taken", "alreadyTaken": True}), 200
 
     user = current_user._get_current_object()
     user.username = username # type: ignore
 
     try: 
         db.session.commit()
-        return jsonify({"message": "Username updated succesfully"}), 200
+        return jsonify({"message": "Username updated succesfully", "alreadyTaken": False}), 200
     except Exception as e:
         db.session.rollback()
         print(f"Error updating username: {e}")
