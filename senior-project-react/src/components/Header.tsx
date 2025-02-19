@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
+import axios, { all } from "axios";
 import { useNavigate } from "react-router-dom"; // React Router for nav
 import {
   Button,
@@ -14,6 +14,12 @@ import {
   Avatar,
   TextField,
   Box,
+  FormControl,
+  InputLabel,
+  Select,
+  Checkbox,
+  ListItemText,
+  FormHelperText
 } from "@mui/material"; //matui components
 import Grid from "@mui/material/Grid2";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -40,6 +46,11 @@ interface UserNotifications {
   }[];
 }
 
+interface DietaryRestrictions {
+  dietaryRestrictions: [];
+  userDietaryRestrictions: [];
+}
+
 const Header: React.FC<HeaderProps> = ({
   title,
   searchLabel,
@@ -53,24 +64,86 @@ const Header: React.FC<HeaderProps> = ({
     searchVisible ?? false
   );
 
+  const [dietaryRestrictions, setDietaryRestrictions] = useState<[]>([]);
+  const [userDietaryRestrictions, setUserDietaryRestrictions] = useState<[]>([]);
+  const [selectedDietaryRestrictions, setSelectedDietaryRestrictions] = useState<string[]>([]);
+    
+  
+
   const navigate = useNavigate();
+
+  
+
+  React.useEffect(() => {
+      const preselectedDietaryRestrictions = dietaryRestrictions
+        .filter((dietaryRestriction) =>
+          userDietaryRestrictions.some(
+            (userDietaryRestriction) =>
+              userDietaryRestriction.restriction_id === //use the actual ID attribute from the SQL table
+              dietaryRestriction.id
+          )
+        )
+        .map((dietaryRestriction) => dietaryRestriction.name);
+  
+      setSelectedDietaryRestrictions(preselectedDietaryRestrictions);
+      console.log(preselectedDietaryRestrictions);
+    }, [dietaryRestrictions, userDietaryRestrictions]);
+
+  const getDietaryRestrictions = async () => {
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/settings/dietary_restrictions/",
+        {},
+        { withCredentials: true }
+      );
+      console.log("response: ", response);
+      const data: DietaryRestrictions = response.data;
+      console.log("data: " + data);
+      setDietaryRestrictions(data.dietaryRestrictions);
+      setUserDietaryRestrictions(data.userDietaryRestrictions);
+    } catch (error) {
+      console.error("Could not fetch dietary restrictions:", error);
+    }
+  };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
-    setSearchQuery(query);
+    setSearchQuery(query); 
 
-    if (query) {
-      navigate({
-        pathname: location.pathname,
-        search: `?search=${query}`,
-      });
-    } else {
-      navigate({
-        pathname: location.pathname,
-        search: "",
-      });
-    }
+    navigate({
+      pathname: location.pathname,
+      search: `?search=${query}&allergens=${selectedDietaryRestrictions.join(",")}`,
+    });
   };
+  
+  const handleAllergenChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const newAllergens = event.target.value as string[];
+    setSelectedDietaryRestrictions(newAllergens); 
+  
+    navigate({
+      pathname: location.pathname,
+      search: `?search=${searchQuery}&allergens=${newAllergens.join(",")}`,
+    });
+  };
+  
+  
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const allergensParam = queryParams.get("allergens");
+    
+    if (allergensParam) {
+      setSelectedDietaryRestrictions(allergensParam.split(","));
+    }
+  }, [location.search]);
+
+  React.useEffect(() => {
+    navigate({
+      pathname: location.pathname,
+      search: `?search=${searchQuery}&allergens=${selectedDietaryRestrictions.join(",")}`,
+    });
+  }, [searchQuery, selectedDietaryRestrictions, navigate, location.pathname]);
+  
 
   const handleGoToProfile = async () => {
     navigate(`/profile`);
@@ -203,6 +276,7 @@ const Header: React.FC<HeaderProps> = ({
     getCurrentUser();
     getNotifications();
     isAdmin();
+    getDietaryRestrictions();
   }, []);
 
   return (
@@ -278,7 +352,38 @@ const Header: React.FC<HeaderProps> = ({
               }}
             />
           </Box>
+          )}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {title === "Recipes" && (
+          <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
+                  <InputLabel id="dietary_restriction-select-label">
+                    Dietary Restrictions
+                  </InputLabel>
+                  <Select
+                    labelId="dietary_restriction-select-label"
+                    multiple
+                    value={selectedDietaryRestrictions}
+                    onChange={handleAllergenChange}
+                    renderValue={(selected) => selected.join(", ")}
+                    displayEmpty
+                  >
+                    <MenuItem value="" disabled>
+                      <em>Choose a dietary restriction</em>
+                    </MenuItem>
+                    {dietaryRestrictions.map((restriction) => (
+                      <MenuItem key={restriction.id} value={restriction.name}>
+                        <Checkbox
+                          checked={selectedDietaryRestrictions.includes(restriction.name)}
+                        />
+                        <ListItemText primary={restriction.name} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <FormHelperText>Select Dietary Restrictions</FormHelperText>
+                </FormControl>
         )}
+        </Box>
+
         {/* Notification */}
         <IconButton
           onClick={handleClickNotification}

@@ -110,10 +110,15 @@ const Recipes: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
     return queryParams.get("search") || "";
   };
+  const getSelectedAllergens = () => {
+    const queryParams = new URLSearchParams(location.search);
+    return queryParams.get("allergens")?.split(",") || [];  
+  };
 
   const loadRecipes = async () => {
     if (loading || page > totalPages) return;
     const searchQuery = getSearchQuery();
+    const allergenQuery = getSelectedAllergens();
     setLoading(true);
     try {
       const response = await axios.post("http://127.0.0.1:5000/recipes/", null, {
@@ -121,6 +126,7 @@ const Recipes: React.FC = () => {
           page: page,
           per_page: 20,
           search_query: searchQuery,
+          allergen_query: allergenQuery
         },
       });
 

@@ -28,6 +28,7 @@ def post_recipes():
     search_query = request.args.get('search_query', '').strip()  # Clean search query
     page = max(1, int(request.args.get('page', 1)))  # Ensure page is at least 1
     per_page = int(request.args.get('per_page', 20))
+    allergen_query = request.args.get('allergen_query', '')
 
     print(f"Search query: {search_query}, Page: {page}, Per page: {per_page}")
     
