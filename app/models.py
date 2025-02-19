@@ -343,6 +343,22 @@ class Review(db.Model):
             "username": self.username
         }
 
+class ReviewReport(db.Model):
+    __tablename__ = "ReviewReport"
+    review_id = db.Column(db.Integer, db.ForeignKey("Review.id"), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("User.id"), primary_key=True)
+    reason = db.Column(db.String(255), nullable=False)
+
+    def __str__(self):
+        return f"Review {self.review_id} reported by user {self.user_id} because {self.reason}"
+    
+    def to_json(self):
+        return {
+            "review_id": self.review_id,
+            "user_id": self.user_id,
+            "reason": self.reason
+        }
+
 class Challenge(db.Model):
     __tablename__ = 'Challenge'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

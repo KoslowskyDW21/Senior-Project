@@ -3,7 +3,7 @@ import math
 from flask import request, jsonify, render_template, redirect, url_for, abort, flash, current_app
 from flask_login import current_user, login_required
 from app.recipes import bp
-from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, Review, db
+from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, Review, ReviewReport, db
 import os
 import uuid
 from werkzeug.utils import secure_filename
@@ -165,7 +165,40 @@ def reviews(id):
         "reviews": [review.to_json() for review in reviews],
     }), 200
 
+@bp.get("/<int:review_id>/report")
+@login_required
+def get_report_review(review_id: int):
+    user = current_user._get_current_object()
 
+    report = ReviewReport.query.filter_by(user_id=user.id, review_id=review_id).first() # type: ignore
+
+    if report != None:
+        return jsonify({"alreadyReported": True, "id": user.id}) # type: ignore
+    
+    return jsonify({"alreadyReported": False, "id": user.id}) # type: ignore
+
+@bp.post("/<int:review_id>/report")
+@login_required
+def post_report_review(review_id: int):
+    data = request.get_json()
+    userId = data.get("user_id")
+    reviewId = data.get("review_id")
+
+    print("Received data - userID: " + str(userId))
+    print("Received data - reviewID: " + str(review_id))
+
+    newReport: ReviewReport = ReviewReport(review_id=reviewId, user_id=userId, reason="N/A") # type: ignore
+    review: Review = Review.query.filter_by(id=reviewId).first() # type: ignore
+    review.num_reports += 1
+
+    try:
+        db.session.add(newReport)
+        db.session.commit()
+        return jsonify({"message": f"Review {reviewId} reported"}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error reporting review: {e}")
+        return jsonify({"message": "Error: could not report review"}), 500
 
 
 def completionAchievements(id):

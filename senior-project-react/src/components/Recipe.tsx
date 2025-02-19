@@ -1,10 +1,24 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button, FormControl, Avatar, MenuItem, Box, Select, InputLabel, FormControlLabel, Checkbox, Typography, SelectChangeEvent, IconButton, Container, Card, CardContent, CardMedia } from "@mui/material"; //matui components
+import { Button, FormControl, Avatar, MenuItem, Box, Select, InputLabel, FormControlLabel, Checkbox, Typography, SelectChangeEvent, IconButton, Container, Card, CardContent, CardMedia, Modal } from "@mui/material"; //matui components
 import axios, { AxiosError } from "axios";
 import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from '@mui/icons-material/Close';
+
+const reportModalStyle = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    bgcolor: "#ffffff",
+    boxShadow: 24,
+    paddingTop: 3,
+    paddingLeft: 7,
+    paddingRight: 7,
+    paddingBottom: 3,
+    textAlign: "center",
+}
 
 interface Recipe {
     "id": string,
@@ -78,6 +92,10 @@ const IndividualRecipe: React.FC = () => {
     const [ snackbarOpen, setSnackBarOpen ] = React.useState(false);
     const { id } = useParams<{ id: string }>();
     const [reviews, setReviews] = React.useState<Review[]>([]);
+    const [ reviewId, setReviewId ] = useState<number | null>(null);
+    const [open, setOpen] = useState(false);
+    const handleOpenModal = () => setOpen(true);
+    const handleCloseModal = () => setOpen(false);
 
     const navigate = useNavigate();
 
@@ -233,6 +251,40 @@ const IndividualRecipe: React.FC = () => {
         }
     }
 
+    const handleReportReview = async () => {
+        let data;
+
+        await axios.get(`http://127.0.0.1:5000/recipes/${reviewId}/report`)
+        .then((response) => {
+            data = response.data;
+        })
+        .catch((error) => {
+            console.error("Could not get if already reported", error);
+        });
+
+        if(!data!.alreadyReported) {
+            const newData = {
+                user_id: data!.id,
+                review_id: reviewId,
+            }
+
+            await axios.post(`http://127.0.0.1:5000/${reviewId}/report`, newData, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+            .then((response) => {
+                console.log(response.data.message);
+            })
+            .catch((error) => {
+                console.log("Could not report review", error);
+            });
+        }
+        else {
+            console.log("Review already reported");
+        }
+    }
+
     React.useEffect(() => {
         getRecipeName();
         getCurrentUser();
@@ -359,6 +411,17 @@ const IndividualRecipe: React.FC = () => {
                             }}
                         />
                     )}
+                    <Button
+                        style={{ position: "relative", top: "50%", left: "50%", transform: "translate(-50%, 0%)" }}
+                        variant="contained"
+                        color="error"
+                        onClick={() => {
+                            setReviewId(review.id);
+                            handleOpenModal();
+                        }}
+                    >
+                        Report Review
+                    </Button>
                 </CardContent>
             </Card>
         ))
@@ -366,6 +429,45 @@ const IndividualRecipe: React.FC = () => {
         <Typography>No reviews yet.</Typography>
     )}
 </Box>
+
+<Modal
+    open={open}
+    onClose={handleCloseModal}
+    aria-labelledby="modal-title"
+>
+    <Box sx={reportModalStyle}>
+        <IconButton
+        onClick={handleCloseModal}
+        style={{ position: "absolute", top: 5, right: 5 }}
+        >
+        <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+        </IconButton>
+
+        <Typography id="modal-title" variant="h4" component="h2">
+        Report Review
+        </Typography>
+
+        <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small" >
+        <InputLabel id="reason-label">Reason</InputLabel>
+        <Select
+            labelId="reason-label"
+        >
+            
+        </Select>
+        </FormControl>
+        <br />
+        <Button
+        variant="contained"
+        color="error"
+        onClick={() => {
+            handleReportReview();
+            handleCloseModal();
+        }}
+        >
+        Confirm Report
+        </Button>
+    </Box>
+    </Modal>
 
 
             <Snackbar
