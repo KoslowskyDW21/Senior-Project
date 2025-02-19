@@ -29,7 +29,7 @@ def create_app(config=Config):
     with app.app_context():
         # UNCOMMENT (and get rid of pass) TO REPOPULATE DATABASE
         # populate_database()
-        #create_dummy_invite()
+        create_dummy_invite()
 
         pass
         
@@ -166,8 +166,9 @@ def create_dummy_invite():
     # Create a new UserNotifications object
     notification = UserNotifications(
         user_id=3,
-        notification_text=f"You have been invited to join the group Group 1.",
-        notification_type='group_message'
+        notification_text="You have been invited to join the group Group 1.",
+        notification_type='group_message',
+        group_id=1
     )
 
     # Add the notification to the session and commit

@@ -277,7 +277,8 @@ def invite_friends(group_id):
         notification = UserNotifications(
             user_id=friend_id,
             notification_text=f"You have been invited to join the group {group.name}.",
-            notification_type='group_message'
+            notification_type='group_message',
+            group_id=group_id
         )
         db.session.add(notification)
     db.session.commit()

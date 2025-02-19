@@ -212,9 +212,11 @@ def read_notification():
     notification.isRead = 1
     try:
         db.session.commit()
+        if notification.notification_type == 'group_message' and notification.group_id:
+            return jsonify({"message": "Notification read successfully", "redirect_url": f"/groups/{notification.group_id}/invite_response"}), 200
         return jsonify({"message": "Notification read successfully"}), 200
     except Exception as e:
-        db.session.rollback() 
+        db.session.rollback()
         print(f"Error updating notification: {e}")
         return jsonify({"message": "Error updating notification"}), 500
 
