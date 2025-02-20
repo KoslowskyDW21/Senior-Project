@@ -103,7 +103,8 @@ def get_members(group_id):
         member_data.append({
             "user_id": user.id,
             "username": user.username,
-            "profile_picture": profile_picture_url
+            "profile_picture": profile_picture_url,
+            "is_trusted": member.is_trusted
         })
     return jsonify(member_data), 200
 
@@ -236,6 +237,7 @@ def set_trusted(group_id):
     if member:
         member.is_trusted = True
         db.session.commit()
+        print(f"Set {user_id} as trusted in group {group_id}")
         return jsonify({"message": "Member set as trusted successfully!"}), 200
     else:
         return jsonify({"message": "Member not found"}), 404
@@ -281,6 +283,9 @@ def delete_group(group_id):
     if (group.creator != current_user.id) and (not current_user.is_admin):
         return jsonify({"message": "Permission denied"}), 403
 
+    Message.query.filter_by(group_id=group_id).delete()
+    GroupBannedMember.query.filter_by(group_id=group_id).delete()
+    GroupMember.query.filter_by(group_id=group_id).delete()
     db.session.delete(group)
     db.session.commit()
 

@@ -44,6 +44,9 @@ const GroupMembersList: React.FC<GroupMembersListProps> = ({
   };
 
   const isTrustedOrCreator = (userId: number) => {
+    console.log("User ID: ", userId);
+    console.log("Group Creator ID: ", groupCreatorId);
+    console.log("Trusted Member IDs: ", trustedMemberIds);
     return userId === groupCreatorId || trustedMemberIds.includes(userId);
   };
 
