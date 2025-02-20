@@ -110,27 +110,20 @@ const Recipes: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
     return queryParams.get("search") || "";
   };
-  const getSelectedAllergens = () => {
-    const queryParams = new URLSearchParams(location.search);
-    return queryParams.get("allergens")?.split(",") || [];  
-  };
 
   const loadRecipes = async () => {
     if (loading || page > totalPages) return;
-  
     const searchQuery = getSearchQuery();
-    const allergenQuery = getSelectedAllergens(); 
     setLoading(true);
     try {
-      const response = await axios.post("http://127.0.0.1:5000/recipes/", {
-        page: page,
-        per_page: 20,
-        search_query: searchQuery,
-        allergen_query: allergenQuery, 
+      const response = await axios.post("http://127.0.0.1:5000/recipes/", null, {
+        params: {
+          page: page,
+          per_page: 20,
+          search_query: searchQuery,
+        },
       });
-  
-      console.log("API Response:", response.data);
-  
+
       const { recipes: newRecipes, total_pages } = response.data;
       setRecipes((prevRecipes) => [...prevRecipes, ...newRecipes]);
       setTotalPages(total_pages);
@@ -139,10 +132,9 @@ const Recipes: React.FC = () => {
       console.error("Unable to fetch recipes", error);
     } finally {
       setLoading(false);
-      hasScrolled.current = false;
+      hasScrolled.current = false; 
     }
   };
-  
 
 
   useEffect(() => {
