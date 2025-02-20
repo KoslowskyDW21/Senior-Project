@@ -17,7 +17,7 @@ import {
   SelectChangeEvent
 } from "@mui/material"; //matui components
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import axios, { AxiosError } from "axios";
+import axios, { all, AxiosError } from "axios";
 
 interface Recipe {
   id: number;
@@ -91,7 +91,7 @@ const RecipeLists: React.FC = () => {
   const [allRecipes, setAllRecipes] = React.useState<Recipe[]>([]);
   const [recipe_list, setRecipe_list] = React.useState<RecipeList>();
   const [searchQuery, setSearchQuery] = React.useState<String>("");
-  const [recipeToAddId, setRecipeToAddId] = React.useState<String>("");
+  const [recipeToAddId, setRecipeToAddId] = React.useState<string>("");
   const { id } = useParams<{ id: string }>();
 
   const navigate = useNavigate();
@@ -182,58 +182,6 @@ const RecipeLists: React.FC = () => {
           setMessage("An unknown error occurred--how spooky");
         }
       }
-
-      async function handleAddRecipeToList(event: SelectChangeEvent) {
-        console.log(`Trying to add recipe id=${event.target.value} to list`);
-        if (event.target.value == undefined) {
-          console.error("The ID of the recipe to add is undefined");
-        }
-        try {
-          const formData = new FormData();
-          formData.append("rid", event.target.value);
-          formData.append("lid", id);
-          const response = await axios.post(`http://127.0.0.1:5000/recipe_lists/add-recipe-to-list`, formData,
-            { headers: { "Content-Type": "multipart/form-data" }}
-          );
-          const data: AddRecipeToListResponse = response.data;
-          setMessage(data.message);
-          console.log(data.message);
-        } catch (error) {
-          const axiosError = error as AxiosError;
-          if (axiosError.response && axiosError.response.data) {
-              const errorData = axiosError.response.data as AddRecipeToListResponse;
-              setMessage(errorData.message);
-          } else {
-              setMessage("An unknown error occurred");
-          }
-        }
-      }
-
-      function RecipesDropdown({ allRecipes }) {
-        if (allRecipes.length == 0) {
-          return <p>Loading...</p>
-        } else {
-          return (
-            <>
-              <FormControl
-                sx={{width: 400}}
-              >
-                <InputLabel>Add a recipe</InputLabel>
-                <Select
-                  value={recipeToAddId}
-                  onChange={handleAddRecipeToList}
-                >
-                  {
-                    allRecipes.map((recipe: Recipe) => {
-                      return <MenuItem value={recipe.id}>{recipe.recipe_name}</MenuItem>
-                    })
-                  };
-                </Select>
-              </FormControl>
-            </>
-          )
-        }
-      }
     };
 
     return (
@@ -254,6 +202,60 @@ const RecipeLists: React.FC = () => {
       </>
     );
   } // end of embedded Recipe component definition
+
+  async function handleAddRecipeToList(event: SelectChangeEvent) {
+    console.log(`Trying to add recipe id=${event.target.value} to list`);
+    if (event.target.value == undefined) {
+      console.error("The ID of the recipe to add is undefined");
+    }
+    try {
+      const formData = new FormData();
+      formData.append("rid", event.target.value);
+      formData.append("lid", id);
+      const response = await axios.post(`http://127.0.0.1:5000/recipe_lists/add-recipe-to-list`, formData,
+        { headers: { "Content-Type": "multipart/form-data" }}
+      );
+      const data: AddRecipeToListResponse = response.data;
+      // setMessage(data.message);
+      console.log(data.message);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response && axiosError.response.data) {
+          const errorData = axiosError.response.data as AddRecipeToListResponse;
+          // setMessage(errorData.message);
+      } else {
+          // setMessage("An unknown error occurred");
+          console.error("An unknown error occurred!");
+      }
+    }
+    getRecipesAndThisList();
+  }
+
+  function RecipesDropdown({ allRecipes }) {
+    if (allRecipes.length == 0) {
+      return <p>Loading...</p>
+    } else {
+      return (
+        <>
+          <FormControl
+            sx={{width: 400}}
+          >
+            <InputLabel>Add a recipe</InputLabel>
+            <Select
+              value={recipeToAddId}
+              onChange={handleAddRecipeToList}
+            >
+              {
+                allRecipes.map((recipe: Recipe) => {
+                  return <MenuItem value={recipe.id}>{recipe.recipe_name}</MenuItem>
+                })
+              };
+            </Select>
+          </FormControl>
+        </>
+      )
+    }
+  }
 
   React.useEffect(() => {
     getRecipesAndThisList();
@@ -349,7 +351,7 @@ const RecipeLists: React.FC = () => {
       ></Box>
 
       {/* AllRecipesDropdown */}
-      
+      <RecipesDropdown allRecipes={allRecipes}></RecipesDropdown>
 
       {/* Implements a grid view of recipes */}
       <Grid2 container spacing={3}>
