@@ -204,9 +204,6 @@ const ShoppingList: React.FC = () => {
         if (recipes.length == 0) {
             return <p>Loading...</p>
         } else {
-            for (const recipe of recipes) {
-                console.log(`${recipe.id}, ${recipe.recipe_name}`);
-            }
             return (
                 <>
                     <FormControl
