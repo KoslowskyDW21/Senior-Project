@@ -194,20 +194,19 @@ const ShoppingList: React.FC = () => {
             <Checkbox
                 sx={{ '& .MuiSvgIcon-root': { fontSize: 28 } }}
             />
-            {ingredient_name}
-            {measure}
+            {`${ingredient_name}: ${measure}`}
             </Card>
             </>
         )
     }
 
     function RecipesDropdown({ recipes }) {
-        // for (const recipe of recipes) {
-        //     console.log(recipe.recipe_name);
-        // }
         if (recipes.length == 0) {
             return <p>Loading...</p>
         } else {
+            for (const recipe of recipes) {
+                console.log(`${recipe.id}, ${recipe.recipe_name}`);
+            }
             return (
                 <>
                     <FormControl
@@ -215,12 +214,12 @@ const ShoppingList: React.FC = () => {
                     >
                         <InputLabel>Add all ingredients of a recipe</InputLabel>
                         <Select
-                            value={""}
-                            onClick={handleAddIngredientsOfRecipe} // ignore this erro and *do not* change to onChange
+                            value={recipe_id}
+                            onChange={handleAddIngredientsOfRecipe}
                         >
                             {
-                                recipes.map((recipe: Recipe) => { // FIX: "recipes.map is not a function"
-                                    <MenuItem value={recipe.id} onClick={() => setRecipe_id(recipe.id.toString())}>{recipe.recipe_name}</MenuItem>
+                                recipes.map((recipe: Recipe) => {
+                                    return <MenuItem value={recipe.id}>{recipe.recipe_name}</MenuItem>
                                 })
                             };
                         </Select>
