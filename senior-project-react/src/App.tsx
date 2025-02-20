@@ -26,6 +26,7 @@ import AchievementSpecific from "./components/AchievementSpecific";
 import CompletedRecipe from "./components/CompletedRecipe";
 import CreateChallenge from "./components/CreateChallenge";
 import ChallengeResults from "./components/ChallengeResults";
+import PastChallenges from "./components/PastChallenges";
 import DeletedAccount from "./components/DeletedAccount";
 import AdminPage from "./components/AdminPage";
 import Groups from "./components/Groups";
@@ -110,14 +111,9 @@ function App() {
               <Route path="/challenges" element={<Challenges />} />
               <Route path="/challenges/:id" element={<ChallengeDetail />} />
               <Route path="/challenges/create" element={<CreateChallenge />} />
-              <Route
-                path="/challenges/:id/vote"
-                element={<ChallengeVoting />}
-              />
-              <Route
-                path="/challenges/:id/vote_results"
-                element={<ChallengeResults />}
-              />
+              <Route path="/challenges/:id/vote" element={<ChallengeVoting />} />
+              <Route path="/past-challenges" element={<PastChallenges />} />
+              <Route path="/challenges/:id/vote_results" element={<ChallengeResults />} />
 
               {/*achievements*/}
               <Route path="/achievements" element={<Achievements />} />

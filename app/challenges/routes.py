@@ -273,3 +273,28 @@ def get_vote_results(challenge_id):
 
     results.sort(key=lambda x: x['points'], reverse=True)
     return jsonify(results), 200
+
+@bp.route('/past_user_participated_challenges', methods=['GET'])
+@login_required
+def get_past_user_challenges():
+    now = datetime.now(UTC)
+    past_challenges = Challenge.query.filter(
+        Challenge.end_time < now - timedelta(hours=24)
+    ).all()
+
+    user_participated_challenges = [
+        challenge for challenge in past_challenges
+        if ChallengeParticipant.query.filter_by(challenge_id=challenge.id, user_id=current_user.id).first()
+    ]
+
+    return jsonify([challenge.to_json() for challenge in user_participated_challenges]), 200
+
+@bp.route('/past_challenges', methods=['GET'])
+@login_required
+def get_past_challenges():
+    now = datetime.now(UTC)
+    past_challenges = Challenge.query.filter(
+        Challenge.end_time < now - timedelta(hours=24)
+    ).all()
+
+    return jsonify([challenge.to_json() for challenge in past_challenges]), 200
