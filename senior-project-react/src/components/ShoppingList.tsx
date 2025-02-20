@@ -219,7 +219,7 @@ const ShoppingList: React.FC = () => {
                             onClick={handleAddIngredientsOfRecipe} // ignore this erro and *do not* change to onChange
                         >
                             {
-                                recipes.map((recipe: Recipe) => {
+                                recipes.map((recipe: Recipe) => { // FIX: "recipes.map is not a function"
                                     <MenuItem value={recipe.id} onClick={() => setRecipe_id(recipe.id.toString())}>{recipe.recipe_name}</MenuItem>
                                 })
                             };
@@ -245,7 +245,7 @@ const ShoppingList: React.FC = () => {
     return (
         <>
         {/* Header bar */}
-        <Header title="Shopping List" searchLabel="Search Shopping List" />
+        <Header title="Shopping List" searchLabel="Search Shopping List" searchVisible={true} />
             <Box
                 sx={{
                 display: "flex",
