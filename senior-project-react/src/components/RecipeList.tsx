@@ -41,6 +41,10 @@ interface RemoveRecipeFromListResponse {
   message: string;
 }
 
+interface AddAllRecipesInListToShoppingListResponse {
+  message: string;
+}
+
 // @ts-expect-error
 function Difficulty({ difficulty }) {
   const diamondStyle = {
@@ -202,6 +206,21 @@ const RecipeLists: React.FC = () => {
       </>
     );
   } // end of embedded Recipe component definition
+
+  {/* Should integrate with a snackbar */}
+  async function handleAddAllIngredientsToShoppingList() {
+    console.log(`Trying to add the ingredients of all recipes in this list to the current user's shopping list`);
+    try {
+      const response = await axios.post(`http://127.0.0.1:5000/shopping_lists/items/addlist/${id}`);
+      if (response.status == 200) {
+        console.log("Recipes successfully added to shopping list");
+      } else {
+        console.error("Something went wrong while trying to add all recipes to shopping list");
+      }
+    } catch (error) {
+      console.error("Error in trying to add all recipes to shopping list", error);
+    }
+  }
 
   async function handleAddRecipeToList(event: SelectChangeEvent) {
     console.log(`Trying to add recipe id=${event.target.value} to list`);
@@ -385,6 +404,11 @@ const RecipeLists: React.FC = () => {
       {/* Button to find more recipes (return to recipe page) */}
       <Button onClick={handleGoToRecipes} variant="contained" color="primary">
         Find Recipes
+      </Button>
+
+      {/* Button to add all ingredients in all recipes to shopping list */}
+      <Button onClick={handleAddAllIngredientsToShoppingList} variant="contained" color="primary">
+        Add All to Shopping List
       </Button>
     </>
   );
