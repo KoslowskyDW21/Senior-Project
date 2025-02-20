@@ -22,7 +22,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
-import GroupMembersList from "./GroupMembersList"; // Import the new component
+import GroupMembersList from "./GroupMembersList";
 
 interface UserGroup {
   id: number;

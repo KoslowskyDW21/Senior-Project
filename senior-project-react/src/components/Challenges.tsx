@@ -285,36 +285,7 @@ const Challenges: React.FC = () => {
                 <Grid container spacing={2}>
                   {filteredJoinedChallenges.map((challenge) => (
                     <Grid item xs={12} sm={6} md={4} key={challenge.id}>
-                      <Card
-                        onClick={() => navigate(`/challenges/${challenge.id}`)}
-                        sx={{ cursor: "pointer" }}
-                      >
-                        {challenge.image && (
-                          <CardMedia
-                            component="img"
-                            height="140"
-                            image={`http://127.0.0.1:5000/${challenge.image}`}
-                            alt={challenge.name}
-                          />
-                        )}
-                        <CardContent>
-                          <Typography variant="h6" component="div" gutterBottom>
-                            {challenge.name}
-                          </Typography>
-                          {new Date(challenge.start_time) > new Date() && (
-                            <Button
-                              variant="contained"
-                              color="secondary"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleLeaveChallenge(challenge.id);
-                              }}
-                            >
-                              Leave Challenge
-                            </Button>
-                          )}
-                        </CardContent>
-                      </Card>
+                      <Challenge {...challenge} />
                     </Grid>
                   ))}
                 </Grid>
@@ -341,49 +312,7 @@ const Challenges: React.FC = () => {
             <Grid container spacing={2}>
               {filteredAllChallenges.map((challenge) => (
                 <Grid item xs={12} sm={6} md={4} key={challenge.id}>
-                  <Card
-                    onClick={() => navigate(`/challenges/${challenge.id}`)}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    {challenge.image && (
-                      <CardMedia
-                        component="img"
-                        height="140"
-                        image={`http://127.0.0.1:5000/${challenge.image}`}
-                        alt={challenge.name}
-                      />
-                    )}
-                    <CardContent>
-                      <Typography variant="h6" component="div" gutterBottom>
-                        {challenge.name}
-                      </Typography>
-                      {new Date(challenge.start_time) > new Date() ? (
-                        participants[challenge.id] ? (
-                          <Button
-                            variant="contained"
-                            color="secondary"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleLeaveChallenge(challenge.id);
-                            }}
-                          >
-                            Leave Challenge
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleJoinChallenge(challenge.id);
-                            }}
-                          >
-                            Join Challenge
-                          </Button>
-                        )
-                      ) : null}
-                    </CardContent>
-                  </Card>
+                  <Challenge {...challenge} />
                 </Grid>
               ))}
             </Grid>

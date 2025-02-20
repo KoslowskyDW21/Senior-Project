@@ -121,7 +121,6 @@ def create_challenge():
     else:
         challenge.image = "static/uploads/default_image.jpg"
 
-    # Save to the database
     db.session.add(challenge)
     db.session.commit()
 
@@ -189,13 +188,11 @@ def delete_challenge(challenge_id):
     if not challenge:
         abort(404, description="Challenge not found")
 
-    if challenge.creator != current_user.id:
+    if challenge.creator != current_user.id and not current_user.is_admin:
         abort(403, description="You do not have permission to delete this challenge")
 
-    # Delete associated participants
+    ChallengeVote.query.filter_by(challenge_id=challenge_id).delete()
     ChallengeParticipant.query.filter_by(challenge_id=challenge_id).delete()
-
-    # Delete the challenge
     db.session.delete(challenge)
     db.session.commit()
 
