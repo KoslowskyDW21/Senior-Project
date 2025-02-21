@@ -22,7 +22,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
-import GroupMembersList from "./GroupMembersList"; // Import the new component
+import GroupMembersList from "./GroupMembersList";
 
 interface UserGroup {
   id: number;
@@ -93,6 +93,11 @@ const GroupDetails: React.FC = () => {
   const handleOpenModal = () => setOpen(true);
   const handleCloseModal = () => setOpen(false);
 
+  // States for delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const handleOpenDeleteModal = () => setDeleteModalOpen(true);
+  const handleCloseDeleteModal = () => setDeleteModalOpen(false);
+
   const navigate = useNavigate();
 
   const fetchGroup = async () => {
@@ -100,7 +105,6 @@ const GroupDetails: React.FC = () => {
       const response = await axios.get(`http://127.0.0.1:5000/groups/${id}`);
       if (response.status === 200) {
         setGroup(response.data);
-        console.log("Group creator ID:", response.data.creator);
       }
     } catch (error) {
       console.error("Error fetching group details:", error);
@@ -130,8 +134,6 @@ const GroupDetails: React.FC = () => {
     try {
       const response = await axios.get("http://127.0.0.1:5000/current_user");
       setCurrentUser(response.data);
-      console.log("Current user ID:", response.data.id);
-      console.log("Current user is admin:", response.data.is_admin);
     } catch (error) {
       console.error("Error fetching current user:", error);
     }
@@ -140,7 +142,23 @@ const GroupDetails: React.FC = () => {
   const fetchFriends = async () => {
     try {
       const response = await axios.post("http://127.0.0.1:5000/friends/get_friends/");
-      setFriends(response.data.friends);
+      const friendsData = response.data.friends;
+  
+      // Fetch group members and unread notifications
+      const membersResponse = await axios.get(`http://127.0.0.1:5000/groups/${id}/members`);
+      const notificationsResponse = await axios.post("http://127.0.0.1:5000/get_notifications/");
+  
+      const groupMembers = membersResponse.data.map((member: GroupMember) => member.user_id);
+      const unreadNotifications = notificationsResponse.data.notifications
+        .filter((notification: any) => notification.isRead === 0 && notification.group_id === parseInt(id!))
+        .map((notification: any) => notification.user_id);
+  
+      // Filter out friends who are already in the group or have an unread notification
+      const filteredFriends = friendsData.filter((friend: Friend) => 
+        !groupMembers.includes(friend.id) && !unreadNotifications.includes(friend.id)
+      );
+  
+      setFriends(filteredFriends);
     } catch (error) {
       console.error("Error fetching friends:", error);
     }
@@ -152,6 +170,7 @@ const GroupDetails: React.FC = () => {
     fetchMembers();
     fetchCurrentUser();
     fetchFriends();
+    console.log("Members updated: ", members);
   }, [id]);
 
   const handleJoinGroup = async () => {
@@ -270,9 +289,6 @@ const GroupDetails: React.FC = () => {
         )}
         <CardContent>
           <Typography variant="h6" component="div" gutterBottom>
-            Description
-          </Typography>
-          <Typography variant="body2" color="textSecondary">
             {group.description}
           </Typography>
           <Typography variant="body2" color="textSecondary">
@@ -283,7 +299,7 @@ const GroupDetails: React.FC = () => {
               <Button
                 variant="contained"
                 color="error"
-                onClick={handleDeleteGroup}
+                onClick={handleOpenDeleteModal}
                 sx={{ mb: 2 }}
               >
                 Delete Group
@@ -441,6 +457,47 @@ const GroupDetails: React.FC = () => {
                 onClick={handleInviteFriends}
               >
                 Send Invites
+              </Button>
+            </Box>
+          </Modal>
+
+          <Modal
+            open={deleteModalOpen}
+            onClose={handleCloseDeleteModal}
+            aria-labelledby="delete-modal-title"
+            aria-describedby="delete-modal-description"
+          >
+            <Box sx={reportModalStyle}>
+              <IconButton
+                onClick={handleCloseDeleteModal}
+                style={{ position: "absolute", top: 5, right: 5 }}
+              >
+                <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+              </IconButton>
+
+              <Typography id="delete-modal-title" variant="h4" component="h2">
+                Confirm Delete
+              </Typography>
+              <Typography id="delete-modal-description" variant="body1" component="p">
+                Are you sure you want to delete this group?
+              </Typography>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() => {
+                  handleDeleteGroup();
+                  handleCloseDeleteModal();
+                }}
+              >
+                Yes, Delete
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleCloseDeleteModal}
+                sx={{ ml: 2 }}
+              >
+                Cancel
               </Button>
             </Box>
           </Modal>
