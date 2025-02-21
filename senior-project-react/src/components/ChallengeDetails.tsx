@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -33,46 +33,58 @@ interface Participant {
   username: string;
 }
 
+interface User {
+  id: number;
+  fname: string;
+  lname: string;
+  email_address: string;
+  username: string;
+  profile_picture: string;
+  xp_points: number;
+  user_level: number;
+  is_admin: boolean;
+  num_recipes_completed: number;
+  colonial_floor: string;
+  colonial_side: string;
+  date_created: Date;
+  last_logged_in: Date;
+  num_reports: number;
+}
+
 const ChallengeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [challenge, setChallenge] = React.useState<Challenge | null>(null);
   const [participants, setParticipants] = React.useState<Participant[]>([]);
-  const [currentUserId, setCurrentUserId] = React.useState<number | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   const navigate = useNavigate();
 
-  React.useEffect(() => {
-    const fetchChallenge = async () => {
-      try {
-        const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}`);
-        setChallenge(response.data);
-      } catch (error) {
-        console.error("Error fetching challenge details:", error);
-      }
-    };
+  const fetchChallenge = async () => {
+    try {
+      const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}`);
+      setChallenge(response.data);
+    } catch (error) {
+      console.error("Error fetching challenge details:", error);
+    }
+  };
 
-    const fetchParticipants = async () => {
-      try {
-        const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}/participants`);
-        setParticipants(response.data);
-      } catch (error) {
-        console.error("Error fetching participants:", error);
-      }
-    };
+  const fetchParticipants = async () => {
+    try {
+      const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}/participants`);
+      setParticipants(response.data);
+    } catch (error) {
+      console.error("Error fetching participants:", error);
+    }
+  };
 
-    const fetchCurrentUser = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:5000/challenges/current_user_id");
-        setCurrentUserId(response.data);
-      } catch (error) {
-        console.error("Error fetching current user:", error);
-      }
-    };
-
-    fetchChallenge();
-    fetchParticipants();
-    fetchCurrentUser();
-  }, [id]);
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await axios.get("http://127.0.0.1:5000/current_user");
+      setCurrentUser(response.data);
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+    }
+  };
 
   const handleJoinChallenge = async () => {
     if (new Date(challenge!.start_time) > new Date()) {
@@ -111,7 +123,13 @@ const ChallengeDetail: React.FC = () => {
     }
   };
 
-  if (!challenge) {
+  React.useEffect(() => {
+    fetchChallenge();
+    fetchParticipants();
+    fetchCurrentUser();
+  }, [id]);
+
+  if (!challenge || !currentUser) {
     return (
       <Container>
         <Typography variant="h5" textAlign="center" mt={4}>
@@ -121,8 +139,8 @@ const ChallengeDetail: React.FC = () => {
     );
   }
 
-  const isParticipant = participants.some((p) => p.user_id === currentUserId);
-  const isCreator = challenge.creator === currentUserId;
+  const isParticipant = participants.some((p) => p.user_id === currentUser.id);
+  const isCreator = challenge.creator === currentUser.id;
   const now = new Date();
   const startTime = new Date(challenge.start_time);
   const endTime = new Date(challenge.end_time);
@@ -173,7 +191,7 @@ const ChallengeDetail: React.FC = () => {
             </Typography>
           </Box>
           <Box textAlign="center" mt={3}>
-            {isCreator && (
+            {(isCreator || currentUser.is_admin) && (
               <Button
                 variant="contained"
                 color="error"

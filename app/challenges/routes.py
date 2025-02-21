@@ -121,7 +121,6 @@ def create_challenge():
     else:
         challenge.image = "static/uploads/default_image.jpg"
 
-    # Save to the database
     db.session.add(challenge)
     db.session.commit()
 
@@ -189,13 +188,11 @@ def delete_challenge(challenge_id):
     if not challenge:
         abort(404, description="Challenge not found")
 
-    if challenge.creator != current_user.id:
+    if challenge.creator != current_user.id and not current_user.is_admin:
         abort(403, description="You do not have permission to delete this challenge")
 
-    # Delete associated participants
+    ChallengeVote.query.filter_by(challenge_id=challenge_id).delete()
     ChallengeParticipant.query.filter_by(challenge_id=challenge_id).delete()
-
-    # Delete the challenge
     db.session.delete(challenge)
     db.session.commit()
 
@@ -276,3 +273,28 @@ def get_vote_results(challenge_id):
 
     results.sort(key=lambda x: x['points'], reverse=True)
     return jsonify(results), 200
+
+@bp.route('/past_user_participated_challenges', methods=['GET'])
+@login_required
+def get_past_user_challenges():
+    now = datetime.now(UTC)
+    past_challenges = Challenge.query.filter(
+        Challenge.end_time < now - timedelta(hours=24)
+    ).all()
+
+    user_participated_challenges = [
+        challenge for challenge in past_challenges
+        if ChallengeParticipant.query.filter_by(challenge_id=challenge.id, user_id=current_user.id).first()
+    ]
+
+    return jsonify([challenge.to_json() for challenge in user_participated_challenges]), 200
+
+@bp.route('/past_challenges', methods=['GET'])
+@login_required
+def get_past_challenges():
+    now = datetime.now(UTC)
+    past_challenges = Challenge.query.filter(
+        Challenge.end_time < now - timedelta(hours=24)
+    ).all()
+
+    return jsonify([challenge.to_json() for challenge in past_challenges]), 200

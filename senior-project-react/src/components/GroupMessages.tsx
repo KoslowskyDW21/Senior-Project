@@ -79,40 +79,39 @@ const GroupMessages: React.FC = () => {
         </Typography>
       </Box>
       <Box mt={4} mb={2}>
-        <Typography variant="h5" gutterBottom>
-          Messages
-        </Typography>
-        <Paper style={{ maxHeight: 300, overflow: 'auto' }}>
-          <List>
-            {messages.map((message) => (
-              <ListItem key={message.id} alignItems="flex-start">
+      <Paper style={{ maxHeight: 300, overflow: 'auto' }}>
+        <List>
+          {messages.map((message) => (
+            <React.Fragment key={message.id}>
+              <ListItem alignItems="flex-start">
                 <ListItemText
                   primary={message.username}
                   secondary={message.text}
                 />
-                <Divider variant="inset" component="li" />
               </ListItem>
-            ))}
-            <div ref={messagesEndRef} />
-          </List>
-        </Paper>
-        <Box mt={2} display="flex">
-          <TextField
-            label="Type a message"
-            variant="outlined"
-            fullWidth
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={sendMessage}
-            style={{ marginLeft: '10px' }}
-          >
-            Send
-          </Button>
-        </Box>
+              <Divider variant="inset" component="li" />
+            </React.Fragment>
+          ))}
+          <div ref={messagesEndRef} />
+        </List>
+      </Paper>
+      <Box mt={2} display="flex">
+        <TextField
+          label="Type a message"
+          variant="outlined"
+          fullWidth
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+        />
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={sendMessage}
+          style={{ marginLeft: '10px' }}
+        >
+          Send
+        </Button>
+      </Box>
       </Box>
     </Container>
   );

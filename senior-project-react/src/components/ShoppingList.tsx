@@ -194,17 +194,13 @@ const ShoppingList: React.FC = () => {
             <Checkbox
                 sx={{ '& .MuiSvgIcon-root': { fontSize: 28 } }}
             />
-            {ingredient_name}
-            {measure}
+            {`${ingredient_name}: ${measure}`}
             </Card>
             </>
         )
     }
 
     function RecipesDropdown({ recipes }) {
-        // for (const recipe of recipes) {
-        //     console.log(recipe.recipe_name);
-        // }
         if (recipes.length == 0) {
             return <p>Loading...</p>
         } else {
@@ -215,12 +211,12 @@ const ShoppingList: React.FC = () => {
                     >
                         <InputLabel>Add all ingredients of a recipe</InputLabel>
                         <Select
-                            value={""}
-                            onClick={handleAddIngredientsOfRecipe} // ignore this erro and *do not* change to onChange
+                            value={recipe_id}
+                            onChange={handleAddIngredientsOfRecipe}
                         >
                             {
                                 recipes.map((recipe: Recipe) => {
-                                    <MenuItem value={recipe.id} onClick={() => setRecipe_id(recipe.id.toString())}>{recipe.recipe_name}</MenuItem>
+                                    return <MenuItem value={recipe.id}>{recipe.recipe_name}</MenuItem>
                                 })
                             };
                         </Select>
@@ -245,7 +241,7 @@ const ShoppingList: React.FC = () => {
     return (
         <>
         {/* Header bar */}
-        <Header title="Shopping List" searchLabel="Search Shopping List" />
+        <Header title="Shopping List" searchLabel="Search Shopping List" searchVisible={true} />
             <Box
                 sx={{
                 display: "flex",

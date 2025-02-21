@@ -26,11 +26,11 @@ import AchievementSpecific from "./components/AchievementSpecific";
 import CompletedRecipe from "./components/CompletedRecipe";
 import CreateChallenge from "./components/CreateChallenge";
 import ChallengeResults from "./components/ChallengeResults";
+import PastChallenges from "./components/PastChallenges";
 import DeletedAccount from "./components/DeletedAccount";
 import AdminPage from "./components/AdminPage";
 import Groups from "./components/Groups";
 import GroupDetails from "./components/GroupDetails";
-import GroupInvite from "./components/GroupInvite";
 import GroupInviteResponse from "./components/GroupInviteResponse";
 import CreateGroup from "./components/CreateGroup";
 import GroupMessages from "./components/GroupMessages";
@@ -111,14 +111,9 @@ function App() {
               <Route path="/challenges" element={<Challenges />} />
               <Route path="/challenges/:id" element={<ChallengeDetail />} />
               <Route path="/challenges/create" element={<CreateChallenge />} />
-              <Route
-                path="/challenges/:id/vote"
-                element={<ChallengeVoting />}
-              />
-              <Route
-                path="/challenges/:id/vote_results"
-                element={<ChallengeResults />}
-              />
+              <Route path="/challenges/:id/vote" element={<ChallengeVoting />} />
+              <Route path="/past-challenges" element={<PastChallenges />} />
+              <Route path="/challenges/:id/vote_results" element={<ChallengeResults />} />
 
               {/*achievements*/}
               <Route path="/achievements" element={<Achievements />} />
@@ -136,7 +131,6 @@ function App() {
               <Route path="/groups/:id" element={<GroupDetails />} />
               <Route path="/groups/create" element={<CreateGroup />} />
               <Route path="/groups/:id/messages" element={<GroupMessages />} />
-              <Route path="/groups/:id/invite" element={<GroupInvite />} />
               <Route path="/groups/:id/invite_response" element={<GroupInviteResponse />} />
 
               {/* friends */}

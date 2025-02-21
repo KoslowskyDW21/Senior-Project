@@ -13,7 +13,6 @@ import {
   Modal,
   FormControl,
   Select,
-  MenuItem,
   InputLabel,
   List,
   ListItem,
@@ -23,7 +22,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
-import GroupMembersList from "./GroupMembersList"; // Import the new component
+import GroupMembersList from "./GroupMembersList";
 
 interface UserGroup {
   id: number;
@@ -46,6 +45,24 @@ interface Friend {
   username: string;
 }
 
+interface User {
+  id: number;
+  fname: string;
+  lname: string;
+  email_address: string;
+  username: string;
+  profile_picture: string;
+  xp_points: number;
+  user_level: number;
+  is_admin: boolean;
+  num_recipes_completed: number;
+  colonial_floor: string;
+  colonial_side: string;
+  date_created: Date;
+  last_logged_in: Date;
+  num_reports: number;
+}
+
 const reportModalStyle = {
   position: "absolute",
   top: "50%",
@@ -65,7 +82,7 @@ const GroupDetails: React.FC = () => {
   const [group, setGroup] = useState<UserGroup | null>(null);
   const [isMember, setIsMember] = useState<boolean>(false);
   const [members, setMembers] = useState<GroupMember[]>([]);
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isTrusted, setIsTrusted] = useState<boolean>(false);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedFriends, setSelectedFriends] = useState<number[]>([]);
@@ -75,6 +92,11 @@ const GroupDetails: React.FC = () => {
   const [open, setOpen] = useState(false);
   const handleOpenModal = () => setOpen(true);
   const handleCloseModal = () => setOpen(false);
+
+  // States for delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const handleOpenDeleteModal = () => setDeleteModalOpen(true);
+  const handleCloseDeleteModal = () => setDeleteModalOpen(false);
 
   const navigate = useNavigate();
 
@@ -111,7 +133,7 @@ const GroupDetails: React.FC = () => {
   const fetchCurrentUser = async () => {
     try {
       const response = await axios.get("http://127.0.0.1:5000/current_user");
-      setCurrentUserId(response.data.id);
+      setCurrentUser(response.data);
     } catch (error) {
       console.error("Error fetching current user:", error);
     }
@@ -120,7 +142,23 @@ const GroupDetails: React.FC = () => {
   const fetchFriends = async () => {
     try {
       const response = await axios.post("http://127.0.0.1:5000/friends/get_friends/");
-      setFriends(response.data.friends);
+      const friendsData = response.data.friends;
+  
+      // Fetch group members and unread notifications
+      const membersResponse = await axios.get(`http://127.0.0.1:5000/groups/${id}/members`);
+      const notificationsResponse = await axios.post("http://127.0.0.1:5000/get_notifications/");
+  
+      const groupMembers = membersResponse.data.map((member: GroupMember) => member.user_id);
+      const unreadNotifications = notificationsResponse.data.notifications
+        .filter((notification: any) => notification.isRead === 0 && notification.group_id === parseInt(id!))
+        .map((notification: any) => notification.user_id);
+  
+      // Filter out friends who are already in the group or have an unread notification
+      const filteredFriends = friendsData.filter((friend: Friend) => 
+        !groupMembers.includes(friend.id) && !unreadNotifications.includes(friend.id)
+      );
+  
+      setFriends(filteredFriends);
     } catch (error) {
       console.error("Error fetching friends:", error);
     }
@@ -132,6 +170,7 @@ const GroupDetails: React.FC = () => {
     fetchMembers();
     fetchCurrentUser();
     fetchFriends();
+    console.log("Members updated: ", members);
   }, [id]);
 
   const handleJoinGroup = async () => {
@@ -199,24 +238,6 @@ const GroupDetails: React.FC = () => {
     }
   }
 
-  const handleSetTrusted = async (userId: number) => {
-    try {
-      await axios.post(`http://127.0.0.1:5000/groups/${id}/set_trusted`, { user_id: userId });
-      fetchMembers();
-    } catch (error) {
-      console.error("Error setting trusted member:", error);
-    }
-  };
-
-  const handleRevokeTrusted = async (userId: number) => {
-    try {
-      await axios.post(`http://127.0.0.1:5000/groups/${id}/revoke_trusted`, { user_id: userId });
-      fetchMembers();
-    } catch (error) {
-      console.error("Error revoking trusted member:", error);
-    }
-  };
-
   const handleInviteFriends = async () => {
     try {
       await axios.post(`http://127.0.0.1:5000/groups/${id}/invite`, { friend_ids: selectedFriends });
@@ -268,69 +289,70 @@ const GroupDetails: React.FC = () => {
         )}
         <CardContent>
           <Typography variant="h6" component="div" gutterBottom>
-            Description
-          </Typography>
-          <Typography variant="body2" color="textSecondary">
             {group.description}
           </Typography>
           <Typography variant="body2" color="textSecondary">
             {group.is_public ? "Public" : "Private"}
           </Typography>
           <Box textAlign="center" mt={4}>
-            {group.creator === currentUserId ? (
+            {(currentUser && (group.creator === currentUser.id || currentUser.is_admin)) && (
               <Button
                 variant="contained"
                 color="error"
-                onClick={handleDeleteGroup}
+                onClick={handleOpenDeleteModal}
+                sx={{ mb: 2 }}
               >
                 Delete Group
               </Button>
-            ) : isMember ? (
+            )}
+            </Box>
+            <Box>
+            {isMember && currentUser && group.creator !== currentUser.id && (
               <Button
                 variant="contained"
                 color="secondary"
                 onClick={handleLeaveGroup}
+                sx={{ mb: 2 }}
               >
                 Leave Group
               </Button>
-            ) : (
+            )}
+            </Box>
+            <Box>
+            {!isMember && (
               <Button
                 variant="contained"
                 color="primary"
                 onClick={handleJoinGroup}
+                sx={{ mb: 2 }}
               >
                 Join Group
               </Button>
             )}
+            </Box>
+            <Box>
             <Button
               variant="contained"
               color="error"
               onClick={handleOpenModal}
+              sx={{ mb: 2 }}
             >
               Report
             </Button>
-            {(group.creator === currentUserId || isTrusted) && (
-              <>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => setInviteModalOpen(true)}
-                  sx={{ ml: 2 }}
-                >
-                  Invite Friends
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => navigate(`/groups/${id}/invite`)}
-                  sx={{ ml: 2 }}
-                >
-                  Invite Friends (New Page)
-                </Button>
-              </>
+            </Box>
+            <Box>
+            {(currentUser && (group.creator === currentUser.id || isTrusted)) && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setInviteModalOpen(true)}
+                sx={{ mb: 2 }}
+              >
+                Invite Friends
+              </Button>
             )}
           </Box>
-          {isMember && (
+          {(isMember || currentUser?.is_admin) && (
             <>
               <Box textAlign="center" mt={3}>
                 <Button
@@ -341,16 +363,6 @@ const GroupDetails: React.FC = () => {
                   View Messages
                 </Button>
               </Box>
-
-              <Box textAlign="center" mt={3}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => navigate(`/groups/${id}/invite`)}
-              >
-                Invite Friends
-              </Button>
-              </Box>
             </>
           )}
           <Box mt={4}>
@@ -359,7 +371,7 @@ const GroupDetails: React.FC = () => {
             </Typography>
             <GroupMembersList
               members={members}
-              currentUserId={currentUserId!}
+              currentUserId={currentUser?.id!}
               groupCreatorId={group.creator}
               trustedMemberIds={members.filter(member => member.is_trusted).map(member => member.user_id)}
               groupId={group.id}
@@ -445,6 +457,47 @@ const GroupDetails: React.FC = () => {
                 onClick={handleInviteFriends}
               >
                 Send Invites
+              </Button>
+            </Box>
+          </Modal>
+
+          <Modal
+            open={deleteModalOpen}
+            onClose={handleCloseDeleteModal}
+            aria-labelledby="delete-modal-title"
+            aria-describedby="delete-modal-description"
+          >
+            <Box sx={reportModalStyle}>
+              <IconButton
+                onClick={handleCloseDeleteModal}
+                style={{ position: "absolute", top: 5, right: 5 }}
+              >
+                <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+              </IconButton>
+
+              <Typography id="delete-modal-title" variant="h4" component="h2">
+                Confirm Delete
+              </Typography>
+              <Typography id="delete-modal-description" variant="body1" component="p">
+                Are you sure you want to delete this group?
+              </Typography>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() => {
+                  handleDeleteGroup();
+                  handleCloseDeleteModal();
+                }}
+              >
+                Yes, Delete
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleCloseDeleteModal}
+                sx={{ ml: 2 }}
+              >
+                Cancel
               </Button>
             </Box>
           </Modal>

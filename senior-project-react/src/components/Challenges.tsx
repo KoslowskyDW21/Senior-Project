@@ -7,7 +7,7 @@ import {
   CardContent,
   CardMedia,
   Typography,
-  Grid,
+  Grid2,
   Box,
   Container,
   CardActionArea,
@@ -53,12 +53,17 @@ const Challenges: React.FC = () => {
     useState<boolean>(false);
   const navigate = useNavigate();
   const [profile_picture, setProfile_picture] = useState<string>();
+  const [pastChallenges, setPastChallenges] = useState<ChallengeData[]>([]);
 
   const getResponse = async () => {
     try {
       const response = await axios.get("http://127.0.0.1:5000/challenges/");
       const data: ChallengeData[] = response.data;
-      setChallenges(data);
+      const now = new Date();
+      const validChallenges = data.filter(
+        (challenge) => new Date(challenge.end_time).getTime() + 24 * 60 * 60 * 1000 > now.getTime()
+      );
+      setChallenges(validChallenges);
 
       const userResponse: UserId = await axios.get(
         "http://127.0.0.1:5000/challenges/current_user_id"
@@ -96,6 +101,15 @@ const Challenges: React.FC = () => {
       setJoinedChallenges(joinedChallengesList);
     } catch (error) {
       console.error("Error fetching challenges:", error);
+    }
+  };
+
+  const fetchPastChallenges = async () => {
+    try {
+      const response = await axios.get("http://127.0.0.1:5000/challenges/past_challenges");
+      setPastChallenges(response.data);
+    } catch (error) {
+      console.error("Error fetching past challenges:", error);
     }
   };
 
@@ -148,17 +162,23 @@ const Challenges: React.FC = () => {
     }
   };
 
-  const filteredMyChallenges = myChallenges.filter((challenge) =>
-    challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredMyChallenges = myChallenges
+    .filter((challenge) => !pastChallenges.some((past) => past.id === challenge.id))
+    .filter((challenge) =>
+      challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
-  const filteredJoinedChallenges = joinedChallenges.filter((challenge) =>
-    challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredJoinedChallenges = joinedChallenges
+    .filter((challenge) => !pastChallenges.some((past) => past.id === challenge.id))
+    .filter((challenge) =>
+      challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
-  const filteredAllChallenges = challenges.filter((challenge) =>
-    challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredAllChallenges = challenges
+    .filter((challenge) => !pastChallenges.some((past) => past.id === challenge.id))
+    .filter((challenge) =>
+      challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   const handleGoToRecipes = async () => {
     navigate("/recipes");
@@ -167,11 +187,12 @@ const Challenges: React.FC = () => {
   useEffect(() => {
     getResponse();
     getCurrentUser();
+    fetchPastChallenges();
   }, []);
 
   React.useEffect(() => {
     filterChallenges();
-  }, [location.search, challenges]);
+  }, [location.search, challenges, pastChallenges]);
 
   return (
     <div>
@@ -227,6 +248,17 @@ const Challenges: React.FC = () => {
               Community
             </Button>
           </div>
+
+          <Box mt={4} mb={2} textAlign="center">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => navigate("/past-challenges")}
+            >
+              View Past Challenges
+            </Button>
+          </Box>
+
           <Box mt={4} mb={2} textAlign="center">
             <Button
               variant="contained"
@@ -248,13 +280,13 @@ const Challenges: React.FC = () => {
                   overflowY: "auto",
                 }}
               >
-                <Grid container spacing={2}>
+                <Grid2 container spacing={2}>
                   {filteredMyChallenges.map((challenge) => (
-                    <Grid item xs={12} sm={6} md={4} key={challenge.id}>
+                    <Grid2 item xs={12} sm={6} md={4} key={challenge.id}>
                       <Challenge {...challenge} />
-                    </Grid>
+                    </Grid2>
                   ))}
-                </Grid>
+                </Grid2>
               </Box>
               {filteredMyChallenges.length > 3 && (
                 <Box textAlign="center" mt={2}>
@@ -282,42 +314,13 @@ const Challenges: React.FC = () => {
                   overflowY: "auto",
                 }}
               >
-                <Grid container spacing={2}>
+                <Grid2 container spacing={2}>
                   {filteredJoinedChallenges.map((challenge) => (
-                    <Grid item xs={12} sm={6} md={4} key={challenge.id}>
-                      <Card
-                        onClick={() => navigate(`/challenges/${challenge.id}`)}
-                        sx={{ cursor: "pointer" }}
-                      >
-                        {challenge.image && (
-                          <CardMedia
-                            component="img"
-                            height="140"
-                            image={`http://127.0.0.1:5000/${challenge.image}`}
-                            alt={challenge.name}
-                          />
-                        )}
-                        <CardContent>
-                          <Typography variant="h6" component="div" gutterBottom>
-                            {challenge.name}
-                          </Typography>
-                          {new Date(challenge.start_time) > new Date() && (
-                            <Button
-                              variant="contained"
-                              color="secondary"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleLeaveChallenge(challenge.id);
-                              }}
-                            >
-                              Leave Challenge
-                            </Button>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </Grid>
+                    <Grid2 item xs={12} sm={6} md={4} key={challenge.id}>
+                      <Challenge {...challenge} />
+                    </Grid2>
                   ))}
-                </Grid>
+                </Grid2>
               </Box>
               {filteredJoinedChallenges.length > 3 && (
                 <Box textAlign="center" mt={2}>
@@ -338,55 +341,13 @@ const Challenges: React.FC = () => {
             <Typography variant="h5" gutterBottom>
               All Challenges
             </Typography>
-            <Grid container spacing={2}>
+            <Grid2 container spacing={2}>
               {filteredAllChallenges.map((challenge) => (
-                <Grid item xs={12} sm={6} md={4} key={challenge.id}>
-                  <Card
-                    onClick={() => navigate(`/challenges/${challenge.id}`)}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    {challenge.image && (
-                      <CardMedia
-                        component="img"
-                        height="140"
-                        image={`http://127.0.0.1:5000/${challenge.image}`}
-                        alt={challenge.name}
-                      />
-                    )}
-                    <CardContent>
-                      <Typography variant="h6" component="div" gutterBottom>
-                        {challenge.name}
-                      </Typography>
-                      {new Date(challenge.start_time) > new Date() ? (
-                        participants[challenge.id] ? (
-                          <Button
-                            variant="contained"
-                            color="secondary"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleLeaveChallenge(challenge.id);
-                            }}
-                          >
-                            Leave Challenge
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleJoinChallenge(challenge.id);
-                            }}
-                          >
-                            Join Challenge
-                          </Button>
-                        )
-                      ) : null}
-                    </CardContent>
-                  </Card>
-                </Grid>
+                <Grid2 item xs={12} sm={6} md={4} key={challenge.id}>
+                  <Challenge {...challenge} />
+                </Grid2>
               ))}
-            </Grid>
+            </Grid2>
           </Box>
         </Container>
         <div
