@@ -128,7 +128,7 @@ const Header: React.FC<HeaderProps> = ({
     setNotificationAnchorEl(event.currentTarget);
     readNotificationsApi(id);
     if (notification_type === "friend_request") {
-      navigate("/groups");
+      navigate("/friends");
     } else if (notification_type === "group_message" && group_id) {
       navigate(`/groups/${group_id}/invite_response`); // Update this line
     } else if (notification_type === "challenge_reminder") {

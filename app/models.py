@@ -541,13 +541,11 @@ class FriendRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     requestFrom = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
     requestTo = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
-    accepted = db.Column(db.Boolean, nullable=False)
     def to_json(self):
         return {
             "id": self.id,
             "requestFrom": self.requestFrom,
-            "requestTo": self.requestTo,
-            "accepted": self.accepted
+            "requestTo": self.requestTo
         }
     
 class RecipeDietaryRestriction(db.Model):
