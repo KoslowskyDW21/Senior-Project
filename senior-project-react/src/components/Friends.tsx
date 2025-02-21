@@ -125,6 +125,7 @@ const Friends: React.FC = () => {
       );
       const data: FriendRequestTo = response.data;
       setFriendRequestsTo(data.friend_requests_to);
+      console.log("Friend requet to", data.friend_requests_to);
     } catch (error) {
       console.error("Error fetching friend requests to: ", error);
     }
