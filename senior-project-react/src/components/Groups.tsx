@@ -6,7 +6,7 @@ import {
   CardContent,
   CardMedia,
   Typography,
-  Grid,
+  Grid2,
   Box,
   Container,
   Button,
@@ -16,6 +16,8 @@ import {
   Avatar,
   ButtonBase,
   TextField,
+  CardActionArea,
+  CardHeader,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
@@ -38,6 +40,43 @@ interface User {
 interface Friendship {
   friends: [];
 }
+
+const Group: React.FC<UserGroup> = ({ id, name, description, image }) => {
+  const navigate = useNavigate();
+  const handleGoToGroup = async () => {
+    navigate(`/groups/${id}`);
+  };
+
+  return (
+    <Card variant="outlined" sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <CardActionArea onClick={handleGoToGroup}>
+        <CardHeader
+          title={name}
+          subheader={description}
+          sx={{
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            flexShrink: 0,
+            width: "90%",
+            fontSize: "clamp(1rem, 4vw, 2rem)",
+          }}
+        />
+        {image && (
+          <CardMedia
+            component="img"
+            image={`http://127.0.0.1:5000/${image}`}
+            sx={{
+              height: 200,
+              objectFit: "cover",
+              width: "100%",
+            }}
+          />
+        )}
+      </CardActionArea>
+    </Card>
+  );
+};
 
 const Groups: React.FC = () => {
   const [groups, setGroups] = useState<UserGroup[]>([]);
@@ -299,33 +338,13 @@ const Groups: React.FC = () => {
               <Typography variant="h5" gutterBottom>
                 My Groups
               </Typography>
-              <Grid container spacing={2}>
+              <Grid2 container spacing={2}>
                 {myGroups.map((group) => (
-                  <Grid item xs={12} sm={6} md={4} key={group.id}>
-                    <Card
-                      onClick={() => navigate(`/groups/${group.id}`)}
-                      sx={{ cursor: "pointer" }}
-                    >
-                      {group.image && (
-                        <CardMedia
-                          component="img"
-                          height="140"
-                          image={`http://127.0.0.1:5000/${group.image}`}
-                          alt={group.name}
-                        />
-                      )}
-                      <CardContent>
-                        <Typography variant="h6" component="div" gutterBottom>
-                          {group.name}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          {group.description}
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
+                  <Grid2 item xs={12} sm={6} md={4} key={group.id}>
+                    <Group {...group} />
+                  </Grid2>
                 ))}
-              </Grid>
+              </Grid2>
             </Box>
           )}
 
@@ -333,33 +352,13 @@ const Groups: React.FC = () => {
             <Typography variant="h5" gutterBottom>
               All Groups
             </Typography>
-            <Grid container spacing={2}>
+            <Grid2 container spacing={2}>
               {filteredGroups.map((group) => (
-                <Grid item xs={12} sm={6} md={4} key={group.id}>
-                  <Card
-                    onClick={() => navigate(`/groups/${group.id}`)}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    {group.image && (
-                      <CardMedia
-                        component="img"
-                        height="140"
-                        image={`http://127.0.0.1:5000/${group.image}`}
-                        alt={group.name}
-                      />
-                    )}
-                    <CardContent>
-                      <Typography variant="h6" component="div" gutterBottom>
-                        {group.name}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        {group.description}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
+                <Grid2 item xs={12} sm={6} md={4} key={group.id}>
+                  <Group {...group} />
+                </Grid2>
               ))}
-            </Grid>
+            </Grid2>
           </Box>
           {loading && (
             <Box textAlign="center" mt={4}>

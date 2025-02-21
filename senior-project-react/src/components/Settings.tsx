@@ -93,6 +93,7 @@ export default function Settings() {
     colonial_side: "",
   });
   const [username, setUsername] = useState<string>("");
+  const [usernameTaken, setUsernameTaken] = useState<boolean>(false);
   const [colonialFloor, setColonialFloor] = useState<string>("");
   const [colonialSide, setColonialSide] = useState<string>("");
 
@@ -119,6 +120,7 @@ export default function Settings() {
         setUsername(user.username);
         setColonialFloor(user.colonial_floor);
         setColonialSide(user.colonial_side);
+        console.log("Username: " + username);
         console.log("Floor: " + user.colonial_floor);
         console.log("Side: " + user.colonial_side);
         loadCuisines();
@@ -226,6 +228,24 @@ export default function Settings() {
       }
     }
   }
+  
+  async function updateUsername() {
+    const data = {
+      username: username,
+    };
+    await axios.post("http://127.0.0.1:5000/settings/update_username/", data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        console.log(response.data.message);
+        setUsernameTaken(response.data.alreadyTaken);
+      })
+      .catch((error) => {
+        console.error("Could not update username", error);
+      });
+  }
 
   React.useEffect(() => {
     loadUser();
@@ -317,6 +337,10 @@ export default function Settings() {
     updateUser(user.colonial_floor, newSide);
   };
 
+  const handleUsernameChange = () => {
+    updateUsername();
+  }
+
   const handleOpenModal = () => {
     setOpenModal(true);
   };
@@ -358,6 +382,8 @@ export default function Settings() {
       console.error("Logout failed", error);
     }
   };
+
+  console.log("Username: " + username);
 
   return (
     <>
@@ -426,23 +452,53 @@ export default function Settings() {
       <br />
 
       <h2>Change Account Details</h2>
+      
+      {!usernameTaken ?
+        <TextField
+          aria-label="username-textfield"
+          size="small"
+          helperText="Username"
+          value={user.username}
+          variant="filled"
+          onChange={(e) => {
+            const newUsername = e.target.value;
 
-      <TextField
-        aria-label="filled-helperText"
-        label="Username"
-        variant="filled"
-        defaultValue={username}
-        value={username}
-        onChange={(e) => {
-          const newUsername = e.target.value;
+            setUsername(newUsername);
+            setUser((prevUser) => ({
+              ...prevUser,
+              username: newUsername,
+            }));
+          }}
+        />
+      :
+        <TextField
+          error
+          aria-label="username-textfield"
+          size="small"
+          helperText="Error: Username already taken"
+          value={user.username}
+          variant="filled"
+          onChange={(e) => {
+            const newUsername = e.target.value;
 
-          setUsername(newUsername);
-          setUser((prevUser) => ({
-            ...prevUser,
-            username: newUsername,
-          }));
-        }}
-      />
+            setUsernameTaken(false);
+            setUsername(newUsername);
+            setUser((prevUser) => ({
+              ...prevUser,
+              username: newUsername,
+            }));
+          }}
+        />
+      }
+
+      <Button
+        sx={{ marginLeft: 2 }}
+        variant="contained"
+        color="primary"
+        onClick={handleUsernameChange}
+      >
+        Save
+      </Button>
 
       <br />
       <br />

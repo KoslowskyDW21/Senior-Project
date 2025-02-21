@@ -2,7 +2,7 @@ from __future__ import annotations
 from flask import jsonify
 from flask_login import current_user, login_required
 from app.shopping_list import bp
-from app.models import ShoppingList, ShoppingListItem, RecipeIngredient, db
+from app.models import ShoppingList, ShoppingListItem, RecipeIngredient, RecipeRecipeList, Recipe, db
 import sys
 
 @bp.get("/user_list")
@@ -44,8 +44,35 @@ def add_recipe_to_shopping_list_items_of_current_user(recipe_id):
         db.session.commit()
     except:
         print("Error")
-        return jsonify({"message": "Error", "objects": None}), 500
-    return jsonify({"message": "Success", "objects": slis}), 200
+        return jsonify({"message": "Error"}), 500
+    return jsonify({"message": "Success"}), 200
+
+@bp.post("/items/addlist/<int:recipe_list_id>")
+def add_all_recipes_in_recipe_list_to_sl(recipe_list_id):
+    print(f"Trying to add all recipes in recipe list id={recipe_list_id} to user's shopping list")
+    try:
+        recipe_relationships = RecipeRecipeList.query.filter_by(recipe_list_id=recipe_list_id).all()
+        recipe_ids = [recipe_relationship.recipe_id for recipe_relationship in recipe_relationships]
+        recipes = []
+        slis = [] # ShoppingListItem[]
+        curr_shopping_list = ShoppingList.query.filter_by(user_id=current_user.id).first()
+        for recipe_id in recipe_ids:
+            recipe = Recipe.query.filter_by(id=recipe_id).first()
+            recipes.append(recipe)
+        for recipe in recipes:
+            recipe_ingredients = RecipeIngredient.query.filter_by(recipe_id=recipe.id)
+            for recipe_ingredient in recipe_ingredients:
+                sli: ShoppingListItem = ShoppingListItem()
+                sli.shopping_list_id = curr_shopping_list.id
+                sli.ingredient_id = recipe_ingredient.ingredient_id
+                sli.measure = recipe_ingredient.measure
+                slis.append(sli)
+                db.session.add(sli)
+        db.session.commit()
+    except (Exception):
+        print(f"Error:")
+        return jsonify({"message": "Error"}), 500
+    return jsonify({"message": "Success"}), 200
 
 @bp.post("/items/remove/<int:sli_id>")
 def remove_shopping_list_item_from_shopping_list_of_cu(sli_id):

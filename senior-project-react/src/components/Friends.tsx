@@ -6,7 +6,7 @@ import {
   CardContent,
   CardMedia,
   Typography,
-  Grid,
+  Grid2,
   Box,
   Container,
   Button,
@@ -125,6 +125,7 @@ const Friends: React.FC = () => {
       );
       const data: FriendRequestTo = response.data;
       setFriendRequestsTo(data.friend_requests_to);
+      console.log("Friend requet to", data.friend_requests_to);
     } catch (error) {
       console.error("Error fetching friend requests to: ", error);
     }
@@ -302,7 +303,7 @@ const Friends: React.FC = () => {
             >
               To you:
             </Typography>
-            {friendRequestsTo.map((friend) => (
+            {friendRequestsFrom.map((friend) => (
               <Box
                 key={friend.id}
                 mt={5}
@@ -351,7 +352,7 @@ const Friends: React.FC = () => {
             >
               From you:
             </Typography>
-            {friendRequestsFrom.map((friend) => (
+            {friendRequestsTo.map((friend) => (
               <Box
                 key={friend.id}
                 mt={5}

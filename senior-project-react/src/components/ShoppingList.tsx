@@ -71,9 +71,9 @@ const ShoppingList: React.FC = () => {
             const ingredients_list: Ingredient[] = response.data;
             setIngredients(ingredients_list);
             console.log(`Ingredients now set:`);
-            for (const ingredient of ingredients_list) {
-                console.log(`${ingredient.ingredient_name}`);
-            }
+            // for (const ingredient of ingredients_list) {
+            //     console.log(`${ingredient.ingredient_name}`);
+            // }
 
             let shopping_list_item_ingredients: _ShoppingListItemIngredient[] = []
             for (const shopping_list_item of shopping_list_items) {
@@ -96,9 +96,12 @@ const ShoppingList: React.FC = () => {
 
     async function getRecipes() {
         try {
-            const response = await axios.post('http://127.0.0.1:5000/recipes');
-            setRecipes(response.data);
-            console.log("Grabbed all recipes");
+            const response = await axios.get('http://127.0.0.1:5000/recipes/all');
+            setRecipes(response.data.recipes);
+            console.log(`Grabbed all recipes: ${response.data.recipes.length} recipes grabbed`);
+            // for (const recipe of recipes) {
+            //     console.log(recipe.recipe_name)
+            // }
         }
         catch (error) {
             console.error("Error fetching all recipes: ", error);
@@ -191,11 +194,36 @@ const ShoppingList: React.FC = () => {
             <Checkbox
                 sx={{ '& .MuiSvgIcon-root': { fontSize: 28 } }}
             />
-            {ingredient_name}
-            {measure}
+            {`${ingredient_name}: ${measure}`}
             </Card>
             </>
         )
+    }
+
+    function RecipesDropdown({ recipes }) {
+        if (recipes.length == 0) {
+            return <p>Loading...</p>
+        } else {
+            return (
+                <>
+                    <FormControl
+                    sx={{width: 400}}
+                    >
+                        <InputLabel>Add all ingredients of a recipe</InputLabel>
+                        <Select
+                            value={recipe_id}
+                            onChange={handleAddIngredientsOfRecipe}
+                        >
+                            {
+                                recipes.map((recipe: Recipe) => {
+                                    return <MenuItem value={recipe.id}>{recipe.recipe_name}</MenuItem>
+                                })
+                            };
+                        </Select>
+                    </FormControl>
+                </>
+            )
+        }
     }
     
     React.useEffect(() => {
@@ -213,7 +241,7 @@ const ShoppingList: React.FC = () => {
     return (
         <>
         {/* Header bar */}
-        <Header title="Shopping List" searchLabel="Search Shopping List" />
+        <Header title="Shopping List" searchLabel="Search Shopping List" searchVisible={true} />
             <Box
                 sx={{
                 display: "flex",
@@ -248,23 +276,8 @@ const ShoppingList: React.FC = () => {
             <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" } } />
         </IconButton>
 
-        {/* Button to add a recipe's ingredients to shopping list */}
-        <FormControl
-            sx={{width: 400}}
-        >
-            <InputLabel>Add all ingredients of a recipe</InputLabel>
-            <Select
-                value={""}
-                onClick={handleAddIngredientsOfRecipe} // ignore this erro and *do not* change to onChange
-            >
-                {/* Replace with better UX */}
-                {recipes.map((recipe) => (
-                    <>
-                        <MenuItem value={recipe.id} onClick={() => {setRecipe_id(recipe.id.toString())}}>{recipe.recipe_name}</MenuItem>
-                    </>
-                ))}
-            </Select>
-        </FormControl>
+        {/* Put RecipeDropdown here */}
+        <RecipesDropdown recipes={recipes}></RecipesDropdown>
 
         {/* Items of shopping list */}
         {filteredShoppingListItemIngredients.map((shoppingListItemIngredient) => (

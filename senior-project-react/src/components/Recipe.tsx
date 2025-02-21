@@ -1,10 +1,24 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button, FormControl, Avatar, MenuItem, Box, Select, InputLabel, FormControlLabel, Checkbox, Typography, SelectChangeEvent, IconButton, Container, Card, CardContent, CardMedia } from "@mui/material"; //matui components
+import { Button, FormControl, Avatar, MenuItem, Box, Select, InputLabel, FormControlLabel, Checkbox, Typography, SelectChangeEvent, IconButton, Container, Card, CardContent, CardMedia, Modal } from "@mui/material"; //matui components
 import axios, { AxiosError } from "axios";
 import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from '@mui/icons-material/Close';
+
+const reportModalStyle = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    bgcolor: "#ffffff",
+    boxShadow: 24,
+    paddingTop: 3,
+    paddingLeft: 7,
+    paddingRight: 7,
+    paddingBottom: 3,
+    textAlign: "center",
+}
 
 interface Recipe {
     "id": string,
@@ -50,6 +64,13 @@ interface AddRecipeToListResponse {
     message: string;
 }
 
+interface ShoppingListItem {
+    id: number;
+    shopping_list_id: number;
+    ingredient_id: number;
+    measure: string;
+}
+
 function Step({ recipe_id, step_number, step_description }: Step) {
     return (
         <>
@@ -78,6 +99,10 @@ const IndividualRecipe: React.FC = () => {
     const [ snackbarOpen, setSnackBarOpen ] = React.useState(false);
     const { id } = useParams<{ id: string }>();
     const [reviews, setReviews] = React.useState<Review[]>([]);
+    const [ reviewId, setReviewId ] = useState<number | null>(null);
+    const [open, setOpen] = useState(false);
+    const handleOpenModal = () => setOpen(true);
+    const handleCloseModal = () => setOpen(false);
 
     const navigate = useNavigate();
 
@@ -133,6 +158,51 @@ const IndividualRecipe: React.FC = () => {
         const formData = new FormData();
         formData.append("rid", id.toString());
         formData.append("lid", event.target.value);
+        try {
+            const response = await axios.post(
+                "http://127.0.0.1:5000/recipe_lists/remove-recipe-from-list", formData,
+                { headers: { "Content-Type": "multipart/form-data"} }
+            );
+            if (response.status != 200) {
+                console.error("Error while trying to remove recipe from list");
+                setMessage(response.data.message);
+            } else {
+                console.log(`Successfully removed recipe id=${id.toString} from RecipeList id=${event.target.value}`);
+                setMessage("Successfully removed recipe from list");
+            }
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            if (axiosError.response && axiosError.response.data) {
+                const errorData = axiosError.response.data as AddRecipeToListResponse;
+                setMessage(errorData.message);
+            } else {
+                setMessage("An unknown error occurred");
+            }
+        }
+        setSnackBarOpen(true);
+    }
+
+    async function handleAddIngredientsOfRecipe() {
+        console.log(`Trying to add recipe id=${id}'s ingredients to list`);
+        if (id == undefined) {
+            console.error("id is undefined!");
+            return;
+        }
+        console.log(`Trying to add all ingredients of this recipe to shopping list`);
+        try {
+            const response = await axios.post(`http://127.0.0.1:5000/shopping_lists/items/add/${id}`);
+            if (response.status == 200) {
+                setMessage("Recipe successfully added to list");
+                console.log(`This recipe added to list`);
+            } else {
+                setMessage("Recipe failed to be added to list");
+                console.log("Recipe failed to be added to list");
+            }
+        } catch (error) {
+            setMessage("Error in trying to add recipe's ingredients to shopping list");
+            console.error("Error in trying to add recipe's ingredients to shopping list", error);
+        }
+        setSnackBarOpen(true);
     }
 
     const handleSnackBarClose = (
@@ -190,7 +260,7 @@ const IndividualRecipe: React.FC = () => {
 
     const getRecipeName = async () => {
         try {
-            const response = await axios.post(`http://127.0.0.1:5000/recipes/${id}`);
+            const response = await axios.get(`http://127.0.0.1:5000/recipes/${id}`);
             const data: Recipe = response.data;
             setRecipe_name(data.recipe_name);
         } catch (error) {
@@ -208,6 +278,40 @@ const IndividualRecipe: React.FC = () => {
             setSteps(data);
         } catch (error) {
             console.error("Error fetching steps: ", error);
+        }
+    }
+
+    const handleReportReview = async () => {
+        let data;
+
+        await axios.get(`http://127.0.0.1:5000/recipes/${reviewId}/report`)
+        .then((response) => {
+            data = response.data;
+        })
+        .catch((error) => {
+            console.error("Could not get if already reported", error);
+        });
+
+        if(!data!.alreadyReported) {
+            const newData = {
+                user_id: data!.id,
+                review_id: reviewId,
+            }
+
+            await axios.post(`http://127.0.0.1:5000/recipes/${reviewId}/report`, newData, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+            .then((response) => {
+                console.log(response.data.message);
+            })
+            .catch((error) => {
+                console.log("Could not report review", error);
+            });
+        }
+        else {
+            console.log("Review already reported");
         }
     }
 
@@ -234,11 +338,11 @@ const IndividualRecipe: React.FC = () => {
                 justifyContent: "center",
                 flexGrow: 1,
                 alignItems: "center",
-                fontSize: "24px",
+                fontSize: "48px",
                 fontWeight: "bold",
             }}
             >
-                <h1>{recipe_name}</h1>
+                {recipe_name}
             </Box>
 
             <Button
@@ -277,6 +381,15 @@ const IndividualRecipe: React.FC = () => {
                     <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
                 ))}
             </Select>
+            </FormControl>
+
+            {/* Add recipe's ingredients to the shopping list */}
+            <FormControl sx={{width: 400}}>
+                <InputLabel>Add ingredients to shopping list</InputLabel>
+                    <Button sx={{width: 400, height: 55}}
+                        variant="outlined"
+                        onClick={() => {handleAddIngredientsOfRecipe()}}
+                    ></Button>
             </FormControl>
             
             <Box
@@ -337,6 +450,17 @@ const IndividualRecipe: React.FC = () => {
                             }}
                         />
                     )}
+                    <Button
+                        style={{ position: "relative", top: "50%", left: "50%", transform: "translate(-50%, 0%)" }}
+                        variant="contained"
+                        color="error"
+                        onClick={() => {
+                            setReviewId(review.id);
+                            handleOpenModal();
+                        }}
+                    >
+                        Report Review
+                    </Button>
                 </CardContent>
             </Card>
         ))
@@ -344,6 +468,45 @@ const IndividualRecipe: React.FC = () => {
         <Typography>No reviews yet.</Typography>
     )}
 </Box>
+
+<Modal
+    open={open}
+    onClose={handleCloseModal}
+    aria-labelledby="modal-title"
+>
+    <Box sx={reportModalStyle}>
+        <IconButton
+        onClick={handleCloseModal}
+        style={{ position: "absolute", top: 5, right: 5 }}
+        >
+        <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+        </IconButton>
+
+        <Typography id="modal-title" variant="h4" component="h2">
+        Report Review
+        </Typography>
+
+        <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small" >
+        <InputLabel id="reason-label">Reason</InputLabel>
+        <Select
+            labelId="reason-label"
+        >
+            
+        </Select>
+        </FormControl>
+        <br />
+        <Button
+        variant="contained"
+        color="error"
+        onClick={() => {
+            handleReportReview();
+            handleCloseModal();
+        }}
+        >
+        Confirm Report
+        </Button>
+    </Box>
+    </Modal>
 
 
             <Snackbar

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import {
@@ -10,15 +10,19 @@ import {
   Container,
   IconButton,
   Button,
-  TextField,
-  Paper,
+  Modal,
+  FormControl,
+  Select,
+  InputLabel,
   List,
   ListItem,
   ListItemText,
-  Divider
+  Checkbox,
 } from "@mui/material";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
+import GroupMembersList from "./GroupMembersList";
 
 interface UserGroup {
   id: number;
@@ -29,11 +33,48 @@ interface UserGroup {
   is_public: boolean;
 }
 
-interface Message {
-  id: number;
+interface GroupMember {
   user_id: number;
-  text: string;
   username: string;
+  profile_picture: string | null;
+  is_trusted: boolean;
+}
+
+interface Friend {
+  id: number;
+  username: string;
+}
+
+interface User {
+  id: number;
+  fname: string;
+  lname: string;
+  email_address: string;
+  username: string;
+  profile_picture: string;
+  xp_points: number;
+  user_level: number;
+  is_admin: boolean;
+  num_recipes_completed: number;
+  colonial_floor: string;
+  colonial_side: string;
+  date_created: Date;
+  last_logged_in: Date;
+  num_reports: number;
+}
+
+const reportModalStyle = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  bgcolor: "#ffffff",
+  boxShadow: 24,
+  paddingTop: 3,
+  paddingLeft: 7,
+  paddingRight: 7,
+  paddingBottom: 3,
+  textAlign: "center",
 }
 
 const GroupDetails: React.FC = () => {
@@ -41,62 +82,95 @@ const GroupDetails: React.FC = () => {
   const [group, setGroup] = useState<UserGroup | null>(null);
   const [isMember, setIsMember] = useState<boolean>(false);
   const [members, setMembers] = useState<GroupMember[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState<string>("");
-  const messagesEndRef = useRef(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isTrusted, setIsTrusted] = useState<boolean>(false);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [selectedFriends, setSelectedFriends] = useState<number[]>([]);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+
+  // States for report modal
+  const [open, setOpen] = useState(false);
+  const handleOpenModal = () => setOpen(true);
+  const handleCloseModal = () => setOpen(false);
+
+  // States for delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const handleOpenDeleteModal = () => setDeleteModalOpen(true);
+  const handleCloseDeleteModal = () => setDeleteModalOpen(false);
+
   const navigate = useNavigate();
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const fetchGroup = async () => {
+    try {
+      const response = await axios.get(`http://127.0.0.1:5000/groups/${id}`);
+      if (response.status === 200) {
+        setGroup(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching group details:", error);
+    }
+  };
+
+  const checkMembership = async () => {
+    try {
+      const response = await axios.get(`http://127.0.0.1:5000/groups/${id}/is_member`);
+      setIsMember(response.data.is_member);
+      setIsTrusted(response.data.is_trusted);
+    } catch (error) {
+      console.error("Error checking membership:", error);
+    }
+  };
+
+  const fetchMembers = async () => {
+    try {
+      const response = await axios.get(`http://127.0.0.1:5000/groups/${id}/members`);
+      setMembers(response.data);
+    } catch (error) {
+      console.error("Error fetching group members:", error);
+    }
+  };
+
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await axios.get("http://127.0.0.1:5000/current_user");
+      setCurrentUser(response.data);
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+    }
+  };
+
+  const fetchFriends = async () => {
+    try {
+      const response = await axios.post("http://127.0.0.1:5000/friends/get_friends/");
+      const friendsData = response.data.friends;
+  
+      // Fetch group members and unread notifications
+      const membersResponse = await axios.get(`http://127.0.0.1:5000/groups/${id}/members`);
+      const notificationsResponse = await axios.post("http://127.0.0.1:5000/get_notifications/");
+  
+      const groupMembers = membersResponse.data.map((member: GroupMember) => member.user_id);
+      const unreadNotifications = notificationsResponse.data.notifications
+        .filter((notification: any) => notification.isRead === 0 && notification.group_id === parseInt(id!))
+        .map((notification: any) => notification.user_id);
+  
+      // Filter out friends who are already in the group or have an unread notification
+      const filteredFriends = friendsData.filter((friend: Friend) => 
+        !groupMembers.includes(friend.id) && !unreadNotifications.includes(friend.id)
+      );
+  
+      setFriends(filteredFriends);
+    } catch (error) {
+      console.error("Error fetching friends:", error);
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  useEffect(() => {
-    const fetchGroup = async () => {
-      try {
-        const response = await axios.get(`http://127.0.0.1:5000/groups/${id}`);
-        if (response.status === 200) {
-          setGroup(response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching group details:", error);
-      }
-    };
-
-    const checkMembership = async () => {
-      try {
-        const response = await axios.get(`http://127.0.0.1:5000/groups/${id}/is_member`);
-        setIsMember(response.data.is_member);
-      } catch (error) {
-        console.error("Error checking membership:", error);
-      }
-    };
-
-    const fetchMembers = async () => {
-      try {
-        const response = await axios.get(`http://127.0.0.1:5000/groups/${id}/members`);
-        setMembers(response.data);
-      } catch (error) {
-        console.error("Error fetching group members:", error);
-      }
-    };
-
-    const fetchMessages = async () => {
-      try {
-        const response = await axios.get(`http://127.0.0.1:5000/groups/${id}/messages`);
-        setMessages(response.data);
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-      }
-    };
-
     fetchGroup();
     checkMembership();
     fetchMembers();
-    fetchMessages();
+    fetchCurrentUser();
+    fetchFriends();
+    console.log("Members updated: ", members);
   }, [id]);
 
   const handleJoinGroup = async () => {
@@ -119,6 +193,15 @@ const GroupDetails: React.FC = () => {
     }
   };
 
+  const handleDeleteGroup = async () => {
+    try {
+      await axios.delete(`http://127.0.0.1:5000/groups/${id}/delete`);
+      navigate("/groups");
+    } catch (error) {
+      console.error("Error deleting group:", error);
+    }
+  };
+
   const handleReportGroup = async () => {
     console.log("Attempting to report this group...");
     let data;
@@ -131,7 +214,7 @@ const GroupDetails: React.FC = () => {
         console.error("Could not get if already reported", error);
       });
     
-    if(data!.alreadyReported) {
+    if(!data!.alreadyReported) {
       const newData = {
         user_id: data!.id,
         group_id: id,
@@ -155,17 +238,21 @@ const GroupDetails: React.FC = () => {
     }
   }
 
-  const sendMessage = async () => {
-    if (!newMessage.trim()) return;
-
+  const handleInviteFriends = async () => {
     try {
-      await axios.post(`http://127.0.0.1:5000/groups/${id}/messages`, { text: newMessage });
-      setNewMessage("");
-      const response = await axios.get(`http://127.0.0.1:5000/groups/${id}/messages`);
-      setMessages(response.data);
+      await axios.post(`http://127.0.0.1:5000/groups/${id}/invite`, { friend_ids: selectedFriends });
+      setInviteModalOpen(false);
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Error inviting friends:", error);
     }
+  };
+
+  const handleToggleFriend = (friendId: number) => {
+    setSelectedFriends((prevSelected) =>
+      prevSelected.includes(friendId)
+        ? prevSelected.filter((id) => id !== friendId)
+        : [...prevSelected, friendId]
+    );
   };
 
   if (!group) {
@@ -202,89 +289,221 @@ const GroupDetails: React.FC = () => {
         )}
         <CardContent>
           <Typography variant="h6" component="div" gutterBottom>
-            Description
-          </Typography>
-          <Typography variant="body2" color="textSecondary">
             {group.description}
           </Typography>
           <Typography variant="body2" color="textSecondary">
             {group.is_public ? "Public" : "Private"}
           </Typography>
           <Box textAlign="center" mt={4}>
-            {isMember ? (
+            {(currentUser && (group.creator === currentUser.id || currentUser.is_admin)) && (
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleOpenDeleteModal}
+                sx={{ mb: 2 }}
+              >
+                Delete Group
+              </Button>
+            )}
+            </Box>
+            <Box>
+            {isMember && currentUser && group.creator !== currentUser.id && (
               <Button
                 variant="contained"
                 color="secondary"
                 onClick={handleLeaveGroup}
+                sx={{ mb: 2 }}
               >
                 Leave Group
               </Button>
-            ) : (
+            )}
+            </Box>
+            <Box>
+            {!isMember && (
               <Button
                 variant="contained"
                 color="primary"
                 onClick={handleJoinGroup}
+                sx={{ mb: 2 }}
               >
                 Join Group
               </Button>
             )}
+            </Box>
+            <Box>
             <Button
               variant="contained"
               color="error"
-              onClick={handleReportGroup}
+              onClick={handleOpenModal}
+              sx={{ mb: 2 }}
             >
               Report
             </Button>
+            </Box>
+            <Box>
+            {(currentUser && (group.creator === currentUser.id || isTrusted)) && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setInviteModalOpen(true)}
+                sx={{ mb: 2 }}
+              >
+                Invite Friends
+              </Button>
+            )}
           </Box>
+          {(isMember || currentUser?.is_admin) && (
+            <>
+              <Box textAlign="center" mt={3}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => navigate(`/groups/${id}/messages`)}
+                >
+                  View Messages
+                </Button>
+              </Box>
+            </>
+          )}
           <Box mt={4}>
             <Typography variant="h5" gutterBottom>
               Members
             </Typography>
-            <ul>
-              {members.map((member) => (
-                <li key={member.user_id}>{member.username}</li>
-              ))}
-            </ul>
+            <GroupMembersList
+              members={members}
+              currentUserId={currentUser?.id!}
+              groupCreatorId={group.creator}
+              trustedMemberIds={members.filter(member => member.is_trusted).map(member => member.user_id)}
+              groupId={group.id}
+              fetchMembers={fetchMembers}
+            />
           </Box>
+
+          <Modal
+            open={open}
+            onClose={handleCloseModal}
+            aria-labelledby="modal-title"
+            aria-describedby="modal-description"
+          >
+            <Box sx={reportModalStyle}>
+              <IconButton
+                onClick={handleCloseModal}
+                style={{ position: "absolute", top: 5, right: 5 }}
+              >
+                <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+              </IconButton>
+
+              <Typography id="modal-title" variant="h4" component="h2">
+                Report Group
+              </Typography>
+              <Typography id="modal-description" variant="body1" component="p">
+                {`Reporting group ${id}`}
+              </Typography>
+
+              <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small" >
+                <InputLabel id="reason-label">Reason</InputLabel>
+                <Select
+                  labelId="reason-label"
+                >
+                  
+                </Select>
+              </FormControl>
+              <br />
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() => {
+                  handleReportGroup();
+                  handleCloseModal();
+                }}
+              >
+                Confirm Report
+              </Button>
+            </Box>
+          </Modal>
+
+          <Modal
+            open={inviteModalOpen}
+            onClose={() => setInviteModalOpen(false)}
+            aria-labelledby="invite-modal-title"
+            aria-describedby="invite-modal-description"
+          >
+            <Box sx={reportModalStyle}>
+              <IconButton
+                onClick={() => setInviteModalOpen(false)}
+                style={{ position: "absolute", top: 5, right: 5 }}
+              >
+                <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+              </IconButton>
+
+              <Typography id="invite-modal-title" variant="h4" component="h2">
+                Invite Friends
+              </Typography>
+              <List>
+                {friends.map((friend) => (
+                  <ListItem key={friend.id} button onClick={() => handleToggleFriend(friend.id)}>
+                    <Checkbox
+                      checked={selectedFriends.includes(friend.id)}
+                      tabIndex={-1}
+                      disableRipple
+                    />
+                    <ListItemText primary={friend.username} />
+                  </ListItem>
+                ))}
+              </List>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleInviteFriends}
+              >
+                Send Invites
+              </Button>
+            </Box>
+          </Modal>
+
+          <Modal
+            open={deleteModalOpen}
+            onClose={handleCloseDeleteModal}
+            aria-labelledby="delete-modal-title"
+            aria-describedby="delete-modal-description"
+          >
+            <Box sx={reportModalStyle}>
+              <IconButton
+                onClick={handleCloseDeleteModal}
+                style={{ position: "absolute", top: 5, right: 5 }}
+              >
+                <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+              </IconButton>
+
+              <Typography id="delete-modal-title" variant="h4" component="h2">
+                Confirm Delete
+              </Typography>
+              <Typography id="delete-modal-description" variant="body1" component="p">
+                Are you sure you want to delete this group?
+              </Typography>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() => {
+                  handleDeleteGroup();
+                  handleCloseDeleteModal();
+                }}
+              >
+                Yes, Delete
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleCloseDeleteModal}
+                sx={{ ml: 2 }}
+              >
+                Cancel
+              </Button>
+            </Box>
+          </Modal>
+
         </CardContent>
       </Card>
-
-      <Box mt={4} mb={2}>
-        <Typography variant="h5" gutterBottom>
-          Messages
-        </Typography>
-        <Paper style={{ maxHeight: 300, overflow: 'auto' }}>
-          <List>
-            {messages.map((message) => (
-              <ListItem key={message.id} alignItems="flex-start">
-                <ListItemText
-                  primary={message.username}
-                  secondary={message.text}
-                />
-                <Divider variant="inset" component="li" />
-              </ListItem>
-            ))}
-            <div ref={messagesEndRef} />
-          </List>
-        </Paper>
-        <Box mt={2} display="flex">
-          <TextField
-            label="Type a message"
-            variant="outlined"
-            fullWidth
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={sendMessage}
-            style={{ marginLeft: '10px' }}
-          >
-            Send
-          </Button>
-        </Box>
-      </Box>
     </Container>
   );
 };

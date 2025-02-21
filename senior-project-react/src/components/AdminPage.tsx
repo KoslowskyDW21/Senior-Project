@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import React from "react";
-import { Button, IconButton, Modal, TextField, Typography, Box } from "@mui/material";
+import { Button, IconButton, Modal, TextField, Typography, Box, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Icon from "@mui/material/Icon";
 import CloseIcon from "@mui/icons-material/Close";
@@ -41,6 +41,8 @@ const modalStyle = {
   textAlign: "center",
 }
 
+const banTimes = [1, 7, 14, 21, 30, 60, 730];
+
 export default function AdminPage() {
   const [admin, setAdmin] = useState<boolean>(false);
   const [superAdmin, setSuperAdmin] = useState<boolean>(false);
@@ -48,6 +50,7 @@ export default function AdminPage() {
   const navigate = useNavigate();
   const [idInput, setIdInput] = useState('');
   const [userToBan, setUserToBan] = useState<User | null>(null);
+  const [indexOfLength, setIndexOfLength] = useState<number>(-1);
   const [open, setOpen] = useState(false);
   const handleOpenModal = () => setOpen(true);
   const handleCloseModal = () => setOpen(false);
@@ -149,10 +152,11 @@ export default function AdminPage() {
     !user.is_admin ? updateUser(false, id) : updateUser(true, id);
   }
 
-  async function banUser(userId: number, banUser: boolean) {
+  async function banUser(userId: number, banUser: boolean, days: number) {
     const data = {
       id: userId,
       ban: banUser,
+      days: days,
     };
 
     await axios.post("http://127.0.0.1:5000/admin/ban/", data, {
@@ -185,7 +189,7 @@ export default function AdminPage() {
     const newUsers = users.map((oldUser) => changeBan(oldUser, id));
     setUsers(newUsers);
 
-    banUser(id, true);
+    banUser(id, true, banTimes[indexOfLength]);
 
     setUserToBan(null);
   }
@@ -194,7 +198,7 @@ export default function AdminPage() {
     const newUsers = users.map((oldUser) => changeBan(oldUser, id));
     setUsers(newUsers);
 
-    banUser(id, false);
+    banUser(id, false, -1);
   }
 
   const handleDeleteRecipe = async() =>{
@@ -205,6 +209,11 @@ export default function AdminPage() {
       console.error('Error submitting ID');
     }
 
+  }
+
+  const handleLengthSelection = (event: SelectChangeEvent) => {
+    const length: number = +event.target.value;
+    setIndexOfLength(length);
   }
 
   if(admin) {
@@ -297,6 +306,25 @@ export default function AdminPage() {
             <Typography id="modal-description" variant="body1" component="p">
               {"Banning " + (userToBan !== null ? userToBan.username : "null")}
             </Typography>
+
+            <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small" >
+              <InputLabel id="length-label">Length</InputLabel>
+              <Select
+                labelId="length-label"
+                onChange={handleLengthSelection}
+              >
+                <MenuItem value={0}>1 Day</MenuItem>
+                <MenuItem value={1}>1 Week</MenuItem>
+                <MenuItem value={2}>2 Weeks</MenuItem>
+                <MenuItem value={3}>3 Weeks</MenuItem>
+                <MenuItem value={4}>1 Month</MenuItem>
+                <MenuItem value={5}>2 Months</MenuItem>
+                <MenuItem value={6}>Indefinite</MenuItem>
+              </Select>
+            </FormControl>
+
+            <br />
+
             <Button
               variant="contained"
               color="error"
@@ -310,6 +338,19 @@ export default function AdminPage() {
           </Box>
         </Modal>
 
+        <br />
+
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            navigate("/reported_content")
+          }}
+        >
+          View Reported Content
+        </Button>
+        
+        <br />
         <br />
       <TextField
         label="Enter Recipe ID"

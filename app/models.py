@@ -187,6 +187,17 @@ class GroupReport(db.Model):
     __tablename__ = "GroupReport"
     group_id = db.Column(db.Integer, db.ForeignKey("UserGroup.id"), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("User.id"), primary_key=True)
+    reason = db.Column(db.String(255), nullable=False)
+
+    def __str__(self):
+        return f"Group {self.group_id} reported by User {self.user_id} because {self.reason}"
+    
+    def to_json(self):
+        return {
+            "group_id": self.group_id,
+            "user_id": self.user_id,
+            "reason": self.reason,
+        }
 
 class GroupMember(db.Model):
     __tablename__ = 'GroupMember'
@@ -330,6 +341,22 @@ class Review(db.Model):
             "num_reports": self.num_reports,
             "user_id": self.user_id,
             "username": self.username
+        }
+
+class ReviewReport(db.Model):
+    __tablename__ = "ReviewReport"
+    review_id = db.Column(db.Integer, db.ForeignKey("Review.id"), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("User.id"), primary_key=True)
+    reason = db.Column(db.String(255), nullable=False)
+
+    def __str__(self):
+        return f"Review {self.review_id} reported by user {self.user_id} because {self.reason}"
+    
+    def to_json(self):
+        return {
+            "review_id": self.review_id,
+            "user_id": self.user_id,
+            "reason": self.reason
         }
 
 class Challenge(db.Model):
@@ -496,15 +523,17 @@ class UserNotifications(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
     notification_text = db.Column(db.Text, nullable=False)
-    isRead = db.Column(db.Integer, default=0, nullable=False)  
+    isRead = db.Column(db.Integer, default=0, nullable=False)
     notification_type = db.Column(db.Enum('friend_request', 'group_message', 'challenge_reminder'), nullable=True)
+    group_id = db.Column(db.Integer, db.ForeignKey('UserGroup.id'), nullable=True)
     def to_json(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
             "notification_text": self.notification_text,
             "isRead": self.isRead,
-            "notification_type": self.notification_type
+            "notification_type": self.notification_type,
+            "group_id": self.group_id
         }
 
 class FriendRequest(db.Model):
@@ -519,4 +548,14 @@ class FriendRequest(db.Model):
             "requestFrom": self.requestFrom,
             "requestTo": self.requestTo,
             "accepted": self.accepted
+        }
+    
+class RecipeDietaryRestriction(db.Model):
+    __tablename__ =  'RecipeDietaryRestriction'
+    recipe_id = db.Column(db.Integer, db.ForeignKey('Recipe.id'), primary_key=True)
+    dietary_restrictions = db.Column(db.Text)
+    def  to_json(self): 
+        return {
+            "recipe_id": self.recipe_id,
+            "dietary_restrictions": self.dietary_restrictions
         }

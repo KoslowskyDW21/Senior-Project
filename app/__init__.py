@@ -3,7 +3,7 @@ from flask_session import Session
 from config import Config
 from flask_login import LoginManager
 from flask_cors import CORS  
-from app.models import User, UserGroup, Recipe, RecipeIngredient, RecipeCuisine, RecipeStep, Ingredient, ShoppingList, ShoppingListItem, Cuisine, db
+from app.models import User, UserGroup, UserNotifications, Recipe, RecipeIngredient, RecipeCuisine, RecipeStep, Ingredient, ShoppingList, ShoppingListItem, Cuisine, db
 import string, random
 from datetime import datetime
 import requests
@@ -29,7 +29,7 @@ def create_app(config=Config):
     with app.app_context():
         # UNCOMMENT (and get rid of pass) TO REPOPULATE DATABASE
         # populate_database()
-        #create_dummy_groups()
+        # create_dummy_invite()
 
         pass
         
@@ -161,94 +161,16 @@ def save_recipes_to_db(recipes):
 
     db.session.commit()
 
-# a temporary method to fix some improperly stored data. This can safely be deleted
-def switch_category_and_youtube_url():
-        recipes = Recipe.query.all()
-        for recipe in recipes:
-            temp = recipe.category
-            recipe.category = recipe.youtube_url
-            recipe.youtube_url = temp
-        db.session.commit()
 
-def create_dummy_groups():
-    dummy_groups = [
-        UserGroup(
-            creator=2,
-            name="Group 10",
-            description="Test",
-            is_public=True,
-            num_reports=0
-        ),
-        UserGroup(
-            creator=2,
-            name="Group 11",
-            description="Test",
-            is_public=False,
-            num_reports=0
-        ),
-        UserGroup(
-            creator=2,
-            name="Group 12",
-            description="Test",
-            is_public=False,
-            num_reports=0
-        ),
-        UserGroup(
-            creator=2,
-            name="Group 13",
-            description="Test",
-            is_public=True,
-            num_reports=0
-        ),
-        UserGroup(
-            creator=2,
-            name="Group 14",
-            description="Test",
-            is_public=False,
-            num_reports=0
-        ),
-        UserGroup(
-            creator=2,
-            name="Group 15",
-            description="Test",
-            is_public=False,
-            num_reports=0
-        ),
-        UserGroup(
-            creator=2,
-            name="Group 16",
-            description="Test",
-            is_public=True,
-            num_reports=0
-        ),
-        UserGroup(
-            creator=2,
-            name="Group 17",
-            description="Test",
-            is_public=False,
-            num_reports=0
-        ),
-        UserGroup(
-            creator=2,
-            name="Group 18",
-            description="Test",
-            is_public=False,
-            num_reports=0
-        ),
-        UserGroup(
-            creator=2,
-            name="Group 19",
-            description="Test",
-            is_public=True,
-            num_reports=0
-        ),
-        UserGroup(
-            creator=2,
-            name="Group 20",
-            description="Test",
-            is_public=False,
-            num_reports=0
-        )
-    ]
-    db.session.add_all(dummy_groups)
+def create_dummy_invite():
+    # Create a new UserNotifications object
+    notification = UserNotifications(
+        user_id=3,
+        notification_text="You have been invited to join the group Group 1.",
+        notification_type='group_message',
+        group_id=1
+    )
+
+    # Add the notification to the session and commit
+    db.session.add(notification)
     db.session.commit()

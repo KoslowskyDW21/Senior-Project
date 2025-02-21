@@ -12,10 +12,7 @@ import {
   Tooltip,
   IconButton,
 } from "@mui/material";
-import Achievement from "./Achievements";
-import Confetti from "react-confetti";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import Header from "./Header";
 
 //TODO: If profile doesn't exist, display a message saying so instead of loading an empty profile
 
@@ -28,6 +25,22 @@ interface ProfileResponse {
   user_level: number;
   xp_points: number;
   hasLeveled: boolean;
+}
+
+interface Friendship {
+  friends: [];
+}
+
+interface User {
+  users: [];
+}
+
+interface FriendRequestTo {
+  friend_requests_to: [];
+}
+
+interface FriendRequestFrom {
+  friend_requests_from: [];
 }
 
 const modalStyle = {
@@ -52,6 +65,8 @@ const OtherProfile: React.FC = () => {
     id = "1";
   }
 
+  const numericId = Number(id);
+
   const [lname, setLname] = useState<String>();
   const [fname, setFname] = useState<String>();
   const [username, setUsername] = useState<String>();
@@ -60,6 +75,9 @@ const OtherProfile: React.FC = () => {
   const [user_level, setLevel] = useState<number>(0);
   const [xp_points, setXp_points] = useState<number>(0);
   const [hasLeveled, setHasLeveled] = useState<boolean>(false);
+  const [friends, setFriends] = useState<[]>([]);
+  const [friendRequestsTo, setFriendRequestsTo] = useState<[]>([]);
+  const [friendRequestsFrom, setFriendRequestsFrom] = useState<[]>([]);
 
   const [openAchievementModal, setOpenAchievementModal] = useState(false);
   const [selectedAchievement, setSelectedAchievement] =
@@ -94,7 +112,7 @@ const OtherProfile: React.FC = () => {
 
   const [hovered, setHovered] = useState(false);
 
-  const getResponse = async () => {
+  const getProfileResponse = async () => {
     try {
       const response = await axios.get(
         `http://127.0.0.1:5000/profile/get_other_profile/${id}`,
@@ -119,8 +137,125 @@ const OtherProfile: React.FC = () => {
     }
   };
 
+  const getFriends = async () => {
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/friends/get_friends/",
+        {},
+        { withCredentials: true }
+      );
+      const data: Friendship = response.data;
+      setFriends(data.friends);
+    } catch (error) {
+      console.error("Error fetching friends: ", error);
+    }
+  };
+
+  const getFriendRequestsTo = async () => {
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/friends/get_requests_to/",
+        {},
+        { withCredentials: true }
+      );
+      const data: FriendRequestTo = response.data;
+      setFriendRequestsTo(data.friend_requests_to);
+      console.log("Friend requests to: ", data.friend_requests_to);
+    } catch (error) {
+      console.error("Error fetching friend requests to: ", error);
+    }
+  };
+
+  const getFriendRequestsFrom = async () => {
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/friends/get_requests_from/",
+        {},
+        { withCredentials: true }
+      );
+      const data: FriendRequestFrom = response.data;
+      setFriendRequestsFrom(data.friend_requests_from);
+    } catch (error) {
+      console.error("Error fetching friend requests from: ", error);
+    }
+  };
+
+  const sendFriendRequest = async (friendId: number) => {
+    try {
+      const response = await axios.post(
+        `http://127.0.0.1:5000/friends/send_request/${friendId}`,
+        { friend_id: friendId },
+        { withCredentials: true }
+      );
+      console.log("Friend request sent:", response.data);
+      getFriendRequestsTo();
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+    }
+  };
+
+  const revokeFriendRequest = async (friendId: number) => {
+    try {
+      const response = await axios.post(
+        `http://127.0.0.1:5000/friends/revoke_request/${friendId}`,
+        { friend_id: friendId },
+        { withCredentials: true }
+      );
+      console.log("Friend request revoked:", response.data);
+      getFriendRequestsTo();
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+    }
+  };
+
+  const declineFriendRequest = async (friendId: number) => {
+    try {
+      const response = await axios.post(
+        `http://127.0.0.1:5000/friends/decline_request/${friendId}`,
+        { friend_id: friendId },
+        { withCredentials: true }
+      );
+      console.log("Friend request declined:", response.data);
+      getFriendRequestsFrom();
+    } catch (error) {
+      console.error("Error declining friend request:", error);
+    }
+  };
+
+  const acceptFriendRequest = async (friendId: number) => {
+    try {
+      const response = await axios.post(
+        `http://127.0.0.1:5000/friends/accept_request/${friendId}`,
+        { friend_id: friendId },
+        { withCredentials: true }
+      );
+      console.log("Friend request accepted:", response.data);
+      getFriendRequestsFrom();
+      getFriends();
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
+    }
+  };
+
+  const removeFriend = async (friendId: number) => {
+    try {
+      const response = await axios.post(
+        `http://127.0.0.1:5000/friends/remove_friend/${friendId}`,
+        { friend_id: friendId },
+        { withCredentials: true }
+      );
+      console.log("Friend removed:", response.data);
+      getFriends();
+    } catch (error) {
+      console.error("Error removingFriend:", error);
+    }
+  };
+
   useEffect(() => {
-    getResponse();
+    getProfileResponse();
+    getFriends();
+    getFriendRequestsFrom();
+    getFriendRequestsTo();
   }, []);
 
   const handleGoToRecipes = async () => {
@@ -132,6 +267,16 @@ const OtherProfile: React.FC = () => {
   };
 
   const xpBarRef = useRef<HTMLDivElement | null>(null);
+
+  const isFriendRequestReceived = friendRequestsFrom.some(
+    (request: any) => request.requestFrom === numericId
+  );
+
+  const isFriendRequestGiven = friendRequestsTo.some(
+    (request: any) => request.requestTo === numericId
+  );
+
+  const isFriend = friends.some((friend: any) => friend.id === numericId);
 
   return (
     <>
@@ -169,14 +314,57 @@ const OtherProfile: React.FC = () => {
 
         {/* Button Container (Stacked Vertically) */}
         <Box display="flex" flexDirection="column" gap={1}>
+          {/* If they sent you a friend request, have option to accept or decline */}
+          {/* If you sent them a friend request, button should say "requested" */}
+          {/* If friends, button should say "remove friend" */}
+          {isFriend ? (
+            <Button
+              variant="contained"
+              color="warning"
+              onClick={() => removeFriend(numericId)}
+            >
+              Remove Friend
+            </Button>
+          ) : isFriendRequestReceived ? (
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => acceptFriendRequest(numericId)}
+              >
+                Accept Friend Request
+              </Button>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() => declineFriendRequest(numericId)}
+              >
+                Decline Friend Request
+              </Button>
+            </Box>
+          ) : isFriendRequestGiven ? (
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => revokeFriendRequest(numericId)}
+            >
+              Revoke Friend Request
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => sendFriendRequest(numericId)}
+            >
+              Send Friend Request
+            </Button>
+          )}
+
           <Button
             variant="contained"
-            color="primary"
-            onClick={() => navigate("/friends")}
+            color="error"
+            onClick={() => console.log("RequestFrom list:", friendRequestsFrom)}
           >
-            View All Friends
-          </Button>
-          <Button variant="contained" color="warning">
             block button 4 jeff
           </Button>
         </Box>

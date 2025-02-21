@@ -47,6 +47,12 @@ def ban_user():
     print("Received data - banned: " + str(isBanned))
     user = User.query.filter_by(id=userId).first()
     user.is_banned = isBanned # type: ignore
+
+    if isBanned:
+        days = data.get("days")
+        print("Received data - days: " + str(days))
+        # TODO: Finish this method once banning functionality is working properly
+
     try:
         db.session.commit()
         return jsonify({"message": "User ban status updated"}), 200

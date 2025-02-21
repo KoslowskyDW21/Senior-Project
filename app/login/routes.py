@@ -341,3 +341,8 @@ def logout():
     # Log out the current user (invalidate the session)
     logout_user()
     return jsonify({"message": "Successfully logged out"}), 200
+
+@bp.route('/current_user/', methods=['GET'])
+def get_current_user():
+    return current_user.to_json(), 200
+

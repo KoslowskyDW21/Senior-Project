@@ -1,22 +1,81 @@
 from __future__ import annotations
 import math
+from sqlalchemy import case, or_
 from flask import request, jsonify, render_template, redirect, url_for, abort, flash, current_app
 from flask_login import current_user, login_required
 from app.recipes import bp
-from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, Review, db
+from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, Review, ReviewReport, Cuisine, db
 import os
 import uuid
 from werkzeug.utils import secure_filename
+from math import ceil
 
 # @bp.get('/')
 # def home():
 #     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
 
+#@bp.post("/")
+#def post_recipes():
+    #print("Fetching recipes")
+    #recipes = Recipe.query.all()
+    #return jsonify([recipe.to_json() for recipe in recipes]), 200
+
+
+
 @bp.post("/")
 def post_recipes():
     print("Fetching recipes")
+    search_query = request.args.get('search_query', '').strip()  # Clean search query
+    page = max(1, int(request.args.get('page', 1)))  # Ensure page is at least 1
+    per_page = int(request.args.get('per_page', 20))
+
+    print(f"Search query: {search_query}, Page: {page}, Per page: {per_page}")
+    
+    recipes_query = Recipe.query
+
+    if search_query != "":
+        name_filter_start = Recipe.recipe_name.ilike(f"{search_query}%")
+        name_filter_contains = Recipe.recipe_name.ilike(f"%{search_query}%")
+        category_filter = Recipe.category.ilike(f"%{search_query}%")
+        cuisine_filter = Cuisine.name.ilike(f"%{search_query}%")
+
+        recipes_query = recipes_query.join(
+            RecipeCuisine, RecipeCuisine.recipe_id == Recipe.id
+        ).join(
+            Cuisine, Cuisine.id == RecipeCuisine.cuisine_id
+        )
+
+        recipes_query = recipes_query.filter(
+            or_(
+                name_filter_start,
+                name_filter_contains,
+                category_filter,
+                cuisine_filter
+            )
+        )
+
+        recipes_query = recipes_query.order_by(
+            name_filter_start.desc(),
+            name_filter_contains.desc(),
+            category_filter.desc(),
+            cuisine_filter.desc()
+        )
+
+    recipes_paginated = recipes_query.paginate(page=page, per_page=per_page, error_out=False)
+    total_pages = ceil(recipes_paginated.total / per_page)  # type: ignore
+    recipes = [recipe.to_json() for recipe in recipes_paginated.items]
+
+    return jsonify({
+        'recipes': recipes,
+        'total_pages': total_pages,
+        'current_page': page
+    }), 200
+
+@bp.get("/all/")
+def get_all_recipes_at_once():
+    print("Fetching all recipes")
     recipes = Recipe.query.all()
-    return jsonify([recipe.to_json() for recipe in recipes]), 200
+    return jsonify({'recipes': [recipe.to_json() for recipe in recipes]})
 
 @bp.get("/<int:id>/")
 def get_recipe_page(id):
@@ -146,7 +205,76 @@ def reviews(id):
         "reviews": [review.to_json() for review in reviews],
     }), 200
 
+@bp.route("/reported_reviews", methods=["GET"])
+@login_required
+def get_reported_reviews():
+    reportedReviews = Review.query.filter(Review.num_reports > 0).all()
+    return jsonify([review.to_json() for review in reportedReviews]), 200
 
+@bp.route("/<int:review_id>/delete_reports", methods=["DELETE"])
+@login_required
+def delete_reports(review_id: int):
+    reports = ReviewReport.query.filter_by(review_id=review_id).all()
+
+    for report in reports:
+        db.session.delete(report)
+
+    db.session.commit()
+    return jsonify({"message": "Reports successfully deleted"}), 200
+
+@bp.route("/<int:review_id>/delete", methods=["DELETE"])
+@login_required
+def delete_review(review_id):
+    review = Review.query.get(review_id)
+    if not review:
+        return jsonify({"message": "Review not found"}), 404
+    
+    db.session.delete(review)
+    db.session.commit()
+
+    return jsonify({"message": "Review deleted successfully"}), 200
+
+@bp.get("/<int:review_id>/report")
+@login_required
+def get_report_review(review_id: int):
+    user = current_user._get_current_object()
+
+    report = ReviewReport.query.filter_by(user_id=user.id, review_id=review_id).first() # type: ignore
+
+    if report != None:
+        return jsonify({"alreadyReported": True, "id": user.id}) # type: ignore
+    
+    return jsonify({"alreadyReported": False, "id": user.id}) # type: ignore
+
+@bp.post("/<int:review_id>/report")
+@login_required
+def post_report_review(review_id: int):
+    data = request.get_json()
+    userId = data.get("user_id")
+    reviewId = data.get("review_id")
+
+    print("Received data - userID: " + str(userId))
+    print("Received data - reviewID: " + str(review_id))
+
+    newReport: ReviewReport = ReviewReport(review_id=reviewId, user_id=userId, reason="N/A") # type: ignore
+    print(newReport)
+    review: Review = Review.query.filter_by(id=reviewId).first() # type: ignore
+    review.num_reports += 1
+
+    try:
+        db.session.add(newReport)
+        db.session.commit()
+        return jsonify({"message": f"Review {reviewId} reported"}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error reporting review: {e}")
+        return jsonify({"message": "Error: could not report review"}), 500
+    
+@bp.route("/reports/<int:id>", methods=["GET"])
+@login_required
+def get_reports(id: int):
+    reports = ReviewReport.query.filter_by(review_id=id).all()
+    return jsonify([report.to_json() for report in reports]), 200
 
 
 def completionAchievements(id):
