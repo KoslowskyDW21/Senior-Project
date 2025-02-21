@@ -17,7 +17,9 @@ import {
   SelectChangeEvent
 } from "@mui/material"; //matui components
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar'
 import axios, { all, AxiosError } from "axios";
+import CloseIcon from '@mui/icons-material/Close';
 
 interface Recipe {
   id: number;
@@ -96,6 +98,8 @@ const RecipeLists: React.FC = () => {
   const [recipe_list, setRecipe_list] = React.useState<RecipeList>();
   const [searchQuery, setSearchQuery] = React.useState<String>("");
   const [recipeToAddId, setRecipeToAddId] = React.useState<string>("");
+  const [message, setMessage] = React.useState('');
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
   const { id } = useParams<{ id: string }>();
 
   const navigate = useNavigate();
@@ -148,9 +152,37 @@ const RecipeLists: React.FC = () => {
     recipe.recipe_name.toLowerCase().includes(searchQuery.toLocaleLowerCase())
   );
 
+  {/* Copy/pasted snackbar stuff */}
+  const handleSnackBarClose = (
+    event: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason,
+    ) => {
+        if (reason === 'clickaway') {
+            return;
+          }
+
+          setSnackbarOpen(false);
+    };
+
+  {/* More copy/pasted snackbar stuff */}
+  const action = (
+    <React.Fragment>
+      {/* <Button color="secondary" size="small" onClick={handleSnackBarClose}>
+        Close
+      </Button> */}
+      <IconButton
+        size="small"
+        aria-label="close"
+        color="inherit"
+        onClick={handleSnackBarClose}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </React.Fragment>
+  );
+
   // @ts-expect-error
   function Recipe({ rid, name, difficulty, image, lid }) {
-    const [message, setMessage] = React.useState<String>();
     rid = rid.toString(); // hacky insurance against mistakes
 
     const handleGoToRecipe = async () => {
@@ -173,7 +205,7 @@ const RecipeLists: React.FC = () => {
           { headers: { "Content-Type": "multipart/form-data" } }
         );
         const data: RemoveRecipeFromListResponse = response.data;
-        setMessage(data.message);
+        setMessage("Recipe successfully removed from list");
         console.log(data.message);
         getRecipesAndThisList();
       } catch (error) {
@@ -186,6 +218,7 @@ const RecipeLists: React.FC = () => {
           setMessage("An unknown error occurred--how spooky");
         }
       }
+      setSnackbarOpen(true);
     };
 
     return (
@@ -214,12 +247,16 @@ const RecipeLists: React.FC = () => {
       const response = await axios.post(`http://127.0.0.1:5000/shopping_lists/items/addlist/${id}`);
       if (response.status == 200) {
         console.log("Recipes successfully added to shopping list");
+        setMessage("Recipes successfully added to shopping list");
       } else {
         console.error("Something went wrong while trying to add all recipes to shopping list");
+        setMessage("Something went wrong while trying to add all recipes to shopping list");
       }
     } catch (error) {
       console.error("Error in trying to add all recipes to shopping list", error);
+      setMessage("Error in trying to add all recipes to shopping list");
     }
+    setSnackbarOpen(true);
   }
 
   async function handleAddRecipeToList(event: SelectChangeEvent) {
@@ -228,6 +265,10 @@ const RecipeLists: React.FC = () => {
       console.error("The ID of the recipe to add is undefined");
     }
     try {
+      if (id == undefined) {
+        console.error("id of list is undefined")
+        return;
+      }
       const formData = new FormData();
       formData.append("rid", event.target.value);
       formData.append("lid", id);
@@ -235,15 +276,15 @@ const RecipeLists: React.FC = () => {
         { headers: { "Content-Type": "multipart/form-data" }}
       );
       const data: AddRecipeToListResponse = response.data;
-      // setMessage(data.message);
       console.log(data.message);
+      setMessage(`Successfully added recipe to this list`);
     } catch (error) {
       const axiosError = error as AxiosError;
       if (axiosError.response && axiosError.response.data) {
           const errorData = axiosError.response.data as AddRecipeToListResponse;
-          // setMessage(errorData.message);
+          setMessage(errorData.message);
       } else {
-          // setMessage("An unknown error occurred");
+          setMessage("An unknown error occurred");
           console.error("An unknown error occurred!");
       }
     }
@@ -410,6 +451,14 @@ const RecipeLists: React.FC = () => {
       <Button onClick={handleAddAllIngredientsToShoppingList} variant="contained" color="primary">
         Add All to Shopping List
       </Button>
+
+      <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
+          onClose={handleSnackBarClose}
+          message={message}
+          action={action}
+      />
     </>
   );
 };
