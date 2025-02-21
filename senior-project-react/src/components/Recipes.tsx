@@ -138,8 +138,6 @@ const Recipes: React.FC = () => {
 
 
   useEffect(() => {
-    if (hasMounted.current) return;
-    hasMounted.current = true;
     window.scrollTo(0, 0)
     setRecipes([]);  
     setPage(1);  
