@@ -57,7 +57,7 @@ def add_all_recipes_in_recipe_list_to_sl(recipe_list_id):
         slis = [] # ShoppingListItem[]
         curr_shopping_list = ShoppingList.query.filter_by(user_id=current_user.id).first()
         for recipe_id in recipe_ids:
-            recipe = Recipe.query.filter_by(recipe_id=recipe_id).first()
+            recipe = Recipe.query.filter_by(id=recipe_id).first()
             recipes.append(recipe)
         for recipe in recipes:
             recipe_ingredients = RecipeIngredient.query.filter_by(recipe_id=recipe.id)
@@ -69,8 +69,8 @@ def add_all_recipes_in_recipe_list_to_sl(recipe_list_id):
                 slis.append(sli)
                 db.session.add(sli)
         db.session.commit()
-    except:
-        print("Error")
+    except (Exception):
+        print(f"Error:")
         return jsonify({"message": "Error"}), 500
     return jsonify({"message": "Success"}), 200
 
