@@ -346,3 +346,29 @@ def logout():
 def get_current_user():
     return current_user.to_json(), 200
 
+@bp.route('/users/<int:user_id>', methods=['GET'])
+@login_required
+def get_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
+    user_data = {
+        "id": user.id,
+        "fname": user.fname,
+        "lname": user.lname,
+        "email_address": user.email_address,
+        "username": user.username,
+        "profile_picture": user.profile_picture,
+        "xp_points": user.xp_points,
+        "user_level": user.user_level,
+        "is_admin": user.is_admin,
+        "num_recipes_completed": user.num_recipes_completed,
+        "colonial_floor": user.colonial_floor,
+        "colonial_side": user.colonial_side,
+        "date_created": user.date_created.isoformat() if user.date_created else None,
+        "last_logged_in": user.last_logged_in.isoformat() if user.last_logged_in else None,
+        "num_reports": user.num_reports,
+    }
+
+    return jsonify(user_data), 200
