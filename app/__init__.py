@@ -29,7 +29,7 @@ def create_app(config=Config):
     with app.app_context():
         # UNCOMMENT (and get rid of pass) TO REPOPULATE DATABASE
         # populate_database()
-        create_dummy_invite()
+        #create_dummy_invite()
 
         pass
         
