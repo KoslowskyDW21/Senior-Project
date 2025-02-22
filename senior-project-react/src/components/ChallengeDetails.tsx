@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from '@mui/icons-material/Close';
+import ChallengeParticipantsList from "./ChallengeParticipantsList";
 
 interface Challenge {
   id: number;
@@ -35,7 +36,6 @@ interface Challenge {
 
 interface Participant {
   user_id: number;
-  username: string;
 }
 
 interface User {
@@ -64,7 +64,7 @@ interface Friend {
 const ChallengeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [challenge, setChallenge] = useState<Challenge | null>(null);
-  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [participants, setParticipants] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedFriends, setSelectedFriends] = useState<number[]>([]);
@@ -84,7 +84,16 @@ const ChallengeDetail: React.FC = () => {
   const fetchParticipants = async () => {
     try {
       const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}/participants`);
-      setParticipants(response.data);
+      const participantIds: Participant[] = response.data;
+
+      const userResponses = await Promise.all(
+        participantIds.map((participant) =>
+          axios.get(`http://127.0.0.1:5000/users/${participant.user_id}`)
+        )
+      );
+
+      const users: User[] = userResponses.map((res) => res.data);
+      setParticipants(users);
     } catch (error) {
       console.error("Error fetching participants:", error);
     }
@@ -112,8 +121,7 @@ const ChallengeDetail: React.FC = () => {
     if (new Date(challenge!.start_time) > new Date()) {
       try {
         await axios.post(`http://127.0.0.1:5000/challenges/${id}/join`);
-        const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}/participants`);
-        setParticipants(response.data);
+        fetchParticipants();
       } catch (error) {
         console.error("Error joining challenge:", error);
       }
@@ -126,8 +134,7 @@ const ChallengeDetail: React.FC = () => {
     if (new Date(challenge!.start_time) > new Date()) {
       try {
         await axios.post(`http://127.0.0.1:5000/challenges/${id}/leave`);
-        const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}/participants`);
-        setParticipants(response.data);
+        fetchParticipants();
       } catch (error) {
         console.error("Error leaving challenge:", error);
       }
@@ -179,7 +186,7 @@ const ChallengeDetail: React.FC = () => {
     );
   }
 
-  const isParticipant = participants.some((p) => p.user_id === currentUser.id);
+  const isParticipant = participants.some((p) => p.id === currentUser.id);
   const isCreator = challenge.creator === currentUser.id;
   const now = new Date();
   const startTime = new Date(challenge.start_time);
@@ -189,7 +196,7 @@ const ChallengeDetail: React.FC = () => {
   return (
     <Container>
       <IconButton
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/challenges")}
         style={{ position: "absolute", top: 30, left: 30 }} 
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
@@ -258,7 +265,7 @@ const ChallengeDetail: React.FC = () => {
                 Leave Challenge
               </Button>
             )}
-            {isParticipant && (
+            {isParticipant && now < startTime && (
               <Button
                 variant="contained"
                 color="primary"
@@ -272,11 +279,7 @@ const ChallengeDetail: React.FC = () => {
             <Typography variant="h5" gutterBottom>
               Participants
             </Typography>
-            <ul>
-              {participants.map((participant) => (
-                <li key={participant.user_id}>{participant.username}</li>
-              ))}
-            </ul>
+            <ChallengeParticipantsList participants={participants} />
           </Box>
           {isParticipant && now >= startTime && now <= votingEndTime && (
             <Box textAlign="center" mt={3}>

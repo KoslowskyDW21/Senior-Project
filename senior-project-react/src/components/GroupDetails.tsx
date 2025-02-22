@@ -268,7 +268,7 @@ const GroupDetails: React.FC = () => {
   return (
     <Container>
       <IconButton
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/groups")}
         style={{ position: "absolute", top: 30, left: 30 }} 
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
