@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Container, TextField, IconButton } from "@mui/material";
+import { Button, Container, TextField, IconButton, Box, Typography } from "@mui/material";
 import axios, { AxiosError } from "axios";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -11,6 +11,7 @@ interface CreateRecipeListResponse {
 
 const CreateRecipeList: React.FC = () => {
     const [ name, setName ] = useState("");
+    const [ image, setImage ] = useState<File | null>(null);
     const [ message, setMessage ] = useState("");
     const navigate = useNavigate();
 
@@ -18,6 +19,9 @@ const CreateRecipeList: React.FC = () => {
         console.log(`Trying to create a recipe list with the name ${name}`);
         const formData = new FormData();
         formData.append("name", name);
+        if (image) {
+            formData.append("image", image);
+        }
         try {
             const response = await axios.post(
                 "http://127.0.0.1:5000/recipe_lists/createlist",
@@ -61,6 +65,17 @@ const CreateRecipeList: React.FC = () => {
                 onChange={(e) => setName(e.target.value)}
                 margin="normal"
             />
+
+            <Box textAlign="left" mt={2}>
+                <Typography>Select an image:</Typography>
+            </Box>
+            <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImage(e.target.files ? e.target.files[0] : null)}
+                style={{ display: "block", margin: "20px 0" }}
+            />
+
             <Button
                 onClick={handleCreateRecipeList}
                 variant="contained"

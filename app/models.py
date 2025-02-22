@@ -500,11 +500,13 @@ class RecipeList(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.Text, nullable=False)
     belongs_to = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    image = db.Column(db.Text, nullable=True)
     def to_json(self):
         return {
             "id": self.id,
             "name": self.name,
             "belongs_to": self.belongs_to,
+            "image": self.image,
         }
     
 class RecipeRecipeList(db.Model):
