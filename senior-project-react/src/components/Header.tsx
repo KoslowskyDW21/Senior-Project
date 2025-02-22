@@ -122,7 +122,8 @@ const Header: React.FC<HeaderProps> = ({
     event: React.MouseEvent<HTMLElement>,
     id: number,
     notification_type: string,
-    group_id?: number // Add this parameter
+    group_id?: number,
+    challenge_id?: number
   ) => {
     console.log(id);
     setNotificationAnchorEl(event.currentTarget);
@@ -130,9 +131,9 @@ const Header: React.FC<HeaderProps> = ({
     if (notification_type === "friend_request") {
       navigate("/friends");
     } else if (notification_type === "group_message" && group_id) {
-      navigate(`/groups/${group_id}/invite_response`); // Update this line
+      navigate(`/groups/${group_id}/invite_response`);
     } else if (notification_type === "challenge_reminder") {
-      navigate("/challenges");
+      navigate(`/challenges/${challenge_id}/invite_response`);
     }
   };
 
@@ -320,7 +321,8 @@ const Header: React.FC<HeaderProps> = ({
                       event,
                       notification.id,
                       notification.notification_type,
-                      notification.group_id // Pass the group_id here
+                      notification.group_id,
+                      notification.challenge_id
                     )
                   }
                 >

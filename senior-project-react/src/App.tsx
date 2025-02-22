@@ -21,6 +21,7 @@ import "./App.css";
 import Challenges from "./components/Challenges";
 import ChallengeDetail from "./components/ChallengeDetails";
 import ChallengeVoting from "./components/ChallengeVoting";
+import ChallengeInviteResponse from "./components/ChallengeInviteResponse";
 import Achievements from "./components/Achievements";
 import AchievementSpecific from "./components/AchievementSpecific";
 import CompletedRecipe from "./components/CompletedRecipe";
@@ -114,6 +115,7 @@ function App() {
               <Route path="/challenges/:id/vote" element={<ChallengeVoting />} />
               <Route path="/past-challenges" element={<PastChallenges />} />
               <Route path="/challenges/:id/vote_results" element={<ChallengeResults />} />
+              <Route path="/challenges/:id/invite_response" element={<ChallengeInviteResponse />} />
 
               {/*achievements*/}
               <Route path="/achievements" element={<Achievements />} />
