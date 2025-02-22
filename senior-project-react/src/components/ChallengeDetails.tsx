@@ -279,7 +279,7 @@ const ChallengeDetail: React.FC = () => {
             <Typography variant="h5" gutterBottom>
               Participants
             </Typography>
-            <ChallengeParticipantsList participants={participants} />
+            <ChallengeParticipantsList participants={participants} isCreator={isCreator} challengeId={challenge.id} creatorId={currentUser.id}/>
           </Box>
           {isParticipant && now >= startTime && now <= votingEndTime && (
             <Box textAlign="center" mt={3}>

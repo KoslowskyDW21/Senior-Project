@@ -1,5 +1,6 @@
 import React from "react";
-import { List, ListItem, ListItemText, Avatar, Box } from "@mui/material";
+import { List, ListItem, ListItemText, Avatar, Box, Button, Typography} from "@mui/material";
+import axios from "axios";
 
 interface User {
   id: number;
@@ -9,11 +10,25 @@ interface User {
 
 interface ChallengeParticipantsListProps {
   participants: User[];
+  isCreator: boolean;
+  challengeId: number;
+  creatorId: number;
 }
 
-const ChallengeParticipantsList: React.FC<ChallengeParticipantsListProps> = ({ participants }) => {
+const ChallengeParticipantsList: React.FC<ChallengeParticipantsListProps> = ({ participants, isCreator, challengeId, creatorId }) => {
   const getProfilePictureUrl = (profilePicture: string | null) => {
     return profilePicture ? `http://127.0.0.1:5000/${profilePicture}` : "";
+  };
+
+  const handleKickUser = async (userId: number) => {
+    try {
+      await axios.post(`http://127.0.0.1:5000/challenges/${challengeId}/kick`, { user_id: userId });
+      alert("User kicked successfully!");
+    } catch (error) {
+      console.error("Error kicking user:", error);
+      alert("Failed to kick user.");
+    }
+    window.location.reload();
   };
 
   return (
@@ -34,7 +49,34 @@ const ChallengeParticipantsList: React.FC<ChallengeParticipantsListProps> = ({ p
               alt={participant.username}
               sx={{ marginRight: 2 }}
             />
-            <ListItemText primary={participant.username} />
+            <ListItemText
+              primary={
+                <Typography
+                  sx={{
+                    color:
+                      participant.id === creatorId
+                        ? "blue"
+                        : "black",
+                  }}
+                >
+                  {participant.username}
+                  {participant.id === creatorId && (
+                    <Typography component="span" sx={{ color: "blue", marginLeft: 1 }}>
+                      (Creator)
+                    </Typography>
+                  )}
+                </Typography>
+              }
+            />
+            {isCreator && participant.id !== creatorId && (
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => handleKickUser(participant.id)}
+              >
+                Kick User
+              </Button>
+            )}
           </ListItem>
         ))}
       </List>

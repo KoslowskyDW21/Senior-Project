@@ -340,3 +340,26 @@ def handle_challenge_invite_response(challenge_id):
         return jsonify({"message": "Challenge invitation denied!"}), 200
     else:
         return jsonify({"message": "Invalid response"}), 400
+    
+
+@bp.route('/<int:challenge_id>/kick', methods=['POST'])
+@login_required
+def kick_user_from_challenge(challenge_id):
+    data = request.get_json()
+    user_id_to_kick = data.get('user_id')
+
+    challenge = Challenge.query.get(challenge_id)
+    if not challenge:
+        return jsonify({"message": "Challenge not found"}), 404
+
+    if challenge.creator != current_user.id:
+        return jsonify({"message": "Permission denied"}), 403
+
+    participant = ChallengeParticipant.query.filter_by(challenge_id=challenge_id, user_id=user_id_to_kick).first()
+    if not participant:
+        return jsonify({"message": "User not found in challenge"}), 404
+
+    db.session.delete(participant)
+    db.session.commit()
+
+    return jsonify({"message": "User kicked successfully!"}), 200

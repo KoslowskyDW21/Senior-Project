@@ -332,3 +332,26 @@ def invite_response(group_id):
         return jsonify({"message": "You have denied the invitation."}), 200
     else:
         return jsonify({"message": "Invalid response."}), 400
+    
+
+@bp.route('/<int:group_id>/kick', methods=['POST'])
+@login_required
+def kick_user_from_group(group_id):
+    data = request.get_json()
+    user_id_to_kick = data.get('user_id')
+
+    group = UserGroup.query.get(group_id)
+    if not group:
+        return jsonify({"message": "Group not found"}), 404
+
+    if group.creator != current_user.id:
+        return jsonify({"message": "Permission denied"}), 403
+
+    participant = GroupMember.query.filter_by(group_id=group_id, member_id=user_id_to_kick).first()
+    if not participant:
+        return jsonify({"message": "User not found in group"}), 404
+
+    db.session.delete(participant)
+    db.session.commit()
+
+    return jsonify({"message": "User kicked successfully!"}), 200

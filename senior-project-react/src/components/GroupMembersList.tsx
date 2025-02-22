@@ -1,5 +1,5 @@
 import React from "react";
-import { List, ListItem, ListItemText, Avatar, Box, Button } from "@mui/material";
+import { List, ListItem, ListItemText, Avatar, Box, Button, Typography } from "@mui/material";
 import axios from "axios";
 
 interface GroupMember {
@@ -43,10 +43,18 @@ const GroupMembersList: React.FC<GroupMembersListProps> = ({
     }
   };
 
+  const handleKickUser = async (userId: number) => {
+    try {
+      await axios.post(`http://127.0.0.1:5000/groups/${groupId}/kick`, { user_id: userId });
+      alert("User kicked successfully!");
+      fetchMembers();
+    } catch (error) {
+      console.error("Error kicking user:", error);
+      alert("Failed to kick user.");
+    }
+  };
+
   const isTrustedOrCreator = (userId: number) => {
-    console.log("User ID: ", userId);
-    console.log("Group Creator ID: ", groupCreatorId);
-    console.log("Trusted Member IDs: ", trustedMemberIds);
     return userId === groupCreatorId || trustedMemberIds.includes(userId);
   };
 
@@ -68,10 +76,35 @@ const GroupMembersList: React.FC<GroupMembersListProps> = ({
               alt={member.username}
               sx={{ marginRight: 2 }}
             />
-            <ListItemText primary={member.username} />
-            {isTrustedOrCreator(currentUserId) && (
-              member.user_id !== groupCreatorId && (
-                trustedMemberIds.includes(member.user_id) ? (
+            <ListItemText
+              primary={
+                <Typography
+                  sx={{
+                    color:
+                      member.user_id === groupCreatorId
+                        ? "blue"
+                        : trustedMemberIds.includes(member.user_id)
+                        ? "green"
+                        : "black",
+                  }}
+                >
+                  {member.username}
+                  {member.user_id === groupCreatorId && (
+                    <Typography component="span" sx={{ color: "blue", marginLeft: 1 }}>
+                      (Creator)
+                    </Typography>
+                  )}
+                  {trustedMemberIds.includes(member.user_id) && member.user_id !== groupCreatorId && (
+                    <Typography component="span" sx={{ color: "green", marginLeft: 1 }}>
+                      (Trusted)
+                    </Typography>
+                  )}
+                </Typography>
+              }
+            />
+            {isTrustedOrCreator(currentUserId) && member.user_id !== groupCreatorId && (
+              <>
+                {trustedMemberIds.includes(member.user_id) ? (
                   <Button
                     variant="contained"
                     color="secondary"
@@ -87,8 +120,18 @@ const GroupMembersList: React.FC<GroupMembersListProps> = ({
                   >
                     Set Trusted
                   </Button>
-                )
-              )
+                )}
+                {currentUserId === groupCreatorId || !trustedMemberIds.includes(member.user_id) ? (
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={() => handleKickUser(member.user_id)}
+                    sx={{ marginLeft: 1 }}
+                  >
+                    Kick User
+                  </Button>
+                ) : null}
+              </>
             )}
           </ListItem>
         ))}
