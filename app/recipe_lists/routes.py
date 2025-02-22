@@ -45,6 +45,11 @@ def delete_list():
     if not lid:
         return jsonify({"message": "List ID must be specified"}), 400
     try:
+        recipeRecipeLists = RecipeRecipeList.query.filter_by(recipe_list_id=lid).all()
+        for rrl in recipeRecipeLists:
+            rrl.recipe_id = -1
+            db.session.delete(rrl)
+            db.session.commit()
         recipeList = RecipeList.query.filter_by(id=lid).first()
         if recipeList:
             db.session.delete(recipeList)
