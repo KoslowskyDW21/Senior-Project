@@ -51,6 +51,7 @@ def delete_list():
             db.session.commit()
             return jsonify({"message": f"List {lid} deleted successfully"}), 200
     except Exception as e:
+        print("Failure to delete", e)
         return jsonify({"message": f"RecipeList {lid} failed to be deleted: {str(e)}"}), 500
         
 
