@@ -1,7 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Button, Card, CardHeader, CardMedia, CardActionArea, Box } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardMedia,
+  CardActionArea,
+  Box,
+} from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import Header from "./Header";
 import debounce from "lodash.debounce";
@@ -46,7 +53,10 @@ function Recipe({ id, name, difficulty, image }) {
   };
 
   return (
-    <Card variant="outlined" sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <Card
+      variant="outlined"
+      sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+    >
       <CardActionArea onClick={handleGoToRecipe}>
         <CardHeader
           title={name}
@@ -60,7 +70,11 @@ function Recipe({ id, name, difficulty, image }) {
             fontSize: "clamp(1rem, 4vw, 2rem)",
           }}
         />
-        <CardMedia component="img" image={image} sx={{ height: 200, objectFit: "cover", width: "100%" }} />
+        <CardMedia
+          component="img"
+          image={image}
+          sx={{ height: 200, objectFit: "cover", width: "100%" }}
+        />
       </CardActionArea>
     </Card>
   );
@@ -75,7 +89,8 @@ const Recipes: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const getSearchQuery = () => new URLSearchParams(location.search).get("search") || "";
+  const getSearchQuery = () =>
+    new URLSearchParams(location.search).get("search") || "";
   const [debouncedSearch, setDebouncedSearch] = useState(getSearchQuery());
 
   const debouncedSetSearch = debounce((query) => {
@@ -103,13 +118,17 @@ const Recipes: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/recipes/", null, {
-        params: {
-          page: reset ? 1 : page,
-          per_page: 20,
-          search_query: debouncedSearch,
-        },
-      });
+      const response = await axios.post(
+        "http://127.0.0.1:5000/recipes/",
+        null,
+        {
+          params: {
+            page: reset ? 1 : page,
+            per_page: 20,
+            search_query: debouncedSearch,
+          },
+        }
+      );
 
       const { recipes: newRecipes, total_pages } = response.data;
 
@@ -131,7 +150,9 @@ const Recipes: React.FC = () => {
 
     const container = document.getElementById("scroll-container");
     if (container) {
-      const nearBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 10;
+      const nearBottom =
+        container.scrollHeight - container.scrollTop <=
+        container.clientHeight + 10;
       if (nearBottom) {
         hasScrolled.current = true;
         setPage((prevPage) => prevPage + 1);
@@ -148,7 +169,10 @@ const Recipes: React.FC = () => {
   return (
     <div>
       <Header title="Recipes" searchLabel="Search for recipes" searchVisible />
-      <Box id="scroll-container" sx={{ overflowY: "scroll", height: "80vh", mt: 4 }}>
+      <Box
+        id="scroll-container"
+        sx={{ overflowY: "scroll", height: "80vh", mt: 4 }}
+      >
         <main role="main" style={{ paddingTop: "60px" }}>
           <Grid container spacing={3}>
             {recipes.map((recipe) => (
@@ -159,13 +183,21 @@ const Recipes: React.FC = () => {
                     borderRadius: 2,
                     boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
                     transition: "all 0.3s ease",
-                    "&:hover": { borderColor: "#1976d2", boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)" },
+                    "&:hover": {
+                      borderColor: "#1976d2",
+                      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                    },
                     display: "flex",
                     flexDirection: "column",
                     height: "100%",
                   }}
                 >
-                  <Recipe id={recipe.id} name={recipe.recipe_name} difficulty={recipe.difficulty} image={recipe.image} />
+                  <Recipe
+                    id={recipe.id}
+                    name={recipe.recipe_name}
+                    difficulty={recipe.difficulty}
+                    image={recipe.image}
+                  />
                 </Box>
               </Grid>
             ))}
@@ -190,10 +222,20 @@ const Recipes: React.FC = () => {
         <Button variant="outlined" color="primary" sx={{ flex: 1 }}>
           Recipes
         </Button>
-        <Button onClick={() => navigate("/challenges")} variant="contained" color="primary" sx={{ flex: 1 }}>
+        <Button
+          onClick={() => navigate("/challenges")}
+          variant="contained"
+          color="primary"
+          sx={{ flex: 1 }}
+        >
           Challenges
         </Button>
-        <Button onClick={() => navigate("/groups")} variant="contained" color="primary" sx={{ flex: 1 }}>
+        <Button
+          onClick={() => navigate("/groups")}
+          variant="contained"
+          color="primary"
+          sx={{ flex: 1 }}
+        >
           Community
         </Button>
       </div>

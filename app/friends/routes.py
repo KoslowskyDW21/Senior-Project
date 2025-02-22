@@ -130,8 +130,12 @@ def request_notification(requestFrom, requestTo, requestType):
     match requestType: 
         case notificationType.send_request:
             notification_message = f"You have a new friend request from {userFrom.username}."
+            print("new request: ")
+            print(notification_message)
         case notificationType.accept_request:
             notification_message = f"{userTo.username} has accepted your friend request."
+            print("accept message: ")
+            print(notification_message)
         case _:
             print("If you see this, you've done something drastically wrong")
     
@@ -183,10 +187,11 @@ def delete_notification(requestFrom, requestTo):
 def send_request(id):
     #TODO: verify notification functionality
     new_request = FriendRequest(requestFrom=current_user.id, requestTo=id)
+    request_notification(current_user.id, id, notificationType.send_request)
     db.session.add(new_request)
     try:
         db.session.commit()
-        request_notification(current_user.id, id, notificationType.send_request)
+        
 
     except IntegrityError as e:
         db.session.rollback()
