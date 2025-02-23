@@ -222,13 +222,18 @@ const Header: React.FC<HeaderProps> = ({
           zIndex: 1000,
           height: "100px",
           justifyContent: "space-between",
+          // Responsive styles
+          "@media (max-width: 600px)": {
+            height: "80px", // Shrink header height on small screens
+            padding: "5px 10px", // Reduce padding on small screens
+          },
         }}
       >
         <ButtonBase onClick={handleGoToRecipes}>
           <Box
             sx={{
-              width: 70,
-              height: 70,
+              width: "clamp(50px, 8vw, 70px)", // Width will scale between 50px and 70px
+              height: "clamp(50px, 8vw, 70px)", // Same for height
               backgroundColor: "lightgray",
               borderRadius: 2,
               display: "flex",
@@ -251,7 +256,7 @@ const Header: React.FC<HeaderProps> = ({
             justifyContent: "center",
             flexGrow: 1,
             alignItems: "center",
-            fontSize: "24px",
+            fontSize: "clamp(8px, 2vw, 24px)", // Scales based on screen width, between 16px and 24px
             fontWeight: "bold",
           }}
         >
@@ -275,17 +280,24 @@ const Header: React.FC<HeaderProps> = ({
               onChange={handleSearchChange}
               sx={{
                 zIndex: 1001,
-                width: 500,
+                width: "clamp(100px, 25vw, 500px)",
+                fontSize: "clamp(8px, 1vw, 18px)", //TODO: This isn't quite working
               }}
             />
           </Box>
         )}
-        {/* Notification */}
+        {/* Notification Icon */}
         <IconButton
           onClick={handleClickNotification}
           style={{ position: "relative", top: 8, right: 6 }}
         >
-          <Avatar sx={{ width: 70, height: 70, backgroundColor: "gray" }}>
+          <Avatar
+            sx={{
+              width: "clamp(40px, 8vw, 70px)", // Avatar width scales between 40px and 70px based on screen width
+              height: "clamp(40px, 8vw, 70px)", // Avatar height scales between 40px and 70px based on screen width
+              backgroundColor: "gray",
+            }}
+          >
             <NotificationsIcon sx={{ color: "white" }} />
             {notifications.length > 0 &&
               notifications.some((n) => n.isRead === 0) && (
@@ -294,8 +306,8 @@ const Header: React.FC<HeaderProps> = ({
                     position: "absolute",
                     top: 5,
                     right: 5,
-                    width: 15,
-                    height: 15,
+                    width: "clamp(10px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
+                    height: "clamp(10px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
                     backgroundColor: "red",
                     borderRadius: "50%",
                   }}
@@ -333,7 +345,7 @@ const Header: React.FC<HeaderProps> = ({
             <MenuItem>No new notifications</MenuItem>
           )}
         </Menu>
-        {/* Avatar Menu */}
+        {/* Avatar Icon */}
         <IconButton
           onClick={handleClickAvatar}
           style={{ position: "relative", top: 8, right: 8 }}
@@ -342,10 +354,20 @@ const Header: React.FC<HeaderProps> = ({
             <Avatar
               alt="Profile Picture"
               src={profile_picture}
-              sx={{ width: 70, height: 70, border: "1px solid #000" }}
+              sx={{
+                width: "clamp(40px, 8vw, 70px)", // Avatar width scales between 40px and 70px based on screen width
+                height: "clamp(40px, 8vw, 70px)", // Avatar height scales between 40px and 70px based on screen width
+                border: "1px solid #000",
+              }}
             />
           ) : (
-            <Avatar sx={{ width: 70, height: 70, backgroundColor: "gray" }}>
+            <Avatar
+              sx={{
+                width: "clamp(40px, 8vw, 70px)", // Avatar width scales between 40px and 70px based on screen width
+                height: "clamp(40px, 8vw, 70px)", // Avatar height scales between 40px and 70px based on screen width
+                backgroundColor: "gray",
+              }}
+            >
               <PersonIcon sx={{ color: "white" }} />
             </Avatar>
           )}
