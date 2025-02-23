@@ -8,6 +8,7 @@ import {
   CardContent,
 } from "@mui/material";
 import Difficulty from "./Difficulty";
+import config from "../config.js";
 
 interface ChallengeProps {
   id: number;
@@ -16,14 +17,22 @@ interface ChallengeProps {
   difficulty: "1" | "2" | "3" | "4" | "5";
 }
 
-const Challenge: React.FC<ChallengeProps> = ({ id, name, image, difficulty }) => {
+const Challenge: React.FC<ChallengeProps> = ({
+  id,
+  name,
+  image,
+  difficulty,
+}) => {
   const navigate = useNavigate();
   const handleGoToChallenge = async () => {
     navigate(`/challenges/${id}`);
   };
 
   return (
-    <Card variant="outlined" sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <Card
+      variant="outlined"
+      sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+    >
       <CardActionArea onClick={handleGoToChallenge}>
         <CardHeader
           title={name}
@@ -42,7 +51,7 @@ const Challenge: React.FC<ChallengeProps> = ({ id, name, image, difficulty }) =>
         {image && (
           <CardMedia
             component="img"
-            image={`http://127.0.0.1:5000/${image}`}
+            image={`${config.serverUrl}}/${image}`}
             sx={{
               height: 200,
               objectFit: "cover",

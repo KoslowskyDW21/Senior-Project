@@ -19,6 +19,7 @@ import Grid from "@mui/material/Grid2";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { Star, StarBorder } from "@mui/icons-material";
 import PersonIcon from "@mui/icons-material/Person";
+import config from "../config.js";
 
 interface HeaderProps {
   title: string;
@@ -117,10 +118,10 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   const getCurrentUser = async () => {
     try {
       const response = await axios.post(
-        `http://127.0.0.1:5000/profile/get_profile_pic/`
+        `${config.serverUrl}/profile/get_profile_pic/`
       );
       const data: User = response.data;
-      setProfile_picture(data.profile_picture);
+      setProfile_picture(`${config.serverUrl}/${data.profile_picture}`);
       console.log(profile_picture);
     } catch (error) {
       console.error("Error fetching user: ", error);
@@ -130,7 +131,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   const getNotifications = async () => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/settings/get_notifications/",
+        `${config.serverUrl}/settings/get_notifications/`,
         {},
         { withCredentials: true }
       );
@@ -148,7 +149,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
       };
       console.log(data);
       await axios.post(
-        "http://127.0.0.1:5000/settings/read_notification/",
+        `${config.serverUrl}/settings/read_notification/`,
         data,
         {
           headers: {
@@ -164,7 +165,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
 
   async function isAdmin() {
     await axios
-      .get("http://127.0.0.1:5000/admin/")
+      .get(`${config.serverUrl}/admin/`)
       .then((response) => {
         setAdmin(response.data.is_admin);
       })
@@ -216,7 +217,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             }}
           >
             <img
-              src="http://127.0.0.1:5000/static\uploads\2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg"
+              src={`${config.serverUrl}/static/uploads/2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg`}
               alt="Image"
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />

@@ -1,7 +1,16 @@
 import React, { useState } from "react";
 import axios, { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
-import { Button, TextField, Container, Box, Typography, FormControlLabel, Checkbox } from "@mui/material";
+import {
+  Button,
+  TextField,
+  Container,
+  Box,
+  Typography,
+  FormControlLabel,
+  Checkbox,
+} from "@mui/material";
+import config from "../config.js";
 
 interface CreateGroupResponse {
   message: string;
@@ -27,7 +36,7 @@ const CreateGroup: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/groups/create",
+        `${config.serverUrl}/groups/create`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

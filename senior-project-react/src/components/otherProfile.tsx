@@ -13,6 +13,7 @@ import {
   IconButton,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import config from "../config.js";
 
 //TODO: If profile doesn't exist, display a message saying so instead of loading an empty profile
 
@@ -115,7 +116,7 @@ const OtherProfile: React.FC = () => {
   const getProfileResponse = async () => {
     try {
       const response = await axios.get(
-        `http://127.0.0.1:5000/profile/get_other_profile/${id}`,
+        `${config.serverUrl}/profile/get_other_profile/${id}`,
         {}
       );
       console.log("response", response);
@@ -127,10 +128,10 @@ const OtherProfile: React.FC = () => {
       setLevel(data.user_level);
       setXp_points(data.xp_points);
       setHasLeveled(data.hasLeveled);
-      const profilePicturePath = response.data.profile_picture;
-      if (profilePicturePath) {
+      const profile_picture = response.data.profile_picture;
+      if (profile_picture) {
         console.log(data.profile_picture);
-        setProfilePicUrl(profilePicturePath);
+        setProfilePicUrl(`${config.serverUrl}/${profile_picture}`);
       }
     } catch (error) {
       console.error("Error getting profile:", error);
@@ -140,7 +141,7 @@ const OtherProfile: React.FC = () => {
   const getFriends = async () => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/friends/get_friends/",
+        `${config.serverUrl}/friends/get_friends/`,
         {},
         { withCredentials: true }
       );
@@ -154,7 +155,7 @@ const OtherProfile: React.FC = () => {
   const getFriendRequestsTo = async () => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/friends/get_requests_to/",
+        `${config.serverUrl}/friends/get_requests_to/`,
         {},
         { withCredentials: true }
       );
@@ -169,7 +170,7 @@ const OtherProfile: React.FC = () => {
   const getFriendRequestsFrom = async () => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/friends/get_requests_from/",
+        `${config.serverUrl}/friends/get_requests_from/`,
         {},
         { withCredentials: true }
       );
@@ -183,7 +184,7 @@ const OtherProfile: React.FC = () => {
   const sendFriendRequest = async (friendId: number) => {
     try {
       const response = await axios.post(
-        `http://127.0.0.1:5000/friends/send_request/${friendId}`,
+        `${config.serverUrl}/friends/send_request/${friendId}`,
         { friend_id: friendId },
         { withCredentials: true }
       );
@@ -197,7 +198,7 @@ const OtherProfile: React.FC = () => {
   const revokeFriendRequest = async (friendId: number) => {
     try {
       const response = await axios.post(
-        `http://127.0.0.1:5000/friends/revoke_request/${friendId}`,
+        `${config.serverUrl}/friends/revoke_request/${friendId}`,
         { friend_id: friendId },
         { withCredentials: true }
       );
@@ -211,7 +212,7 @@ const OtherProfile: React.FC = () => {
   const declineFriendRequest = async (friendId: number) => {
     try {
       const response = await axios.post(
-        `http://127.0.0.1:5000/friends/decline_request/${friendId}`,
+        `${config.serverUrl}/friends/decline_request/${friendId}`,
         { friend_id: friendId },
         { withCredentials: true }
       );
@@ -225,7 +226,7 @@ const OtherProfile: React.FC = () => {
   const acceptFriendRequest = async (friendId: number) => {
     try {
       const response = await axios.post(
-        `http://127.0.0.1:5000/friends/accept_request/${friendId}`,
+        `${config.serverUrl}/friends/accept_request/${friendId}`,
         { friend_id: friendId },
         { withCredentials: true }
       );
@@ -240,7 +241,7 @@ const OtherProfile: React.FC = () => {
   const removeFriend = async (friendId: number) => {
     try {
       const response = await axios.post(
-        `http://127.0.0.1:5000/friends/remove_friend/${friendId}`,
+        `${config.serverUrl}/friends/remove_friend/${friendId}`,
         { friend_id: friendId },
         { withCredentials: true }
       );

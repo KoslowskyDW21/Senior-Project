@@ -12,6 +12,7 @@ import {
   InputLabel,
   SelectChangeEvent,
 } from "@mui/material";
+import config from "../config.js";
 
 interface RegistrationResponse {
   message: string;
@@ -93,7 +94,7 @@ const RegisterThree = () => {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/api/register/",
+        `${config.serverUrl}/api/register/`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

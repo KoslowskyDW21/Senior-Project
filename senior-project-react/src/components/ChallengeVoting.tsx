@@ -11,6 +11,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import config from "../config.js";
 
 interface Participant {
   user_id: number;
@@ -29,7 +30,9 @@ const ChallengeVoting: React.FC = () => {
   useEffect(() => {
     const fetchParticipants = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}/participants`);
+        const response = await axios.get(
+          `${config.serverUrl}/challenges/${id}/participants`
+        );
         setParticipants(response.data);
       } catch (error) {
         console.error("Error fetching participants:", error);
@@ -38,7 +41,9 @@ const ChallengeVoting: React.FC = () => {
 
     const fetchCurrentUser = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:5000/challenges/current_user_id");
+        const response = await axios.get(
+          `${config.serverUrl}/challenges/current_user_id`
+        );
         setCurrentUserId(response.data);
       } catch (error) {
         console.error("Error fetching current user:", error);
@@ -53,11 +58,15 @@ const ChallengeVoting: React.FC = () => {
     if (
       firstChoice &&
       currentUserId !== firstChoice &&
-      (secondChoice === null || (secondChoice !== firstChoice && currentUserId !== secondChoice)) &&
-      (thirdChoice === null || (thirdChoice !== firstChoice && thirdChoice !== secondChoice && currentUserId !== thirdChoice))
+      (secondChoice === null ||
+        (secondChoice !== firstChoice && currentUserId !== secondChoice)) &&
+      (thirdChoice === null ||
+        (thirdChoice !== firstChoice &&
+          thirdChoice !== secondChoice &&
+          currentUserId !== thirdChoice))
     ) {
       try {
-        await axios.post(`http://127.0.0.1:5000/challenges/${id}/vote`, {
+        await axios.post(`${config.serverUrl}/challenges/${id}/vote`, {
           voter_id: currentUserId,
           first_choice: firstChoice,
           second_choice: secondChoice,
@@ -105,10 +114,14 @@ const ChallengeVoting: React.FC = () => {
               {participants
                 .filter(
                   (participant) =>
-                    participant.user_id !== currentUserId && participant.user_id !== firstChoice
+                    participant.user_id !== currentUserId &&
+                    participant.user_id !== firstChoice
                 )
                 .map((participant) => (
-                  <MenuItem key={participant.user_id} value={participant.user_id}>
+                  <MenuItem
+                    key={participant.user_id}
+                    value={participant.user_id}
+                  >
                     {participant.username}
                   </MenuItem>
                 ))}
@@ -131,7 +144,10 @@ const ChallengeVoting: React.FC = () => {
                     participant.user_id !== secondChoice
                 )
                 .map((participant) => (
-                  <MenuItem key={participant.user_id} value={participant.user_id}>
+                  <MenuItem
+                    key={participant.user_id}
+                    value={participant.user_id}
+                  >
                     {participant.username}
                   </MenuItem>
                 ))}
@@ -144,7 +160,11 @@ const ChallengeVoting: React.FC = () => {
           </Button>
         </Box>
         <Box mt={2}>
-          <Button variant="contained" color="secondary" onClick={() => navigate(-1)}>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => navigate(-1)}
+          >
             Back to Challenge Details
           </Button>
         </Box>

@@ -1,6 +1,15 @@
 import React from "react";
-import { List, ListItem, ListItemText, Avatar, Box, Button, Typography} from "@mui/material";
+import {
+  List,
+  ListItem,
+  ListItemText,
+  Avatar,
+  Box,
+  Button,
+  Typography,
+} from "@mui/material";
 import axios from "axios";
+import config from "../config.js";
 
 interface User {
   id: number;
@@ -15,14 +24,21 @@ interface ChallengeParticipantsListProps {
   creatorId: number;
 }
 
-const ChallengeParticipantsList: React.FC<ChallengeParticipantsListProps> = ({ participants, isCreator, challengeId, creatorId }) => {
+const ChallengeParticipantsList: React.FC<ChallengeParticipantsListProps> = ({
+  participants,
+  isCreator,
+  challengeId,
+  creatorId,
+}) => {
   const getProfilePictureUrl = (profilePicture: string | null) => {
-    return profilePicture ? `http://127.0.0.1:5000/${profilePicture}` : "";
+    return profilePicture ? `${config.serverUrl}/${profilePicture}` : "";
   };
 
   const handleKickUser = async (userId: number) => {
     try {
-      await axios.post(`http://127.0.0.1:5000/challenges/${challengeId}/kick`, { user_id: userId });
+      await axios.post(`${config.serverUrl}/challenges/${challengeId}/kick`, {
+        user_id: userId,
+      });
       alert("User kicked successfully!");
     } catch (error) {
       console.error("Error kicking user:", error);
@@ -43,7 +59,10 @@ const ChallengeParticipantsList: React.FC<ChallengeParticipantsListProps> = ({ p
     >
       <List>
         {participants.map((participant) => (
-          <ListItem key={participant.id} sx={{ display: "flex", alignItems: "center" }}>
+          <ListItem
+            key={participant.id}
+            sx={{ display: "flex", alignItems: "center" }}
+          >
             <Avatar
               src={getProfilePictureUrl(participant.profile_picture)}
               alt={participant.username}
@@ -53,15 +72,15 @@ const ChallengeParticipantsList: React.FC<ChallengeParticipantsListProps> = ({ p
               primary={
                 <Typography
                   sx={{
-                    color:
-                      participant.id === creatorId
-                        ? "blue"
-                        : "black",
+                    color: participant.id === creatorId ? "blue" : "black",
                   }}
                 >
                   {participant.username}
                   {participant.id === creatorId && (
-                    <Typography component="span" sx={{ color: "blue", marginLeft: 1 }}>
+                    <Typography
+                      component="span"
+                      sx={{ color: "blue", marginLeft: 1 }}
+                    >
                       (Creator)
                     </Typography>
                   )}

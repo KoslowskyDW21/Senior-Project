@@ -2,7 +2,9 @@ from __future__ import annotations
 from app.login import bp
 from app.models import *
 from app.login.loginforms import RegisterForm, LoginForm
+from better_profanity import profanity
 from datetime import datetime
+import html
 from flask import request, jsonify, render_template, redirect, url_for, flash, current_app
 from flask_login import login_required
 from flask_login import current_user, login_user, logout_user
@@ -19,6 +21,8 @@ import time
 TENANT_ID = os.getenv("TENANT_ID")
 CLIENT_ID = os.getenv("CLIENT_ID")
 JWKS_URL = f"https://login.microsoftonline.com/{TENANT_ID}/discovery/v2.0/keys"
+
+profanity.load_censor_words()
 
 def get_signing_keys():
     response = requests.get(JWKS_URL)
@@ -102,6 +106,9 @@ def add_cuisines(cuisine_ids, user_id):
         print(f"Error adding cuisines for user {user_id}: {e}")
 
 
+def escape_html(input_text):
+    return html.escape(input_text)
+
 # route for registering through API
 @bp.route('/api/register/', methods=['POST'])
 def api_register():
@@ -124,6 +131,11 @@ def api_register():
     userNameValidation = User.query.filter_by(username=username).first()
     if userNameValidation is not None:
         return jsonify({"message": "There is already an account with that username"}), 400
+
+    if profanity.contains_profanity(user_text):
+        return jsonify({"error": "Input contains inappropriate language"}), 400
+    
+    username = escape_html(username)
 
     if colonial_floor == "":
         colonial_floor = None

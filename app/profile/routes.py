@@ -54,16 +54,16 @@ def get_other_profile(id):
     if not user_data:
         return "<h1>404: profile not found</h1>", 404
     
-    profilePicturePath = None
+    profile_picture = None
     if user_data[0].profile_picture:
-        profilePicturePath = f'http://127.0.0.1:5000/{user_data[0].profile_picture}'
-        print(profilePicturePath)
+        profile_picture = f'{user_data[0].profile_picture}'
+        print("profile picture" + profile_picture)
 
     user_info = {
         "lname": user_data[0].lname,
         "fname": user_data[0].fname,
         "username": user_data[0].username,
-        "profile_picture": profilePicturePath,
+        "profile_picture": profile_picture,
         "user_level": user_data[0].user_level,
         "xp_points": user_data[0].xp_points,
         "achievements": []
@@ -93,10 +93,11 @@ def get_profile_pic():
     user = db.session.query(User).filter(User.id == current_user.id).first()
     if user and user.profile_picture:
         print(user.profile_picture)
-        profilePicturePath = f'http://127.0.0.1:5000/{user.profile_picture}'
-        print(jsonify({"profile_picture": profilePicturePath}))
+        #TODO: Fix this
+        profile_picture = f'{user.profile_picture}'
+        print(jsonify({"profile_picture": profile_picture}))
         return jsonify({
-            "profile_picture": profilePicturePath
+            "profile_picture": profile_picture
         }), 200
     return jsonify({"message": "No profile picture found"}), 200
 

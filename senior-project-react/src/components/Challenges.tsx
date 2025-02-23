@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import Header from "./Header";
 import Challenge from "./Challenge";
+import config from "../config.js";
 
 interface UserId {
   id: number;
@@ -58,7 +59,7 @@ const Challenges: React.FC = () => {
 
   const getResponse = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:5000/challenges/");
+      const response = await axios.get("${config.serverUrl}/challenges/");
       const data: ChallengeData[] = response.data;
       const now = new Date();
       const validChallenges = data.filter(
@@ -69,7 +70,7 @@ const Challenges: React.FC = () => {
       setChallenges(validChallenges);
 
       const userResponse: UserId = await axios.get(
-        "http://127.0.0.1:5000/challenges/current_user_id"
+        "${config.serverUrl}/challenges/current_user_id"
       );
       const currentUserId = userResponse.data;
       setCurrentUserId(currentUserId);
@@ -89,7 +90,7 @@ const Challenges: React.FC = () => {
       const joinedChallengesList: ChallengeData[] = [];
       for (const challenge of data) {
         const participantResponse = await axios.get(
-          `http://127.0.0.1:5000/challenges/${challenge.id}/is_participant`
+          `${config.serverUrl}/challenges/${challenge.id}/is_participant`
         );
         participantStatus[challenge.id] =
           participantResponse.data.is_participant;
@@ -110,7 +111,7 @@ const Challenges: React.FC = () => {
   const fetchPastChallenges = async () => {
     try {
       const response = await axios.get(
-        "http://127.0.0.1:5000/challenges/past_challenges"
+        "${config.serverUrl}/challenges/past_challenges"
       );
       setPastChallenges(response.data);
     } catch (error) {
@@ -120,7 +121,7 @@ const Challenges: React.FC = () => {
 
   const handleJoinChallenge = async (challengeId: number) => {
     try {
-      await axios.post(`http://127.0.0.1:5000/challenges/${challengeId}/join`);
+      await axios.post(`${config.serverUrl}/challenges/${challengeId}/join`);
       setParticipants((prev) => ({ ...prev, [challengeId]: true }));
       navigate(`/challenges/${challengeId}`);
     } catch (error) {
@@ -130,7 +131,7 @@ const Challenges: React.FC = () => {
 
   const handleLeaveChallenge = async (challengeId: number) => {
     try {
-      await axios.post(`http://127.0.0.1:5000/challenges/${challengeId}/leave`);
+      await axios.post(`${config.serverUrl}/challenges/${challengeId}/leave`);
       setParticipants((prev) => ({ ...prev, [challengeId]: false }));
       setJoinedChallenges((prev) =>
         prev.filter((challenge) => challenge.id !== challengeId)
@@ -143,7 +144,7 @@ const Challenges: React.FC = () => {
   const getCurrentUser = async () => {
     try {
       const response = await axios.post(
-        `http://127.0.0.1:5000/profile/get_profile_pic/`
+        `${config.serverUrl}/profile/get_profile_pic/`
       );
       const data: User = response.data;
       setProfile_picture(data.profile_picture);

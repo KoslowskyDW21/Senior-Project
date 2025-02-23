@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import config from "../config.js";
 
 import Header from "./Header";
 
@@ -68,7 +69,7 @@ const Group: React.FC<UserGroup> = ({ id, name, description, image }) => {
         {image && (
           <CardMedia
             component="img"
-            image={`http://127.0.0.1:5000/${image}`}
+            image={`${config.serverUrl}/${image}`}
             sx={{
               height: 200,
               objectFit: "cover",
@@ -95,7 +96,7 @@ const Groups: React.FC = () => {
 
   const fetchGroups = async () => {
     try {
-      const response = await axios.get(`http://127.0.0.1:5000/groups`);
+      const response = await axios.get(`${config.serverUrl}/groups`);
       if (response.status === 200) {
         const newGroups = response.data;
         setGroups((prevGroups) => [...prevGroups, ...newGroups]);
@@ -108,9 +109,7 @@ const Groups: React.FC = () => {
 
   const fetchMyGroups = async () => {
     try {
-      const response = await axios.get(
-        `http://127.0.0.1:5000/groups/my_groups`
-      );
+      const response = await axios.get(`${config.serverUrl}/groups/my_groups`);
       if (response.status === 200) {
         setMyGroups(response.data);
       }
@@ -181,7 +180,7 @@ const Groups: React.FC = () => {
   const getCurrentUser = async () => {
     try {
       const response = await axios.post(
-        `http://127.0.0.1:5000/profile/get_profile_pic/`
+        `${config.serverUrl}/profile/get_profile_pic/`
       );
       const data: User = response.data;
       setProfile_picture(data.profile_picture);
@@ -194,7 +193,7 @@ const Groups: React.FC = () => {
   const getFriends = async () => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/friends/get_friends/",
+        `${config.serverUrl}/friends/get_friends/`,
         {},
         { withCredentials: true }
       );
@@ -272,7 +271,7 @@ const Groups: React.FC = () => {
                 {friend.profile_picture ? (
                   <Avatar
                     alt="Profile Picture"
-                    src={`http://127.0.0.1:5000/${friend.profile_picture}`}
+                    src={`${config.serverUrl}/${friend.profile_picture}`}
                     sx={{ width: 70, height: 70, border: "1px solid #000" }}
                   />
                 ) : (

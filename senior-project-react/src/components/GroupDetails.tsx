@@ -19,10 +19,11 @@ import {
   ListItemText,
   Checkbox,
 } from "@mui/material";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import GroupMembersList from "./GroupMembersList";
+import config from "../config.js";
 
 interface UserGroup {
   id: number;
@@ -75,7 +76,7 @@ const reportModalStyle = {
   paddingRight: 7,
   paddingBottom: 3,
   textAlign: "center",
-}
+};
 
 const GroupDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -102,7 +103,7 @@ const GroupDetails: React.FC = () => {
 
   const fetchGroup = async () => {
     try {
-      const response = await axios.get(`http://127.0.0.1:5000/groups/${id}`);
+      const response = await axios.get(`${config.serverUrl}/groups/${id}`);
       if (response.status === 200) {
         setGroup(response.data);
       }
@@ -113,7 +114,9 @@ const GroupDetails: React.FC = () => {
 
   const checkMembership = async () => {
     try {
-      const response = await axios.get(`http://127.0.0.1:5000/groups/${id}/is_member`);
+      const response = await axios.get(
+        `${config.serverUrl}/groups/${id}/is_member`
+      );
       setIsMember(response.data.is_member);
       setIsTrusted(response.data.is_trusted);
     } catch (error) {
@@ -123,7 +126,9 @@ const GroupDetails: React.FC = () => {
 
   const fetchMembers = async () => {
     try {
-      const response = await axios.get(`http://127.0.0.1:5000/groups/${id}/members`);
+      const response = await axios.get(
+        `${config.serverUrl}/groups/${id}/members`
+      );
       setMembers(response.data);
     } catch (error) {
       console.error("Error fetching group members:", error);
@@ -132,7 +137,7 @@ const GroupDetails: React.FC = () => {
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:5000/current_user");
+      const response = await axios.get(`${config.serverUrl}/current_user`);
       setCurrentUser(response.data);
     } catch (error) {
       console.error("Error fetching current user:", error);
@@ -141,23 +146,36 @@ const GroupDetails: React.FC = () => {
 
   const fetchFriends = async () => {
     try {
-      const response = await axios.post("http://127.0.0.1:5000/friends/get_friends/");
-      const friendsData = response.data.friends;
-  
-      // Fetch group members and unread notifications
-      const membersResponse = await axios.get(`http://127.0.0.1:5000/groups/${id}/members`);
-      const notificationsResponse = await axios.post("http://127.0.0.1:5000/get_notifications/");
-  
-      const groupMembers = membersResponse.data.map((member: GroupMember) => member.user_id);
-      const unreadNotifications = notificationsResponse.data.notifications
-        .filter((notification: any) => notification.isRead === 0 && notification.group_id === parseInt(id!))
-        .map((notification: any) => notification.user_id);
-  
-      // Filter out friends who are already in the group or have an unread notification
-      const filteredFriends = friendsData.filter((friend: Friend) => 
-        !groupMembers.includes(friend.id) && !unreadNotifications.includes(friend.id)
+      const response = await axios.post(
+        `${config.serverUrl}/friends/get_friends/`
       );
-  
+      const friendsData = response.data.friends;
+
+      // Fetch group members and unread notifications
+      const membersResponse = await axios.get(
+        `${config.serverUrl}/groups/${id}/members`
+      );
+      const notificationsResponse = await axios.post(
+        `${config.serverUrl}/get_notifications/`
+      );
+
+      const groupMembers = membersResponse.data.map(
+        (member: GroupMember) => member.user_id
+      );
+      const unreadNotifications = notificationsResponse.data.notifications
+        .filter(
+          (notification: any) =>
+            notification.isRead === 0 && notification.group_id === parseInt(id!)
+        )
+        .map((notification: any) => notification.user_id);
+
+      // Filter out friends who are already in the group or have an unread notification
+      const filteredFriends = friendsData.filter(
+        (friend: Friend) =>
+          !groupMembers.includes(friend.id) &&
+          !unreadNotifications.includes(friend.id)
+      );
+
       setFriends(filteredFriends);
     } catch (error) {
       console.error("Error fetching friends:", error);
@@ -175,7 +193,7 @@ const GroupDetails: React.FC = () => {
 
   const handleJoinGroup = async () => {
     try {
-      await axios.post(`http://127.0.0.1:5000/groups/${id}/join`);
+      await axios.post(`${config.serverUrl}/groups/${id}/join`);
       setIsMember(true);
       fetchMembers();
     } catch (error) {
@@ -185,7 +203,7 @@ const GroupDetails: React.FC = () => {
 
   const handleLeaveGroup = async () => {
     try {
-      await axios.post(`http://127.0.0.1:5000/groups/${id}/leave`);
+      await axios.post(`${config.serverUrl}/groups/${id}/leave`);
       setIsMember(false);
       fetchMembers();
     } catch (error) {
@@ -195,7 +213,7 @@ const GroupDetails: React.FC = () => {
 
   const handleDeleteGroup = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:5000/groups/${id}/delete`);
+      await axios.delete(`${config.serverUrl}/groups/${id}/delete`);
       navigate("/groups");
     } catch (error) {
       console.error("Error deleting group:", error);
@@ -206,25 +224,27 @@ const GroupDetails: React.FC = () => {
     console.log("Attempting to report this group...");
     let data;
 
-    await axios.get(`http://127.0.0.1:5000/groups/${id}/report`)
+    await axios
+      .get(`${config.serverUrl}/groups/${id}/report`)
       .then((response) => {
         data = response.data;
       })
       .catch((error) => {
         console.error("Could not get if already reported", error);
       });
-    
-    if(!data!.alreadyReported) {
+
+    if (!data!.alreadyReported) {
       const newData = {
         user_id: data!.id,
         group_id: id,
-      }
-  
-      await axios.post(`http://127.0.0.1:5000/groups/${id}/report`, newData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
+      };
+
+      await axios
+        .post(`${config.serverUrl}/groups/${id}/report`, newData, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
         .then((response) => {
           console.log("Group successfully reported.");
           console.log(response.data.message);
@@ -232,15 +252,16 @@ const GroupDetails: React.FC = () => {
         .catch((error) => {
           console.log("Could not report group", error);
         });
-    }
-    else {
+    } else {
       console.log("Group already reported");
     }
-  }
+  };
 
   const handleInviteFriends = async () => {
     try {
-      await axios.post(`http://127.0.0.1:5000/groups/${id}/invite`, { friend_ids: selectedFriends });
+      await axios.post(`${config.serverUrl}/groups/${id}/invite`, {
+        friend_ids: selectedFriends,
+      });
       setInviteModalOpen(false);
     } catch (error) {
       console.error("Error inviting friends:", error);
@@ -269,9 +290,9 @@ const GroupDetails: React.FC = () => {
     <Container>
       <IconButton
         onClick={() => navigate("/groups")}
-        style={{ position: "absolute", top: 30, left: 30 }} 
+        style={{ position: "absolute", top: 30, left: 30 }}
       >
-        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
       <Box mt={4} mb={2} textAlign="center">
         <Typography variant="h4" gutterBottom>
@@ -283,7 +304,7 @@ const GroupDetails: React.FC = () => {
           <CardMedia
             component="img"
             height="400"
-            image={`http://127.0.0.1:5000/${group.image}`}
+            image={`${config.serverUrl}/${group.image}`}
             alt={group.name}
           />
         )}
@@ -295,18 +316,19 @@ const GroupDetails: React.FC = () => {
             {group.is_public ? "Public" : "Private"}
           </Typography>
           <Box textAlign="center" mt={4}>
-            {(currentUser && (group.creator === currentUser.id || currentUser.is_admin)) && (
-              <Button
-                variant="contained"
-                color="error"
-                onClick={handleOpenDeleteModal}
-                sx={{ mb: 2 }}
-              >
-                Delete Group
-              </Button>
-            )}
-            </Box>
-            <Box>
+            {currentUser &&
+              (group.creator === currentUser.id || currentUser.is_admin) && (
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={handleOpenDeleteModal}
+                  sx={{ mb: 2 }}
+                >
+                  Delete Group
+                </Button>
+              )}
+          </Box>
+          <Box>
             {isMember && currentUser && group.creator !== currentUser.id && (
               <Button
                 variant="contained"
@@ -317,8 +339,8 @@ const GroupDetails: React.FC = () => {
                 Leave Group
               </Button>
             )}
-            </Box>
-            <Box>
+          </Box>
+          <Box>
             {!isMember && (
               <Button
                 variant="contained"
@@ -329,8 +351,8 @@ const GroupDetails: React.FC = () => {
                 Join Group
               </Button>
             )}
-            </Box>
-            <Box>
+          </Box>
+          <Box>
             <Button
               variant="contained"
               color="error"
@@ -339,9 +361,9 @@ const GroupDetails: React.FC = () => {
             >
               Report
             </Button>
-            </Box>
-            <Box>
-            {(currentUser && (group.creator === currentUser.id || isTrusted)) && (
+          </Box>
+          <Box>
+            {currentUser && (group.creator === currentUser.id || isTrusted) && (
               <Button
                 variant="contained"
                 color="primary"
@@ -373,7 +395,9 @@ const GroupDetails: React.FC = () => {
               members={members}
               currentUserId={currentUser?.id!}
               groupCreatorId={group.creator}
-              trustedMemberIds={members.filter(member => member.is_trusted).map(member => member.user_id)}
+              trustedMemberIds={members
+                .filter((member) => member.is_trusted)
+                .map((member) => member.user_id)}
               groupId={group.id}
               fetchMembers={fetchMembers}
             />
@@ -400,13 +424,13 @@ const GroupDetails: React.FC = () => {
                 {`Reporting group ${id}`}
               </Typography>
 
-              <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small" >
+              <FormControl
+                variant="filled"
+                sx={{ m: 1, width: 250 }}
+                size="small"
+              >
                 <InputLabel id="reason-label">Reason</InputLabel>
-                <Select
-                  labelId="reason-label"
-                >
-                  
-                </Select>
+                <Select labelId="reason-label"></Select>
               </FormControl>
               <br />
               <Button
@@ -441,7 +465,11 @@ const GroupDetails: React.FC = () => {
               </Typography>
               <List>
                 {friends.map((friend) => (
-                  <ListItem key={friend.id} button onClick={() => handleToggleFriend(friend.id)}>
+                  <ListItem
+                    key={friend.id}
+                    button
+                    onClick={() => handleToggleFriend(friend.id)}
+                  >
                     <Checkbox
                       checked={selectedFriends.includes(friend.id)}
                       tabIndex={-1}
@@ -478,7 +506,11 @@ const GroupDetails: React.FC = () => {
               <Typography id="delete-modal-title" variant="h4" component="h2">
                 Confirm Delete
               </Typography>
-              <Typography id="delete-modal-description" variant="body1" component="p">
+              <Typography
+                id="delete-modal-description"
+                variant="body1"
+                component="p"
+              >
                 Are you sure you want to delete this group?
               </Typography>
               <Button
@@ -501,7 +533,6 @@ const GroupDetails: React.FC = () => {
               </Button>
             </Box>
           </Modal>
-
         </CardContent>
       </Card>
     </Container>

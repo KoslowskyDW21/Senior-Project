@@ -11,6 +11,7 @@ import {
   IconButton,
   Box,
 } from "@mui/material";
+import config from "../config.js";
 
 interface RecipeList {
   id: number;
@@ -60,7 +61,7 @@ const RecipeLists: React.FC = () => {
     console.log("Getting FULL JSON of current user");
     try {
       const response = await axios.get(
-        `http://127.0.0.1:5000/profile/current_user`
+        `${config.serverUrl}/profile/current_user`
       );
       const data: User = response.data;
       setCurrentUserId(data.id);
@@ -76,9 +77,7 @@ const RecipeLists: React.FC = () => {
       console.error(`Error in fetching current_user's id`);
     }
     try {
-      const response = await axios.get(
-        "http://127.0.0.1:5000/recipe_lists/all"
-      );
+      const response = await axios.get(`${config.serverUrl}/recipe_lists/all`);
       const data: RecipeList[] = response.data;
       setRecipeLists(data);
     } catch (error) {
@@ -103,7 +102,7 @@ const RecipeLists: React.FC = () => {
       formData.append("lid", lid);
       try {
         const response = await axios.post(
-          "http://127.0.0.1:5000/recipe_lists/deletelist",
+          `${config.serverUrl}/recipe_lists/deletelist`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );

@@ -99,7 +99,7 @@ def get_members(group_id):
     member_data = []
     for member in members:
         user = User.query.get(member.member_id)
-        profile_picture_url = f'http://127.0.0.1:5000/{user.profile_picture}' if user.profile_picture else None
+        profile_picture_url = f'${config.serverUrl}/{user.profile_picture}' if user.profile_picture else None
         member_data.append({
             "user_id": user.id,
             "username": user.username,

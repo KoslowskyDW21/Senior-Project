@@ -9,8 +9,9 @@ import {
   Button,
   IconButton,
 } from "@mui/material";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Challenge from "./Challenge";
+import config from "../config.js";
 
 interface ChallengeData {
   id: number;
@@ -33,7 +34,9 @@ const PastChallenges: React.FC = () => {
   useEffect(() => {
     const fetchPastChallenges = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:5000/challenges/past_user_participated_challenges");
+        const response = await axios.get(
+          `${config.serverUrl}/challenges/past_user_participated_challenges`
+        );
         setPastChallenges(response.data);
       } catch (error) {
         console.error("Error fetching past challenges:", error);
@@ -45,11 +48,11 @@ const PastChallenges: React.FC = () => {
 
   return (
     <Container>
-        <IconButton
+      <IconButton
         onClick={() => navigate(-1)}
-        style={{ position: "absolute", top: 30, left: 30 }} 
+        style={{ position: "absolute", top: 30, left: 30 }}
       >
-        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
       <Box mt={4} mb={2} textAlign="center">
         <Typography variant="h4">Past Challenges</Typography>

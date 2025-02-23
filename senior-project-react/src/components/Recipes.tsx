@@ -15,6 +15,7 @@ import Grid2 from "@mui/material/Grid2";
 import Header from "./Header";
 import debounce from "lodash.debounce";
 import Typography from "@mui/material/Typography";
+import config from "../config.js";
 
 interface Recipe {
   id: number;
@@ -149,17 +150,13 @@ const Recipes: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:5000/recipes/",
-        null,
-        {
-          params: {
-            page: reset ? 1 : page,
-            per_page: 20,
-            search_query: debouncedSearch,
-          },
-        }
-      );
+      const response = await axios.post(`${config.serverUrl}/recipes/`, null, {
+        params: {
+          page: reset ? 1 : page,
+          per_page: 20,
+          search_query: debouncedSearch,
+        },
+      });
 
       const { recipes: newRecipes, total_pages } = response.data;
 

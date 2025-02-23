@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { Container, Typography, Box, Button } from "@mui/material";
+import config from "../config.js";
 
 const ChallengeInviteResponse: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -11,7 +12,9 @@ const ChallengeInviteResponse: React.FC = () => {
   useEffect(() => {
     const fetchChallenge = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}`);
+        const response = await axios.get(
+          `${config.serverUrl}/challenges/${id}`
+        );
         setChallenge(response.data);
       } catch (error) {
         console.error("Error fetching challenge details:", error);
@@ -23,7 +26,9 @@ const ChallengeInviteResponse: React.FC = () => {
 
   const handleResponse = async (response: string) => {
     try {
-      await axios.post(`http://127.0.0.1:5000/challenges/${id}/invite_response`, { response });
+      await axios.post(`${config.serverUrl}/challenges/${id}/invite_response`, {
+        response,
+      });
       navigate(`/challenges/${id}`);
     } catch (error) {
       console.error(`Error sending ${response} response:`, error);
@@ -52,7 +57,7 @@ const ChallengeInviteResponse: React.FC = () => {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => handleResponse('accept')}
+          onClick={() => handleResponse("accept")}
           sx={{ mr: 2 }}
         >
           Accept
@@ -60,13 +65,13 @@ const ChallengeInviteResponse: React.FC = () => {
         <Button
           variant="contained"
           color="secondary"
-          onClick={() => handleResponse('deny')}
+          onClick={() => handleResponse("deny")}
         >
           Deny
         </Button>
       </Box>
     </Container>
-  )
-}
+  );
+};
 
 export default ChallengeInviteResponse;

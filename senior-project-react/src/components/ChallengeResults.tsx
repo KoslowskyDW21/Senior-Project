@@ -10,6 +10,7 @@ import {
   ListItemText,
   Button,
 } from "@mui/material";
+import config from "../config.js";
 
 interface Participant {
   user_id: number;
@@ -25,7 +26,9 @@ const ChallengeResults: React.FC = () => {
   useEffect(() => {
     const fetchVoteResults = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}/vote_results`);
+        const response = await axios.get(
+          `${config.serverUrl}/challenges/${id}/vote_results`
+        );
         setParticipants(response.data);
       } catch (error) {
         console.error("Error fetching vote results:", error);
@@ -52,7 +55,11 @@ const ChallengeResults: React.FC = () => {
           ))}
         </List>
         <Box mt={2}>
-          <Button variant="contained" color="secondary" onClick={() => navigate(-1)}>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => navigate(-1)}
+          >
             Back to Challenge Details
           </Button>
         </Box>
