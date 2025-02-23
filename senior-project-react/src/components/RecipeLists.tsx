@@ -10,14 +10,12 @@ import {
   Grid2,
   IconButton,
   Box,
-  CardMedia,
 } from "@mui/material";
 
 interface RecipeList {
   id: number;
   name: string;
   belongs_to: number;
-  image: string;
 }
 
 interface RecipeListDeletionResponse {
@@ -91,7 +89,7 @@ const RecipeLists: React.FC = () => {
   };
 
   // @ts-expect-error
-  function RecipeList({ lid, name, belongs_to, image }) {
+  function RecipeList({ lid, name, belongs_to }) {
     const handleGoToRecipeList = async () => {
       console.log(`Navigating to page of RecipeList ${lid}`);
       navigate(`/recipe-lists/${lid}`);
@@ -136,17 +134,6 @@ const RecipeLists: React.FC = () => {
               {name}
             </Typography>
             <br />
-            {image && (
-            <CardMedia
-                component="img"
-                image={`http://127.0.0.1:5000/${image}`}
-                sx={{
-                  height: 200,
-                  objectFit: "cover",
-                  width: "100%",
-                }}
-              />
-            )}
             <br />
             <Button
               variant="outlined"
@@ -244,7 +231,6 @@ const RecipeLists: React.FC = () => {
                   lid={recipeList.id}
                   name={recipeList.name}
                   belongs_to={recipeList.belongs_to}
-                  image = {recipeList.image}
                 />
               </Box>
             </Grid2>
