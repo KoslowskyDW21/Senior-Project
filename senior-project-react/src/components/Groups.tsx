@@ -48,7 +48,10 @@ const Group: React.FC<UserGroup> = ({ id, name, description, image }) => {
   };
 
   return (
-    <Card variant="outlined" sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <Card
+      variant="outlined"
+      sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+    >
       <CardActionArea onClick={handleGoToGroup}>
         <CardHeader
           title={name}
@@ -159,7 +162,20 @@ const Groups: React.FC = () => {
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
+    const query = event.target.value;
+    setSearchQuery(query);
+
+    if (query) {
+      navigate({
+        pathname: location.pathname,
+        search: `?search=${query}`,
+      });
+    } else {
+      navigate({
+        pathname: location.pathname,
+        search: "",
+      });
+    }
   };
 
   const getCurrentUser = async () => {
@@ -200,11 +216,7 @@ const Groups: React.FC = () => {
 
   return (
     <div>
-      <Header
-        title="Community"
-        searchLabel="Search for groups"
-        searchVisible={true}
-      />
+      <Header title="Community" />
       <Box
         sx={{
           display: "flex",
@@ -307,15 +319,15 @@ const Groups: React.FC = () => {
             </Box>
           </Box>
 
-            <Box mt={10} textAlign="center">
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => navigate("/friends")}
-              >
-                View All Friends
-              </Button>
-            </Box>
+          <Box mt={10} textAlign="center">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => navigate("/friends")}
+            >
+              View All Friends
+            </Button>
+          </Box>
         </main>
 
         <Container>
@@ -347,6 +359,25 @@ const Groups: React.FC = () => {
               </Grid2>
             </Box>
           )}
+
+          <Box
+            mt={{ xs: 10, sm: 14, md: 14 }}
+            textAlign="center"
+            display="flex"
+            justifyContent="center"
+            sx={{ flexGrow: 1 }}
+          >
+            <TextField
+              label="Search for groups"
+              variant="outlined"
+              fullWidth
+              value={searchQuery}
+              onChange={handleSearchChange}
+              sx={{
+                width: "100%",
+              }}
+            />
+          </Box>
 
           <Box mt={4}>
             <Typography variant="h5" gutterBottom>

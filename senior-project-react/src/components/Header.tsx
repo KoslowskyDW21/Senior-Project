@@ -22,8 +22,6 @@ import PersonIcon from "@mui/icons-material/Person";
 
 interface HeaderProps {
   title: string;
-  searchLabel?: string;
-  searchVisible?: boolean;
 }
 
 interface User {
@@ -40,37 +38,12 @@ interface UserNotifications {
   }[];
 }
 
-const Header: React.FC<HeaderProps> = ({
-  title,
-  searchLabel,
-  searchVisible,
-}) => {
+const Header: React.FC<HeaderProps> = ({ title }) => {
   const [admin, setAdmin] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>("");
   const [profile_picture, setProfile_picture] = useState<string>();
   const [notifications, setNotifications] = useState<[]>([]);
-  const [isSearchVisible, setIsSearchVisible] = useState<boolean>(
-    searchVisible ?? false
-  );
 
   const navigate = useNavigate();
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value;
-    setSearchQuery(query);
-
-    if (query) {
-      navigate({
-        pathname: location.pathname,
-        search: `?search=${query}`,
-      });
-    } else {
-      navigate({
-        pathname: location.pathname,
-        search: "",
-      });
-    }
-  };
 
   const handleGoToProfile = async () => {
     navigate(`/profile`);
@@ -222,13 +195,18 @@ const Header: React.FC<HeaderProps> = ({
           zIndex: 1000,
           height: "100px",
           justifyContent: "space-between",
+          // Responsive styles
+          "@media (max-width: 600px)": {
+            height: "80px", // Shrink header height on small screens
+            padding: "5px 10px", // Reduce padding on small screens
+          },
         }}
       >
         <ButtonBase onClick={handleGoToRecipes}>
           <Box
             sx={{
-              width: 70,
-              height: 70,
+              width: "clamp(50px, 8vw, 70px)", // Width will scale between 50px and 70px
+              height: "clamp(50px, 8vw, 70px)", // Same for height
               backgroundColor: "lightgray",
               borderRadius: 2,
               display: "flex",
@@ -251,41 +229,25 @@ const Header: React.FC<HeaderProps> = ({
             justifyContent: "center",
             flexGrow: 1,
             alignItems: "center",
-            fontSize: "24px",
+            fontSize: "clamp(8px, 2vw, 24px)", // Scales based on screen width, between 16px and 24px
             fontWeight: "bold",
           }}
         >
           <h1>{title}</h1>
         </Box>
 
-        {isSearchVisible && searchLabel && (
-          <Box
-            mt={4}
-            mb={2}
-            textAlign="center"
-            display="flex"
-            justifyContent="center"
-            sx={{ flexGrow: 1 }}
-          >
-            <TextField
-              label={searchLabel}
-              variant="outlined"
-              fullWidth
-              value={searchQuery}
-              onChange={handleSearchChange}
-              sx={{
-                zIndex: 1001,
-                width: 500,
-              }}
-            />
-          </Box>
-        )}
-        {/* Notification */}
+        {/* Notification Icon */}
         <IconButton
           onClick={handleClickNotification}
           style={{ position: "relative", top: 8, right: 6 }}
         >
-          <Avatar sx={{ width: 70, height: 70, backgroundColor: "gray" }}>
+          <Avatar
+            sx={{
+              width: "clamp(40px, 8vw, 70px)", // Avatar width scales between 40px and 70px based on screen width
+              height: "clamp(40px, 8vw, 70px)", // Avatar height scales between 40px and 70px based on screen width
+              backgroundColor: "gray",
+            }}
+          >
             <NotificationsIcon sx={{ color: "white" }} />
             {notifications.length > 0 &&
               notifications.some((n) => n.isRead === 0) && (
@@ -294,8 +256,8 @@ const Header: React.FC<HeaderProps> = ({
                     position: "absolute",
                     top: 5,
                     right: 5,
-                    width: 15,
-                    height: 15,
+                    width: "clamp(10px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
+                    height: "clamp(10px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
                     backgroundColor: "red",
                     borderRadius: "50%",
                   }}
@@ -333,7 +295,7 @@ const Header: React.FC<HeaderProps> = ({
             <MenuItem>No new notifications</MenuItem>
           )}
         </Menu>
-        {/* Avatar Menu */}
+        {/* Avatar Icon */}
         <IconButton
           onClick={handleClickAvatar}
           style={{ position: "relative", top: 8, right: 8 }}
@@ -342,10 +304,20 @@ const Header: React.FC<HeaderProps> = ({
             <Avatar
               alt="Profile Picture"
               src={profile_picture}
-              sx={{ width: 70, height: 70, border: "1px solid #000" }}
+              sx={{
+                width: "clamp(40px, 8vw, 70px)", // Avatar width scales between 40px and 70px based on screen width
+                height: "clamp(40px, 8vw, 70px)", // Avatar height scales between 40px and 70px based on screen width
+                border: "1px solid #000",
+              }}
             />
           ) : (
-            <Avatar sx={{ width: 70, height: 70, backgroundColor: "gray" }}>
+            <Avatar
+              sx={{
+                width: "clamp(40px, 8vw, 70px)", // Avatar width scales between 40px and 70px based on screen width
+                height: "clamp(40px, 8vw, 70px)", // Avatar height scales between 40px and 70px based on screen width
+                backgroundColor: "gray",
+              }}
+            >
               <PersonIcon sx={{ color: "white" }} />
             </Avatar>
           )}

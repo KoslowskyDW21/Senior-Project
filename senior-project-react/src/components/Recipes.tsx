@@ -8,10 +8,13 @@ import {
   CardMedia,
   CardActionArea,
   Box,
+  useMediaQuery,
+  TextField,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid2 from "@mui/material/Grid2";
 import Header from "./Header";
 import debounce from "lodash.debounce";
+import Typography from "@mui/material/Typography";
 
 interface Recipe {
   id: number;
@@ -24,11 +27,11 @@ interface Recipe {
 
 function Difficulty({ difficulty }) {
   const diamondStyle = {
-    width: 24,
-    height: 24,
+    width: "clamp(5px, 2vw, 24px)", // Min size 16px, max size 24px, grows based on viewport width
+    height: "clamp(5px, 2vw, 24px)",
     backgroundColor: "black",
     transform: "rotate(45deg)",
-    marginRight: 2,
+    marginRight: "clamp(4px, 1vw, 8px)",
   };
 
   const renderDiamonds = (num) => {
@@ -38,7 +41,7 @@ function Difficulty({ difficulty }) {
   };
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center", padding: "2px" }}>
+    <Box sx={{ display: "flex", justifyContent: "center", padding: "0px" }}>
       {renderDiamonds(Number(difficulty))}
     </Box>
   );
@@ -55,25 +58,35 @@ function Recipe({ id, name, difficulty, image }) {
   return (
     <Card
       variant="outlined"
-      sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        flexShrink: 1,
+      }}
     >
       <CardActionArea onClick={handleGoToRecipe}>
         <CardHeader
-          title={name}
+          title={
+            <Typography
+              variant="h5"
+              sx={{ fontSize: "clamp(1rem, 1.5vw, 2rem)", textAlign: "center" }}
+            >
+              {name}
+            </Typography>
+          }
           subheader={<Difficulty difficulty={difficulty} />}
           sx={{
             justifyContent: "center",
             alignItems: "center",
-            textAlign: "center",
-            flexShrink: 0,
-            width: "90%",
-            fontSize: "clamp(1rem, 4vw, 2rem)",
+            flexShrink: 1,
+            width: "auto",
           }}
         />
         <CardMedia
           component="img"
           image={image}
-          sx={{ height: 200, objectFit: "cover", width: "100%" }}
+          sx={{ height: "auto", objectFit: "contain", width: "100%" }}
         />
       </CardActionArea>
     </Card>
@@ -88,6 +101,7 @@ const Recipes: React.FC = () => {
   const hasScrolled = useRef(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const getSearchQuery = () =>
     new URLSearchParams(location.search).get("search") || "";
@@ -96,6 +110,23 @@ const Recipes: React.FC = () => {
   const debouncedSetSearch = debounce((query) => {
     setDebouncedSearch(query);
   }, 300);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+
+    if (query) {
+      navigate({
+        pathname: location.pathname,
+        search: `?search=${query}`,
+      });
+    } else {
+      navigate({
+        pathname: location.pathname,
+        search: "",
+      });
+    }
+  };
 
   useEffect(() => {
     debouncedSetSearch(getSearchQuery());
@@ -166,17 +197,48 @@ const Recipes: React.FC = () => {
     return () => container?.removeEventListener("scroll", handleScroll);
   }, [loading, page, totalPages]);
 
+  const isSmallScreen = useMediaQuery("(max-width:600px)");
+  const isMediumScreen = useMediaQuery(
+    "(min-width:600px) and (max-width:900px)"
+  );
+
   return (
     <div>
-      <Header title="Recipes" searchLabel="Search for recipes" searchVisible />
+      <Header title="Recipes" />
+      <Box
+        mt={{ xs: 10, sm: 14, md: 14 }}
+        textAlign="center"
+        display="flex"
+        justifyContent="center"
+        sx={{ flexGrow: 1 }}
+      >
+        <TextField
+          label="Search for recipes"
+          variant="outlined"
+          fullWidth
+          value={searchQuery}
+          onChange={handleSearchChange}
+          sx={{
+            width: "100%",
+          }}
+        />
+      </Box>
       <Box
         id="scroll-container"
-        sx={{ overflowY: "scroll", height: "80vh", mt: 4 }}
+        sx={{
+          overflowY: "scroll",
+          height: "calc(100vh - 60px)",
+          mt: 0,
+          width: "100%",
+        }}
       >
         <main role="main" style={{ paddingTop: "60px" }}>
-          <Grid container spacing={3}>
+          <Grid2 container spacing={3}>
             {recipes.map((recipe) => (
-              <Grid size={3} key={recipe.id}>
+              <Grid2
+                key={recipe.id}
+                size={isSmallScreen ? 4 : isMediumScreen ? 4 : 3}
+              >
                 <Box
                   sx={{
                     border: "2px solid rgb(172, 169, 169)",
@@ -190,6 +252,13 @@ const Recipes: React.FC = () => {
                     display: "flex",
                     flexDirection: "column",
                     height: "100%",
+                    minHeight: "200px", // Base minimum height
+                    "@media (min-width:600px)": {
+                      maxHeight: "300px", // Adjust the minHeight for medium screens
+                    },
+                    "@media (min-width:900px)": {
+                      maxHeight: "350px", // Adjust the minHeight for larger screens
+                    },
                   }}
                 >
                   <Recipe
@@ -199,9 +268,9 @@ const Recipes: React.FC = () => {
                     image={recipe.image}
                   />
                 </Box>
-              </Grid>
+              </Grid2>
             ))}
-          </Grid>
+          </Grid2>
         </main>
       </Box>
 

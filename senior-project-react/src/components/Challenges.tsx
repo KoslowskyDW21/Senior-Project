@@ -12,6 +12,7 @@ import {
   Container,
   CardActionArea,
   CardHeader,
+  TextField,
 } from "@mui/material";
 import Header from "./Header";
 import Challenge from "./Challenge";
@@ -61,7 +62,9 @@ const Challenges: React.FC = () => {
       const data: ChallengeData[] = response.data;
       const now = new Date();
       const validChallenges = data.filter(
-        (challenge) => new Date(challenge.end_time).getTime() + 24 * 60 * 60 * 1000 > now.getTime()
+        (challenge) =>
+          new Date(challenge.end_time).getTime() + 24 * 60 * 60 * 1000 >
+          now.getTime()
       );
       setChallenges(validChallenges);
 
@@ -106,7 +109,9 @@ const Challenges: React.FC = () => {
 
   const fetchPastChallenges = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:5000/challenges/past_challenges");
+      const response = await axios.get(
+        "http://127.0.0.1:5000/challenges/past_challenges"
+      );
       setPastChallenges(response.data);
     } catch (error) {
       console.error("Error fetching past challenges:", error);
@@ -152,6 +157,23 @@ const Challenges: React.FC = () => {
     navigate(`/groups`);
   };
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+
+    if (query) {
+      navigate({
+        pathname: location.pathname,
+        search: `?search=${query}`,
+      });
+    } else {
+      navigate({
+        pathname: location.pathname,
+        search: "",
+      });
+    }
+  };
+
   const filterChallenges = () => {
     const urlParams = new URLSearchParams(location.search);
     const searchQuery = urlParams.get("search")?.toLowerCase() || "";
@@ -163,19 +185,25 @@ const Challenges: React.FC = () => {
   };
 
   const filteredMyChallenges = myChallenges
-    .filter((challenge) => !pastChallenges.some((past) => past.id === challenge.id))
+    .filter(
+      (challenge) => !pastChallenges.some((past) => past.id === challenge.id)
+    )
     .filter((challenge) =>
       challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
   const filteredJoinedChallenges = joinedChallenges
-    .filter((challenge) => !pastChallenges.some((past) => past.id === challenge.id))
+    .filter(
+      (challenge) => !pastChallenges.some((past) => past.id === challenge.id)
+    )
     .filter((challenge) =>
       challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
   const filteredAllChallenges = challenges
-    .filter((challenge) => !pastChallenges.some((past) => past.id === challenge.id))
+    .filter(
+      (challenge) => !pastChallenges.some((past) => past.id === challenge.id)
+    )
     .filter((challenge) =>
       challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -196,11 +224,25 @@ const Challenges: React.FC = () => {
 
   return (
     <div>
-      <Header
-        title="Challenges"
-        searchLabel="Search for challenges"
-        searchVisible={true}
-      />
+      <Header title="Challenges" />
+      <Box
+        mt={{ xs: 10, sm: 14, md: 14 }}
+        textAlign="center"
+        display="flex"
+        justifyContent="center"
+        sx={{ flexGrow: 1 }}
+      >
+        <TextField
+          label="Search for challenges"
+          variant="outlined"
+          fullWidth
+          value={searchQuery}
+          onChange={handleSearchChange}
+          sx={{
+            width: "100%",
+          }}
+        />
+      </Box>
       <Box
         sx={{
           display: "flex",
