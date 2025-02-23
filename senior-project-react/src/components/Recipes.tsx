@@ -9,6 +9,7 @@ import {
   CardActionArea,
   Box,
   useMediaQuery,
+  TextField,
 } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import Header from "./Header";
@@ -100,6 +101,7 @@ const Recipes: React.FC = () => {
   const hasScrolled = useRef(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const getSearchQuery = () =>
     new URLSearchParams(location.search).get("search") || "";
@@ -108,6 +110,23 @@ const Recipes: React.FC = () => {
   const debouncedSetSearch = debounce((query) => {
     setDebouncedSearch(query);
   }, 300);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+
+    if (query) {
+      navigate({
+        pathname: location.pathname,
+        search: `?search=${query}`,
+      });
+    } else {
+      navigate({
+        pathname: location.pathname,
+        search: "",
+      });
+    }
+  };
 
   useEffect(() => {
     debouncedSetSearch(getSearchQuery());
@@ -185,13 +204,31 @@ const Recipes: React.FC = () => {
 
   return (
     <div>
-      <Header title="Recipes" searchLabel="Search for recipes" searchVisible />
+      <Header title="Recipes" />
+      <Box
+        mt={{ xs: 10, sm: 14, md: 14 }}
+        textAlign="center"
+        display="flex"
+        justifyContent="center"
+        sx={{ flexGrow: 1 }}
+      >
+        <TextField
+          label="Search for recipes"
+          variant="outlined"
+          fullWidth
+          value={searchQuery}
+          onChange={handleSearchChange}
+          sx={{
+            width: "100%",
+          }}
+        />
+      </Box>
       <Box
         id="scroll-container"
         sx={{
           overflowY: "scroll",
           height: "calc(100vh - 60px)",
-          mt: 4,
+          mt: 0,
           width: "100%",
         }}
       >

@@ -161,11 +161,7 @@ const Friends: React.FC = () => {
           paddingTop: "150px",
         }}
       >
-        <Header
-          title="Friends"
-          searchLabel="Find new friends"
-          searchVisible={false}
-        />
+        <Header title="Friends" />
 
         <main role="main">
           <Box sx={{ position: "relative", width: "50vw", margin: "auto" }}>
@@ -175,7 +171,6 @@ const Friends: React.FC = () => {
               fullWidth
               value={searchQuery}
               onChange={handleSearchChange}
-              sx={{ zIndex: 1 }}
             />
             {searchResults.length > 0 && (
               <Box
@@ -189,7 +184,7 @@ const Friends: React.FC = () => {
                   borderRadius: "4px",
                   maxHeight: "300px",
                   overflowY: "auto",
-                  zIndex: 1000,
+                  zIndex: 1001,
                 }}
               >
                 {searchResults.map((user) => (

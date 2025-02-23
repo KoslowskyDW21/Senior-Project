@@ -22,8 +22,6 @@ import PersonIcon from "@mui/icons-material/Person";
 
 interface HeaderProps {
   title: string;
-  searchLabel?: string;
-  searchVisible?: boolean;
 }
 
 interface User {
@@ -40,37 +38,12 @@ interface UserNotifications {
   }[];
 }
 
-const Header: React.FC<HeaderProps> = ({
-  title,
-  searchLabel,
-  searchVisible,
-}) => {
+const Header: React.FC<HeaderProps> = ({ title }) => {
   const [admin, setAdmin] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>("");
   const [profile_picture, setProfile_picture] = useState<string>();
   const [notifications, setNotifications] = useState<[]>([]);
-  const [isSearchVisible, setIsSearchVisible] = useState<boolean>(
-    searchVisible ?? false
-  );
 
   const navigate = useNavigate();
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value;
-    setSearchQuery(query);
-
-    if (query) {
-      navigate({
-        pathname: location.pathname,
-        search: `?search=${query}`,
-      });
-    } else {
-      navigate({
-        pathname: location.pathname,
-        search: "",
-      });
-    }
-  };
 
   const handleGoToProfile = async () => {
     navigate(`/profile`);
@@ -263,29 +236,6 @@ const Header: React.FC<HeaderProps> = ({
           <h1>{title}</h1>
         </Box>
 
-        {isSearchVisible && searchLabel && (
-          <Box
-            mt={4}
-            mb={2}
-            textAlign="center"
-            display="flex"
-            justifyContent="center"
-            sx={{ flexGrow: 1 }}
-          >
-            <TextField
-              label={searchLabel}
-              variant="outlined"
-              fullWidth
-              value={searchQuery}
-              onChange={handleSearchChange}
-              sx={{
-                zIndex: 1001,
-                width: "clamp(100px, 25vw, 500px)",
-                fontSize: "clamp(8px, 1vw, 18px)", //TODO: This isn't quite working
-              }}
-            />
-          </Box>
-        )}
         {/* Notification Icon */}
         <IconButton
           onClick={handleClickNotification}
