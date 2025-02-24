@@ -128,24 +128,28 @@ const Recipes: React.FC = () => {
   
 
   const handleDietaryRestrictionsChange = (
-      event: SelectChangeEvent<typeof selectedDietaryRestrictions>
-    ) => {
-      const selectedNames = event.target.value;
-      const selectedIdz = dietaryRestrictions
+    event: SelectChangeEvent<typeof selectedDietaryRestrictions>
+  ) => {
+    const selectedNames = event.target.value;
+    const selectedIdz = dietaryRestrictions
       .filter((dietaryRestriction) =>
         selectedNames.includes(dietaryRestriction.name)
       )
       .map((dietaryRestriction) => dietaryRestriction.id);
-      console.log("i am trying", selectedNames);
-      setSelectedDietaryRestrictions(selectedNames);
-      setSelectedIds(selectedIdz);
-      setRecipes([]); 
-      setPage(1); 
-      setTotalPages(1);
-      setNoResultsFound(false); 
-      loadRecipes(true);
+    setSelectedDietaryRestrictions(selectedNames);
+    setSelectedIds(selectedIdz);
+  };
 
-    };
+  useEffect(() => {
+    // If dietary restrictions or page change, reload recipes
+    setRecipes([]); // Clear previous recipes
+    setPage(1); // Reset page to 1
+    setTotalPages(1); // Reset total pages
+    setNoResultsFound(false); // Reset no results state
+    loadRecipes(true); // Load recipes with the initial settings
+  }, [selectedDietaryRestrictions]);
+  
+  
 
   // Use the searchQuery directly without debouncing
   const debouncedSearch = searchQuery;
@@ -187,7 +191,6 @@ const Recipes: React.FC = () => {
     setLoading(true);
   
     try {
-      console.log("theIDSMaam ", selectedIds)
       const response = await axios.post(`${config.serverUrl}/recipes/`, null, {
         params: {
           page: reset ? 1 : page,
