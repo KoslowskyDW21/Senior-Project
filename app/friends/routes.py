@@ -208,6 +208,8 @@ def accept_request(id):
         new_friendship = Friendship(user1 = request.requestFrom, user2 = request.requestTo)
         db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==id, FriendRequest.requestTo==current_user.id)).delete()
         db.session.add(new_friendship)
+        checkAchievement(request.requestFrom, request.requestTo)
+
     else:
         print("No request, heathen!")
     
@@ -270,4 +272,20 @@ def decline_request(id):
         db.session.rollback()
         print(f"Error declining request with user {id}: {e}")
         return jsonify({"error": "Could not decline request"}), 500
+    
+def checkAchievement(user1, user2):
+    if(UserAchievement.filter_by(achievement_id = 4, user_id = user1.id).all() == None): # type: ignore
+        UserAchievement a1 = UserAchievement(achievement_id = 4, user_id = user1.id) #type: ignore
+        db.session.add(a1)
+        db.session.flush()
+        db.session.commit()
+        
+
+    if(UserAchievement.filter_by(achievement_id = 4, user_id = user2.id).all() == None): # type: ignore
+        UserAchievement a2 = UserAchievement(achievement_id = 4, user_id = user2.id) #type: ignore
+        db.session.add(a2)
+        db.session.flush()
+        db.session.commit()
+    
+    
 
