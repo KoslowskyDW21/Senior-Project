@@ -207,7 +207,8 @@ export default function AdminPage() {
     const newUsers = users.map((oldUser) => changeBan(oldUser, id));
     setUsers(newUsers);
 
-    banUser(id, true, banTimes[indexOfLength]);
+    
+    banUser(id, true, banTimes[indexOfLength !== -1 ? indexOfLength : 6]);
 
     setUserToBan(null);
   };

@@ -32,6 +32,7 @@ class User(UserMixin, db.Model):
     last_logged_in = db.Column(db.DateTime)
     num_reports = db.Column(db.Integer, nullable=False)
     is_banned = db.Column(db.Boolean, nullable=False)
+    banned_until = db.Column(db.DateTime, nullable=True)
     hasLeveled = db.Column(db.Boolean, nullable = False)
 
     @property

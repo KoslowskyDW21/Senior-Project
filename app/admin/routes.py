@@ -3,6 +3,7 @@ from flask import jsonify, request
 from app.admin import bp
 from app.models import *
 from flask_login import current_user, login_required
+from datetime import datetime, timedelta, UTC, timezone
 
 @login_required
 @bp.route("/", methods=["GET"])
@@ -38,7 +39,7 @@ def make_admin():
         return jsonify({"message": "Error: Could not update user"}), 500
     
 @login_required
-@bp.route("/ban/", methods=["POST"])
+@bp.post("/ban/")
 def ban_user():
     data = request.get_json()
     userId = data.get("id")
@@ -51,7 +52,10 @@ def ban_user():
     if isBanned:
         days = data.get("days")
         print("Received data - days: " + str(days))
-        # TODO: Finish this method once banning functionality is working properly
+        banTime = datetime.now(UTC) + timedelta(days=days)
+        user.banned_until = banTime # type: ignore
+    else:
+        user.banned_until = None # type: ignore
 
     try:
         db.session.commit()
@@ -60,6 +64,39 @@ def ban_user():
         db.session.rollback()
         print(f"Error updating ban status: {e}")
         return jsonify({"message": "Error: Could not update user's ban status"})
+    
+@login_required
+@bp.post("/stillBanned")
+def still_banned():
+    user = current_user._get_current_object()
+    now = datetime.now(UTC)
+    now = now.replace(tzinfo=None)
+    banTime = user.banned_until #type: ignore
+    print("Now: " + str(now))
+    print("Banned until: " + str(banTime))
+
+    if now > banTime:
+        user.is_banned = False # type: ignore
+        user.banned_until = None # type: ignore
+    else:
+        return jsonify({"message": "User is still banned", "banned": True}), 200
+
+    try:
+        db.session.commit()
+        return jsonify({"message": "User is no longer banned", "banned": False}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error unbanning user: {e}")
+        return jsonify({"message": "Error: Could not unban user", "banned": False}), 500
+
+@login_required
+@bp.get("/ban")
+def get_ban():
+    user: User = current_user._get_current_object() # type: ignore
+    print(user)
+    isBanned: bool = user.is_banned
+    return jsonify({"banned": isBanned})
+
     
 @bp.route("/delete/<int:id>", methods = ["POST"])
 def delete_recipe(id):
