@@ -19,11 +19,10 @@ import Grid from "@mui/material/Grid2";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { Star, StarBorder } from "@mui/icons-material";
 import PersonIcon from "@mui/icons-material/Person";
+import config from "../config.js";
 
 interface HeaderProps {
   title: string;
-  searchLabel?: string;
-  searchVisible?: boolean;
 }
 
 interface User {
@@ -40,37 +39,12 @@ interface UserNotifications {
   }[];
 }
 
-const Header: React.FC<HeaderProps> = ({
-  title,
-  searchLabel,
-  searchVisible,
-}) => {
+const Header: React.FC<HeaderProps> = ({ title }) => {
   const [admin, setAdmin] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>("");
   const [profile_picture, setProfile_picture] = useState<string>();
   const [notifications, setNotifications] = useState<[]>([]);
-  const [isSearchVisible, setIsSearchVisible] = useState<boolean>(
-    searchVisible ?? false
-  );
 
   const navigate = useNavigate();
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value;
-    setSearchQuery(query);
-
-    if (query) {
-      navigate({
-        pathname: location.pathname,
-        search: `?search=${query}`,
-      });
-    } else {
-      navigate({
-        pathname: location.pathname,
-        search: "",
-      });
-    }
-  };
 
   const handleGoToProfile = async () => {
     navigate(`/profile`);
@@ -122,17 +96,18 @@ const Header: React.FC<HeaderProps> = ({
     event: React.MouseEvent<HTMLElement>,
     id: number,
     notification_type: string,
-    group_id?: number // Add this parameter
+    group_id?: number,
+    challenge_id?: number
   ) => {
     console.log(id);
     setNotificationAnchorEl(event.currentTarget);
     readNotificationsApi(id);
     if (notification_type === "friend_request") {
-      navigate("/groups");
+      navigate("/friends");
     } else if (notification_type === "group_message" && group_id) {
-      navigate(`/groups/${group_id}/invite_response`); // Update this line
+      navigate(`/groups/${group_id}/invite_response`);
     } else if (notification_type === "challenge_reminder") {
-      navigate("/challenges");
+      navigate(`/challenges/${challenge_id}/invite_response`);
     }
   };
 
@@ -143,10 +118,10 @@ const Header: React.FC<HeaderProps> = ({
   const getCurrentUser = async () => {
     try {
       const response = await axios.post(
-        `http://127.0.0.1:5000/profile/get_profile_pic/`
+        `${config.serverUrl}/profile/get_profile_pic/`
       );
       const data: User = response.data;
-      setProfile_picture(data.profile_picture);
+      setProfile_picture(`${config.serverUrl}/${data.profile_picture}`);
       console.log(profile_picture);
     } catch (error) {
       console.error("Error fetching user: ", error);
@@ -156,7 +131,7 @@ const Header: React.FC<HeaderProps> = ({
   const getNotifications = async () => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/settings/get_notifications/",
+        `${config.serverUrl}/settings/get_notifications/`,
         {},
         { withCredentials: true }
       );
@@ -174,7 +149,7 @@ const Header: React.FC<HeaderProps> = ({
       };
       console.log(data);
       await axios.post(
-        "http://127.0.0.1:5000/settings/read_notification/",
+        `${config.serverUrl}/settings/read_notification/`,
         data,
         {
           headers: {
@@ -190,7 +165,7 @@ const Header: React.FC<HeaderProps> = ({
 
   async function isAdmin() {
     await axios
-      .get("http://127.0.0.1:5000/admin/")
+      .get(`${config.serverUrl}/admin/`)
       .then((response) => {
         setAdmin(response.data.is_admin);
       })
@@ -221,13 +196,18 @@ const Header: React.FC<HeaderProps> = ({
           zIndex: 1000,
           height: "100px",
           justifyContent: "space-between",
+          // Responsive styles
+          "@media (max-width: 600px)": {
+            height: "80px", // Shrink header height on small screens
+            padding: "5px 10px", // Reduce padding on small screens
+          },
         }}
       >
         <ButtonBase onClick={handleGoToRecipes}>
           <Box
             sx={{
-              width: 70,
-              height: 70,
+              width: "clamp(50px, 8vw, 70px)", // Width will scale between 50px and 70px
+              height: "clamp(50px, 8vw, 70px)", // Same for height
               backgroundColor: "lightgray",
               borderRadius: 2,
               display: "flex",
@@ -237,7 +217,7 @@ const Header: React.FC<HeaderProps> = ({
             }}
           >
             <img
-              src="http://127.0.0.1:5000/static\uploads\2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg"
+              src={`${config.serverUrl}/static/uploads/2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg`}
               alt="Image"
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
@@ -250,41 +230,25 @@ const Header: React.FC<HeaderProps> = ({
             justifyContent: "center",
             flexGrow: 1,
             alignItems: "center",
-            fontSize: "24px",
+            fontSize: "clamp(8px, 2vw, 24px)", // Scales based on screen width, between 16px and 24px
             fontWeight: "bold",
           }}
         >
           <h1>{title}</h1>
         </Box>
 
-        {isSearchVisible && searchLabel && (
-          <Box
-            mt={4}
-            mb={2}
-            textAlign="center"
-            display="flex"
-            justifyContent="center"
-            sx={{ flexGrow: 1 }}
-          >
-            <TextField
-              label={searchLabel}
-              variant="outlined"
-              fullWidth
-              value={searchQuery}
-              onChange={handleSearchChange}
-              sx={{
-                zIndex: 1001,
-                width: 500,
-              }}
-            />
-          </Box>
-        )}
-        {/* Notification */}
+        {/* Notification Icon */}
         <IconButton
           onClick={handleClickNotification}
           style={{ position: "relative", top: 8, right: 6 }}
         >
-          <Avatar sx={{ width: 70, height: 70, backgroundColor: "gray" }}>
+          <Avatar
+            sx={{
+              width: "clamp(40px, 8vw, 70px)", // Avatar width scales between 40px and 70px based on screen width
+              height: "clamp(40px, 8vw, 70px)", // Avatar height scales between 40px and 70px based on screen width
+              backgroundColor: "gray",
+            }}
+          >
             <NotificationsIcon sx={{ color: "white" }} />
             {notifications.length > 0 &&
               notifications.some((n) => n.isRead === 0) && (
@@ -293,8 +257,8 @@ const Header: React.FC<HeaderProps> = ({
                     position: "absolute",
                     top: 5,
                     right: 5,
-                    width: 15,
-                    height: 15,
+                    width: "clamp(10px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
+                    height: "clamp(10px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
                     backgroundColor: "red",
                     borderRadius: "50%",
                   }}
@@ -320,7 +284,8 @@ const Header: React.FC<HeaderProps> = ({
                       event,
                       notification.id,
                       notification.notification_type,
-                      notification.group_id // Pass the group_id here
+                      notification.group_id,
+                      notification.challenge_id
                     )
                   }
                 >
@@ -331,7 +296,7 @@ const Header: React.FC<HeaderProps> = ({
             <MenuItem>No new notifications</MenuItem>
           )}
         </Menu>
-        {/* Avatar Menu */}
+        {/* Avatar Icon */}
         <IconButton
           onClick={handleClickAvatar}
           style={{ position: "relative", top: 8, right: 8 }}
@@ -340,10 +305,20 @@ const Header: React.FC<HeaderProps> = ({
             <Avatar
               alt="Profile Picture"
               src={profile_picture}
-              sx={{ width: 70, height: 70, border: "1px solid #000" }}
+              sx={{
+                width: "clamp(40px, 8vw, 70px)", // Avatar width scales between 40px and 70px based on screen width
+                height: "clamp(40px, 8vw, 70px)", // Avatar height scales between 40px and 70px based on screen width
+                border: "1px solid #000",
+              }}
             />
           ) : (
-            <Avatar sx={{ width: 70, height: 70, backgroundColor: "gray" }}>
+            <Avatar
+              sx={{
+                width: "clamp(40px, 8vw, 70px)", // Avatar width scales between 40px and 70px based on screen width
+                height: "clamp(40px, 8vw, 70px)", // Avatar height scales between 40px and 70px based on screen width
+                backgroundColor: "gray",
+              }}
+            >
               <PersonIcon sx={{ color: "white" }} />
             </Avatar>
           )}

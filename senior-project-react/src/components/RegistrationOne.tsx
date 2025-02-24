@@ -4,6 +4,7 @@ import axios, { AxiosError } from "axios";
 import { Button, TextField, Container } from "@mui/material"; //matui components
 import { useNavigate } from "react-router-dom"; // React Router for nav
 import { useMsal } from "@azure/msal-react";
+import config from "../config.js";
 
 interface RegisterResponse {
   message: string;
@@ -32,7 +33,7 @@ const RegisterOne = () => {
         })
       ).idToken;
       const response = await axios.post<any>(
-        "http://127.0.0.1:5000/api/get_initial_data/",
+        `${config.serverUrl}/api/get_initial_data/`,
         { token: idToken },
         { withCredentials: true }
       );
@@ -63,7 +64,7 @@ const RegisterOne = () => {
     try {
       console.log("Validating user");
       const response = await axios.post(
-        "http://127.0.0.1:5000/api/validate_user/",
+        `${config.serverUrl}/api/validate_user/`,
         {
           username: data.username,
           email: data.email,

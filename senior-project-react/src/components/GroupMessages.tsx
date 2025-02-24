@@ -14,8 +14,9 @@ import {
   Button,
   IconButton,
 } from "@mui/material";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
+import config from "../config.js";
 
 interface Message {
   id: number;
@@ -42,7 +43,9 @@ const GroupMessages: React.FC = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:5000/groups/${id}/messages`);
+        const response = await axios.get(
+          `${config.serverUrl}/groups/${id}/messages`
+        );
         setMessages(response.data);
       } catch (error) {
         console.error("Error fetching messages:", error);
@@ -56,9 +59,13 @@ const GroupMessages: React.FC = () => {
     if (!newMessage.trim()) return;
 
     try {
-      await axios.post(`http://127.0.0.1:5000/groups/${id}/messages`, { text: newMessage });
+      await axios.post(`${config.serverUrl}/groups/${id}/messages`, {
+        text: newMessage,
+      });
       setNewMessage("");
-      const response = await axios.get(`http://127.0.0.1:5000/groups/${id}/messages`);
+      const response = await axios.get(
+        `${config.serverUrl}/groups/${id}/messages`
+      );
       setMessages(response.data);
     } catch (error) {
       console.error("Error sending message:", error);
@@ -69,9 +76,9 @@ const GroupMessages: React.FC = () => {
     <Container>
       <IconButton
         onClick={() => navigate(-1)}
-        style={{ position: "absolute", top: 30, left: 30 }} 
+        style={{ position: "absolute", top: 30, left: 30 }}
       >
-        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
       <Box mt={4} mb={2} textAlign="center">
         <Typography variant="h4" gutterBottom>
@@ -79,39 +86,39 @@ const GroupMessages: React.FC = () => {
         </Typography>
       </Box>
       <Box mt={4} mb={2}>
-      <Paper style={{ maxHeight: 300, overflow: 'auto' }}>
-        <List>
-          {messages.map((message) => (
-            <React.Fragment key={message.id}>
-              <ListItem alignItems="flex-start">
-                <ListItemText
-                  primary={message.username}
-                  secondary={message.text}
-                />
-              </ListItem>
-              <Divider variant="inset" component="li" />
-            </React.Fragment>
-          ))}
-          <div ref={messagesEndRef} />
-        </List>
-      </Paper>
-      <Box mt={2} display="flex">
-        <TextField
-          label="Type a message"
-          variant="outlined"
-          fullWidth
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-        />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={sendMessage}
-          style={{ marginLeft: '10px' }}
-        >
-          Send
-        </Button>
-      </Box>
+        <Paper style={{ maxHeight: 300, overflow: "auto" }}>
+          <List>
+            {messages.map((message) => (
+              <React.Fragment key={message.id}>
+                <ListItem alignItems="flex-start">
+                  <ListItemText
+                    primary={message.username}
+                    secondary={message.text}
+                  />
+                </ListItem>
+                <Divider variant="inset" component="li" />
+              </React.Fragment>
+            ))}
+            <div ref={messagesEndRef} />
+          </List>
+        </Paper>
+        <Box mt={2} display="flex">
+          <TextField
+            label="Type a message"
+            variant="outlined"
+            fullWidth
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={sendMessage}
+            style={{ marginLeft: "10px" }}
+          >
+            Send
+          </Button>
+        </Box>
       </Box>
     </Container>
   );

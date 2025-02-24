@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from flask_login import login_required, current_user
 from app.challenges import bp
-from app.models import User, Challenge, ChallengeParticipant, ChallengeVote, db
+from app.models import User, Challenge, ChallengeParticipant, ChallengeVote, UserNotifications, db
 from flask import request, jsonify, abort, current_app
 from datetime import datetime, timedelta, UTC
 from werkzeug.utils import secure_filename
@@ -272,6 +272,24 @@ def get_vote_results(challenge_id):
         })
 
     results.sort(key=lambda x: x['points'], reverse=True)
+
+    #add xp to users
+    for i, result in enumerate(results):
+        uid = result["user_id"]
+        theUser = User.query.get(uid)
+        if i == 0:
+            theUser.xp_points = theUser.xp_points + 400 # type: ignore
+        elif i == 1:
+            theUser.xp_points = theUser.xp_points + 200 # type: ignore
+        elif i == 2:
+            theUser.xp_points = theUser.xp_points + 100 # type: ignore
+        else:
+            theUser.xp_points = theUser.xp_points + 50 # type: ignore
+        db.session.add(theUser)
+        db.session.flush()
+        db.session.commit()
+
+
     return jsonify(results), 200
 
 @bp.route('/past_user_participated_challenges', methods=['GET'])
@@ -298,3 +316,78 @@ def get_past_challenges():
     ).all()
 
     return jsonify([challenge.to_json() for challenge in past_challenges]), 200
+
+
+@bp.route('/<int:challenge_id>/invite', methods=['POST'])
+@login_required
+def invite_friends_to_challenge(challenge_id):
+    challenge = Challenge.query.get(challenge_id)
+    if not challenge:
+        return jsonify({"message": "Challenge not found"}), 404
+
+    if challenge.creator != current_user.id and not ChallengeParticipant.query.filter_by(challenge_id=challenge_id, user_id=current_user.id).first():
+        return jsonify({"message": "Permission denied"}), 403
+
+    friend_ids = request.json.get('friend_ids', [])
+    for friend_id in friend_ids:
+        notification = UserNotifications(
+            user_id=friend_id,
+            notification_text=f"You have been invited to join the challenge {challenge.name}.",
+            notification_type='challenge_reminder',
+            challenge_id=challenge_id
+        )
+        db.session.add(notification)
+    db.session.commit()
+
+    return jsonify({"message": "Invitations sent successfully!"}), 200
+
+@bp.route('/<int:challenge_id>/invite_response', methods=['POST'])
+@login_required
+def handle_challenge_invite_response(challenge_id):
+    response = request.json.get('response')
+    challenge = Challenge.query.get(challenge_id)
+    if not challenge:
+        return jsonify({"message": "Challenge not found"}), 404
+
+    if response == 'accept':
+        participant = ChallengeParticipant(challenge_id=challenge_id, user_id=current_user.id)
+        db.session.add(participant)
+        db.session.commit()
+        return jsonify({"message": "Challenge invitation accepted!"}), 200
+    elif response == 'deny':
+        return jsonify({"message": "Challenge invitation denied!"}), 200
+    else:
+        return jsonify({"message": "Invalid response"}), 400
+    
+
+@bp.route('/<int:challenge_id>/kick', methods=['POST'])
+@login_required
+def kick_user_from_challenge(challenge_id):
+    data = request.get_json()
+    user_id_to_kick = data.get('user_id')
+
+    challenge = Challenge.query.get(challenge_id)
+    if not challenge:
+        return jsonify({"message": "Challenge not found"}), 404
+
+    if challenge.creator != current_user.id:
+        return jsonify({"message": "Permission denied"}), 403
+
+    participant = ChallengeParticipant.query.filter_by(challenge_id=challenge_id, user_id=user_id_to_kick).first()
+    if not participant:
+        return jsonify({"message": "User not found in challenge"}), 404
+
+    db.session.delete(participant)
+    db.session.commit()
+
+    return jsonify({"message": "User kicked successfully!"}), 200
+
+def checkLevel():
+    startingLevel = current_user.user_level
+    current_user.user_level = math.floor(.1 * math.sqrt(.1 * current_user.xp_points)) + 1 # type: ignore
+    db.session.add(current_user)
+    db.session.commit()
+    if(startingLevel != current_user.user_level):
+        current_user.hasLeveled = 1
+        db.session.add(current_user)
+        db.session.commit()

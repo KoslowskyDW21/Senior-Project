@@ -16,6 +16,7 @@ import Achievement from "./Achievements";
 import Confetti from "react-confetti";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Header from "./Header";
+import config from "../config.js";
 
 interface ProfileResponse {
   lname: string;
@@ -95,7 +96,7 @@ const Profile: React.FC = () => {
 
   const getResponse = async () => {
     const response = await axios.post(
-      `http://127.0.0.1:5000/profile/${id}`,
+      `${config.serverUrl}/profile/${id}`,
       {},
       { withCredentials: true }
     );
@@ -117,13 +118,14 @@ const Profile: React.FC = () => {
   const getProfilePic = async () => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/profile/get_profile_pic/",
+        `${config.serverUrl}/profile/get_profile_pic/`,
         {},
         { withCredentials: true }
       );
       const profilePicturePath = response.data.profile_picture;
       if (profilePicturePath) {
-        setProfilePicUrl(profilePicturePath);
+        console.log("profile picture profile", profilePicturePath);
+        setProfilePicUrl(`${config.serverUrl}/${profilePicturePath}`);
       }
     } catch (error) {
       const axiosError = error as AxiosError;
@@ -152,7 +154,7 @@ const Profile: React.FC = () => {
 
       try {
         const response = await axios.post(
-          "http://127.0.0.1:5000/profile/change_profile_pic/",
+          `${config.serverUrl}/profile/change_profile_pic/`,
           formData,
           {
             withCredentials: true,
@@ -194,7 +196,7 @@ const Profile: React.FC = () => {
     handleClosePfpModal();
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/profile/remove_profile_pic/",
+        `${config.serverUrl}/profile/remove_profile_pic/`,
         {},
         { withCredentials: true }
       );
@@ -215,7 +217,7 @@ const Profile: React.FC = () => {
   const resetHasLeveled = async () => {
     try {
       await axios.post(
-        `http://127.0.0.1:5000/profile/leveled/`,
+        `${config.serverUrl}/profile/leveled/`,
         {},
         { withCredentials: true }
       );
@@ -252,6 +254,10 @@ const Profile: React.FC = () => {
       }, 3000);
     }
   }, [hasLeveled]);
+
+  useEffect(() => {
+    console.log("Profile pic url", profilePicUrl);
+  });
 
   return (
     <>

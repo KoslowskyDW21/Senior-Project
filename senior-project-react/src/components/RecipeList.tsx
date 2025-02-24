@@ -14,12 +14,13 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
-  SelectChangeEvent
+  SelectChangeEvent,
 } from "@mui/material"; //matui components
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar'
+import Snackbar, { SnackbarCloseReason } from "@mui/material/Snackbar";
 import axios, { all, AxiosError } from "axios";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
+import config from "../config.js";
 
 interface Recipe {
   id: number;
@@ -98,7 +99,7 @@ const RecipeLists: React.FC = () => {
   const [recipe_list, setRecipe_list] = React.useState<RecipeList>();
   const [searchQuery, setSearchQuery] = React.useState<String>("");
   const [recipeToAddId, setRecipeToAddId] = React.useState<string>("");
-  const [message, setMessage] = React.useState('');
+  const [message, setMessage] = React.useState("");
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
   const { id } = useParams<{ id: string }>();
 
@@ -117,13 +118,13 @@ const RecipeLists: React.FC = () => {
   const getRecipesAndThisList = async () => {
     try {
       const response = await axios.get(
-        `http://127.0.0.1:5000/recipe_lists/recipes/${id}`
+        `${config.serverUrl}/recipe_lists/recipes/${id}`
       );
       const resp_recipes: Recipe[] = response.data;
       console.log(resp_recipes);
       setRecipes(resp_recipes);
       const response2 = await axios.get(
-        `http://127.0.0.1:5000/recipe_lists/info/${id}`
+        `${config.serverUrl}/recipe_lists/info/${id}`
       );
       const resp_recipe_list: RecipeList = response2.data;
       console.log(resp_recipe_list);
@@ -135,14 +136,12 @@ const RecipeLists: React.FC = () => {
 
   const getAllRecipes = async () => {
     try {
-      const response = await axios.get(
-        `http://127.0.0.1:5000/recipes/all`
-      );
+      const response = await axios.get(`${config.serverUrl}/recipes/all`);
       setAllRecipes(response.data.recipes);
     } catch (error) {
       console.error("Error fetching all recipes ", error);
     }
-  }
+  };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
@@ -152,19 +151,23 @@ const RecipeLists: React.FC = () => {
     recipe.recipe_name.toLowerCase().includes(searchQuery.toLocaleLowerCase())
   );
 
-  {/* Copy/pasted snackbar stuff */}
+  {
+    /* Copy/pasted snackbar stuff */
+  }
   const handleSnackBarClose = (
     event: React.SyntheticEvent | Event,
-    reason?: SnackbarCloseReason,
-    ) => {
-        if (reason === 'clickaway') {
-            return;
-          }
+    reason?: SnackbarCloseReason
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
 
-          setSnackbarOpen(false);
-    };
+    setSnackbarOpen(false);
+  };
 
-  {/* More copy/pasted snackbar stuff */}
+  {
+    /* More copy/pasted snackbar stuff */
+  }
   const action = (
     <React.Fragment>
       {/* <Button color="secondary" size="small" onClick={handleSnackBarClose}>
@@ -200,7 +203,7 @@ const RecipeLists: React.FC = () => {
       formData.append("lid", lid);
       try {
         const response = await axios.post(
-          "http://127.0.0.1:5000/recipe_lists/remove-recipe-from-list",
+          `${config.serverUrl}/recipe_lists/remove-recipe-from-list`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -240,20 +243,33 @@ const RecipeLists: React.FC = () => {
     );
   } // end of embedded Recipe component definition
 
-  {/* Should integrate with a snackbar */}
+  {
+    /* Should integrate with a snackbar */
+  }
   async function handleAddAllIngredientsToShoppingList() {
-    console.log(`Trying to add the ingredients of all recipes in this list to the current user's shopping list`);
+    console.log(
+      `Trying to add the ingredients of all recipes in this list to the current user's shopping list`
+    );
     try {
-      const response = await axios.post(`http://127.0.0.1:5000/shopping_lists/items/addlist/${id}`);
+      const response = await axios.post(
+        `${config.serverUrl}/shopping_lists/items/addlist/${id}`
+      );
       if (response.status == 200) {
         console.log("Recipes successfully added to shopping list");
         setMessage("Recipes successfully added to shopping list");
       } else {
-        console.error("Something went wrong while trying to add all recipes to shopping list");
-        setMessage("Something went wrong while trying to add all recipes to shopping list");
+        console.error(
+          "Something went wrong while trying to add all recipes to shopping list"
+        );
+        setMessage(
+          "Something went wrong while trying to add all recipes to shopping list"
+        );
       }
     } catch (error) {
-      console.error("Error in trying to add all recipes to shopping list", error);
+      console.error(
+        "Error in trying to add all recipes to shopping list",
+        error
+      );
       setMessage("Error in trying to add all recipes to shopping list");
     }
     setSnackbarOpen(true);
@@ -266,14 +282,16 @@ const RecipeLists: React.FC = () => {
     }
     try {
       if (id == undefined) {
-        console.error("id of list is undefined")
+        console.error("id of list is undefined");
         return;
       }
       const formData = new FormData();
       formData.append("rid", event.target.value);
       formData.append("lid", id);
-      const response = await axios.post(`http://127.0.0.1:5000/recipe_lists/add-recipe-to-list`, formData,
-        { headers: { "Content-Type": "multipart/form-data" }}
+      const response = await axios.post(
+        `${config.serverUrl}/recipe_lists/add-recipe-to-list`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
       const data: AddRecipeToListResponse = response.data;
       console.log(data.message);
@@ -281,11 +299,11 @@ const RecipeLists: React.FC = () => {
     } catch (error) {
       const axiosError = error as AxiosError;
       if (axiosError.response && axiosError.response.data) {
-          const errorData = axiosError.response.data as AddRecipeToListResponse;
-          setMessage(errorData.message);
+        const errorData = axiosError.response.data as AddRecipeToListResponse;
+        setMessage(errorData.message);
       } else {
-          setMessage("An unknown error occurred");
-          console.error("An unknown error occurred!");
+        setMessage("An unknown error occurred");
+        console.error("An unknown error occurred!");
       }
     }
     getRecipesAndThisList();
@@ -293,27 +311,23 @@ const RecipeLists: React.FC = () => {
 
   function RecipesDropdown({ allRecipes }) {
     if (allRecipes.length == 0) {
-      return <p>Loading...</p>
+      return <p>Loading...</p>;
     } else {
       return (
         <>
-          <FormControl
-            sx={{width: 400}}
-          >
+          <FormControl sx={{ width: 400 }}>
             <InputLabel>Add a recipe</InputLabel>
-            <Select
-              value={recipeToAddId}
-              onChange={handleAddRecipeToList}
-            >
-              {
-                allRecipes.map((recipe: Recipe) => {
-                  return <MenuItem value={recipe.id}>{recipe.recipe_name}</MenuItem>
-                })
-              };
+            <Select value={recipeToAddId} onChange={handleAddRecipeToList}>
+              {allRecipes.map((recipe: Recipe) => {
+                return (
+                  <MenuItem value={recipe.id}>{recipe.recipe_name}</MenuItem>
+                );
+              })}
+              ;
             </Select>
           </FormControl>
         </>
-      )
+      );
     }
   }
 
@@ -409,10 +423,8 @@ const RecipeLists: React.FC = () => {
           mt: 12,
         }}
       ></Box>
-
       {/* AllRecipesDropdown */}
       <RecipesDropdown allRecipes={allRecipes}></RecipesDropdown>
-
       {/* Implements a grid view of recipes */}
       <Grid2 container spacing={3}>
         {filteredRecipes.map((recipe) => (
@@ -446,18 +458,20 @@ const RecipeLists: React.FC = () => {
       <Button onClick={handleGoToRecipes} variant="contained" color="primary">
         Find Recipes
       </Button>
-
       {/* Button to add all ingredients in all recipes to shopping list */}
-      <Button onClick={handleAddAllIngredientsToShoppingList} variant="contained" color="primary">
+      <Button
+        onClick={handleAddAllIngredientsToShoppingList}
+        variant="contained"
+        color="primary"
+      >
         Add All to Shopping List
       </Button>
-
       <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={6000}
-          onClose={handleSnackBarClose}
-          message={message}
-          action={action}
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackBarClose}
+        message={message}
+        action={action}
       />
     </>
   );

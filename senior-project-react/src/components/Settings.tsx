@@ -19,6 +19,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useMsal } from "@azure/msal-react";
+import config from "../config.js";
 
 interface DeleteResponse {
   message: string;
@@ -69,13 +70,10 @@ const modalStyle = {
 async function updateUser(floor: string, side: string) {
   try {
     // Sending the updated data to the backend
-    const response = await axios.post(
-      "http://127.0.0.1:5000/settings/update/",
-      {
-        floor: floor,
-        side: side,
-      }
-    );
+    const response = await axios.post(`${config.serverUrl}/settings/update/`, {
+      floor: floor,
+      side: side,
+    });
     console.log("User updated successfully:", response.data);
   } catch (error) {
     console.error("Could not update user: ", error);
@@ -114,7 +112,7 @@ export default function Settings() {
 
   async function loadUser() {
     await axios
-      .get("http://127.0.0.1:5000/settings/")
+      .get(`${config.serverUrl}/settings/`)
       .then((response) => {
         setUser(response.data);
         setUsername(user.username);
@@ -132,7 +130,7 @@ export default function Settings() {
 
   async function loadCuisines() {
     await axios
-      .get("http://127.0.0.1:5000/settings/cuisines/")
+      .get(`${config.serverUrl}/settings/cuisines/`)
       .then((response) => {
         const data: UserCuisines = response.data;
         setCuisines(data.cuisines);
@@ -149,15 +147,11 @@ export default function Settings() {
         user_id: user.id,
         selected_cuisines: selectedIds,
       };
-      await axios.post(
-        "http://127.0.0.1:5000/settings/update_cuisines/",
-        data,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await axios.post(`${config.serverUrl}/settings/update_cuisines/`, data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       console.log("Cuisines updated successfully!");
     } catch (error) {
       console.error("Error updating cuisines: ", error);
@@ -167,7 +161,7 @@ export default function Settings() {
   const getDietaryRestrictions = async () => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/settings/dietary_restrictions/",
+        `${config.serverUrl}/settings/dietary_restrictions/`,
         {},
         { withCredentials: true }
       );
@@ -188,7 +182,7 @@ export default function Settings() {
         selected_dietary_restrictions: selectedIds,
       };
       await axios.post(
-        "http://127.0.0.1:5000/settings/update_dietary_restrictions/",
+        `${config.serverUrl}/settings/update_dietary_restrictions/`,
         data,
         {
           headers: {
@@ -206,7 +200,7 @@ export default function Settings() {
   async function handleDelete() {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/settings/api/delete_account/"
+        `${config.serverUrl}/settings/api/delete_account/`
       );
       console.log("Response:");
       console.log(response);
@@ -228,16 +222,17 @@ export default function Settings() {
       }
     }
   }
-  
+
   async function updateUsername() {
     const data = {
       username: username,
     };
-    await axios.post("http://127.0.0.1:5000/settings/update_username/", data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+    await axios
+      .post(`${config.serverUrl}/settings/update_username/`, data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
       .then((response) => {
         console.log(response.data.message);
         setUsernameTaken(response.data.alreadyTaken);
@@ -267,6 +262,7 @@ export default function Settings() {
 
     setSelectedCuisines(preselectedCuisines);
   }, [cuisines, userCuisines]);
+
 
   React.useEffect(() => {
     const preselectedDietaryRestrictions = dietaryRestrictions
@@ -339,7 +335,7 @@ export default function Settings() {
 
   const handleUsernameChange = () => {
     updateUsername();
-  }
+  };
 
   const handleOpenModal = () => {
     setOpenModal(true);
@@ -366,7 +362,7 @@ export default function Settings() {
       const token = response.idToken;
 
       await axios.post(
-        "http://127.0.0.1:5000/api/logout/",
+        `${config.serverUrl}/api/logout/`,
         {},
         {
           headers: {
@@ -387,209 +383,217 @@ export default function Settings() {
 
   return (
     <>
-      <IconButton aria-label="back"
+      <IconButton
+        aria-label="back"
         onClick={() => navigate(-1)}
         style={{ position: "absolute", top: 30, left: 30 }}
       >
-        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" } } />
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
       <h1>Settings Page</h1>
       <main role="main">
-      <p>
-        Name: {user.fname} {user.lname}
-      </p>
-      <p>Username: {user.username}</p>
-      <p>Colonial Floor: {user.colonial_floor}</p>
-      <p>Colonial Side: {user.colonial_side}</p>
+        <p>
+          Name: {user.fname} {user.lname}
+        </p>
+        <p>Username: {user.username}</p>
+        <p>Colonial Floor: {user.colonial_floor}</p>
+        <p>Colonial Side: {user.colonial_side}</p>
 
-      <h2>Change Personal Details</h2>
+        <h2>Change Personal Details</h2>
 
-      <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small" >
-        <Select
-          displayEmpty
-          value={colonialFloor}
-          onChange={handleFloorChange}
-          renderValue={(selected) => {
-            if (selected.length === 0) {
-              return <i>{user.colonial_floor}</i>;
-            }
-            return selected;
-          }}
-        >
-          <MenuItem disabled value="">
-            {user.colonial_floor}
-          </MenuItem>
-          <MenuItem value={1}>One</MenuItem>
-          <MenuItem value={2}>Two</MenuItem>
-          <MenuItem value={3}>Three</MenuItem>
-          <MenuItem value={4}>Four</MenuItem>
-        </Select>
-        <FormHelperText>Colonial Floor</FormHelperText>
-      </FormControl>
+        <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
+          <Select
+            displayEmpty
+            value={colonialFloor}
+            onChange={handleFloorChange}
+            renderValue={(selected) => {
+              if (selected.length === 0) {
+                return <i>{user.colonial_floor}</i>;
+              }
+              return selected;
+            }}
+          >
+            <MenuItem disabled value="">
+              {user.colonial_floor}
+            </MenuItem>
+            <MenuItem value={1}>One</MenuItem>
+            <MenuItem value={2}>Two</MenuItem>
+            <MenuItem value={3}>Three</MenuItem>
+            <MenuItem value={4}>Four</MenuItem>
+          </Select>
+          <FormHelperText>Colonial Floor</FormHelperText>
+        </FormControl>
 
-      <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small" aria-label="side-select">
-        <Select
-          displayEmpty
-          value={colonialSide}
-          onChange={handleSideChange}
-          renderValue={(selected) => {
-            if (selected.length === 0) {
-              return <i>{user.colonial_side}</i>;
-            }
-            return selected;
-          }}
-        >
-          <MenuItem disabled value="" aria-label="default-text">
-            {user.colonial_side}
-          </MenuItem>
-          <MenuItem value={"Mens"}>Men's</MenuItem>
-          <MenuItem value={"Womens"}>Women's</MenuItem>
-        </Select>
-        <FormHelperText>Colonial Side</FormHelperText>
-      </FormControl>
-
-      <br />
-      <br />
-
-      <h2>Change Account Details</h2>
-      
-      {!usernameTaken ?
-        <TextField
-          aria-label="username-textfield"
-          size="small"
-          helperText="Username"
-          value={user.username}
+        <FormControl
           variant="filled"
-          onChange={(e) => {
-            const newUsername = e.target.value;
-
-            setUsername(newUsername);
-            setUser((prevUser) => ({
-              ...prevUser,
-              username: newUsername,
-            }));
-          }}
-        />
-      :
-        <TextField
-          error
-          aria-label="username-textfield"
+          sx={{ m: 1, width: 250 }}
           size="small"
-          helperText="Error: Username already taken"
-          value={user.username}
-          variant="filled"
-          onChange={(e) => {
-            const newUsername = e.target.value;
-
-            setUsernameTaken(false);
-            setUsername(newUsername);
-            setUser((prevUser) => ({
-              ...prevUser,
-              username: newUsername,
-            }));
-          }}
-        />
-      }
-
-      <Button
-        sx={{ marginLeft: 2 }}
-        variant="contained"
-        color="primary"
-        onClick={handleUsernameChange}
-      >
-        Save
-      </Button>
-
-      <br />
-      <br />
-
-      <h2>Change Cuisine Preferences</h2>
-
-      <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
-        <InputLabel id="cuisine-select-label">Cuisines</InputLabel>
-        <Select
-          labelId="cuisine-select-label"
-          multiple
-          value={selectedCuisines}
-          onChange={handleCuisineChange}
-          renderValue={(selected) => selected.join(", ")}
-          displayEmpty
+          aria-label="side-select"
         >
-          <MenuItem value="" disabled>
-            <em>Choose a cuisine</em>
-          </MenuItem>
-          {cuisines &&
-            cuisines.map((cuisine, index) => (
-              <MenuItem key={index} value={cuisine.name}>
+          <Select
+            displayEmpty
+            value={colonialSide}
+            onChange={handleSideChange}
+            renderValue={(selected) => {
+              if (selected.length === 0) {
+                return <i>{user.colonial_side}</i>;
+              }
+              return selected;
+            }}
+          >
+            <MenuItem disabled value="" aria-label="default-text">
+              {user.colonial_side}
+            </MenuItem>
+            <MenuItem value={"Mens"}>Men's</MenuItem>
+            <MenuItem value={"Womens"}>Women's</MenuItem>
+          </Select>
+          <FormHelperText>Colonial Side</FormHelperText>
+        </FormControl>
+
+        <br />
+        <br />
+
+        <h2>Change Account Details</h2>
+
+        {!usernameTaken ? (
+          <TextField
+            aria-label="username-textfield"
+            size="small"
+            helperText="Username"
+            value={user.username}
+            variant="filled"
+            onChange={(e) => {
+              const newUsername = e.target.value;
+
+              setUsername(newUsername);
+              setUser((prevUser) => ({
+                ...prevUser,
+                username: newUsername,
+              }));
+            }}
+          />
+        ) : (
+          <TextField
+            error
+            aria-label="username-textfield"
+            size="small"
+            helperText="Error: Username already taken"
+            value={user.username}
+            variant="filled"
+            onChange={(e) => {
+              const newUsername = e.target.value;
+
+              setUsernameTaken(false);
+              setUsername(newUsername);
+              setUser((prevUser) => ({
+                ...prevUser,
+                username: newUsername,
+              }));
+            }}
+          />
+        )}
+
+        <Button
+          sx={{ marginLeft: 2 }}
+          variant="contained"
+          color="primary"
+          onClick={handleUsernameChange}
+        >
+          Save
+        </Button>
+
+        <br />
+        <br />
+
+        <h2>Change Cuisine Preferences</h2>
+
+        <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
+          <InputLabel id="cuisine-select-label">Cuisines</InputLabel>
+          <Select
+            labelId="cuisine-select-label"
+            multiple
+            value={selectedCuisines}
+            onChange={handleCuisineChange}
+            renderValue={(selected) => selected.join(", ")}
+            displayEmpty
+          >
+            <MenuItem value="" disabled>
+              <em>Choose a cuisine</em>
+            </MenuItem>
+            {cuisines &&
+              cuisines.map((cuisine, index) => (
+                <MenuItem key={index} value={cuisine.name}>
+                  <Checkbox
+                    checked={selectedCuisines.indexOf(cuisine.name) > -1}
+                  />
+                  <ListItemText primary={cuisine.name} />
+                </MenuItem>
+              ))}
+          </Select>
+          <FormHelperText>Select Favorite Cuisines</FormHelperText>
+        </FormControl>
+
+        <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
+          <InputLabel id="dietary_restriction-select-label">
+            Dietary Restrictions
+          </InputLabel>
+          <Select
+            labelId="dietary_restriction-select-label"
+            multiple
+            value={selectedDietaryRestrictions}
+            onChange={handleDietaryRestrictionsChange}
+            renderValue={(selected) => selected.join(", ")}
+            displayEmpty
+          >
+            <MenuItem value="" disabled>
+              <em>Choose a dietary restriction</em>
+            </MenuItem>
+            {dietaryRestrictions.map((restriction) => (
+              <MenuItem key={restriction.id} value={restriction.name}>
                 <Checkbox
-                  checked={selectedCuisines.indexOf(cuisine.name) > -1}
+                  checked={selectedDietaryRestrictions.includes(
+                    restriction.name
+                  )}
                 />
-                <ListItemText primary={cuisine.name} />
+                <ListItemText primary={restriction.name} />
               </MenuItem>
             ))}
-        </Select>
-        <FormHelperText>Select Favorite Cuisines</FormHelperText>
-      </FormControl>
+          </Select>
+          <FormHelperText>Select Dietary Restrictions</FormHelperText>
+        </FormControl>
 
-      <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
-        <InputLabel id="dietary_restriction-select-label">
-          Dietary Restrictions
-        </InputLabel>
-        <Select
-          labelId="dietary_restriction-select-label"
-          multiple
-          value={selectedDietaryRestrictions}
-          onChange={handleDietaryRestrictionsChange}
-          renderValue={(selected) => selected.join(", ")}
-          displayEmpty
-        >
-          <MenuItem value="" disabled>
-            <em>Choose a dietary restriction</em>
-          </MenuItem>
-          {dietaryRestrictions.map((restriction) => (
-            <MenuItem key={restriction.id} value={restriction.name}>
-              <Checkbox
-                checked={selectedDietaryRestrictions.includes(restriction.name)}
-              />
-              <ListItemText primary={restriction.name} />
-            </MenuItem>
-          ))}
-        </Select>
-        <FormHelperText>Select Dietary Restrictions</FormHelperText>
-      </FormControl>
+        <br />
+        <br />
 
-      <br />
-      <br />
-
-      <Box mt={4} display="flex" flexDirection="column" gap={2}>
-        <Button variant="contained" color="error" onClick={handleOpenModal}>
-          Delete Account
-        </Button>
-        <Button variant="contained" color="primary" onClick={handleLogout}>
-          Logout
-        </Button>
-      </Box>
-
-      <Modal open={openModal} onClose={handleCloseModal}>
-        <Box sx={modalStyle}>
-          <h2>Are you sure you want to delete your account?</h2>
-          <Button
-            onClick={handleConfirmDelete}
-            variant="contained"
-            color="error"
-            sx={{ marginRight: 2 }}
-          >
-            Yes, delete my account
+        <Box mt={4} display="flex" flexDirection="column" gap={2}>
+          <Button variant="contained" color="error" onClick={handleOpenModal}>
+            Delete Account
           </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleCloseModal}
-          >
-            Cancel
+          <Button variant="contained" color="primary" onClick={handleLogout}>
+            Logout
           </Button>
         </Box>
-      </Modal>
+
+        <Modal open={openModal} onClose={handleCloseModal}>
+          <Box sx={modalStyle}>
+            <h2>Are you sure you want to delete your account?</h2>
+            <Button
+              onClick={handleConfirmDelete}
+              variant="contained"
+              color="error"
+              sx={{ marginRight: 2 }}
+            >
+              Yes, delete my account
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleCloseModal}
+            >
+              Cancel
+            </Button>
+          </Box>
+        </Modal>
       </main>
     </>
   );

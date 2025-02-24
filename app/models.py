@@ -32,6 +32,7 @@ class User(UserMixin, db.Model):
     last_logged_in = db.Column(db.DateTime)
     num_reports = db.Column(db.Integer, nullable=False)
     is_banned = db.Column(db.Boolean, nullable=False)
+    banned_until = db.Column(db.DateTime, nullable=True)
     hasLeveled = db.Column(db.Boolean, nullable = False)
 
     @property
@@ -500,11 +501,13 @@ class RecipeList(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.Text, nullable=False)
     belongs_to = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    image = db.Column(db.Text, nullable=True)
     def to_json(self):
         return {
             "id": self.id,
             "name": self.name,
             "belongs_to": self.belongs_to,
+            "image": self.image,
         }
     
 class RecipeRecipeList(db.Model):
@@ -526,6 +529,7 @@ class UserNotifications(db.Model):
     isRead = db.Column(db.Integer, default=0, nullable=False)
     notification_type = db.Column(db.Enum('friend_request', 'group_message', 'challenge_reminder'), nullable=True)
     group_id = db.Column(db.Integer, db.ForeignKey('UserGroup.id'), nullable=True)
+    challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id'), nullable=True)
     def to_json(self):
         return {
             "id": self.id,
@@ -533,7 +537,8 @@ class UserNotifications(db.Model):
             "notification_text": self.notification_text,
             "isRead": self.isRead,
             "notification_type": self.notification_type,
-            "group_id": self.group_id
+            "group_id": self.group_id,
+            "challenge_id": self.challenge_id,
         }
 
 class FriendRequest(db.Model):
@@ -541,13 +546,11 @@ class FriendRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     requestFrom = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
     requestTo = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
-    accepted = db.Column(db.Boolean, nullable=False)
     def to_json(self):
         return {
             "id": self.id,
             "requestFrom": self.requestFrom,
-            "requestTo": self.requestTo,
-            "accepted": self.accepted
+            "requestTo": self.requestTo
         }
     
 class RecipeDietaryRestriction(db.Model):

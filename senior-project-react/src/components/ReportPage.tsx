@@ -1,10 +1,23 @@
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import React from "react";
-import { Button, IconButton, Modal, TextField, Typography, Box, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
+import {
+  Button,
+  IconButton,
+  Modal,
+  TextField,
+  Typography,
+  Box,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+} from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
+import config from "../config.js";
 
 interface UserGroup {
   id: number;
@@ -45,7 +58,7 @@ const modalStyle = {
   paddingRight: 7,
   paddingBottom: 3,
   textAlign: "center",
-}
+};
 
 export default function ReportPage() {
   const [admin, setAdmin] = useState<boolean>(false);
@@ -62,78 +75,84 @@ export default function ReportPage() {
   const handleOpenReviewModal = () => setOpenReview(true);
   const handleCloseReviewModal = () => setOpenReview(false);
   const navigate = useNavigate();
-  
 
   async function isAdmin() {
-    await axios.get("http://127.0.0.1:5000/admin/")
+    await axios
+      .get(`${config.serverUrl}/admin/`)
       .then((response) => {
         setAdmin(response.data.is_admin);
       })
       .catch((error) => {
-        console.error("Unable to check if user is admin", error)
+        console.error("Unable to check if user is admin", error);
       });
   }
 
   async function loadGroups() {
-    await axios.get("http://127.0.0.1:5000/groups/reported/")
-    .then((response) => {
-      if(response.status === 200) {
-        setGroups(response.data);
-      }
-    })
-    .catch((error) => {
-      console.error("Could not fetch reported groups ", error);
-    });
+    await axios
+      .get(`${config.serverUrl}/groups/reported/`)
+      .then((response) => {
+        if (response.status === 200) {
+          setGroups(response.data);
+        }
+      })
+      .catch((error) => {
+        console.error("Could not fetch reported groups ", error);
+      });
   }
 
   async function loadReviews() {
-    await axios.get("http://127.0.0.1:5000/recipes/reported_reviews")
-    .then((response) => {
-      setReviews(response.data)
-    })
-    .catch((error) => {
-      console.error("Could not fetch reported reviews ", error);
-    });
+    await axios
+      .get(`${config.serverUrl}/recipes/reported_reviews`)
+      .then((response) => {
+        setReviews(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not fetch reported reviews ", error);
+      });
   }
 
   async function loadGroupReports(id: number) {
-    await axios.get(`http://127.0.0.1:5000/groups/reports/${id}/`)
-    .then((response) => {
-      setGroupReports(response.data);
-    })
-    .catch((error) => {
-      console.error("Could not fetch reports ", error);
-    });
+    await axios
+      .get(`${config.serverUrl}/groups/reports/${id}/`)
+      .then((response) => {
+        setGroupReports(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not fetch reports ", error);
+      });
   }
 
   async function loadReviewReports(id: number) {
-    await axios.get(`http://127.0.0.1:5000/recipes/reports/${id}`)
-    .then((response) => {
-      setReviewReports(response.data);
-    })
-    .catch((error) => {
-      console.error("Could not fetch reports ", error);
-    });
+    await axios
+      .get(`${config.serverUrl}/recipes/reports/${id}`)
+      .then((response) => {
+        setReviewReports(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not fetch reports ", error);
+      });
   }
 
   async function deleteGroupReports() {
-    await axios.delete(`http://127.0.0.1:5000/groups/${group!.id}/delete_reports`)
-    .then((response) => {
-      console.log(response.data);
-    })
-    .catch((error) => {
-      console.error("Could not delete reports ", error);
-    });
+    await axios
+      .delete(`${config.serverUrl}/groups/${group!.id}/delete_reports`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not delete reports ", error);
+      });
   }
-  
+
   async function deleteGroup() {
-    await axios.delete(`http://127.0.0.1:5000/groups/${group!.id}/delete`)
-    .then((response) => {
-      console.log(response.data);
-    })
-    .catch((error) => {
-      console.error("Could not delete group ", error);
-    });
+    await axios
+      .delete(`${config.serverUrl}/groups/${group!.id}/delete`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not delete group ", error);
+      });
   }
 
   function handleRemoveGroup() {
@@ -142,23 +161,25 @@ export default function ReportPage() {
   }
 
   async function deleteReviewReports() {
-    await axios.delete(`http://127.0.0.1:5000/recipes/${review!.id}/delete_reports`)
-    .then((response) => {
-      console.log(response.data);
-    })
-    .catch((error) => {
-      console.error("Could not delete reports ", error);
-    });
+    await axios
+      .delete(`${config.serverUrl}/recipes/${review!.id}/delete_reports`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not delete reports ", error);
+      });
   }
 
   async function deleteReview() {
-    await axios.delete(`http://127.0.0.1:5000/recipes/${review!.id}/delete`)
-    .then((response) => {
-      console.log(response.data);
-    })
-    .catch((error) => {
-      console.error("Could not delete review ", error);
-    });
+    await axios
+      .delete(`${config.serverUrl}/recipes/${review!.id}/delete`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not delete review ", error);
+      });
   }
 
   function handleRemoveReview() {
@@ -166,95 +187,99 @@ export default function ReportPage() {
     deleteReview();
   }
 
-  React.useEffect(() => {isAdmin(); loadGroups(); loadReviews();}, []);
+  React.useEffect(() => {
+    isAdmin();
+    loadGroups();
+    loadReviews();
+  }, []);
 
-  if(admin) {
+  if (admin) {
     return (
       <>
         <IconButton
           onClick={() => navigate(-1)}
-          style={{ position: "absolute", top: 30, left: 30 }} 
+          style={{ position: "absolute", top: 30, left: 30 }}
         >
-          <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+          <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
         </IconButton>
 
         <h1>Reported Content</h1>
 
         <h2>Reported Groups</h2>
 
-        {groups.length > 0 ?
-        <table>
-          <thead>
-            <tr>
-              <td>ID</td>
-              <td>Name</td>
-              <td>Reports</td>
-              <td></td>
-            </tr>
-          </thead>
-          <tbody>
-            {groups.map((group) => (
-              <tr key={group.id}>
-                <td>{group.id}</td>
-                <td>{group.name}</td>
-                <td>{group.num_reports}</td>
-                <td>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => {
-                      setGroup(group);
-                      loadGroupReports(group.id);
-                      handleOpenGroupModal();
-                    }}
-                  >
-                    View Reports
-                  </Button>
-                </td>
+        {groups.length > 0 ? (
+          <table>
+            <thead>
+              <tr>
+                <td>ID</td>
+                <td>Name</td>
+                <td>Reports</td>
+                <td></td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        :
-        <p>No Groups Reported</p>
-        }
+            </thead>
+            <tbody>
+              {groups.map((group) => (
+                <tr key={group.id}>
+                  <td>{group.id}</td>
+                  <td>{group.name}</td>
+                  <td>{group.num_reports}</td>
+                  <td>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => {
+                        setGroup(group);
+                        loadGroupReports(group.id);
+                        handleOpenGroupModal();
+                      }}
+                    >
+                      View Reports
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No Groups Reported</p>
+        )}
 
         <h2>Reported Reviews</h2>
 
-        {reviews.length > 0 ?
-        <table>
-          <thead>
-            <tr>
-              <td>ID</td>
-              <td>Reports</td>
-              <td></td>
-            </tr>
-          </thead>
-          <tbody>
-            {reviews.map((review) => (
-              <tr key={review.id}>
-                <td>{review.id}</td>
-                <td>{review.num_reports}</td>
-                <td>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => {
-                      setReview(review);
-                      loadReviewReports(review.id);
-                      handleOpenReviewModal();
-                    }}
-                  >
-                    View Reports
-                  </Button>
-                </td>
+        {reviews.length > 0 ? (
+          <table>
+            <thead>
+              <tr>
+                <td>ID</td>
+                <td>Reports</td>
+                <td></td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        :
-        <p>No Reviews Reported</p>
-        }
+            </thead>
+            <tbody>
+              {reviews.map((review) => (
+                <tr key={review.id}>
+                  <td>{review.id}</td>
+                  <td>{review.num_reports}</td>
+                  <td>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => {
+                        setReview(review);
+                        loadReviewReports(review.id);
+                        handleOpenReviewModal();
+                      }}
+                    >
+                      View Reports
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No Reviews Reported</p>
+        )}
 
         <Modal
           open={openGroup}
@@ -317,7 +342,9 @@ export default function ReportPage() {
             </IconButton>
 
             <Typography id="modal-title" variant="h4" component="h2">
-              {`Review submitted by ${review !== null ? review.username : "null"}`}
+              {`Review submitted by ${
+                review !== null ? review.username : "null"
+              }`}
             </Typography>
 
             <table>
@@ -351,8 +378,7 @@ export default function ReportPage() {
         </Modal>
       </>
     );
-  }
-  else {
+  } else {
     return (
       <>
         <h1>You don't have access to this page.</h1>

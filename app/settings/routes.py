@@ -217,6 +217,9 @@ def read_notification():
         db.session.commit()
         if notification.notification_type == 'group_message' and notification.group_id:
             return jsonify({"message": "Notification read successfully", "redirect_url": f"/groups/{notification.group_id}/invite_response"}), 200
+        elif notification.notification_type == 'challenge_reminder' and notification.challenge_id:
+            return jsonify({"message": "Notification read successfully", "redirect_url": f"/challenges/{notification.challenge_id}/invite_response"}), 200
+            
         return jsonify({"message": "Notification read successfully"}), 200
     except Exception as e:
         db.session.rollback()

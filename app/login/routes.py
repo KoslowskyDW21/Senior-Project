@@ -2,7 +2,9 @@ from __future__ import annotations
 from app.login import bp
 from app.models import *
 from app.login.loginforms import RegisterForm, LoginForm
+from better_profanity import profanity
 from datetime import datetime
+import html
 from flask import request, jsonify, render_template, redirect, url_for, flash, current_app
 from flask_login import login_required
 from flask_login import current_user, login_user, logout_user
@@ -19,6 +21,8 @@ import time
 TENANT_ID = os.getenv("TENANT_ID")
 CLIENT_ID = os.getenv("CLIENT_ID")
 JWKS_URL = f"https://login.microsoftonline.com/{TENANT_ID}/discovery/v2.0/keys"
+
+profanity.load_censor_words()
 
 def get_signing_keys():
     response = requests.get(JWKS_URL)
@@ -102,6 +106,9 @@ def add_cuisines(cuisine_ids, user_id):
         print(f"Error adding cuisines for user {user_id}: {e}")
 
 
+def escape_html(input_text):
+    return html.escape(input_text)
+
 # route for registering through API
 @bp.route('/api/register/', methods=['POST'])
 def api_register():
@@ -124,6 +131,11 @@ def api_register():
     userNameValidation = User.query.filter_by(username=username).first()
     if userNameValidation is not None:
         return jsonify({"message": "There is already an account with that username"}), 400
+
+    if profanity.contains_profanity(user_text):
+        return jsonify({"error": "Input contains inappropriate language"}), 400
+    
+    username = escape_html(username)
 
     if colonial_floor == "":
         colonial_floor = None
@@ -346,3 +358,29 @@ def logout():
 def get_current_user():
     return current_user.to_json(), 200
 
+@bp.route('/users/<int:user_id>', methods=['GET'])
+@login_required
+def get_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
+    user_data = {
+        "id": user.id,
+        "fname": user.fname,
+        "lname": user.lname,
+        "email_address": user.email_address,
+        "username": user.username,
+        "profile_picture": user.profile_picture,
+        "xp_points": user.xp_points,
+        "user_level": user.user_level,
+        "is_admin": user.is_admin,
+        "num_recipes_completed": user.num_recipes_completed,
+        "colonial_floor": user.colonial_floor,
+        "colonial_side": user.colonial_side,
+        "date_created": user.date_created.isoformat() if user.date_created else None,
+        "last_logged_in": user.last_logged_in.isoformat() if user.last_logged_in else None,
+        "num_reports": user.num_reports,
+    }
+
+    return jsonify(user_data), 200

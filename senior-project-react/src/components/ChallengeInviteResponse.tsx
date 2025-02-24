@@ -4,36 +4,38 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Container, Typography, Box, Button } from "@mui/material";
 import config from "../config.js";
 
-const GroupInviteResponse: React.FC = () => {
+const ChallengeInviteResponse: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [group, setGroup] = useState<any>(null);
+  const [challenge, setChallenge] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchGroup = async () => {
+    const fetchChallenge = async () => {
       try {
-        const response = await axios.get(`${config.serverUrl}/groups/${id}`);
-        setGroup(response.data);
+        const response = await axios.get(
+          `${config.serverUrl}/challenges/${id}`
+        );
+        setChallenge(response.data);
       } catch (error) {
-        console.error("Error fetching group details:", error);
+        console.error("Error fetching challenge details:", error);
       }
     };
 
-    fetchGroup();
+    fetchChallenge();
   }, [id]);
 
   const handleResponse = async (response: string) => {
     try {
-      await axios.post(`${config.serverUrl}/groups/${id}/invite_response`, {
+      await axios.post(`${config.serverUrl}/challenges/${id}/invite_response`, {
         response,
       });
-      navigate(`/groups/${id}`);
+      navigate(`/challenges/${id}`);
     } catch (error) {
       console.error(`Error sending ${response} response:`, error);
     }
   };
 
-  if (!group) {
+  if (!challenge) {
     return (
       <Container>
         <Typography variant="h5" textAlign="center" mt={4}>
@@ -47,10 +49,10 @@ const GroupInviteResponse: React.FC = () => {
     <Container>
       <Box mt={4} mb={2} textAlign="center">
         <Typography variant="h4" gutterBottom>
-          Group Invitation
+          Challenge Invitation
         </Typography>
         <Typography variant="h6" gutterBottom>
-          You have been invited to join the group {group.name}.
+          You have been invited to join the challenge {challenge.name}.
         </Typography>
         <Button
           variant="contained"
@@ -72,4 +74,4 @@ const GroupInviteResponse: React.FC = () => {
   );
 };
 
-export default GroupInviteResponse;
+export default ChallengeInviteResponse;

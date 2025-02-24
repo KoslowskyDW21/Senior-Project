@@ -119,45 +119,54 @@ def get_requests_from():
     return jsonify({"friend_requests_from": users_list}), 200
 
 def request_notification(requestFrom, requestTo, requestType):
-    
     notification_message = "if you see this, something has gone drastically wrong"
 
     userFrom = User.query.filter_by(id=requestFrom).first()
     userTo = User.query.filter_by(id=requestTo).first()
 
+    if not userFrom or not userTo:
+        return jsonify({"error": "Invalid user IDs"}), 400
+
     match requestType: 
         case notificationType.send_request:
             notification_message = f"You have a new friend request from {userFrom.username}."
+            print("new request: ")
+            print(notification_message)
         case notificationType.accept_request:
             notification_message = f"{userTo.username} has accepted your friend request."
+            print("accept message: ")
+            print(notification_message)
         case _:
             print("If you see this, you've done something drastically wrong")
     
     notification_user_id = -1
-    if requestType is notificationType.send_request:
+    if requestType == notificationType.send_request:
         notification_user_id = requestTo
     else:
         notification_user_id = requestFrom
 
     friend_notification = UserNotifications(user_id = notification_user_id, notification_text = notification_message, isRead = False, notification_type = 'friend_request')
     db.session.add(friend_notification)
+    print(friend_notification)
     try:
         db.session.commit()
+        return jsonify({"message": "Notification sent successfully"}), 200
     except IntegrityError as e:
         db.session.rollback()
         return jsonify({"error": "sending notification"}), 500
         print(f"Error sending notification to  {notification_user_id}: {e}")
+        return jsonify({"error": "sending notification"}), 500
 
 def delete_notification(requestFrom, requestTo):
+    #TODO: This is wrong. Fix it
     user = db.session.query(User).filter(User.id == requestFrom).first()
     notification_text_pattern = f"You have a new friend request from {user.username}%"
     notification_to_delete = db.session.query(UserNotifications).filter(
-        #TODO: This is wrong. Fix it
         and_(
-            UserNotifications.notification_text == notification_text_pattern,
+            UserNotifications.notification_text.like(notification_text_pattern),
             UserNotifications.user_id == requestTo
         )
-    ).first()
+    ).all()
 
     if notification_to_delete:
         for notification in notification_to_delete:
@@ -176,14 +185,13 @@ def delete_notification(requestFrom, requestTo):
 
 @bp.route('/send_request/<int:id>', methods=['POST'])
 def send_request(id):
-    new_request = FriendRequest(requestFrom=current_user.id, requestTo=id, accepted=False)
+    #TODO: verify notification functionality
+    new_request = FriendRequest(requestFrom=current_user.id, requestTo=id)
+    request_notification(current_user.id, id, notificationType.send_request)
     db.session.add(new_request)
-    #TODO: verify this actually works
     try:
         db.session.commit()
-        request_notification(current_user.id, id, notificationType.accept_request)
-        db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==current_user.id, FriendRequest.requestTo==id)).delete()
-        db.session.commit()
+        
 
     except IntegrityError as e:
         db.session.rollback()
@@ -195,16 +203,17 @@ def send_request(id):
 @bp.route('/accept_request/<int:id>', methods=['POST'])
 def accept_request(id):
     request = db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==id, FriendRequest.requestTo==current_user.id)).first()
-    #TODO: REMOVE FRIEND REQUEST FROM LIST
     if request:
-        request.accepted = True
+        #Create new friendship, delete request, 
+        new_friendship = Friendship(user1 = request.requestFrom, user2 = request.requestTo)
+        db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==id, FriendRequest.requestTo==current_user.id)).delete()
+        db.session.add(new_friendship)
     else:
         print("No request, heathen!")
     
     try:
-        print(request.accepted)
         db.session.commit()
-        request_notification(id, current_user.id, notificationType.send_request)
+        request_notification(id, current_user.id, notificationType.accept_request)
     except IntegrityError as e:
         db.session.rollback()
         print(f"Error accepting friend request from {id}: {e}")
@@ -214,7 +223,8 @@ def accept_request(id):
 @bp.route('/revoke_request/<int:id>', methods=['POST'])
 def revoke_request(id): 
     request = db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==current_user.id, FriendRequest.requestTo==id)).first()
-    delete_notification(request.requestFrom, request.requestTo)
+    if request:
+        delete_notification(request.requestFrom, request.requestTo)
     db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==current_user.id, FriendRequest.requestTo==id)).delete()
     try:
         db.session.commit()
@@ -244,10 +254,10 @@ def remove_friend(id):
 
 @bp.route('/decline_request/<int:id>', methods=['POST'])
 def decline_request(id):
-    request = db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==current_user.id, FriendRequest.requestTo==id)).first()
+    request = db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==id, FriendRequest.requestTo==current_user.id)).first()
     if request:
         delete_notification(request.requestFrom, request.requestTo)
-        request.delete()
+        db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==id, FriendRequest.requestTo==current_user.id)).delete()
     else:
         print("No request, heathen!")
     

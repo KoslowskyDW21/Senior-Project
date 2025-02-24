@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import config from "../config.js";
 
 import Header from "./Header";
 
@@ -48,7 +49,10 @@ const Group: React.FC<UserGroup> = ({ id, name, description, image }) => {
   };
 
   return (
-    <Card variant="outlined" sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <Card
+      variant="outlined"
+      sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+    >
       <CardActionArea onClick={handleGoToGroup}>
         <CardHeader
           title={name}
@@ -65,7 +69,7 @@ const Group: React.FC<UserGroup> = ({ id, name, description, image }) => {
         {image && (
           <CardMedia
             component="img"
-            image={`http://127.0.0.1:5000/${image}`}
+            image={`${config.serverUrl}/${image}`}
             sx={{
               height: 200,
               objectFit: "cover",
@@ -92,7 +96,7 @@ const Groups: React.FC = () => {
 
   const fetchGroups = async () => {
     try {
-      const response = await axios.get(`http://127.0.0.1:5000/groups`);
+      const response = await axios.get(`${config.serverUrl}/groups`);
       if (response.status === 200) {
         const newGroups = response.data;
         setGroups((prevGroups) => [...prevGroups, ...newGroups]);
@@ -105,9 +109,7 @@ const Groups: React.FC = () => {
 
   const fetchMyGroups = async () => {
     try {
-      const response = await axios.get(
-        `http://127.0.0.1:5000/groups/my_groups`
-      );
+      const response = await axios.get(`${config.serverUrl}/groups/my_groups`);
       if (response.status === 200) {
         setMyGroups(response.data);
       }
@@ -159,13 +161,26 @@ const Groups: React.FC = () => {
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
+    const query = event.target.value;
+    setSearchQuery(query);
+
+    if (query) {
+      navigate({
+        pathname: location.pathname,
+        search: `?search=${query}`,
+      });
+    } else {
+      navigate({
+        pathname: location.pathname,
+        search: "",
+      });
+    }
   };
 
   const getCurrentUser = async () => {
     try {
       const response = await axios.post(
-        `http://127.0.0.1:5000/profile/get_profile_pic/`
+        `${config.serverUrl}/profile/get_profile_pic/`
       );
       const data: User = response.data;
       setProfile_picture(data.profile_picture);
@@ -178,7 +193,7 @@ const Groups: React.FC = () => {
   const getFriends = async () => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/friends/get_friends/",
+        `${config.serverUrl}/friends/get_friends/`,
         {},
         { withCredentials: true }
       );
@@ -200,11 +215,7 @@ const Groups: React.FC = () => {
 
   return (
     <div>
-      <Header
-        title="Community"
-        searchLabel="Search for groups"
-        searchVisible={true}
-      />
+      <Header title="Community" />
       <Box
         sx={{
           display: "flex",
@@ -260,7 +271,7 @@ const Groups: React.FC = () => {
                 {friend.profile_picture ? (
                   <Avatar
                     alt="Profile Picture"
-                    src={`http://127.0.0.1:5000/${friend.profile_picture}`}
+                    src={`${config.serverUrl}/${friend.profile_picture}`}
                     sx={{ width: 70, height: 70, border: "1px solid #000" }}
                   />
                 ) : (
@@ -307,15 +318,15 @@ const Groups: React.FC = () => {
             </Box>
           </Box>
 
-            <Box mt={10} textAlign="center">
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => navigate("/friends")}
-              >
-                View All Friends
-              </Button>
-            </Box>
+          <Box mt={10} textAlign="center">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => navigate("/friends")}
+            >
+              View All Friends
+            </Button>
+          </Box>
         </main>
 
         <Container>
@@ -347,6 +358,25 @@ const Groups: React.FC = () => {
               </Grid2>
             </Box>
           )}
+
+          <Box
+            mt={{ xs: 10, sm: 14, md: 14 }}
+            textAlign="center"
+            display="flex"
+            justifyContent="center"
+            sx={{ flexGrow: 1 }}
+          >
+            <TextField
+              label="Search for groups"
+              variant="outlined"
+              fullWidth
+              value={searchQuery}
+              onChange={handleSearchChange}
+              sx={{
+                width: "100%",
+              }}
+            />
+          </Box>
 
           <Box mt={4}>
             <Typography variant="h5" gutterBottom>

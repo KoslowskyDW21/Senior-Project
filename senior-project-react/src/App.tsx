@@ -21,6 +21,7 @@ import "./App.css";
 import Challenges from "./components/Challenges";
 import ChallengeDetail from "./components/ChallengeDetails";
 import ChallengeVoting from "./components/ChallengeVoting";
+import ChallengeInviteResponse from "./components/ChallengeInviteResponse";
 import Achievements from "./components/Achievements";
 import AchievementSpecific from "./components/AchievementSpecific";
 import CompletedRecipe from "./components/CompletedRecipe";
@@ -111,9 +112,19 @@ function App() {
               <Route path="/challenges" element={<Challenges />} />
               <Route path="/challenges/:id" element={<ChallengeDetail />} />
               <Route path="/challenges/create" element={<CreateChallenge />} />
-              <Route path="/challenges/:id/vote" element={<ChallengeVoting />} />
+              <Route
+                path="/challenges/:id/vote"
+                element={<ChallengeVoting />}
+              />
               <Route path="/past-challenges" element={<PastChallenges />} />
-              <Route path="/challenges/:id/vote_results" element={<ChallengeResults />} />
+              <Route
+                path="/challenges/:id/vote_results"
+                element={<ChallengeResults />}
+              />
+              <Route
+                path="/challenges/:id/invite_response"
+                element={<ChallengeInviteResponse />}
+              />
 
               {/*achievements*/}
               <Route path="/achievements" element={<Achievements />} />
@@ -131,7 +142,10 @@ function App() {
               <Route path="/groups/:id" element={<GroupDetails />} />
               <Route path="/groups/create" element={<CreateGroup />} />
               <Route path="/groups/:id/messages" element={<GroupMessages />} />
-              <Route path="/groups/:id/invite_response" element={<GroupInviteResponse />} />
+              <Route
+                path="/groups/:id/invite_response"
+                element={<GroupInviteResponse />}
+              />
 
               {/* friends */}
               <Route path="/friends" element={<Friends />} />

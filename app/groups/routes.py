@@ -99,7 +99,7 @@ def get_members(group_id):
     member_data = []
     for member in members:
         user = User.query.get(member.member_id)
-        profile_picture_url = f'http://127.0.0.1:5000/{user.profile_picture}' if user.profile_picture else None
+        profile_picture_url = f'${config.serverUrl}/{user.profile_picture}' if user.profile_picture else None
         member_data.append({
             "user_id": user.id,
             "username": user.username,
@@ -332,3 +332,26 @@ def invite_response(group_id):
         return jsonify({"message": "You have denied the invitation."}), 200
     else:
         return jsonify({"message": "Invalid response."}), 400
+    
+
+@bp.route('/<int:group_id>/kick', methods=['POST'])
+@login_required
+def kick_user_from_group(group_id):
+    data = request.get_json()
+    user_id_to_kick = data.get('user_id')
+
+    group = UserGroup.query.get(group_id)
+    if not group:
+        return jsonify({"message": "Group not found"}), 404
+
+    if group.creator != current_user.id:
+        return jsonify({"message": "Permission denied"}), 403
+
+    participant = GroupMember.query.filter_by(group_id=group_id, member_id=user_id_to_kick).first()
+    if not participant:
+        return jsonify({"message": "User not found in group"}), 404
+
+    db.session.delete(participant)
+    db.session.commit()
+
+    return jsonify({"message": "User kicked successfully!"}), 200

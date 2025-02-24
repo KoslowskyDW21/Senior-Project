@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import config from "../config.js";
 
 import Header from "./Header";
 import { set } from "date-fns";
@@ -61,7 +62,7 @@ const Friends: React.FC = () => {
 
       try {
         const response = await axios.post(
-          "http://127.0.0.1:5000/friends/search_for_friends/",
+          `${config.serverUrl}/friends/search_for_friends/`,
           { search_query: query },
           {
             withCredentials: true,
@@ -105,7 +106,7 @@ const Friends: React.FC = () => {
   const getFriends = async () => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/friends/get_friends/",
+        `${config.serverUrl}/friends/get_friends/`,
         {},
         { withCredentials: true }
       );
@@ -119,7 +120,7 @@ const Friends: React.FC = () => {
   const getFriendRequestsTo = async () => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/friends/get_requests_to/",
+        `${config.serverUrl}/friends/get_requests_to/`,
         {},
         { withCredentials: true }
       );
@@ -134,7 +135,7 @@ const Friends: React.FC = () => {
   const getFriendRequestsFrom = async () => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/friends/get_requests_from/",
+        `${config.serverUrl}/friends/get_requests_from/`,
         {},
         { withCredentials: true }
       );
@@ -161,33 +162,16 @@ const Friends: React.FC = () => {
           paddingTop: "150px",
         }}
       >
-        <Header
-          title="Friends"
-          searchLabel="Find new friends"
-          searchVisible={false}
-        />
-        <Box sx={{ position: "relative", width: "100%" }}>
-          <IconButton
-            onClick={() => navigate("/groups/")}
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-            }}
-          >
-            <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
-          </IconButton>
-        </Box>
+        <Header title="Friends" />
 
         <main role="main">
-          <Box sx={{ position: "relative", width: "50%", margin: "auto" }}>
+          <Box sx={{ position: "relative", width: "50vw", margin: "auto" }}>
             <TextField
               label="Find new friends"
               variant="outlined"
               fullWidth
               value={searchQuery}
               onChange={handleSearchChange}
-              sx={{ zIndex: 1 }}
             />
             {searchResults.length > 0 && (
               <Box
@@ -201,7 +185,7 @@ const Friends: React.FC = () => {
                   borderRadius: "4px",
                   maxHeight: "300px",
                   overflowY: "auto",
-                  zIndex: 1000,
+                  zIndex: 1001,
                 }}
               >
                 {searchResults.map((user) => (
@@ -219,7 +203,7 @@ const Friends: React.FC = () => {
                     {user.profile_picture ? (
                       <Avatar
                         alt="Profile Picture"
-                        src={`http://127.0.0.1:5000/${user.profile_picture}`}
+                        src={`${config.serverUrl}/${user.profile_picture}`}
                         sx={{ width: 40, height: 40, marginRight: "10px" }}
                       />
                     ) : (
@@ -245,7 +229,7 @@ const Friends: React.FC = () => {
             sx={{
               display: "flex",
               flexWrap: "wrap",
-              justifyContent: "center",
+              justifyContent: "flex-start",
               gap: 2,
             }}
           >
@@ -276,7 +260,7 @@ const Friends: React.FC = () => {
                 {friend.profile_picture ? (
                   <Avatar
                     alt="Profile Picture"
-                    src={`http://127.0.0.1:5000/${friend.profile_picture}`}
+                    src={`${config.serverUrl}/${friend.profile_picture}`}
                     sx={{ width: 70, height: 70, border: "1px solid #000" }}
                   />
                 ) : (
@@ -303,48 +287,56 @@ const Friends: React.FC = () => {
             >
               To you:
             </Typography>
-            {friendRequestsFrom.map((friend) => (
-              <Box
-                key={friend.id}
-                mt={5}
-                sx={{
-                  width: "100px",
-                  minHeight: "100px",
-                  border: "2px solid rgb(172, 169, 169)",
-                  borderRadius: 2,
-                  boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
-                  transition: "all 0.3s ease",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  p: 1,
-                  height: "100%",
-                  "&:hover": {
-                    borderColor: "#1976d2",
-                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-                  },
-                }}
-                onClick={() => handleGoToOtherProfile(friend.id)}
-              >
-                {friend.profile_picture ? (
-                  <Avatar
-                    alt="Profile Picture"
-                    src={`http://127.0.0.1:5000/${friend.profile_picture}`}
-                    sx={{ width: 70, height: 70, border: "1px solid #000" }}
-                  />
-                ) : (
-                  <Avatar
-                    sx={{ width: 70, height: 70, backgroundColor: "gray" }}
-                  >
-                    <PersonIcon sx={{ color: "white" }} />
-                  </Avatar>
-                )}
-                <Typography variant="body2" mt={1}>
-                  {friend.username}
-                </Typography>
-              </Box>
-            ))}
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "flex-start",
+                gap: 2,
+                mt: 3,
+              }}
+            >
+              {friendRequestsFrom.map((friend) => (
+                <Box
+                  key={friend.id}
+                  sx={{
+                    width: "120px",
+                    minHeight: "120px",
+                    border: "2px solid rgb(172, 169, 169)",
+                    borderRadius: 2,
+                    boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                    transition: "all 0.3s ease",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    p: 1,
+                    "&:hover": {
+                      borderColor: "#1976d2",
+                      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                    },
+                  }}
+                  onClick={() => handleGoToOtherProfile(friend.id)}
+                >
+                  {friend.profile_picture ? (
+                    <Avatar
+                      alt="Profile Picture"
+                      src={`${config.serverUrl}/${friend.profile_picture}`}
+                      sx={{ width: 70, height: 70, border: "1px solid #000" }}
+                    />
+                  ) : (
+                    <Avatar
+                      sx={{ width: 70, height: 70, backgroundColor: "gray" }}
+                    >
+                      <PersonIcon sx={{ color: "white" }} />
+                    </Avatar>
+                  )}
+                  <Typography variant="body2" mt={1}>
+                    {friend.username}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
             <Typography
               variant="h5"
               mt={5}
@@ -379,7 +371,7 @@ const Friends: React.FC = () => {
                 {friend.profile_picture ? (
                   <Avatar
                     alt="Profile Picture"
-                    src={`http://127.0.0.1:5000/${friend.profile_picture}`}
+                    src={`${config.serverUrl}/${friend.profile_picture}`}
                     sx={{ width: 70, height: 70, border: "1px solid #000" }}
                   />
                 ) : (

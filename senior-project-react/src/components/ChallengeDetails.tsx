@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   Card,
@@ -11,8 +10,16 @@ import {
   Container,
   Button,
   IconButton,
+  Modal,
+  List,
+  ListItem,
+  ListItemText,
+  Checkbox,
 } from "@mui/material";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CloseIcon from "@mui/icons-material/Close";
+import ChallengeParticipantsList from "./ChallengeParticipantsList";
+import config from "../config.js";
 
 interface Challenge {
   id: number;
@@ -30,7 +37,6 @@ interface Challenge {
 
 interface Participant {
   user_id: number;
-  username: string;
 }
 
 interface User {
@@ -51,17 +57,25 @@ interface User {
   num_reports: number;
 }
 
+interface Friend {
+  id: number;
+  username: string;
+}
+
 const ChallengeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [challenge, setChallenge] = React.useState<Challenge | null>(null);
-  const [participants, setParticipants] = React.useState<Participant[]>([]);
+  const [challenge, setChallenge] = useState<Challenge | null>(null);
+  const [participants, setParticipants] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [selectedFriends, setSelectedFriends] = useState<number[]>([]);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   const navigate = useNavigate();
 
   const fetchChallenge = async () => {
     try {
-      const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}`);
+      const response = await axios.get(`${config.serverUrl}/challenges/${id}`);
       setChallenge(response.data);
     } catch (error) {
       console.error("Error fetching challenge details:", error);
@@ -70,8 +84,19 @@ const ChallengeDetail: React.FC = () => {
 
   const fetchParticipants = async () => {
     try {
-      const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}/participants`);
-      setParticipants(response.data);
+      const response = await axios.get(
+        `${config.serverUrl}/challenges/${id}/participants`
+      );
+      const participantIds: Participant[] = response.data;
+
+      const userResponses = await Promise.all(
+        participantIds.map((participant) =>
+          axios.get(`${config.serverUrl}/users/${participant.user_id}`)
+        )
+      );
+
+      const users: User[] = userResponses.map((res) => res.data);
+      setParticipants(users);
     } catch (error) {
       console.error("Error fetching participants:", error);
     }
@@ -79,19 +104,29 @@ const ChallengeDetail: React.FC = () => {
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:5000/current_user");
+      const response = await axios.get(`${config.serverUrl}/current_user`);
       setCurrentUser(response.data);
     } catch (error) {
       console.error("Error fetching current user:", error);
     }
   };
 
+  const fetchFriends = async () => {
+    try {
+      const response = await axios.post(
+        `${config.serverUrl}/friends/get_friends/`
+      );
+      setFriends(response.data.friends);
+    } catch (error) {
+      console.error("Error fetching friends:", error);
+    }
+  };
+
   const handleJoinChallenge = async () => {
     if (new Date(challenge!.start_time) > new Date()) {
       try {
-        await axios.post(`http://127.0.0.1:5000/challenges/${id}/join`);
-        const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}/participants`);
-        setParticipants(response.data);
+        await axios.post(`${config.serverUrl}/challenges/${id}/join`);
+        fetchParticipants();
       } catch (error) {
         console.error("Error joining challenge:", error);
       }
@@ -103,9 +138,8 @@ const ChallengeDetail: React.FC = () => {
   const handleLeaveChallenge = async () => {
     if (new Date(challenge!.start_time) > new Date()) {
       try {
-        await axios.post(`http://127.0.0.1:5000/challenges/${id}/leave`);
-        const response = await axios.get(`http://127.0.0.1:5000/challenges/${id}/participants`);
-        setParticipants(response.data);
+        await axios.post(`${config.serverUrl}/challenges/${id}/leave`);
+        fetchParticipants();
       } catch (error) {
         console.error("Error leaving challenge:", error);
       }
@@ -116,17 +150,37 @@ const ChallengeDetail: React.FC = () => {
 
   const handleDeleteChallenge = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:5000/challenges/${id}/delete`);
-      window.history.back()
+      await axios.delete(`${config.serverUrl}/challenges/${id}/delete`);
+      window.history.back();
     } catch (error) {
       console.error("Error deleting challenge:", error);
     }
   };
 
-  React.useEffect(() => {
+  const handleInviteFriends = async () => {
+    try {
+      await axios.post(`${config.serverUrl}/challenges/${id}/invite`, {
+        friend_ids: selectedFriends,
+      });
+      setInviteModalOpen(false);
+    } catch (error) {
+      console.error("Error inviting friends:", error);
+    }
+  };
+
+  const handleToggleFriend = (friendId: number) => {
+    setSelectedFriends((prevSelected) =>
+      prevSelected.includes(friendId)
+        ? prevSelected.filter((id) => id !== friendId)
+        : [...prevSelected, friendId]
+    );
+  };
+
+  useEffect(() => {
     fetchChallenge();
     fetchParticipants();
     fetchCurrentUser();
+    fetchFriends();
   }, [id]);
 
   if (!challenge || !currentUser) {
@@ -139,7 +193,7 @@ const ChallengeDetail: React.FC = () => {
     );
   }
 
-  const isParticipant = participants.some((p) => p.user_id === currentUser.id);
+  const isParticipant = participants.some((p) => p.id === currentUser.id);
   const isCreator = challenge.creator === currentUser.id;
   const now = new Date();
   const startTime = new Date(challenge.start_time);
@@ -149,17 +203,17 @@ const ChallengeDetail: React.FC = () => {
   return (
     <Container>
       <IconButton
-        onClick={() => navigate(-1)}
-        style={{ position: "absolute", top: 30, left: 30 }} 
+        onClick={() => navigate("/challenges")}
+        style={{ position: "absolute", top: 30, left: 30 }}
       >
-        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: 'bold' }} />
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
       <Card sx={{ maxWidth: 800, margin: "20px auto", padding: 2 }}>
         {challenge.image && (
           <CardMedia
             component="img"
             height="400"
-            image={`http://127.0.0.1:5000/${challenge.image}`}
+            image={`${config.serverUrl}/${challenge.image}`}
             alt={challenge.name}
             sx={{ borderRadius: 2 }}
           />
@@ -182,12 +236,10 @@ const ChallengeDetail: React.FC = () => {
               <strong>Location:</strong> {challenge.location}
             </Typography>
             <Typography variant="body1">
-              <strong>Start Time:</strong>{" "}
-              {startTime.toLocaleString()}
+              <strong>Start Time:</strong> {startTime.toLocaleString()}
             </Typography>
             <Typography variant="body1">
-              <strong>End Time:</strong>{" "}
-              {endTime.toLocaleString()}
+              <strong>End Time:</strong> {endTime.toLocaleString()}
             </Typography>
           </Box>
           <Box textAlign="center" mt={3}>
@@ -218,16 +270,21 @@ const ChallengeDetail: React.FC = () => {
                 Leave Challenge
               </Button>
             )}
+            {isParticipant && now < startTime && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setInviteModalOpen(true)}
+              >
+                Invite Friends
+              </Button>
+            )}
           </Box>
           <Box mt={4}>
             <Typography variant="h5" gutterBottom>
               Participants
             </Typography>
-            <ul>
-              {participants.map((participant) => (
-                <li key={participant.user_id}>{participant.username}</li>
-              ))}
-            </ul>
+            <ChallengeParticipantsList participants={participants} isCreator={isCreator} challengeId={challenge.id} creatorId={challenge.creator}/>
           </Box>
           {isParticipant && now >= startTime && now <= votingEndTime && (
             <Box textAlign="center" mt={3}>
@@ -253,6 +310,60 @@ const ChallengeDetail: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      <Modal
+        open={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        aria-labelledby="invite-modal-title"
+        aria-describedby="invite-modal-description"
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            bgcolor: "#ffffff",
+            boxShadow: 24,
+            padding: 4,
+            borderRadius: 2,
+          }}
+        >
+          <IconButton
+            onClick={() => setInviteModalOpen(false)}
+            style={{ position: "absolute", top: 5, right: 5 }}
+          >
+            <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+          </IconButton>
+
+          <Typography id="invite-modal-title" variant="h4" component="h2">
+            Invite Friends
+          </Typography>
+          <List>
+            {friends.map((friend) => (
+              <ListItem
+                key={friend.id}
+                button
+                onClick={() => handleToggleFriend(friend.id)}
+              >
+                <Checkbox
+                  checked={selectedFriends.includes(friend.id)}
+                  tabIndex={-1}
+                  disableRipple
+                />
+                <ListItemText primary={friend.username} />
+              </ListItem>
+            ))}
+          </List>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleInviteFriends}
+          >
+            Send Invites
+          </Button>
+        </Box>
+      </Modal>
     </Container>
   );
 };

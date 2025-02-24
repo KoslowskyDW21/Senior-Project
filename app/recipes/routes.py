@@ -1,35 +1,25 @@
 from __future__ import annotations
 import math
-from sqlalchemy import case, or_
+from sqlalchemy import case, func, or_
 from flask import request, jsonify, render_template, redirect, url_for, abort, flash, current_app
 from flask_login import current_user, login_required
 from app.recipes import bp
-from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, Review, ReviewReport, Cuisine, db
+from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, Review, ReviewReport, Cuisine, RecipeDietaryRestriction, db
 import os
 import uuid
 from werkzeug.utils import secure_filename
 from math import ceil
-
-# @bp.get('/')
-# def home():
-#     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
-
-#@bp.post("/")
-#def post_recipes():
-    #print("Fetching recipes")
-    #recipes = Recipe.query.all()
-    #return jsonify([recipe.to_json() for recipe in recipes]), 200
+from sqlalchemy.orm import aliased
 
 
 
 @bp.post("/")
 def post_recipes():
     print("Fetching recipes")
-    search_query = request.args.get('search_query', '').strip()  # Clean search query
-    page = max(1, int(request.args.get('page', 1)))  # Ensure page is at least 1
+    search_query = request.args.get('search_query', '').strip()  
+    dietary_restrictions = request.args.getlist('dietary_restrictions[]')
+    page = max(1, int(request.args.get('page', 1)))  
     per_page = int(request.args.get('per_page', 20))
-
-    print(f"Search query: {search_query}, Page: {page}, Per page: {per_page}")
     
     recipes_query = Recipe.query
 
@@ -61,6 +51,20 @@ def post_recipes():
             cuisine_filter.desc()
         )
 
+    if dietary_restrictions:
+        for i, restriction in enumerate(dietary_restrictions):
+            # Create a new alias for each restriction
+            dietary_restriction_alias = aliased(RecipeDietaryRestriction)
+            print(f"Filtering by restriction {i+1}: {restriction}")
+            
+            recipes_query = recipes_query.join(
+                dietary_restriction_alias, dietary_restriction_alias.recipe_id == Recipe.id
+            ).filter(
+                ~dietary_restriction_alias.dietary_restrictions.ilike(f"%{restriction}%")
+            )
+    else:
+        print("No dietary restrictions provided")
+        
     recipes_paginated = recipes_query.paginate(page=page, per_page=per_page, error_out=False)
     total_pages = ceil(recipes_paginated.total / per_page)  # type: ignore
     recipes = [recipe.to_json() for recipe in recipes_paginated.items]
@@ -190,7 +194,7 @@ def upload_review(id):
             difficulty = '0'
         if image_path is None:
             image_path = "NULL"
-        review = Review(recipe_id=id,text=notes,image=image_path,rating=rating,difficulty=difficulty, num_reports=0,author=current_user.id) # type: ignore
+        review = Review(recipe_id=id,text=notes,image=image_path,rating=rating,difficulty=difficulty, num_reports=0,user_id=current_user.id, username = current_user.username) # type: ignore
         db.session.add(review)
         db.session.commit()
 

@@ -3,6 +3,7 @@ import axios from "axios";
 import { Box, Button, Container } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
+import config from "../config.js";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ const Login = () => {
 
       // Send ID Token to backend
       const response = await axios.post(
-        "http://127.0.0.1:5000/api/login/sso/",
+        `${config.serverUrl}/api/login/sso/`,
         { token: idToken },
         { withCredentials: true }
       );
@@ -114,7 +115,7 @@ const Login = () => {
         }}
       >
         <img
-          src="http://127.0.0.1:5000/static/uploads/2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg"
+          src={`${config.serverUrl}/static/uploads/2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg`}
           alt="Image"
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
