@@ -35,7 +35,7 @@ const Achievements: React.FC = () => {
   const [specAchievements, setSpecAchievements] = React.useState<Achievement[]>([]);
   const [open, setOpen] = React.useState(false);
   const [selectedAchievement, setSelectedAchievement] = React.useState<Achievement | null>(null);
-  const [filter, setFilter] = React.useState("all"); // "all" or "completed"
+  const [filter, setFilter] = React.useState("all"); // "all", "completed", or "notCompleted"
 
   const navigate = useNavigate();
 
@@ -77,6 +77,8 @@ const Achievements: React.FC = () => {
   const filteredAchievements =
     filter === "completed"
       ? achievements.filter((achievement) => specAchievements.some((specAch) => specAch.id === achievement.id))
+      : filter === "notCompleted"
+      ? achievements.filter((achievement) => !specAchievements.some((specAch) => specAch.id === achievement.id))
       : achievements;
 
   return (
@@ -99,6 +101,7 @@ const Achievements: React.FC = () => {
         >
           <MenuItem value="all">All Achievements</MenuItem>
           <MenuItem value="completed">Completed Achievements</MenuItem>
+          <MenuItem value="notCompleted">Unearned Achievements</MenuItem>
         </Select>
       </FormControl>
 
