@@ -4,12 +4,9 @@ import { useNavigate } from "react-router-dom";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { useMediaQuery } from "@mui/material";
+import { useMediaQuery, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Button, IconButton } from "@mui/material";
-import CheckIcon from "@mui/icons-material/Check";
-import DoneIcon from "@mui/icons-material/Done";
-import HowToRegIcon from "@mui/icons-material/HowToReg";
 import { CheckCircle } from "@mui/icons-material";
 import config from "../config.js";
 
@@ -35,12 +32,10 @@ const style = {
 
 const Achievements: React.FC = () => {
   const [achievements, setAchievements] = React.useState<Achievement[]>([]);
-  const [specAchievements, setSpecAchievements] = React.useState<Achievement[]>(
-    []
-  );
+  const [specAchievements, setSpecAchievements] = React.useState<Achievement[]>([]);
   const [open, setOpen] = React.useState(false);
-  const [selectedAchievement, setSelectedAchievement] =
-    React.useState<Achievement | null>(null);
+  const [selectedAchievement, setSelectedAchievement] = React.useState<Achievement | null>(null);
+  const [filter, setFilter] = React.useState("all"); // "all" or "completed"
 
   const navigate = useNavigate();
 
@@ -58,19 +53,15 @@ const Achievements: React.FC = () => {
   const isMediumScreen = useMediaQuery("(max-width:960px)");
 
   const gridTemplateColumns = isSmallScreen
-    ? "repeat(1, 1fr)" // 1 column for small screens
+    ? "repeat(1, 1fr)"
     : isMediumScreen
-    ? "repeat(2, 1fr)" // 2 columns for medium screens
-    : "repeat(3, 1fr)"; // 3 columns for larger screens
+    ? "repeat(2, 1fr)"
+    : "repeat(3, 1fr)";
 
   const getResponse = async () => {
     try {
       const response = await axios.post(`${config.serverUrl}/achievements/`);
-      const {
-        achievements,
-        specAchievements,
-      }: { achievements: Achievement[]; specAchievements: Achievement[] } =
-        response.data;
+      const { achievements, specAchievements }: { achievements: Achievement[]; specAchievements: Achievement[] } = response.data;
       setAchievements(achievements);
       setSpecAchievements(specAchievements);
     } catch (error) {
@@ -82,6 +73,12 @@ const Achievements: React.FC = () => {
     getResponse();
   }, []);
 
+  // Filter achievements based on the selected filter
+  const filteredAchievements =
+    filter === "completed"
+      ? achievements.filter((achievement) => specAchievements.some((specAch) => specAch.id === achievement.id))
+      : achievements;
+
   return (
     <div>
       <IconButton
@@ -91,6 +88,20 @@ const Achievements: React.FC = () => {
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
       <h1>Achievements</h1>
+
+      {/* Dropdown for Filtering Achievements */}
+      <FormControl fullWidth style={{ marginBottom: "16px" }}>
+        <InputLabel>Filter Achievements</InputLabel>
+        <Select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          label="Filter Achievements"
+        >
+          <MenuItem value="all">All Achievements</MenuItem>
+          <MenuItem value="completed">Completed Achievements</MenuItem>
+        </Select>
+      </FormControl>
+
       <div
         style={{
           display: "grid",
@@ -98,7 +109,7 @@ const Achievements: React.FC = () => {
           gap: "16px",
         }}
       >
-        {achievements.map((achievement) => {
+        {filteredAchievements.map((achievement) => {
           const isSpecial = specAchievements.some(
             (specAch) => specAch.id === achievement.id
           );
