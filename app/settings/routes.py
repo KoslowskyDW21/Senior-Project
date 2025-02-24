@@ -58,66 +58,21 @@ def post_update_user():
         print(f"Error updating user: {e}")
         return jsonify({"message": "Error updating user"}), 500
 
-def delete_user_and_dependencies(session, current_user_id):
-    try:
-        session.query(UserBlock).filter(
-            (UserBlock.blocked_user == current_user_id) | (UserBlock.blocked_by == current_user_id)
-        ).delete(synchronize_session=False)
+# def delete_user_and_dependencies(current_user_id):
+#     try:
         
-        session.query(Friendship).filter(
-            (Friendship.user1 == current_user_id) | (Friendship.user2 == current_user_id)
-        ).delete(synchronize_session=False)
-        
-        session.query(UserDietaryRestriction).filter(
-            UserDietaryRestriction.user_id == current_user_id
-        ).delete(synchronize_session=False)
-        
-        session.query(UserCuisinePreference).filter(
-            UserCuisinePreference.user_id == current_user_id
-        ).delete(synchronize_session=False)
-        
-        session.query(GroupMember).filter(
-            GroupMember.member_id == current_user_id
-        ).delete(synchronize_session=False)
-        
-        session.query(GroupBannedMember).filter(
-            GroupBannedMember.banned_member_id == current_user_id
-        ).delete(synchronize_session=False)
-        
-        session.query(CookedRecipe).filter(
-            CookedRecipe.completed_by == current_user_id
-        ).delete(synchronize_session=False)
-        
-        session.query(Review).filter(
-            Review.author == current_user_id
-        ).delete(synchronize_session=False)
-        
-        session.query(UserAchievement).filter(
-            UserAchievement.user_id == current_user_id
-        ).delete(synchronize_session=False)
-        
-        session.query(Message).filter(
-            Message.user_id == current_user_id
-        ).delete(synchronize_session=False)
-        
-        session.query(User).filter(
-            User.id == current_user_id
-        ).delete(synchronize_session=False)
-        
-        session.commit()
-    except Exception as e:
-        session.rollback()
-        print(f"Error deleting user data: {e}")
-        raise
+#     except Exception as e:
+#         session.rollback()
+#         print(f"Error deleting user data: {e}")
+#         raise
 
 
 @login_required
 @bp.route('/api/delete_account/', methods=['POST'])
 def delete_account():
     user = current_user
-    session = db.session
     current_user_id = user.id
-    delete_user_and_dependencies(session, current_user_id)
+    delete_user_and_dependencies(current_user_id)
     print("Deleted successfully")
     return jsonify({"message": "Account deleted successfully"}), 200
 
