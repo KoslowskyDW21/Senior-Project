@@ -274,14 +274,14 @@ def decline_request(id):
         return jsonify({"error": "Could not decline request"}), 500
     
 def checkAchievement(user1, user2):
-    if(UserAchievement.filter_by(achievement_id = 4, user_id = user1.id).all() == None): # type: ignore
+    if(UserAchievement.query.filter_by(achievement_id = 4, user_id = user1.id).all() == None): # type: ignore
         a1 = UserAchievement(achievement_id = 4, user_id = user1.id) #type: ignore
         db.session.add(a1)
         db.session.flush()
         db.session.commit()
         
 
-    if(UserAchievement.filter_by(achievement_id = 4, user_id = user2.id).all() == None): # type: ignore
+    if(UserAchievement.query.filter_by(achievement_id = 4, user_id = user2.id).all() == None): # type: ignore
         a2 = UserAchievement(achievement_id = 4, user_id = user2.id) #type: ignore
         db.session.add(a2)
         db.session.flush()
