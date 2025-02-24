@@ -99,6 +99,7 @@ const Recipes: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [noResultsFound, setNoResultsFound] = useState(false);
   const hasScrolled = useRef(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -106,16 +107,16 @@ const Recipes: React.FC = () => {
 
   const getSearchQuery = () =>
     new URLSearchParams(location.search).get("search") || "";
-  const [debouncedSearch, setDebouncedSearch] = useState(getSearchQuery());
 
-  const debouncedSetSearch = debounce((query) => {
-    setDebouncedSearch(query);
-  }, 300);
+  // Use the searchQuery directly without debouncing
+  const debouncedSearch = searchQuery;
 
+  // Handle search changes and trigger navigation immediately
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
     setSearchQuery(query);
 
+    // Update URL with the new search query
     if (query) {
       navigate({
         pathname: location.pathname,
@@ -129,16 +130,13 @@ const Recipes: React.FC = () => {
     }
   };
 
+  // Effect to load recipes when the search query or page changes
   useEffect(() => {
-    debouncedSetSearch(getSearchQuery());
-    return () => debouncedSetSearch.cancel();
-  }, [location.search]);
-
-  useEffect(() => {
-    setRecipes([]);
-    setPage(1);
-    setTotalPages(1);
-    loadRecipes(true);
+    setRecipes([]); // Clear previous results
+    setPage(1); // Reset to first page
+    setTotalPages(1); // Reset total pages
+    setNoResultsFound(false); // Reset no results state
+    loadRecipes(true); // Load recipes with the initial query
   }, [debouncedSearch]);
 
   useEffect(() => {
@@ -150,16 +148,25 @@ const Recipes: React.FC = () => {
     setLoading(true);
 
     try {
+      // Send empty string if no search query to fetch all recipes
       const response = await axios.post(`${config.serverUrl}/recipes/`, null, {
         params: {
           page: reset ? 1 : page,
           per_page: 20,
-          search_query: debouncedSearch,
+          search_query: debouncedSearch || "", // If searchQuery is empty, send ""
         },
       });
 
       const { recipes: newRecipes, total_pages } = response.data;
 
+      // If no recipes are found, set flag to show "No results"
+      if (newRecipes.length === 0) {
+        setNoResultsFound(true);
+      } else {
+        setNoResultsFound(false);
+      }
+
+      // Set new recipes and total pages
       setRecipes((prev) => (reset ? newRecipes : [...prev, ...newRecipes]));
       setTotalPages(total_pages);
     } catch (error) {
@@ -230,47 +237,54 @@ const Recipes: React.FC = () => {
         }}
       >
         <main role="main" style={{ paddingTop: "60px" }}>
-          <Grid2 container spacing={3}>
-            {recipes.map((recipe) => (
-              <Grid2
-                key={recipe.id}
-                size={isSmallScreen ? 4 : isMediumScreen ? 4 : 3}
-              >
-                <Box
-                  sx={{
-                    border: "2px solid rgb(172, 169, 169)",
-                    borderRadius: 2,
-                    boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      borderColor: "#1976d2",
-                      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-                    },
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "100%",
-                    minHeight: "200px", // Base minimum height
-                    "@media (min-width:600px)": {
-                      maxHeight: "300px", // Adjust the minHeight for medium screens
-                    },
-                    "@media (min-width:900px)": {
-                      maxHeight: "350px", // Adjust the minHeight for larger screens
-                    },
-                  }}
+          {noResultsFound ? (
+            <Typography variant="h6" textAlign="center">
+              No recipes found for "{debouncedSearch}".
+            </Typography>
+          ) : (
+            <Grid2 container spacing={3}>
+              {recipes.map((recipe) => (
+                <Grid2
+                  key={recipe.id}
+                  size={isSmallScreen ? 4 : isMediumScreen ? 4 : 3}
                 >
-                  <Recipe
-                    id={recipe.id}
-                    name={recipe.recipe_name}
-                    difficulty={recipe.difficulty}
-                    image={recipe.image}
-                  />
-                </Box>
-              </Grid2>
-            ))}
-          </Grid2>
+                  <Box
+                    sx={{
+                      border: "2px solid rgb(172, 169, 169)",
+                      borderRadius: 2,
+                      boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        borderColor: "#1976d2",
+                        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                      },
+                      display: "flex",
+                      flexDirection: "column",
+                      height: "100%",
+                      minHeight: "200px", // Base minimum height
+                      "@media (min-width:600px)": {
+                        maxHeight: "300px", // Adjust the minHeight for medium screens
+                      },
+                      "@media (min-width:900px)": {
+                        maxHeight: "350px", // Adjust the minHeight for larger screens
+                      },
+                    }}
+                  >
+                    <Recipe
+                      id={recipe.id}
+                      name={recipe.recipe_name}
+                      difficulty={recipe.difficulty}
+                      image={recipe.image}
+                    />
+                  </Box>
+                </Grid2>
+              ))}
+            </Grid2>
+          )}
         </main>
       </Box>
 
+      {/* Footer buttons */}
       <div
         style={{
           position: "fixed",
@@ -308,5 +322,6 @@ const Recipes: React.FC = () => {
     </div>
   );
 };
+
 
 export default Recipes;
