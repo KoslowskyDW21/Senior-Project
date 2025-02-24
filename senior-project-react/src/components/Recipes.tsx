@@ -10,6 +10,14 @@ import {
   Box,
   useMediaQuery,
   TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Checkbox,
+  ListItemText,
+  FormHelperText,
+  SelectChangeEvent,
 } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import Header from "./Header";
@@ -24,6 +32,11 @@ interface Recipe {
   xp_amount: number;
   rating: number;
   image: string;
+}
+
+interface DietaryRestrictions {
+  dietaryRestrictions: [];
+  userDietaryRestrictions: [];
 }
 
 function Difficulty({ difficulty }) {
@@ -108,6 +121,32 @@ const Recipes: React.FC = () => {
   const getSearchQuery = () =>
     new URLSearchParams(location.search).get("search") || "";
 
+  const [dietaryRestrictions, setDietaryRestrictions] = useState<[]>([]);
+  const [userDietaryRestrictions, setUserDietaryRestrictions] = useState<[]>([]);
+  const [selectedDietaryRestrictions, setSelectedDietaryRestrictions] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  
+
+  const handleDietaryRestrictionsChange = (
+      event: SelectChangeEvent<typeof selectedDietaryRestrictions>
+    ) => {
+      const selectedNames = event.target.value;
+      const selectedIdz = dietaryRestrictions
+      .filter((dietaryRestriction) =>
+        selectedNames.includes(dietaryRestriction.name)
+      )
+      .map((dietaryRestriction) => dietaryRestriction.id);
+      console.log("i am trying", selectedNames);
+      setSelectedDietaryRestrictions(selectedNames);
+      setSelectedIds(selectedIdz);
+      setRecipes([]); 
+      setPage(1); 
+      setTotalPages(1);
+      setNoResultsFound(false); 
+      loadRecipes(true);
+
+    };
+
   // Use the searchQuery directly without debouncing
   const debouncedSearch = searchQuery;
 
@@ -146,27 +185,26 @@ const Recipes: React.FC = () => {
   const loadRecipes = async (reset = false) => {
     if (loading || page > totalPages) return;
     setLoading(true);
-
+  
     try {
-      // Send empty string if no search query to fetch all recipes
+      console.log("theIDSMaam ", selectedIds)
       const response = await axios.post(`${config.serverUrl}/recipes/`, null, {
         params: {
           page: reset ? 1 : page,
           per_page: 20,
-          search_query: debouncedSearch || "", // If searchQuery is empty, send ""
+          search_query: debouncedSearch || "", 
+          dietary_restrictions: selectedIds, 
         },
       });
-
+  
       const { recipes: newRecipes, total_pages } = response.data;
-
-      // If no recipes are found, set flag to show "No results"
+  
       if (newRecipes.length === 0) {
         setNoResultsFound(true);
       } else {
         setNoResultsFound(false);
       }
-
-      // Set new recipes and total pages
+  
       setRecipes((prev) => (reset ? newRecipes : [...prev, ...newRecipes]));
       setTotalPages(total_pages);
     } catch (error) {
@@ -175,10 +213,36 @@ const Recipes: React.FC = () => {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     hasScrolled.current = false;
   }, [recipes]);
+
+  useEffect(() => {
+    getDietaryRestrictions(); 
+  }, []);
+
+  React.useEffect(() => {
+      const preselectedDietaryRestrictions = dietaryRestrictions
+        .filter((dietaryRestriction) =>
+          userDietaryRestrictions.some(
+            (userDietaryRestriction) =>
+              userDietaryRestriction.restriction_id === //use the actual ID attribute from the SQL table
+              dietaryRestriction.id
+          )
+        )
+        .map((dietaryRestriction) => dietaryRestriction.name);
+      const selectedIdz = dietaryRestrictions
+      . filter((dietaryRestriction) =>
+          preselectedDietaryRestrictions.includes(dietaryRestriction.name)
+        )
+        .map((dietaryRestriction) => dietaryRestriction.id);
+  
+      setSelectedDietaryRestrictions(preselectedDietaryRestrictions);
+      setSelectedIds(selectedIdz);
+    }, [dietaryRestrictions, userDietaryRestrictions]);
+
 
   const handleScroll = () => {
     if (loading || page >= totalPages || hasScrolled.current) return;
@@ -200,6 +264,23 @@ const Recipes: React.FC = () => {
     if (container) container.addEventListener("scroll", handleScroll);
     return () => container?.removeEventListener("scroll", handleScroll);
   }, [loading, page, totalPages]);
+
+  const getDietaryRestrictions = async () => {
+    try {
+      const response = await axios.post(
+        `${config.serverUrl}/settings/dietary_restrictions/`,
+        {},
+        { withCredentials: true }
+      );
+      console.log("response: ", response);
+      const data: DietaryRestrictions = response.data;
+      console.log("data: " + data);
+      setDietaryRestrictions(data.dietaryRestrictions);
+      setUserDietaryRestrictions(data.userDietaryRestrictions);
+    } catch (error) {
+      console.error("Could not fetch dietary restrictions:", error);
+    }
+  };
 
   const isSmallScreen = useMediaQuery("(max-width:600px)");
   const isMediumScreen = useMediaQuery(
@@ -227,6 +308,35 @@ const Recipes: React.FC = () => {
           }}
         />
       </Box>
+      <Box mt={2} display="flex" justifyContent="center">
+        <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
+          <InputLabel id="dietary_restriction-select-label">
+            Dietary Restrictions
+          </InputLabel>
+          <Select
+            labelId="dietary_restriction-select-label"
+            multiple
+            value={selectedDietaryRestrictions}
+            onChange={handleDietaryRestrictionsChange}
+            renderValue={(selected) => selected.join(", ")}
+            displayEmpty
+          >
+            <MenuItem value="" disabled>
+              <em>Choose a dietary restriction</em>
+            </MenuItem>
+            {dietaryRestrictions.map((restriction) => (
+              <MenuItem key={restriction.id} value={restriction.name}>
+                <Checkbox
+                  checked={selectedDietaryRestrictions.includes(restriction.name)}
+                />
+                <ListItemText primary={restriction.name} />
+              </MenuItem>
+            ))}
+          </Select>
+          <FormHelperText>Select Dietary Restrictions</FormHelperText>
+        </FormControl>
+      </Box>
+
       <Box
         id="scroll-container"
         sx={{

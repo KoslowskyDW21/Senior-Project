@@ -263,6 +263,7 @@ export default function Settings() {
     setSelectedCuisines(preselectedCuisines);
   }, [cuisines, userCuisines]);
 
+
   React.useEffect(() => {
     const preselectedDietaryRestrictions = dietaryRestrictions
       .filter((dietaryRestriction) =>
