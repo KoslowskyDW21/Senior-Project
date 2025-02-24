@@ -18,6 +18,7 @@ import {
   CardContent,
   CardMedia,
   Modal,
+  Rating,
 } from "@mui/material"; //matui components
 import axios, { AxiosError } from "axios";
 import Snackbar, { SnackbarCloseReason } from "@mui/material/Snackbar";
@@ -42,9 +43,9 @@ const reportModalStyle = {
 interface Recipe {
   id: string;
   recipe_name: string;
-  difficulty: string;
+  difficulty: "1" | "2" | "3" | "4" | "5";
   xp_amount: string;
-  rating: string;
+  rating: "0.5"| "1" |"1.5"| "2"|"2.5" | "3" | "3.5" | "4" | "4.5" | "5";
   image: string;
   achievements: [];
 }
@@ -55,11 +56,6 @@ interface RecipeList {
   belongs_to: number;
 }
 
-interface Step {
-  recipe_id: string;
-  step_number: number;
-  step_description: string;
-}
 
 interface User {
   id: string;
@@ -90,19 +86,63 @@ interface ShoppingListItem {
   measure: string;
 }
 
+interface Step {
+  recipe_id: string;
+  step_number: number;
+  step_description: string;
+}
+
 function Step({ recipe_id, step_number, step_description }: Step) {
+  // State to track whether the step is checked off
+  const [checked, setChecked] = useState(false);
+
+  const handleCheckboxChange = () => {
+    setChecked(!checked);
+  };
+
   return (
-    <>
-      <Box sx={{}}>
-        <FormControlLabel
-          control={<Checkbox />}
-          label={`Step ${step_number}:`}
-        />
-        <Typography>{step_description}</Typography>
-      </Box>
-    </>
+    <Box sx={{ marginBottom: 2 }}>
+      {/* FormControlLabel with Checkbox */}
+      <FormControlLabel
+        control={<Checkbox checked={checked} onChange={handleCheckboxChange} />}
+        label={`Step ${step_number}:`}
+      />
+
+      {/* Step description with conditional strikethrough */}
+      <Typography 
+        sx={{
+          textDecoration: checked ? "line-through" : "none", // Apply strikethrough if checked
+          color: checked ? "gray" : "black",  // Optional: change color when checked
+        }}
+      >
+        {step_description}
+      </Typography>
+    </Box>
   );
 }
+
+function Difficulty({ difficulty }) {
+  const diamondStyle = {
+    width: "clamp(5px, 2vw, 24px)", // Min size 16px, max size 24px, grows based on viewport width
+    height: "clamp(5px, 2vw, 24px)",
+    backgroundColor: "black",
+    transform: "rotate(45deg)",
+    marginRight: "clamp(4px, 1vw, 8px)",
+  };
+
+  const renderDiamonds = (num) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Box key={i} sx={{ ...diamondStyle, opacity: i < num ? 1 : 0.1 }} />
+    ));
+  };
+
+  return (
+    <Box sx={{ display: "flex", justifyContent: "center", padding: "0px" }}>
+      {renderDiamonds(Number(difficulty))}
+    </Box>
+  );
+}
+
 
 const IndividualRecipe: React.FC = () => {
   const [recipe_name, setRecipe_name] = React.useState<String>();
@@ -115,6 +155,8 @@ const IndividualRecipe: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [reviews, setReviews] = React.useState<Review[]>([]);
   const [reviewId, setReviewId] = useState<number | null>(null);
+  const [difficulty, setDifficulty] = useState<string | undefined>();
+  const [rating, setRating] = useState<string | undefined>();
   const [open, setOpen] = useState(false);
   const handleOpenModal = () => setOpen(true);
   const handleCloseModal = () => setOpen(false);
@@ -300,6 +342,8 @@ const IndividualRecipe: React.FC = () => {
       const response = await axios.get(`${config.serverUrl}/recipes/${id}`);
       const data: Recipe = response.data;
       setRecipe_name(data.recipe_name);
+      setDifficulty(data.difficulty);
+      setRating(data.rating);
     } catch (error) {
       console.error("Error fetching recipe: ", error);
     }
@@ -384,13 +428,42 @@ const IndividualRecipe: React.FC = () => {
       >
         {recipe_name}
       </Box>
+    
+      <Box sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexShrink: 1,
+        width: "auto",
+        marginTop: 2,  // Add space on top if necessary
+        marginBottom: 2,  // Add space on bottom if necessary
+        padding: "10px",  // Optional padding for extra space inside the Box
+      }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexShrink: 1,
+          width: "auto",
+          fontSize: "24px",
+          padding: "30px",
+        }}
+      >
+      {difficulty && <Difficulty difficulty={difficulty} />}
+      </Box>
+
+      <Box sx={{ marginLeft: 2, display: "flex", alignItems: "center" }}>
+        <Rating name="recipe-rating" value={Number(rating)} precision={0.5} readOnly />
+      </Box>
+      </Box>
 
       <Button
         onClick={handleGoToCompletedRecipe}
         variant="contained"
         color="primary"
       >
-        Mark as Complete
+        Complete Recipe
       </Button>
       <br />
       <br />
