@@ -219,13 +219,17 @@ def get_all_substrings(s):
     return substrings
 
 bad_words = ["fuck", "shit" "cunt", "nigger", "nigga" "asshole", "bitch"]
+#TODO: Fix this
 def check_username_direct(username):
     substrings = get_all_substrings(username)
 
     for substring in substrings:
         for word in bad_words:
             if word.lower() in substring.lower():
+                print(substring)
+                print(word)
                 return False
+    return True
 
 @bp.route('/api/validate_user/', methods=['POST']) 
 def validate_user():
@@ -238,16 +242,17 @@ def validate_user():
         return jsonify({"valid": False, "message": "Username already in use"}), 400
 
     if email and User.query.filter_by(email_address=email).first():
-        return jsonify({"valid": False, "message": "Email already in use"}), 400
         print("invalid 2")
+        return jsonify({"valid": False, "message": "Email already in use"}), 400
     
     if username and profanity.contains_profanity(username):
-        return jsonify({"valid": False, "message": "Username cannot contain inappropriate language"}), 400
         print("invalid 3")
-    
-    if username and not check_username_direct(username):
         return jsonify({"valid": False, "message": "Username cannot contain inappropriate language"}), 400
+    
+    if check_username_direct(username) is False:
         print("invalid 4")
+        return jsonify({"valid": False, "message": "Username cannot contain inappropriate language"}), 400
+        
 
     return jsonify({"valid": True, "message": "Valid"}), 200
 
