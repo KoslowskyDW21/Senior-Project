@@ -56,6 +56,13 @@ interface RecipeList {
   belongs_to: number;
 }
 
+interface RecipeIngredient {
+  recipe_id: "recipe_id";
+  ingredient_id: "ingredient_id";
+  ingredient_name: "ingredient_name";
+  measure: "measure";
+}
+
 
 interface User {
   id: string;
@@ -157,6 +164,7 @@ const IndividualRecipe: React.FC = () => {
   const [reviewId, setReviewId] = useState<number | null>(null);
   const [difficulty, setDifficulty] = useState<string | undefined>();
   const [rating, setRating] = useState<string | undefined>();
+  const [ingredients, setIngredients] = React.useState<RecipeIngredient[]>([]);
   const [open, setOpen] = useState(false);
   const handleOpenModal = () => setOpen(true);
   const handleCloseModal = () => setOpen(false);
@@ -364,6 +372,19 @@ const IndividualRecipe: React.FC = () => {
     }
   };
 
+  const getIngredients = async() => {
+    try {
+      const response = await axios.post(
+        `${config.serverUrl}/recipes/ingredients/${id}`
+      );
+      const data: RecipeIngredient[] = response.data;
+      setIngredients(data)
+    }
+    catch (error){
+      console.error("Error fetching ingredients: ", error)
+    }
+  }
+
   const handleReportReview = async () => {
     let data;
 
@@ -404,6 +425,7 @@ const IndividualRecipe: React.FC = () => {
     getCurrentUser();
     getRecipeLists();
     getSteps();
+    getIngredients();
     getReviews();
   }, []);
 
@@ -515,16 +537,61 @@ const IndividualRecipe: React.FC = () => {
       </FormControl>
 
       <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-start",
-          alignItems: "center",
-          fontSize: "24px",
-          fontWeight: "bold",
-          textAlign: "center",
-          mt: 4,
-        }}
-      ></Box>
+  sx={{
+    textAlign: "left",
+    marginTop: 4, // Space between ingredients and other sections
+    marginBottom: 4, // Optional space for separation
+  }}
+>
+  <Typography sx={{ fontWeight: "bold" }}>
+    Ingredients:
+  </Typography>
+  {ingredients.length > 0 ? (
+    <Box sx={{ marginTop: 2 }}>
+      {ingredients.map((ingredient) => (
+        <Box
+          key={ingredient.ingredient_id}
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            padding: "8px 0",
+            borderBottom: "1px solid #ccc",
+            alignItems: "center", // Center items vertically
+          }}
+        >
+          {/* Checkbox to the left of each ingredient */}
+          <Checkbox
+            onChange={(e) => {
+              // Toggle checked state of ingredient
+              const newIngredients = ingredients.map((item) =>
+                item.ingredient_id === ingredient.ingredient_id
+                  ? { ...item, checked: e.target.checked }
+                  : item
+              );
+              setIngredients(newIngredients); // Update ingredients state
+            }}
+          />
+          <Typography
+            variant="body1"
+            sx={{
+              textDecoration: ingredient.checked ? "line-through" : "none", // Strikethrough if checked
+              color: ingredient.checked ? "gray" : "black", // Optional: change color if checked
+              flex: 1, // Allow the ingredient name to grow and take available space
+            }}
+          >
+            {ingredient.ingredient_name}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {ingredient.measure}
+          </Typography>
+        </Box>
+      ))}
+    </Box>
+  ) : (
+    <Typography>No ingredients available.</Typography>
+  )}
+</Box>
+
 
       <Box
         sx={{

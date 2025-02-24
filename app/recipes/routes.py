@@ -4,7 +4,7 @@ from sqlalchemy import case, func, or_
 from flask import request, jsonify, render_template, redirect, url_for, abort, flash, current_app
 from flask_login import current_user, login_required
 from app.recipes import bp
-from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, Review, ReviewReport, Cuisine, RecipeDietaryRestriction, db
+from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, Review, ReviewReport, Cuisine, RecipeDietaryRestriction, RecipeIngredient, db
 import os
 import uuid
 from werkzeug.utils import secure_filename
@@ -64,7 +64,7 @@ def post_recipes():
             )
     else:
         print("No dietary restrictions provided")
-        
+
     recipes_paginated = recipes_query.paginate(page=page, per_page=per_page, error_out=False)
     total_pages = ceil(recipes_paginated.total / per_page)  # type: ignore
     recipes = [recipe.to_json() for recipe in recipes_paginated.items]
@@ -97,6 +97,12 @@ def post_recipe_steps(id):
         return jsonify([step.to_json() for step in steps])
     return f"<h1>404: steps not found for recipe {id}</h1>", 404
 
+@bp.post("/ingredients/<int:id>")
+def post_recipe_ingredients(id):
+    ingredients = RecipeIngredient.query.filter_by(recipe_id = id).all()
+    if ingredients is not None:
+        return jsonify([i.to_json() for i in ingredients]), 200
+    return f"<h1>404: ingredients not found for recipe {id}</h1>", 404
 
 @bp.route("/completed/<int:id>/", methods  = ['POST'])
 def post_completed_recipe_page(id):
