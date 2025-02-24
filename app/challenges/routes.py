@@ -272,6 +272,24 @@ def get_vote_results(challenge_id):
         })
 
     results.sort(key=lambda x: x['points'], reverse=True)
+
+    #add xp to users
+    for i, result in enumerate(results):
+        uid = result["user_id"]
+        theUser = User.query.get(uid)
+        if i == 0:
+            theUser.xp_points = theUser.xp_points + 400 # type: ignore
+        elif i == 1:
+            theUser.xp_points = theUser.xp_points + 200 # type: ignore
+        elif i == 2:
+            theUser.xp_points = theUser.xp_points + 100 # type: ignore
+        else:
+            theUser.xp_points = theUser.xp_points + 50 # type: ignore
+        db.session.add(theUser)
+        db.session.flush()
+        db.session.commit()
+
+
     return jsonify(results), 200
 
 @bp.route('/past_user_participated_challenges', methods=['GET'])
@@ -363,3 +381,13 @@ def kick_user_from_challenge(challenge_id):
     db.session.commit()
 
     return jsonify({"message": "User kicked successfully!"}), 200
+
+def checkLevel():
+    startingLevel = current_user.user_level
+    current_user.user_level = math.floor(.1 * math.sqrt(.1 * current_user.xp_points)) + 1 # type: ignore
+    db.session.add(current_user)
+    db.session.commit()
+    if(startingLevel != current_user.user_level):
+        current_user.hasLeveled = 1
+        db.session.add(current_user)
+        db.session.commit()

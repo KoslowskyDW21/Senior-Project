@@ -10,23 +10,12 @@ import uuid
 from werkzeug.utils import secure_filename
 from math import ceil
 
-# @bp.get('/')
-# def home():
-#     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
-
-#@bp.post("/")
-#def post_recipes():
-    #print("Fetching recipes")
-    #recipes = Recipe.query.all()
-    #return jsonify([recipe.to_json() for recipe in recipes]), 200
-
-
 
 @bp.post("/")
 def post_recipes():
     print("Fetching recipes")
-    search_query = request.args.get('search_query', '').strip()  # Clean search query
-    page = max(1, int(request.args.get('page', 1)))  # Ensure page is at least 1
+    search_query = request.args.get('search_query', '').strip()  
+    page = max(1, int(request.args.get('page', 1)))  
     per_page = int(request.args.get('per_page', 20))
 
     print(f"Search query: {search_query}, Page: {page}, Per page: {per_page}")
@@ -190,7 +179,7 @@ def upload_review(id):
             difficulty = '0'
         if image_path is None:
             image_path = "NULL"
-        review = Review(recipe_id=id,text=notes,image=image_path,rating=rating,difficulty=difficulty, num_reports=0,author=current_user.id) # type: ignore
+        review = Review(recipe_id=id,text=notes,image=image_path,rating=rating,difficulty=difficulty, num_reports=0,user_id=current_user.id, username = current_user.username) # type: ignore
         db.session.add(review)
         db.session.commit()
 
