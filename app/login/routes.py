@@ -132,8 +132,6 @@ def api_register():
     if userNameValidation is not None:
         return jsonify({"message": "There is already an account with that username"}), 400
 
-    if profanity.contains_profanity(user_text):
-        return jsonify({"error": "Input contains inappropriate language"}), 400
     
     username = escape_html(username)
 
@@ -212,15 +210,28 @@ def api_register():
         return jsonify({"message": "User not registered"}), 200
 
  
+def get_all_substrings(s):
+    substrings = []
+    for start in range(len(s)):
+        for end in range(start + 1, len(s) + 1):
+            substrings.append(s[start:end])
+    print(substrings)
+    return substrings
 
+bad_words = ["fuck", "shit" "cunt", "nigger", "nigga" "asshole", "bitch"]
+def check_username_direct(username):
+    substrings = get_all_substrings(username)
+
+    for substring in substrings:
+        for word in bad_words:
+            if word.lower() in substring.lower():
+                return False
 
 @bp.route('/api/validate_user/', methods=['POST']) 
 def validate_user():
     username = request.json.get('username')
     email = request.json.get('email')
 
-    #print(username)
-    #print(email)
 
     if username and User.query.filter_by(username=username).first():
         print("invalid 1")
@@ -229,6 +240,14 @@ def validate_user():
     if email and User.query.filter_by(email_address=email).first():
         return jsonify({"valid": False, "message": "Email already in use"}), 400
         print("invalid 2")
+    
+    if username and profanity.contains_profanity(username):
+        return jsonify({"valid": False, "message": "Username cannot contain inappropriate language"}), 400
+        print("invalid 3")
+    
+    if username and not check_username_direct(username):
+        return jsonify({"valid": False, "message": "Username cannot contain inappropriate language"}), 400
+        print("invalid 4")
 
     return jsonify({"valid": True, "message": "Valid"}), 200
 

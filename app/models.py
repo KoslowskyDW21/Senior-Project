@@ -47,6 +47,11 @@ class User(UserMixin, db.Model):
     group_memberships = relationship('GroupMember', cascade="all, delete-orphan")
     banned_from_groups = relationship('GroupBannedMember', cascade="all, delete-orphan")
     messages = relationship('Message', cascade="all, delete-orphan")
+    challenge_participants = db.relationship('ChallengeParticipant', backref='user', cascade="all, delete-orphan")
+    recipes = db.relationship('RecipeList', backref='user', cascade="all, delete-orphan")
+    shopping_lists = db.relationship('ShoppingList', backref='user', cascade="all, delete-orphan")
+    user_achievements = db.relationship('UserAchievement', backref='user', cascade="all, delete-orphan")
+    user_notifications = db.relationship('UserNotifications', backref='user', cascade="all, delete-orphan")
 
     @property
     def password(self):
@@ -489,6 +494,7 @@ class ShoppingList(db.Model):
     __tablename__ = 'ShoppingList'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    
     def to_json(self):
         return {
             "id": self.id,
@@ -515,6 +521,7 @@ class RecipeList(db.Model):
     name = db.Column(db.Text, nullable=False)
     belongs_to = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
     image = db.Column(db.Text, nullable=True)
+    recipes = db.relationship('RecipeRecipeList', backref='recipe_list', cascade="all, delete-orphan")
     def to_json(self):
         return {
             "id": self.id,

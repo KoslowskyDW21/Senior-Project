@@ -58,13 +58,16 @@ def post_update_user():
         print(f"Error updating user: {e}")
         return jsonify({"message": "Error updating user"}), 500
 
-# def delete_user_and_dependencies(current_user_id):
-#     try:
+def delete_user_and_dependencies(current_user_id):
+    user = User.query.filter_by(id=current_user_id).first()
+    try:
+        db.session.delete(user)
+        db.session.commit()
         
-#     except Exception as e:
-#         session.rollback()
-#         print(f"Error deleting user data: {e}")
-#         raise
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error deleting user data: {e}")
+        raise
 
 
 @login_required
