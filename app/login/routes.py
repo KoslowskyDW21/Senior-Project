@@ -132,8 +132,6 @@ def api_register():
     if userNameValidation is not None:
         return jsonify({"message": "There is already an account with that username"}), 400
 
-    if profanity.contains_profanity(user_text):
-        return jsonify({"error": "Input contains inappropriate language"}), 400
     
     username = escape_html(username)
 
@@ -212,23 +210,49 @@ def api_register():
         return jsonify({"message": "User not registered"}), 200
 
  
+def get_all_substrings(s):
+    substrings = []
+    for start in range(len(s)):
+        for end in range(start + 1, len(s) + 1):
+            substrings.append(s[start:end])
+    print(substrings)
+    return substrings
 
+bad_words = ["fuck", "shit" "cunt", "nigger", "nigga" "asshole", "bitch"]
+#TODO: Fix this
+def check_username_direct(username):
+    substrings = get_all_substrings(username)
+
+    for substring in substrings:
+        for word in bad_words:
+            if word.lower() in substring.lower():
+                print(substring)
+                print(word)
+                return False
+    return True
 
 @bp.route('/api/validate_user/', methods=['POST']) 
 def validate_user():
     username = request.json.get('username')
     email = request.json.get('email')
 
-    #print(username)
-    #print(email)
 
     if username and User.query.filter_by(username=username).first():
         print("invalid 1")
         return jsonify({"valid": False, "message": "Username already in use"}), 400
 
     if email and User.query.filter_by(email_address=email).first():
-        return jsonify({"valid": False, "message": "Email already in use"}), 400
         print("invalid 2")
+        return jsonify({"valid": False, "message": "Email already in use"}), 400
+    
+    if username and profanity.contains_profanity(username):
+        print("invalid 3")
+        return jsonify({"valid": False, "message": "Username cannot contain inappropriate language"}), 400
+    
+    if check_username_direct(username) is False:
+        print("invalid 4")
+        return jsonify({"valid": False, "message": "Username cannot contain inappropriate language"}), 400
+        
 
     return jsonify({"valid": True, "message": "Valid"}), 200
 

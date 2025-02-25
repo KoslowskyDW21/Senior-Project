@@ -1,5 +1,6 @@
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import relationship
 from .hashing_examples import UpdatedHasher
 import os
 
@@ -34,6 +35,23 @@ class User(UserMixin, db.Model):
     is_banned = db.Column(db.Boolean, nullable=False)
     banned_until = db.Column(db.DateTime, nullable=True)
     hasLeveled = db.Column(db.Boolean, nullable = False)
+
+    blocks = relationship('UserBlock', foreign_keys="[UserBlock.blocked_user]", cascade="all, delete-orphan")
+    blocked_by = relationship('UserBlock', foreign_keys="[UserBlock.blocked_by]", cascade="all, delete-orphan")
+    friendships1 = relationship('Friendship', foreign_keys="[Friendship.user1]", cascade="all, delete-orphan")
+    friendships2 = relationship('Friendship', foreign_keys="[Friendship.user2]", cascade="all, delete-orphan")
+    dietary_restrictions = relationship('UserDietaryRestriction', cascade="all, delete-orphan")
+    cuisine_preferences = relationship('UserCuisinePreference', cascade="all, delete-orphan")
+    created_groups = relationship('UserGroup', foreign_keys="[UserGroup.creator]", cascade="all, delete-orphan")
+    group_reports = relationship('GroupReport', cascade="all, delete-orphan")
+    group_memberships = relationship('GroupMember', cascade="all, delete-orphan")
+    banned_from_groups = relationship('GroupBannedMember', cascade="all, delete-orphan")
+    messages = relationship('Message', cascade="all, delete-orphan")
+    challenge_participants = db.relationship('ChallengeParticipant', backref='user', cascade="all, delete-orphan")
+    recipes = db.relationship('RecipeList', backref='user', cascade="all, delete-orphan")
+    shopping_lists = db.relationship('ShoppingList', backref='user', cascade="all, delete-orphan")
+    user_achievements = db.relationship('UserAchievement', backref='user', cascade="all, delete-orphan")
+    user_notifications = db.relationship('UserNotifications', backref='user', cascade="all, delete-orphan")
 
     @property
     def password(self):
@@ -476,6 +494,7 @@ class ShoppingList(db.Model):
     __tablename__ = 'ShoppingList'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    
     def to_json(self):
         return {
             "id": self.id,
@@ -502,6 +521,7 @@ class RecipeList(db.Model):
     name = db.Column(db.Text, nullable=False)
     belongs_to = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
     image = db.Column(db.Text, nullable=True)
+    recipes = db.relationship('RecipeRecipeList', backref='recipe_list', cascade="all, delete-orphan")
     def to_json(self):
         return {
             "id": self.id,
