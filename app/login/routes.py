@@ -216,7 +216,7 @@ def check_username_direct(username, bad_words):
     username_lower = username.lower()
     for word in bad_words:
         if word.lower() in username_lower:
-            print(word.lower())
+            print(word.lower()) #for debugging
             return False
     return True
 
