@@ -93,26 +93,19 @@ class User(UserMixin, db.Model):
             f"num_reports={self.num_reports}, user_level={self.user_level}, "
             f"last_logged_in={self.last_logged_in})>"
         )
-    
-    # TODO: Figure out why this method is broken
-    # @staticmethod
-    # def from_json(o: dict):
-    #     return User(
-    #         fname=o.get("fname"), #type: ignore
-    #         lname=o.get("lname"), #type: ignore
-    #         email_address=o.get("email_address"),
-    #         username=o.get("username"),
-    #         profile_picture=o.get("profile_picture"),
-    #         xp_points=o.get("xp_points"),
-    #         user_level=o.get("user_level"),
-    #         is_admin=o.get("is_admin"),
-    #         num_recipes_completed=o.get("num_recipes_completed"),
-    #         colonial_floor=o.get("colonial_floor"),
-    #         colonial_side=o.get("colonial_side"),
-    #         date_created=o.get("date_created"),
-    #         last_logged_in=o.get("last_logged_in"),
-    #         num_reports=o.get("num_reports"),
-    #     )
+
+class UserReport(db.Model):
+    __tablename__ = "UserReport"
+    reported_user = db.Column(db.Integer, db.ForeignKey("User.id"), primary_key=True)
+    reported_by = db.Column(db.Integer, db.ForeignKey("User.id"), primary_key=True)
+    reason = db.Column(db.String(255), nullable=False)
+
+    def to_json(self):
+        return {
+            "reported_user": self.reported_user,
+            "reported_by": self.reported_by,
+            "reason": self.reason,
+        }
 
 class UserBlock(db.Model):
     __tablename__ = 'UserBlock'
@@ -239,20 +232,33 @@ class GroupBannedMember(db.Model):
             "group_id": self.group_id,
             "banned_member_id": self.banned_member_id,
         }
+    
+class MessageReport(db.Model):
+    __tablename__ = "MessageReport"
+    user_id = db.Column(db.Integer, db.ForeignKey("User.id"), primary_key=True)
+    message_id = db.Column(db.Integer, db.ForeignKey("Message.id"), primary_key=True)
+    reason = db.Column(db.String(255), nullable=False)
+
+    def to_json(self):
+        return {
+            "user_id": self.user_id,
+            "message_id": self.message_id,
+            "reason": self.reason
+        }
 
 class Message(db.Model):
     __tablename__ = 'Message'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     group_id = db.Column(db.Integer, db.ForeignKey('UserGroup.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
-    is_reported = db.Column(db.Boolean, nullable=False)
+    num_reports = db.Column(db.Integer, nullable=False)
     text = db.Column(db.Text, nullable=False)
     def to_json(self):
         return {
             "id": self.id,
             "group_id": self.group_id,
             "user_id": self.user_id,
-            "is_reported": self.is_reported,
+            "num_reports": self.num_reports,
             "text": self.text,
         }
 

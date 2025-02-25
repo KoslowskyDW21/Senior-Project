@@ -1,6 +1,6 @@
 from __future__ import annotations
 from app.groups import bp
-from app.models import User, UserGroup, GroupMember, GroupBannedMember, Message, GroupReport, UserNotifications, db
+from app.models import User, UserGroup, GroupMember, GroupBannedMember, Message, GroupReport, UserNotifications, MessageReport, db
 from flask import jsonify, request, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
@@ -31,11 +31,25 @@ def get_reported_groups():
     reportedGroups = UserGroup.query.filter(UserGroup.num_reports > 0).all()
     return jsonify([group.to_json() for group in reportedGroups]), 200
 
+@bp.route("/reported_messages", methods=["GET"])
+@login_required
+def get_reported_messages():
+    reportedMessages = Message.query.filter(Message.num_reports > 0).all()
+    return jsonify([message.to_json() for message in reportedMessages]), 200
+
 @bp.route("/reports/<int:id>/", methods=["GET"])
 @login_required
 def get_reports(id):
     print(id)
     reports = GroupReport.query.filter_by(group_id=id).all()
+    print(reports)
+    return jsonify([report.to_json() for report in reports]), 200
+
+@bp.route("/message_reports/<int:id>", methods=["GET"])
+@login_required
+def get_message_reports(id):
+    print(id)
+    reports = MessageReport.query.filter_by(message_id=id).all()
     print(reports)
     return jsonify([report.to_json() for report in reports]), 200
 
@@ -187,7 +201,7 @@ def send_message(group_id):
     return jsonify({"message": "Message sent successfully!"}), 200
 
 @login_required
-@bp.get("/<int:group_id>/report")
+@bp.get("/<int:group_id>/reportGroup")
 def get_report_group(group_id: int):
     user = current_user._get_current_object()
 
@@ -199,7 +213,7 @@ def get_report_group(group_id: int):
     return jsonify({"alreadyReported": False, "id": user.id}) # type: ignore
 
 @login_required
-@bp.post("/<int:group_id>/report")
+@bp.post("/<int:group_id>/reportGroup")
 def post_report_group(group_id: int):
     data = request.get_json()
     userId = data.get("user_id")
@@ -220,6 +234,41 @@ def post_report_group(group_id: int):
         db.session.rollback()
         print(f"Error reporting group: {e}")
         return jsonify({"message": "Error: could not report group"})
+    
+@login_required
+@bp.get("/<int:message_id>/reportMessage")
+def get_report_message(message_id: int):
+    user = current_user._get_current_object()
+
+    report = MessageReport.query.filter_by(user_id=user.id, message_id=message_id).first() # type: ignore
+        
+    if report != None:
+        return jsonify({"alreadyReported": True, "id": user.id}) # type: ignore
+    
+    return jsonify({"alreadyReported": False, "id": user.id}) # type: ignore
+
+@login_required
+@bp.post("/<int:message_id>/reportMessage")
+def post_report_message(message_id: int):
+    data = request.get_json()
+    userId = data.get("user_id")
+    messageId = data.get("message_id")
+
+    print("Received data - userID: " + str(userId))
+    print("Received data - messageId: " + str(messageId))
+
+    newReport: MessageReport = MessageReport(message_id=messageId, user_id=userId, reason="N/A") # type: ignore
+    message: Message = Message.query.filter_by(id=messageId).first() # type: ignore
+    message.num_reports += 1
+
+    try:
+        db.session.add(newReport)
+        db.session.commit()
+        return jsonify({"message": f"Message {messageId} reported"})
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error reporting message: {e}")
+        return jsonify({"message": "Error: could not report message"})
 
 
 @bp.route('/<int:group_id>/set_trusted', methods=['POST'])
@@ -261,6 +310,29 @@ def revoke_trusted(group_id):
     else:
         return jsonify({"message": "Member not found"}), 404
     
+@login_required
+@bp.route("/<int:message_id>/delete_message_reports", methods=["DELETE"])
+def delete_message_reports(message_id: int):
+    reports = MessageReport.query.filter_by(message_id=message_id).all()
+
+    for report in reports:
+        db.session.delete(report)
+    
+    db.session.commit()
+    return jsonify({"message": "Reports successfully deleted"}), 200
+
+@login_required
+@bp.route("/<int:message_id>/delete_message", methods=["DELETE"])
+def delete_message(message_id: int):
+    message = Message.query.get(message_id)
+
+    if not message:
+        return jsonify({"message": "Message not found"}), 404
+    
+    db.session.delete(message)
+    db.session.commit()
+
+    return jsonify({"message": "Message deleted succesffully!"}), 200
 
 @bp.route("/<int:group_id>/delete_reports", methods=["DELETE"])
 @login_required

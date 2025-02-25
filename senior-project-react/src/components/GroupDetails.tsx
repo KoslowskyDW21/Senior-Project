@@ -225,7 +225,7 @@ const GroupDetails: React.FC = () => {
     let data;
 
     await axios
-      .get(`${config.serverUrl}/groups/${id}/report`)
+      .get(`${config.serverUrl}/groups/${id}/reportGroup`)
       .then((response) => {
         data = response.data;
       })
@@ -240,7 +240,7 @@ const GroupDetails: React.FC = () => {
       };
 
       await axios
-        .post(`${config.serverUrl}/groups/${id}/report`, newData, {
+        .post(`${config.serverUrl}/groups/${id}/reportGroup`, newData, {
           headers: {
             "Content-Type": "application/json",
           },
