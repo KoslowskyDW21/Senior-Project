@@ -239,20 +239,26 @@ class GroupBannedMember(db.Model):
             "group_id": self.group_id,
             "banned_member_id": self.banned_member_id,
         }
+    
+class MessageReport(db.Model):
+    __tablename__ = "MessageReport"
+    user_id = db.Column(db.Integer, db.ForeignKey("User.id"), primary_key=True)
+    message_id = db.Column(db.Integer, db.ForeignKey("Message.id"), primary_key=True)
+    reason = db.Column(db.String(255), nullable=False)
 
 class Message(db.Model):
     __tablename__ = 'Message'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     group_id = db.Column(db.Integer, db.ForeignKey('UserGroup.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
-    is_reported = db.Column(db.Boolean, nullable=False)
+    num_reports = db.Column(db.Integer, nullable=False)
     text = db.Column(db.Text, nullable=False)
     def to_json(self):
         return {
             "id": self.id,
             "group_id": self.group_id,
             "user_id": self.user_id,
-            "is_reported": self.is_reported,
+            "num_reports": self.num_reports,
             "text": self.text,
         }
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from app.groups import bp
-from app.models import User, UserGroup, GroupMember, GroupBannedMember, Message, GroupReport, UserNotifications, db
+from app.models import User, UserGroup, GroupMember, GroupBannedMember, Message, GroupReport, UserNotifications, MessageReport, db
 from flask import jsonify, request, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
@@ -187,7 +187,7 @@ def send_message(group_id):
     return jsonify({"message": "Message sent successfully!"}), 200
 
 @login_required
-@bp.get("/<int:group_id>/report")
+@bp.get("/<int:group_id>/reportGroup")
 def get_report_group(group_id: int):
     user = current_user._get_current_object()
 
@@ -199,7 +199,7 @@ def get_report_group(group_id: int):
     return jsonify({"alreadyReported": False, "id": user.id}) # type: ignore
 
 @login_required
-@bp.post("/<int:group_id>/report")
+@bp.post("/<int:group_id>/reportGroup")
 def post_report_group(group_id: int):
     data = request.get_json()
     userId = data.get("user_id")
@@ -220,6 +220,41 @@ def post_report_group(group_id: int):
         db.session.rollback()
         print(f"Error reporting group: {e}")
         return jsonify({"message": "Error: could not report group"})
+    
+@login_required
+@bp.get("/<int:message_id>/reportMessage")
+def get_report_message(message_id: int):
+    user = current_user._get_current_object()
+
+    report = MessageReport.query.filter_by(user_id=user.id, message_id=message_id).first() # type: ignore
+        
+    if report != None:
+        return jsonify({"alreadyReported": True, "id": user.id}) # type: ignore
+    
+    return jsonify({"alreadyReported": False, "id": user.id}) # type: ignore
+
+@login_required
+@bp.post("/<int:message_id>/reportMessage")
+def post_report_message(message_id: int):
+    data = request.get_json()
+    userId = data.get("user_id")
+    messageId = data.get("message_id")
+
+    print("Received data - userID: " + str(userId))
+    print("Received data - messageId: " + str(messageId))
+
+    newReport: MessageReport = MessageReport(message_id=messageId, user_id=userId, reason="N/A") # type: ignore
+    message: Message = Message.query.filter_by(id=messageId).first() # type: ignore
+    message.num_reports += 1
+
+    try:
+        db.session.add(newReport)
+        db.session.commit()
+        return jsonify({"message": f"Message {messageId} reported"})
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error reporting message: {e}")
+        return jsonify({"message": "Error: could not report message"})
 
 
 @bp.route('/<int:group_id>/set_trusted', methods=['POST'])
