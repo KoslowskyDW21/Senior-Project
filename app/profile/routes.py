@@ -1,8 +1,8 @@
 from __future__ import annotations
 from flask import jsonify, redirect, url_for, current_app, request
-from flask_login import current_user
+from flask_login import current_user, login_required
 from app.profile import bp
-from app.models import User, UserAchievement, Achievement, db
+from app.models import User, UserAchievement, Achievement, UserReport, db
 from werkzeug.utils import secure_filename
 import uuid
 import os
@@ -162,3 +162,31 @@ def leveled():
     db.session.commit()
     return {"message": "Level trigger updated successfully!"}, 200
 
+@login_required
+@bp.route("/report", methods=["POST"])
+def report():
+    user = current_user._get_current_object()
+    data = request.get_json()
+    reportedId = data.get("report_id")
+
+    print("Received data - reportedId: " + str(reportedId))
+
+    report = UserReport.query.filter_by(reported_by=user.id, reported_user=reportedId).first() # type: ignore
+
+    print(report)
+
+    if report != None:
+        return jsonify({"message": "You already reported this user"}), 405
+
+    newReport: UserReport = UserReport(reported_user=reportedId, reported_by=user.id, reason="N/A") # type: ignore
+    otherUser: User = User.query.filter_by(id=reportedId).first() # type: ignore
+    otherUser.num_reports += 1
+
+    try:
+        db.session.add(newReport)
+        db.session.commit()
+        return jsonify({"message": f"User {reportedId} reported"}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error reporting user: {e}")
+        return jsonify({"message": "Error: could not report user"}), 500

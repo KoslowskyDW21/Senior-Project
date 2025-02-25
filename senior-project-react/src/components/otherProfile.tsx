@@ -11,8 +11,12 @@ import {
   LinearProgress,
   Tooltip,
   IconButton,
+  FormControl,
+  InputLabel,
+  Select,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CloseIcon from "@mui/icons-material/Close";
 import config from "../config.js";
 
 //TODO: If profile doesn't exist, display a message saying so instead of loading an empty profile
@@ -59,6 +63,20 @@ const modalStyle = {
   borderRadius: 2,
 };
 
+const reportModalStyle = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  bgcolor: "#ffffff",
+  boxShadow: 24,
+  paddingTop: 3,
+  paddingLeft: 7,
+  paddingRight: 7,
+  paddingBottom: 3,
+  textAlign: "center",
+};
+
 const OtherProfile: React.FC = () => {
   const navigate = useNavigate();
   let { id } = useParams<{ id: string }>();
@@ -79,6 +97,9 @@ const OtherProfile: React.FC = () => {
   const [friends, setFriends] = useState<[]>([]);
   const [friendRequestsTo, setFriendRequestsTo] = useState<[]>([]);
   const [friendRequestsFrom, setFriendRequestsFrom] = useState<[]>([]);
+  const [open, setOpen] = useState(false);
+  const handleOpenModal = () => setOpen(true);
+  const handleCloseModal = () => setOpen(false);
 
   const [openAchievementModal, setOpenAchievementModal] = useState(false);
   const [selectedAchievement, setSelectedAchievement] =
@@ -279,6 +300,25 @@ const OtherProfile: React.FC = () => {
 
   const isFriend = friends.some((friend: any) => friend.id === numericId);
 
+  const handleReportUser = async () => {
+    const data = {
+      report_id: numericId,
+    };
+
+    await axios
+      .post(`${config.serverUrl}/profile/report`, data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((response) => {
+        console.log(response.data.message);
+      })
+      .catch((error) => {
+        console.error("Could not report user", error);
+      });
+  }
+
   return (
     <>
       <IconButton
@@ -368,6 +408,16 @@ const OtherProfile: React.FC = () => {
           >
             block button 4 jeff
           </Button>
+
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              handleOpenModal();
+            }}
+          >
+            Report User
+          </Button>
         </Box>
       </Box>
       <input
@@ -456,6 +506,41 @@ const OtherProfile: React.FC = () => {
           See More
         </Button>
       </div>
+
+      <Modal
+        open={open}
+        onClose={handleCloseModal}
+        aria-labelledby="modal-title"
+      >
+        <Box sx={reportModalStyle}>
+          <IconButton
+            onClick={handleCloseModal}
+            style={{ position: "absolute", top: 5, right: 5 }}
+          >
+            <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+          </IconButton>
+
+          <Typography id="modal-title" variant="h4" component="h2">
+            Report User
+          </Typography>
+
+          <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
+            <InputLabel id="reason-label">Reason</InputLabel>
+            <Select labelId="reason-label"></Select>
+          </FormControl>
+          <br />
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              handleReportUser();
+              handleCloseModal();
+            }}
+          >
+            Confirm Report
+          </Button>
+        </Box>
+      </Modal>
 
       <Modal
         open={openAchievementModal}
