@@ -209,16 +209,13 @@ def api_register():
         print("User not registered")
         return jsonify({"message": "User not registered"}), 200
 
-
-bad_words = ["fuck", "shit" "cunt", "nigger", "nigga" "asshole", "bitch"]
-
-def check_username_direct(username, bad_words):
-    username_lower = username.lower()
-    for word in bad_words:
-        if word.lower() in username_lower:
-            print(word.lower()) #for debugging
-            return False
-    return True
+# def check_username_direct(username, bad_words):
+#     username_lower = username.lower()
+#     for word in bad_words:
+#         if word.lower() in username_lower:
+#             print(word.lower()) #for debugging
+#             return False
+#     return True
 
 @bp.route('/api/validate_user/', methods=['POST']) 
 def validate_user():
