@@ -246,6 +246,13 @@ class MessageReport(db.Model):
     message_id = db.Column(db.Integer, db.ForeignKey("Message.id"), primary_key=True)
     reason = db.Column(db.String(255), nullable=False)
 
+    def to_json(self):
+        return {
+            "user_id": self.user_id,
+            "message_id": self.message_id,
+            "reason": self.reason
+        }
+
 class Message(db.Model):
     __tablename__ = 'Message'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

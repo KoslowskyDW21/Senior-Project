@@ -31,11 +31,25 @@ def get_reported_groups():
     reportedGroups = UserGroup.query.filter(UserGroup.num_reports > 0).all()
     return jsonify([group.to_json() for group in reportedGroups]), 200
 
+@bp.route("/reported_messages", methods=["GET"])
+@login_required
+def get_reported_messages():
+    reportedMessages = Message.query.filter(Message.num_reports > 0).all()
+    return jsonify([message.to_json() for message in reportedMessages]), 200
+
 @bp.route("/reports/<int:id>/", methods=["GET"])
 @login_required
 def get_reports(id):
     print(id)
     reports = GroupReport.query.filter_by(group_id=id).all()
+    print(reports)
+    return jsonify([report.to_json() for report in reports]), 200
+
+@bp.route("/message_reports/<int:id>", methods=["GET"])
+@login_required
+def get_message_reports(id):
+    print(id)
+    reports = MessageReport.query.filter_by(message_id=id).all()
     print(reports)
     return jsonify([report.to_json() for report in reports]), 200
 
@@ -296,6 +310,29 @@ def revoke_trusted(group_id):
     else:
         return jsonify({"message": "Member not found"}), 404
     
+@login_required
+@bp.route("/<int:message_id>/delete_message_reports", methods=["DELETE"])
+def delete_message_reports(message_id: int):
+    reports = MessageReport.query.filter_by(message_id=message_id).all()
+
+    for report in reports:
+        db.session.delete(report)
+    
+    db.session.commit()
+    return jsonify({"message": "Reports successfully deleted"}), 200
+
+@login_required
+@bp.route("/<int:message_id>/delete_message", methods=["DELETE"])
+def delete_message(message_id: int):
+    message = Message.query.get(message_id)
+
+    if not message:
+        return jsonify({"message": "Message not found"}), 404
+    
+    db.session.delete(message)
+    db.session.commit()
+
+    return jsonify({"message": "Message deleted succesffully!"}), 200
 
 @bp.route("/<int:group_id>/delete_reports", methods=["DELETE"])
 @login_required

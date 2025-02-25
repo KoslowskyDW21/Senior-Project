@@ -46,6 +46,20 @@ interface ReviewReport {
   reason: string;
 }
 
+interface Message {
+  id: number;
+  group_id: number;
+  user_id: number;
+  num_reports: number;
+  text: string;
+}
+
+interface MessageReport {
+  user_id: number;
+  message_id: number;
+  reason: string;
+}
+
 const modalStyle = {
   position: "absolute",
   top: "50%",
@@ -68,12 +82,18 @@ export default function ReportPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [review, setReview] = useState<Review | null>(null);
   const [reviewReports, setReviewReports] = useState<ReviewReport[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [message, setMessage] = useState<Message | null>(null);
+  const [messageReports, setMessageReports] = useState<MessageReport[]>([]);
   const [openGroup, setOpenGroup] = useState(false);
   const handleOpenGroupModal = () => setOpenGroup(true);
   const handleCloseGroupModal = () => setOpenGroup(false);
   const [openReview, setOpenReview] = useState(false);
   const handleOpenReviewModal = () => setOpenReview(true);
   const handleCloseReviewModal = () => setOpenReview(false);
+  const [openMessage, setOpenMessage] = useState(false);
+  const handleOpenMessageModal = () => setOpenMessage(true);
+  const handleCloseMessageModal = () => setOpenMessage(false);
   const navigate = useNavigate();
 
   async function isAdmin() {
@@ -111,6 +131,17 @@ export default function ReportPage() {
       });
   }
 
+  async function loadMessages() {
+    await axios
+      .get(`${config.serverUrl}/groups/reported_messages`)
+      .then((response) => {
+        setMessages(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not fetch reported messages", error);
+      });
+  }
+
   async function loadGroupReports(id: number) {
     await axios
       .get(`${config.serverUrl}/groups/reports/${id}/`)
@@ -130,6 +161,17 @@ export default function ReportPage() {
       })
       .catch((error) => {
         console.error("Could not fetch reports ", error);
+      });
+  }
+
+  async function loadMessageReports(id: number) {
+    await axios
+      .get(`${config.serverUrl}/groups/message_reports/${id}`)
+      .then((response) => {
+        setMessageReports(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not fetch reports", error);
       });
   }
 
@@ -187,10 +229,38 @@ export default function ReportPage() {
     deleteReview();
   }
 
+  async function deleteMessageReports() {
+    await axios
+      .delete(`${config.serverUrl}/groups/${message!.id}/delete_message_reports`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not delete reports", error);
+      });
+  }
+
+  async function deleteMessage() {
+    await axios
+      .delete(`${config.serverUrl}/groups/${message!.id}/delete_message`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not delete message", error);
+      });
+  }
+
+  function handleRemoveMessage(){
+    deleteMessageReports();
+    deleteMessage();
+  }
+
   React.useEffect(() => {
     isAdmin();
     loadGroups();
     loadReviews();
+    loadMessages();
   }, []);
 
   if (admin) {
@@ -279,6 +349,41 @@ export default function ReportPage() {
           </table>
         ) : (
           <p>No Reviews Reported</p>
+        )}
+
+        <h2>Reported Messages</h2>
+
+        {messages.length > 0 ? (
+          <table>
+            <thead>
+              <td>ID</td>
+              <td>Reports</td>
+              <td></td>
+            </thead>
+            <tbody>
+              {messages.map((message) => (
+                <tr key={message.id}>
+                  <td>{message.id}</td>
+                  <td>{message.num_reports}</td>
+                  <td>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => {
+                        setMessage(message);
+                        loadMessageReports(message.id);
+                        handleOpenMessageModal();
+                      }}
+                    >
+                      View Reports
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No Messages Reported</p>
         )}
 
         <Modal
@@ -373,6 +478,55 @@ export default function ReportPage() {
               }}
             >
               Remove Review
+            </Button>
+          </Box>
+        </Modal>
+
+        <Modal
+          open={openMessage}
+          onClose={handleCloseMessageModal}
+          aria-labelledby="modal-title"
+        >
+          <Box sx={modalStyle}>
+            <IconButton
+              onClick={handleCloseMessageModal}
+              style={{ position: "absolute", top: 5, right: 5 }}
+            >
+              <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+            </IconButton>
+
+            <Typography id="modal-title" variant="h4" component="h2">
+              {`Message written by ${
+                message !== null ? message.user_id : "null"
+              }`}
+            </Typography>
+
+            <table>
+              <thead>
+                <tr>
+                  <td>User ID</td>
+                  <td>Reason</td>
+                </tr>
+              </thead>
+              <tbody>
+                {messageReports.map((message) => (
+                  <tr key={message.user_id}>
+                    <td>{message.user_id}</td>
+                    <td>{message.reason}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                handleRemoveMessage();
+                handleCloseMessageModal();
+              }}
+            >
+              Remove Message
             </Button>
           </Box>
         </Modal>
