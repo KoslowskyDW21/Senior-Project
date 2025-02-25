@@ -209,26 +209,15 @@ def api_register():
         print("User not registered")
         return jsonify({"message": "User not registered"}), 200
 
- 
-def get_all_substrings(s):
-    substrings = []
-    for start in range(len(s)):
-        for end in range(start + 1, len(s) + 1):
-            substrings.append(s[start:end])
-    print(substrings)
-    return substrings
 
 bad_words = ["fuck", "shit" "cunt", "nigger", "nigga" "asshole", "bitch"]
-#TODO: Fix this
-def check_username_direct(username):
-    substrings = get_all_substrings(username)
 
-    for substring in substrings:
-        for word in bad_words:
-            if word.lower() in substring.lower():
-                print(substring)
-                print(word)
-                return False
+def check_username_direct(username, bad_words):
+    username_lower = username.lower()
+    for word in bad_words:
+        if word.lower() in username_lower:
+            print(word.lower())
+            return False
     return True
 
 @bp.route('/api/validate_user/', methods=['POST']) 
@@ -244,14 +233,18 @@ def validate_user():
     if email and User.query.filter_by(email_address=email).first():
         print("invalid 2")
         return jsonify({"valid": False, "message": "Email already in use"}), 400
-    
+
     if username and profanity.contains_profanity(username):
         print("invalid 3")
         return jsonify({"valid": False, "message": "Username cannot contain inappropriate language"}), 400
     
-    if check_username_direct(username) is False:
+    if check_username_direct(username, bad_words) is False:
         print("invalid 4")
         return jsonify({"valid": False, "message": "Username cannot contain inappropriate language"}), 400
+
+    if " " in username:
+        print("invalid 5")
+        return jsonify({"valid": False, "message": "Username cannot contain spaces"}), 400
         
 
     return jsonify({"valid": True, "message": "Valid"}), 200
