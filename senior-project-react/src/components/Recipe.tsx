@@ -157,6 +157,7 @@ const IndividualRecipe: React.FC = () => {
   const [message, setMessage] = React.useState("");
   const [lid, setLid] = React.useState("");
   const [recipeLists, setRecipeLists] = React.useState<RecipeList[]>([]);
+  const [recipeListsIn, setRecipeListsIn] = React.useState<RecipeList[]>([]);
   const [steps, setSteps] = React.useState<Step[]>([]);
   const [snackbarOpen, setSnackBarOpen] = React.useState(false);
   const { id } = useParams<{ id: string }>();
@@ -345,6 +346,16 @@ const IndividualRecipe: React.FC = () => {
     }
   };
 
+  const getRecipeListsIn = async () => {
+    if (id == undefined) {
+      return;
+    }
+    const response = await axios.get(`${config.serverUrl}/recipe_lists/all_containing/${id}`);
+    const rli: RecipeList[] = response.data;
+    console.log(rli);
+    setRecipeListsIn(rli);
+  }
+
   const getRecipeName = async () => {
     try {
       const response = await axios.get(`${config.serverUrl}/recipes/${id}`);
@@ -427,6 +438,7 @@ const IndividualRecipe: React.FC = () => {
     getSteps();
     getIngredients();
     getReviews();
+    getRecipeListsIn();
   }, []);
 
   return (
@@ -514,7 +526,7 @@ const IndividualRecipe: React.FC = () => {
           value={lid}
           onChange={handleRemoveRecipeFromList}
         >
-          {recipeLists.map(
+          {recipeListsIn.map(
             (
               recipeList // TODO: remove lists the recipe is not in
             ) => (

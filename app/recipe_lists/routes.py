@@ -23,6 +23,20 @@ def get_all_recipe_lists_of_current_user():
     recipe_lists = RecipeList.query.filter_by(belongs_to=current_user.id).all()
     print([recipe_list.to_json() for recipe_list in recipe_lists])
     return jsonify([recipe_list.to_json() for recipe_list in recipe_lists])
+
+@bp.get("/all_containing/<int:id>")
+def get_all_recipe_lists_containing_recipe_with_id(id):
+    print(f"Attempting to return all recipe lists containing recipe with id={id}")
+    recipe_lists = RecipeList.query.filter_by(belongs_to=current_user.id).all()
+    print(f"All recipe lists of user: {recipe_lists}")
+    recipe_lists_in = []
+    for recipe_list in recipe_lists:
+        recipe_ids = [rrl.recipe_id for rrl in (RecipeRecipeList.query.filter_by(recipe_list_id=recipe_list.id).all())]
+        if id in recipe_ids:
+            recipe_lists_in.append(recipe_list)
+    for recipe_list_in in recipe_lists_in:
+        print(f"Recipe list this recipe is in: {recipe_list_in}")
+    return jsonify([recipe_list_in.to_json() for recipe_list_in in recipe_lists_in]), 200
     
 @bp.get('/info/<int:rid>')
 def get_recipe_list_name(rid):
