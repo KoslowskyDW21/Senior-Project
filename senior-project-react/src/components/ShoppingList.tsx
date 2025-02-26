@@ -317,7 +317,7 @@ const ShoppingList: React.FC = () => {
     <>
     {/* Back button */}
     <IconButton
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/recipes/")}
         style={{ position: "fixed", top: 30, left: 30 }}
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
