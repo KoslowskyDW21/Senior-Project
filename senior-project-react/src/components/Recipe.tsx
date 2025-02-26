@@ -445,7 +445,7 @@ const IndividualRecipe: React.FC = () => {
     <>
       <IconButton
         onClick={() => navigate(-1)}
-        style={{ position: "absolute", top: 30, left: 30 }}
+        style={{ position: "fixed", top: 30, left: 30 }}
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
@@ -528,7 +528,7 @@ const IndividualRecipe: React.FC = () => {
         >
           {recipeListsIn.map(
             (
-              recipeList // TODO: remove lists the recipe is not in
+              recipeList
             ) => (
               <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
             )

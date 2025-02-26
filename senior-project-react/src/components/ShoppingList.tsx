@@ -73,6 +73,7 @@ const ShoppingList: React.FC = () => {
   const [recipes, setRecipes] = React.useState<Recipe[]>([]);
   const [message, setMessage] = React.useState<string>("");
   const [recipe_id, setRecipe_id] = React.useState<string>("");
+  const [searchQuery, setSearchQuery] = React.useState<string>("");
 
   const navigate = useNavigate();
 
@@ -140,6 +141,25 @@ const ShoppingList: React.FC = () => {
       console.error("Error fetching all recipes: ", error);
     }
   }
+
+  // Handle search changes and trigger navigation immediately
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const query = event.target.value;
+      setSearchQuery(query);
+  
+      // Update URL with the new search query
+      if (query) {
+        navigate({
+          pathname: location.pathname,
+          search: `?search=${query}`,
+        });
+      } else {
+        navigate({
+          pathname: location.pathname,
+          search: "",
+        });
+      }
+    };
 
   const filterShoppingListItemIngredients = (
     shoppingListItemIngredients_: _ShoppingListItemIngredient[]
@@ -295,12 +315,29 @@ const ShoppingList: React.FC = () => {
 
   return (
     <>
-      {/* Header bar */}
+    {/* Back button */}
+    <IconButton
+        onClick={() => navigate(-1)}
+        style={{ position: "fixed", top: 30, left: 30 }}
+      >
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+      </IconButton>
+      {/* Header bar
       <Header
         title="Shopping List"
-        searchLabel="Search Shopping List"
-        searchVisible={true}
-      />
+      /> */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          flexGrow: 1,
+          alignItems: "center",
+          fontSize: "48px",
+          fontWeight: "bold",
+        }}
+      >
+        Shopping List
+      </Box>
       <Box
         sx={{
           display: "flex",
@@ -309,9 +346,21 @@ const ShoppingList: React.FC = () => {
           fontSize: "24px",
           fontWeight: "bold",
           textAlign: "center",
-          mt: 4,
+          mt: 2,
         }}
-      ></Box>
+      >
+        {/* Search field */}
+        <TextField
+          label="Search for recipes"
+          variant="outlined"
+          fullWidth
+          value={searchQuery}
+          onChange={handleSearchChange}
+          sx={{
+            width: "100%",
+          }}
+        />
+      </Box>
 
       {/* Spacer */}
       <Box
@@ -322,18 +371,10 @@ const ShoppingList: React.FC = () => {
           fontSize: "24px",
           fontWeight: "bold",
           textAlign: "center",
-          mt: 12,
+          mt: 2,
         }}
-      ></Box>
-
-      {/* Back button */}
-      <IconButton
-        aria-label="back"
-        onClick={() => navigate(-1)}
-        style={{ position: "relative", right: 650 }}
       >
-        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
-      </IconButton>
+      </Box>
 
       {/* Put RecipeDropdown here */}
       <RecipesDropdown recipes={recipes}></RecipesDropdown>
