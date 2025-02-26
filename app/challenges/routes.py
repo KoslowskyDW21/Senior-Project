@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, UTC
 from werkzeug.utils import secure_filename
 import os
 import pytz
+import uuid
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
@@ -30,8 +31,6 @@ def challenges():
 @bp.route('/<int:id>', methods=['GET'])
 def get_challenge(id):
     challenge = Challenge.query.get(id)
-    print(id)
-    print(challenge)
     if not challenge:
         abort(404, description="Challenge not found")
     return jsonify(challenge.to_json()), 200
@@ -105,7 +104,7 @@ def create_challenge():
             insecureFilename = image.filename
             if not insecureFilename:
                 return jsonify({"message": "Invalid file name"}), 400
-            filename = secure_filename(insecureFilename)
+            filename = f"{uuid.uuid4().hex}_{secure_filename(insecureFilename)}"
             file_path = os.path.join(upload_folder, filename)
             image.save(file_path)
             challenge.image = os.path.join('static', 'uploads', filename)

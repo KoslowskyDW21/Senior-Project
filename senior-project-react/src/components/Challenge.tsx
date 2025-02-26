@@ -45,13 +45,10 @@ const Challenge: React.FC<ChallengeProps> = ({
             fontSize: "clamp(1rem, 4vw, 2rem)",
           }}
         />
-        <CardContent>
-          <Difficulty difficulty={difficulty} />
-        </CardContent>
         {image && (
           <CardMedia
             component="img"
-            image={`${config.serverUrl}}/${image}`}
+            image={`${config.serverUrl}/${image}`}
             sx={{
               height: 200,
               objectFit: "cover",
@@ -59,6 +56,9 @@ const Challenge: React.FC<ChallengeProps> = ({
             }}
           />
         )}
+        <CardContent>
+          <Difficulty difficulty={difficulty} />
+        </CardContent>
       </CardActionArea>
     </Card>
   );
