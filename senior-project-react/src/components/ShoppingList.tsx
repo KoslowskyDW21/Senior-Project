@@ -351,7 +351,7 @@ const ShoppingList: React.FC = () => {
       >
         {/* Search field */}
         <TextField
-          label="Search for recipes"
+          label="Search for ingredients"
           variant="outlined"
           fullWidth
           value={searchQuery}
