@@ -1,6 +1,6 @@
 from __future__ import annotations
 import math
-from sqlalchemy import case, func, or_
+from sqlalchemy import case, func, or_, and_
 from flask import request, jsonify, render_template, redirect, url_for, abort, flash, current_app
 from flask_login import current_user, login_required
 from app.recipes import bp
@@ -23,6 +23,20 @@ def post_recipes():
     
     recipes_query = Recipe.query
 
+    if dietary_restrictions:
+        for i, restriction in enumerate(dietary_restrictions):
+            # Create a new alias for each restriction
+            dietary_restriction_alias = aliased(RecipeDietaryRestriction)
+            print(f"Filtering by restriction {i+1}: {restriction}")
+            
+            recipes_query = recipes_query.join(
+                dietary_restriction_alias, dietary_restriction_alias.recipe_id == Recipe.id
+            ).filter(
+                ~dietary_restriction_alias.dietary_restrictions.ilike(f"%{restriction}%")
+            )
+    else:
+        print("No dietary restrictions provided")
+    
     if search_query != "":
         name_filter_start = Recipe.recipe_name.ilike(f"{search_query}%")
         name_filter_contains = Recipe.recipe_name.ilike(f"%{search_query}%")
@@ -50,25 +64,76 @@ def post_recipes():
             category_filter.desc(),
             cuisine_filter.desc()
         )
-
-    if dietary_restrictions:
-        for i, restriction in enumerate(dietary_restrictions):
-            # Create a new alias for each restriction
-            dietary_restriction_alias = aliased(RecipeDietaryRestriction)
-            print(f"Filtering by restriction {i+1}: {restriction}")
-            
-            recipes_query = recipes_query.join(
-                dietary_restriction_alias, dietary_restriction_alias.recipe_id == Recipe.id
-            ).filter(
-                ~dietary_restriction_alias.dietary_restrictions.ilike(f"%{restriction}%")
-            )
+    
     else:
-        print("No dietary restrictions provided")
+        print("No search query provided")
 
-    recipes_paginated = recipes_query.paginate(page=page, per_page=per_page, error_out=False)
+        review_alias = aliased(Review)
+        recipes_query = recipes_query.outerjoin(review_alias, review_alias.recipe_id == Recipe.id)
+
+        user_cuisine_alias = aliased(UserCuisinePreference)
+        recipes_query = recipes_query.join(
+            RecipeCuisine, RecipeCuisine.recipe_id == Recipe.id
+        ).join(
+            user_cuisine_alias, user_cuisine_alias.cuisine_id == RecipeCuisine.cuisine_id
+        )
+
+
+        user_rating_weight = case(
+            (review_alias.user_id == current_user.id, 
+              case(
+                  (review_alias.rating >= 3, 3),  
+                   (review_alias.rating < 3, -1), 
+                  else_=0
+              )),
+            else_=0
+        )
+
+        recipe_rating_weight = case(
+            (Recipe.rating >= 3, 1),  
+             (Recipe.rating < 3, -1),  
+            else_=0
+        )
+
+        cuisine_preference_weight = case(
+            (user_cuisine_alias.user_id == current_user.id, 3),  
+            else_=0
+        )
+
+        completion_weight = case(
+            (user_cuisine_alias.numComplete > 20, 3),  
+             (user_cuisine_alias.numComplete > 5, 2),  
+             (user_cuisine_alias.numComplete > 0, 1),  
+            else_=0
+        )
+
+
+        total_weight = (user_rating_weight +
+                        recipe_rating_weight +
+                        cuisine_preference_weight +
+                        completion_weight)
+
+
+        recipes_query = recipes_query.add_columns(
+            Recipe.id, 
+            Recipe.recipe_name, 
+            func.sum(total_weight).label('total_weight') 
+        )
+
+
+        recipes_query = recipes_query.group_by(Recipe.id)
+        recipes_query = recipes_query.order_by(
+            func.sum(total_weight).desc(),
+            Recipe.recipe_name.asc()
+        )
+
+
+    # Paginate the results
+    recipes_paginated = recipes_query.paginate(page=page, per_page=per_page, error_out=False)#type: ignore
     total_pages = ceil(recipes_paginated.total / per_page)  # type: ignore
-    recipes = [recipe.to_json() for recipe in recipes_paginated.items]
 
+    # Convert the results to JSON using `to_json()`
+    recipes = [recipe[0].to_json() for recipe in recipes_paginated.items]
     return jsonify({
         'recipes': recipes,
         'total_pages': total_pages,
