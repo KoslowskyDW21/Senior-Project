@@ -438,7 +438,7 @@ def kick_user_from_group(group_id):
     if not group:
         return jsonify({"message": "Group not found"}), 404
 
-    if group.creator != current_user.id or not GroupMember.query.filter_by(group_id=group_id, member_id=current_user.id, is_trusted=True).first():
+    if (not (group.creator == current_user.id)) and (not GroupMember.query.filter_by(group_id=group_id, member_id=current_user.id, is_trusted=True).first()):
         return jsonify({"message": "Permission denied"}), 403
 
     participant = GroupMember.query.filter_by(group_id=group_id, member_id=user_id_to_kick).first()
