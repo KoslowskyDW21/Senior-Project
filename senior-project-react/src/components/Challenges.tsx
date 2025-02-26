@@ -3,15 +3,10 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {
   Button,
-  Card,
-  CardContent,
-  CardMedia,
   Typography,
   Grid2,
   Box,
   Container,
-  CardActionArea,
-  CardHeader,
   TextField,
 } from "@mui/material";
 import Header from "./Header";
@@ -61,6 +56,7 @@ const Challenges: React.FC = () => {
     try {
       const response = await axios.get(`${config.serverUrl}/challenges/`);
       const data: ChallengeData[] = response.data;
+      console.log(data);
       const now = new Date();
       const validChallenges = data.filter(
         (challenge) =>
@@ -116,28 +112,6 @@ const Challenges: React.FC = () => {
       setPastChallenges(response.data);
     } catch (error) {
       console.error("Error fetching past challenges:", error);
-    }
-  };
-
-  const handleJoinChallenge = async (challengeId: number) => {
-    try {
-      await axios.post(`${config.serverUrl}/challenges/${challengeId}/join`);
-      setParticipants((prev) => ({ ...prev, [challengeId]: true }));
-      navigate(`/challenges/${challengeId}`);
-    } catch (error) {
-      console.error("Error joining challenge:", error);
-    }
-  };
-
-  const handleLeaveChallenge = async (challengeId: number) => {
-    try {
-      await axios.post(`${config.serverUrl}/challenges/${challengeId}/leave`);
-      setParticipants((prev) => ({ ...prev, [challengeId]: false }));
-      setJoinedChallenges((prev) =>
-        prev.filter((challenge) => challenge.id !== challengeId)
-      );
-    } catch (error) {
-      console.error("Error leaving challenge:", error);
     }
   };
 
