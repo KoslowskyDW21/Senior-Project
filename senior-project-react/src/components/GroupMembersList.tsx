@@ -147,8 +147,8 @@ const GroupMembersList: React.FC<GroupMembersListProps> = ({
                       Set Trusted
                     </Button>
                   )}
-                  {currentUserId === groupCreatorId ||
-                  !trustedMemberIds.includes(member.user_id) || 
+                  {(currentUserId === groupCreatorId ||
+                  !trustedMemberIds.includes(member.user_id)) && 
                   currentUserId !== member.user_id ? (
                     <Button
                       variant="contained"
