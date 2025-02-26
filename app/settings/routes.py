@@ -169,6 +169,8 @@ def read_notification():
     id = data['id']
     print(id)
     notification = UserNotifications.query.filter_by(id=id).first()
+    if not notification:
+        return jsonify({"message": "Notification not found"}), 404
     print(notification.notification_text)
     notification.isRead = 1
     try:

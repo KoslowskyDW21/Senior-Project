@@ -10,7 +10,7 @@ def get_all_shopping_lists_of_current_user():
     print("Attempting to return the shopping list of current user")
     shopping_list: ShoppingList | None = ShoppingList.query.filter_by(user_id=current_user.id).first()
     if (shopping_list is None):
-        newList = ShoppingList(user_id=current_user.id)
+        newList = ShoppingList(user_id=current_user.id) # type: ignore
         db.session.add(newList)
         db.session.commit()
     print(f"User {current_user.id}'s shopping list metadata: {shopping_list}")
@@ -32,6 +32,8 @@ def add_recipe_to_shopping_list_items_of_current_user(recipe_id):
         print(f"RecipeIngredients: {recipe_ingredients}")
         curr_shopping_list = ShoppingList.query.filter_by(user_id=current_user.id).first()
         print(curr_shopping_list)
+        if not curr_shopping_list:
+            return jsonify({"message": "No shopping list found for user"}), 404
         for recipe_ingredient in recipe_ingredients:
             print(f"RecipeIngredient: {recipe_ingredient}")
             sli: ShoppingListItem = ShoppingListItem()

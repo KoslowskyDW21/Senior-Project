@@ -156,7 +156,7 @@ const GroupDetails: React.FC = () => {
         `${config.serverUrl}/groups/${id}/members`
       );
       const notificationsResponse = await axios.post(
-        `${config.serverUrl}/get_notifications/`
+        `${config.serverUrl}/settings/get_notifications/`
       );
 
       const groupMembers = membersResponse.data.map(
