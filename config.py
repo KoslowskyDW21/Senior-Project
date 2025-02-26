@@ -20,7 +20,6 @@ class Config:
     # Cookie can be sent with cross-origin requests
     SESSION_COOKIE_SAMESITE = 'None'
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'None'
     #Configure uploading image
     BASE_DIR = os.path.abspath(os.path.dirname(__file__)) 
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')  

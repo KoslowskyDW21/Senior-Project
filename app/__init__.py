@@ -19,7 +19,7 @@ def create_app(config=Config):
     #max file size for uploads
     app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # 2 MB limit
     # Allow requests only from React frontend
-    CORS(app, origins="https://letthemcook.gcc.edu/", supports_credentials=True) 
+    CORS(app, origins="http://localhost:5173", supports_credentials=True) 
     login_manager.init_app(app)
     login_manager.login_view = 'login.get_login' # type: ignore
     login_manager.session_protection = "strong"
