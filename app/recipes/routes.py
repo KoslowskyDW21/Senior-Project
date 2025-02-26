@@ -133,7 +133,9 @@ def post_recipes():
     total_pages = ceil(recipes_paginated.total / per_page)  # type: ignore
 
     # Convert the results to JSON using `to_json()`
-    recipes = [recipe[0].to_json() for recipe in recipes_paginated.items]
+    recipes = [recipe.to_json() for recipe in recipes_paginated.items]
+    if not search_query:
+        recipes = [recipe[0].to_json() for recipe in recipes_paginated.items]
     return jsonify({
         'recipes': recipes,
         'total_pages': total_pages,
