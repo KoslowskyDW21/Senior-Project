@@ -59,7 +59,7 @@ const Challenges: React.FC = () => {
 
   const getResponse = async () => {
     try {
-      const response = await axios.get("${config.serverUrl}/challenges/");
+      const response = await axios.get(`${config.serverUrl}/challenges/`);
       const data: ChallengeData[] = response.data;
       const now = new Date();
       const validChallenges = data.filter(
@@ -70,7 +70,7 @@ const Challenges: React.FC = () => {
       setChallenges(validChallenges);
 
       const userResponse: UserId = await axios.get(
-        "${config.serverUrl}/challenges/current_user_id"
+        `${config.serverUrl}/challenges/current_user_id`
       );
       const currentUserId = userResponse.data;
       setCurrentUserId(currentUserId);
@@ -111,7 +111,7 @@ const Challenges: React.FC = () => {
   const fetchPastChallenges = async () => {
     try {
       const response = await axios.get(
-        "${config.serverUrl}/challenges/past_challenges"
+        `${config.serverUrl}/challenges/past_challenges`
       );
       setPastChallenges(response.data);
     } catch (error) {

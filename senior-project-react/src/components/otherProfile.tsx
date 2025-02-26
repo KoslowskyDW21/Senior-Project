@@ -317,7 +317,7 @@ const OtherProfile: React.FC = () => {
       .catch((error) => {
         console.error("Could not report user", error);
       });
-  }
+  };
 
   return (
     <>
@@ -400,14 +400,6 @@ const OtherProfile: React.FC = () => {
               Send Friend Request
             </Button>
           )}
-
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => console.log("RequestFrom list:", friendRequestsFrom)}
-          >
-            block button 4 jeff
-          </Button>
 
           <Button
             variant="contained"

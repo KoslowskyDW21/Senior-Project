@@ -235,9 +235,9 @@ def validate_user():
         print("invalid 3")
         return jsonify({"valid": False, "message": "Username cannot contain inappropriate language"}), 400
     
-    if check_username_direct(username, bad_words) is False:
-        print("invalid 4")
-        return jsonify({"valid": False, "message": "Username cannot contain inappropriate language"}), 400
+    # if check_username_direct(username, bad_words) is False:
+    #     print("invalid 4")
+    #     return jsonify({"valid": False, "message": "Username cannot contain inappropriate language"}), 400
 
     if " " in username:
         print("invalid 5")
