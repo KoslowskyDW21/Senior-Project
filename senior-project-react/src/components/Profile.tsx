@@ -263,7 +263,7 @@ const Profile: React.FC = () => {
     <>
       <IconButton
         onClick={() => navigate(-1)}
-        style={{ position: "absolute", top: 30, left: 30 }}
+        style={{ position: "fixed", top: 30, left: 30 }}
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
