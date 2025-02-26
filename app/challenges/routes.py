@@ -23,22 +23,6 @@ def get_localized_time(time):
 @login_required
 @bp.route('/', methods=['GET', 'POST'])
 def challenges():
-    """
-    challenge = Challenge(
-        name = "Charlie's Chili Challenge",
-        creator = 1,
-        difficulty = '1',
-        theme = "Chili",
-        location = "Main Lobby",
-        start_time = datetime.now(UTC),
-        end_time = datetime.now(UTC) + timedelta(hours=3),
-        is_complete = False,
-        num_reports = 0
-    )
-    db.session.add(challenge)
-    db.session.commit()
-    """
-    
     challenges = Challenge.query.all()
     return jsonify([challenge.to_json() for challenge in challenges]), 200
 
@@ -69,6 +53,8 @@ def create_challenge():
 
     start_time_dt = get_localized_time(start_time)
     try:
+        if not duration:
+            return jsonify({"message": "Duration is required"}), 400
         duration_hours = int(duration)
     except ValueError:
         return jsonify({"message": "Duration must be a valid number"}), 400
@@ -76,6 +62,8 @@ def create_challenge():
     if duration_hours > 24:
         return jsonify({"message": "Duration cannot be more than 24 hours"}), 400
 
+    if not type(start_time_dt) is datetime:
+        return jsonify({"message": "Start time must be a valid datetime"}), 400
     end_time_dt = start_time_dt + timedelta(hours=duration_hours)
 
     # Check if start time is before end time
@@ -88,6 +76,8 @@ def create_challenge():
 
     # Validate difficulty
     try:
+        if not difficulty:
+            return jsonify({"message": "Difficulty is required"}), 400
         difficulty_int = int(difficulty)
         if not (1 <= difficulty_int <= 5):
             return jsonify({"message": "Difficulty must be between 1 and 5"}), 400
@@ -96,15 +86,15 @@ def create_challenge():
 
     # Create the challenge instance
     challenge = Challenge(
-        name=name,
-        creator=current_user.id,
-        difficulty=difficulty,
-        theme=theme,
-        location=location,
-        start_time=start_time_dt,
-        end_time=end_time_dt,
-        is_complete=False,
-        num_reports=0,
+        name=name, #type: ignore
+        creator=current_user.id, #type: ignore
+        difficulty=difficulty, #type: ignore
+        theme=theme, #type: ignore
+        location=location, #type: ignore
+        start_time=start_time_dt, #type: ignore
+        end_time=end_time_dt, #type: ignore
+        is_complete=False, #type: ignore
+        num_reports=0, #type: ignore
     )
 
     # Handle image upload
@@ -112,7 +102,10 @@ def create_challenge():
         try:
             upload_folder = current_app.config['UPLOAD_FOLDER']
             os.makedirs(upload_folder, exist_ok=True)
-            filename = secure_filename(image.filename)
+            insecureFilename = image.filename
+            if not insecureFilename:
+                return jsonify({"message": "Invalid file name"}), 400
+            filename = secure_filename(insecureFilename)
             file_path = os.path.join(upload_folder, filename)
             image.save(file_path)
             challenge.image = os.path.join('static', 'uploads', filename)
@@ -143,7 +136,7 @@ def join_challenge(challenge_id):
     if datetime.now(UTC) >= get_localized_time(challenge.start_time):
         return jsonify({"message": "Cannot join challenge after it has started"}), 403
 
-    participant = ChallengeParticipant(challenge_id=challenge_id, user_id=current_user.id)
+    participant = ChallengeParticipant(challenge_id=challenge_id, user_id=current_user.id) #type: ignore
     db.session.add(participant)
     db.session.commit()
 
@@ -172,6 +165,8 @@ def get_participants(challenge_id):
     participant_data = []
     for participant in participants:
         user = User.query.get(participant.user_id)
+        if not user:
+            return jsonify({"message": "User not found"}), 404
         participant_data.append({"user_id": user.id, "username": user.username})
     return jsonify(participant_data), 200
 
@@ -236,11 +231,11 @@ def submit_vote(challenge_id):
         existing_vote.third_choice = third_choice
     else:
         vote = ChallengeVote(
-            challenge_id=challenge_id,
-            given_by=voter_id,
-            first_choice=first_choice,
-            second_choice=second_choice,
-            third_choice=third_choice,
+            challenge_id=challenge_id, #type: ignore
+            given_by=voter_id, #type: ignore
+            first_choice=first_choice, #type: ignore
+            second_choice=second_choice, #type: ignore
+            third_choice=third_choice, #type: ignore
         )
         db.session.add(vote)
 
@@ -265,6 +260,8 @@ def get_vote_results(challenge_id):
     results = []
     for user_id, points in participants.items():
         user = User.query.get(user_id)
+        if not user:
+            return jsonify({"message": "User not found"}), 404
         results.append({
             "user_id": user_id,
             "username": user.username,
@@ -328,13 +325,16 @@ def invite_friends_to_challenge(challenge_id):
     if challenge.creator != current_user.id and not ChallengeParticipant.query.filter_by(challenge_id=challenge_id, user_id=current_user.id).first():
         return jsonify({"message": "Permission denied"}), 403
 
-    friend_ids = request.json.get('friend_ids', [])
+    json = request.json
+    if not json:
+        return jsonify({"message": "Invalid request"}), 400
+    friend_ids = json.get('friend_ids', [])
     for friend_id in friend_ids:
         notification = UserNotifications(
-            user_id=friend_id,
-            notification_text=f"You have been invited to join the challenge {challenge.name}.",
-            notification_type='challenge_reminder',
-            challenge_id=challenge_id
+            user_id=friend_id, #type: ignore
+            notification_text=f"You have been invited to join the challenge {challenge.name}.", #type: ignore
+            notification_type='challenge_reminder', #type: ignore
+            challenge_id=challenge_id #type: ignore
         )
         db.session.add(notification)
     db.session.commit()
@@ -344,13 +344,16 @@ def invite_friends_to_challenge(challenge_id):
 @bp.route('/<int:challenge_id>/invite_response', methods=['POST'])
 @login_required
 def handle_challenge_invite_response(challenge_id):
-    response = request.json.get('response')
+    json = request.json
+    if not json:
+        return jsonify({"message": "Invalid request"}), 400
+    response = json.get('response')
     challenge = Challenge.query.get(challenge_id)
     if not challenge:
         return jsonify({"message": "Challenge not found"}), 404
 
     if response == 'accept':
-        participant = ChallengeParticipant(challenge_id=challenge_id, user_id=current_user.id)
+        participant = ChallengeParticipant(challenge_id=challenge_id, user_id=current_user.id) #type: ignore
         db.session.add(participant)
         db.session.commit()
         return jsonify({"message": "Challenge invitation accepted!"}), 200

@@ -60,16 +60,16 @@ def join_group(group_id):
     if not group:
         return jsonify({"message": "Group not found"}), 404
 
-    member = GroupMember(group_id=group_id, member_id=current_user.id, is_trusted=False)
+    member = GroupMember(group_id=group_id, member_id=current_user.id, is_trusted=False) #type: ignore
     db.session.add(member)
     db.session.commit()
 
     # Create a message indicating the user has joined the group
     message = Message(
-        group_id=group_id,
-        user_id=current_user.id,
-        text=f"{current_user.username} has joined the group.",
-        is_reported=False
+        group_id=group_id, #type: ignore
+        user_id=current_user.id, #type: ignore
+        text=f"{current_user.username} has joined the group.", #type: ignore
+        is_reported=False #type: ignore
     )
     db.session.add(message)
     db.session.commit()
@@ -90,10 +90,10 @@ def leave_group(group_id):
 
         # Create a message indicating the user has left the group
         message = Message(
-            group_id=group_id,
-            user_id=current_user.id,
-            text=f"{current_user.username} has left the group.",
-            is_reported=False
+            group_id=group_id, #type: ignore
+            user_id=current_user.id, #type: ignore
+            text=f"{current_user.username} has left the group.", #type: ignore
+            is_reported=False #type: ignore
         )
         db.session.add(message)
         db.session.commit()
@@ -113,6 +113,8 @@ def get_members(group_id):
     member_data = []
     for member in members:
         user = User.query.get(member.member_id)
+        if(not user):
+            continue
         profile_picture_url = f'/static/uploads/{user.profile_picture}' if user.profile_picture else None
         member_data.append({
             "user_id": user.id,
@@ -142,17 +144,20 @@ def create_group():
         return jsonify({"message": "Name and description are required"}), 400
 
     group = UserGroup(
-        name=name,
-        description=description,
-        is_public=is_public,
-        creator=current_user.id,
-        num_reports=0
+        name=name, #type: ignore
+        description=description, #type: ignore
+        is_public=is_public, #type: ignore
+        creator=current_user.id, #type: ignore
+        num_reports=0 #type: ignore
     )
 
     if image and allowed_file(image.filename):
         upload_folder = current_app.config['UPLOAD_FOLDER']
         os.makedirs(upload_folder, exist_ok=True)
-        filename = f"{uuid.uuid4().hex}_{secure_filename(image.filename)}"
+        insecureFilename = image.filename
+        if not insecureFilename:
+            return jsonify({"message": "Invalid file name"}), 400
+        filename = f"{uuid.uuid4().hex}_{secure_filename(insecureFilename)}"
         file_path = os.path.join(upload_folder, filename)
         image.save(file_path)
         group.image = os.path.join('static', 'uploads', filename)
@@ -162,7 +167,7 @@ def create_group():
     db.session.add(group)
     db.session.commit()
 
-    member = GroupMember(group_id=group.id, member_id=current_user.id, is_trusted=True)
+    member = GroupMember(group_id=group.id, member_id=current_user.id, is_trusted=True) #type: ignore
     db.session.add(member)
     db.session.commit()
 
@@ -175,6 +180,8 @@ def get_messages(group_id):
     message_data = []
     for message in messages:
         user = User.query.get(message.user_id)
+        if(not user):
+            continue
         message_data.append({
             "id": message.id,
             "user_id": message.user_id,
@@ -190,11 +197,14 @@ def send_message(group_id):
     if not group:
         return jsonify({"message": "Group not found"}), 404
 
-    text = request.json.get('text')
+    json = request.json
+    if not json:
+        return jsonify({"message": "Invalid request"}), 400
+    text = json.get('text')
     if not text:
         return jsonify({"message": "Message text is required"}), 400
 
-    message = Message(group_id=group_id, user_id=current_user.id, text=text, is_reported=False)
+    message = Message(group_id=group_id, user_id=current_user.id, text=text, is_reported=False) #type: ignore
     db.session.add(message)
     db.session.commit()
 
@@ -274,7 +284,10 @@ def post_report_message(message_id: int):
 @bp.route('/<int:group_id>/set_trusted', methods=['POST'])
 @login_required
 def set_trusted(group_id):
-    user_id = request.json.get('user_id')
+    json = request.json
+    if not json:
+        return jsonify({"message": "Invalid request"}), 400
+    user_id = json.get('user_id')
     group = UserGroup.query.get(group_id)
     if not group:
         return jsonify({"message": "Group not found"}), 404
@@ -294,7 +307,10 @@ def set_trusted(group_id):
 @bp.route('/<int:group_id>/revoke_trusted', methods=['POST'])
 @login_required
 def revoke_trusted(group_id):
-    user_id = request.json.get('user_id')
+    json = request.json
+    if not json:
+        return jsonify({"message": "Invalid request"}), 400
+    user_id = json.get('user_id')
     group = UserGroup.query.get(group_id)
     if not group:
         return jsonify({"message": "Group not found"}), 404
@@ -374,13 +390,16 @@ def invite_friends(group_id):
     if group.creator != current_user.id and not GroupMember.query.filter_by(group_id=group_id, member_id=current_user.id, is_trusted=True).first():
         return jsonify({"message": "Permission denied"}), 403
 
-    friend_ids = request.json.get('friend_ids', [])
+    json = request.json
+    if not json:
+        return jsonify({"message": "Invalid request"}), 400
+    friend_ids = json.get('friend_ids', [])
     for friend_id in friend_ids:
         notification = UserNotifications(
-            user_id=friend_id,
-            notification_text=f"You have been invited to join the group {group.name}.",
-            notification_type='group_message',
-            group_id=group_id
+            user_id=friend_id, #type: ignore
+            notification_text=f"You have been invited to join the group {group.name}.", #type: ignore
+            notification_type='group_message', #type: ignore
+            group_id=group_id #type: ignore
         )
         db.session.add(notification)
     db.session.commit()
@@ -394,9 +413,12 @@ def invite_response(group_id):
     if not group:
         return jsonify({"message": "Group not found"}), 404
 
-    response = request.json.get('response')
+    json = request.json
+    if not json:
+        return jsonify({"message": "Invalid request"}), 400
+    response = json.get('response')
     if response == 'accept':
-        member = GroupMember(group_id=group_id, member_id=current_user.id, is_trusted=False)
+        member = GroupMember(group_id=group_id, member_id=current_user.id, is_trusted=False) #type: ignore
         db.session.add(member)
         db.session.commit()
         return jsonify({"message": "You have joined the group!"}), 200

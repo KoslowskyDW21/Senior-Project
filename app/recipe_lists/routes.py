@@ -42,6 +42,8 @@ def get_all_recipe_lists_containing_recipe_with_id(id):
 def get_recipe_list_name(rid):
     print(f"Searching for RecipeList {rid}")
     recipe_list = RecipeList.query.filter_by(id=rid).first()
+    if not recipe_list:
+        return jsonify({"message": f"RecipeList {rid} not found"}), 404
     return jsonify(recipe_list.to_json())
 
 @bp.post('/createlist')
@@ -52,14 +54,17 @@ def create_list():
     if not name:
         return jsonify({"message": "name must be specified"}), 400
     try:
-        recipeList = RecipeList(name=name, belongs_to=current_user.id, image=image)
+        recipeList = RecipeList(name=name, belongs_to=current_user.id, image=image) #type: ignore
 
         # Handle image upload
         if image and allowed_file(image.filename):
             try:
                 upload_folder = current_app.config['UPLOAD_FOLDER']
                 os.makedirs(upload_folder, exist_ok=True)
-                filename = secure_filename(image.filename)
+                insecureFilename = image.filename
+                if not insecureFilename:
+                    return jsonify({"message": "Invalid file name"}), 400
+                filename = secure_filename(insecureFilename)
                 file_path = os.path.join(upload_folder, filename)
                 image.save(file_path)
                 recipeList.image = os.path.join('static', 'uploads', filename)
@@ -74,8 +79,8 @@ def create_list():
                         "recipe_list_id": recipeList.id}), 201
     except Exception as e:
         return jsonify({"message": f"RecipeList creation failed: {str(e)}", "recipe_list_id": -1}), 500
-    
-@bp.post('/deletelist')
+
+@bp.post('/deletelist') #type: ignore
 def delete_list():
     lid = request.form.get('lid')
     if not lid:
@@ -109,7 +114,7 @@ def add_recipe_to_list():
         print(already_exists)
         if (already_exists):
             return jsonify({"message": "Recipe already in list"}), 200
-        rrl = RecipeRecipeList(recipe_id=rid, recipe_list_id=lid)
+        rrl = RecipeRecipeList(recipe_id=rid, recipe_list_id=lid) #type: ignore
         db.session.add(rrl)
         db.session.commit()
         return jsonify({"message": "Recipe added to list successfully!"}), 200

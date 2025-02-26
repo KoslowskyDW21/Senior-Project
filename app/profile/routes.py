@@ -111,7 +111,8 @@ def allowed_file(filename):
 def change_profile_pic():
     profile_picture = request.files.get('profile_picture')
     user = db.session.query(User).filter(User.id == current_user.id).first()
-    
+    if not user:
+        return jsonify({"message": "User not found"}), 404
     if profile_picture and allowed_file(profile_picture.filename):
         upload_folder = current_app.config['UPLOAD_FOLDER']
         os.makedirs(upload_folder, exist_ok=True)
@@ -124,7 +125,10 @@ def change_profile_pic():
                 except OSError as e:
                     current_app.logger.error(f"Error deleting old profile picture: {e}")
 
-        filename = f"{uuid.uuid4().hex}_{secure_filename(profile_picture.filename)}"
+        insecureFilename = profile_picture.filename
+        if not insecureFilename:
+            return jsonify({"message": "Invalid file name"}), 400
+        filename = f"{uuid.uuid4().hex}_{secure_filename(insecureFilename)}"
         file_path = os.path.join(upload_folder, filename)
         profile_picture.save(file_path)
 
@@ -144,6 +148,8 @@ def change_profile_pic():
 @bp.route('/remove_profile_pic/', methods=['POST'])
 def remove_profile_pic():
     user = db.session.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        return jsonify({"message": "User not found"}), 404
     if user.profile_picture:
             old_file_path = os.path.join(current_app.root_path, user.profile_picture)
             if os.path.exists(old_file_path):

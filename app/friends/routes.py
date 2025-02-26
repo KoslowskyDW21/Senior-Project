@@ -42,7 +42,10 @@ def get_friends():
 
 @bp.route('/search_for_friends/', methods=['POST'])
 def search_for_friends():
-    search_query = request.json.get('search_query', '').strip()
+    json = request.json
+    if not json:
+        return jsonify({"error": "Invalid request"}), 400
+    search_query = json.get('search_query', '').strip()
 
     if not search_query:
         return jsonify({"users": []}), 200
@@ -145,7 +148,7 @@ def request_notification(requestFrom, requestTo, requestType):
     else:
         notification_user_id = requestFrom
 
-    friend_notification = UserNotifications(user_id = notification_user_id, notification_text = notification_message, isRead = False, notification_type = 'friend_request')
+    friend_notification = UserNotifications(user_id = notification_user_id, notification_text = notification_message, isRead = False, notification_type = 'friend_request') #type: ignore
     db.session.add(friend_notification)
     print(friend_notification)
     try:
@@ -160,6 +163,8 @@ def request_notification(requestFrom, requestTo, requestType):
 def delete_notification(requestFrom, requestTo):
     #TODO: This is wrong. Fix it
     user = db.session.query(User).filter(User.id == requestFrom).first()
+    if not user:
+        return jsonify({"error": "Invalid user ID"}), 400
     notification_text_pattern = f"You have a new friend request from {user.username}%"
     notification_to_delete = db.session.query(UserNotifications).filter(
         and_(
@@ -186,7 +191,7 @@ def delete_notification(requestFrom, requestTo):
 @bp.route('/send_request/<int:id>', methods=['POST'])
 def send_request(id):
     #TODO: verify notification functionality
-    new_request = FriendRequest(requestFrom=current_user.id, requestTo=id)
+    new_request = FriendRequest(requestFrom=current_user.id, requestTo=id) #type: ignore
     request_notification(current_user.id, id, notificationType.send_request)
     db.session.add(new_request)
     try:
@@ -205,7 +210,7 @@ def accept_request(id):
     request = db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==id, FriendRequest.requestTo==current_user.id)).first()
     if request:
         #Create new friendship, delete request, 
-        new_friendship = Friendship(user1 = request.requestFrom, user2 = request.requestTo)
+        new_friendship = Friendship(user1 = request.requestFrom, user2 = request.requestTo) #type: ignore
         db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==id, FriendRequest.requestTo==current_user.id)).delete()
         db.session.add(new_friendship)
         checkAchievement(request.requestFrom, request.requestTo)
