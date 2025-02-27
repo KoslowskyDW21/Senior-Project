@@ -301,6 +301,16 @@ def delete_reports(review_id: int):
     db.session.commit()
     return jsonify({"message": "Reports successfully deleted"}), 200
 
+@bp.route("/<int:review_id>/set_reports_zero", methods=["POST"])
+@login_required
+def set_reports_zero(review_id: int):
+    review: Review = Review.query.get(review_id) # type: ignore
+    print(review)
+    review.num_reports = 0
+
+    db.session.commit()
+    return jsonify({"message": "Dismissed all reports"}), 200
+
 @bp.route("/<int:review_id>/delete", methods=["DELETE"])
 @login_required
 def delete_review(review_id):

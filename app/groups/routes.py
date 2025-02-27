@@ -338,6 +338,15 @@ def delete_message_reports(message_id: int):
     return jsonify({"message": "Reports successfully deleted"}), 200
 
 @login_required
+@bp.route("/<int:message_id>/set_message_reports_zero", methods=["POST"])
+def set_message_reports_zero(message_id: int):
+    message: Message = Message.query.get(message_id) # type: ignore
+    message.num_reports = 0
+
+    db.session.commit()
+    return jsonify({"message": "Dismissed reports successfully"}), 200
+
+@login_required
 @bp.route("/<int:message_id>/delete_message", methods=["DELETE"])
 def delete_message(message_id: int):
     message = Message.query.get(message_id)
@@ -360,6 +369,15 @@ def delete_reports(group_id: int):
     
     db.session.commit()
     return jsonify({"message": "Reports succesfully deleted"}), 200
+
+@bp.route("/<int:group_id>/set_group_reports_zero", methods=["POST"])
+@login_required
+def set_group_reports_zero(group_id: int):
+    group: UserGroup = UserGroup.query.get(group_id) # type: ignore
+    group.num_reports = 0
+
+    db.session.commit()
+    return jsonify({"message": "Dismissed reports successfully"}), 200
 
 @bp.route('/<int:group_id>/delete', methods=['DELETE'])
 @login_required

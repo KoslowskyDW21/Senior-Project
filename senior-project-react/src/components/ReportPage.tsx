@@ -13,6 +13,9 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  Card,
+  CardContent,
+  CardMedia,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
@@ -36,6 +39,10 @@ interface GroupReport {
 
 interface Review {
   id: number;
+  text: string;
+  image: string;
+  rating: string;
+  difficulty: string;
   num_reports: number;
   username: string;
 }
@@ -58,6 +65,49 @@ interface MessageReport {
   user_id: number;
   message_id: number;
   reason: string;
+}
+
+function Review({ review }) {
+  return (
+    <Card
+      sx={{
+        marginBottom: 2,
+        border: "1px solid #ccc",
+        borderRadius: 2,
+        boxShadow: 2,
+      }}
+    >
+      <CardContent>
+        <Typography variant="h6">{review.username}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {review.text}
+        </Typography>
+        {review.difficulty !== "0" && (
+          <Typography variant="body2" color="text.secondary">
+            Difficulty: {review.difficulty}
+          </Typography>
+        )}
+        {review.rating !== "0" && (
+          <Typography variant="body2" color="text.secondary">
+            Rating: {review.rating}
+          </Typography>
+        )}
+        {review.image != "NULL" && (
+          <CardMedia
+            component="img"
+            height="200"
+            image={`${config.serverUrl}/${review.image}`}
+            alt="Review Image"
+            sx={{
+              objectFit: "contain",
+              maxWidth: "100%",
+              marginBottom: 2,
+            }}
+          />
+        )}
+      </CardContent>
+    </Card>
+  )
 }
 
 const modalStyle = {
@@ -186,6 +236,17 @@ export default function ReportPage() {
       });
   }
 
+  async function setGroupReportsZero() {
+    await axios
+      .post(`${config.serverUrl}/groups/${group!.id}/set_group_reports_zero`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not set reports to zero", error);
+      });
+  }
+
   async function deleteGroup() {
     await axios
       .delete(`${config.serverUrl}/groups/${group!.id}/delete`)
@@ -202,6 +263,11 @@ export default function ReportPage() {
     deleteGroup();
   }
 
+  function handleRemoveGroupReports() {
+    deleteGroupReports();
+    setGroupReportsZero();
+  }
+
   async function deleteReviewReports() {
     await axios
       .delete(`${config.serverUrl}/recipes/${review!.id}/delete_reports`)
@@ -210,6 +276,17 @@ export default function ReportPage() {
       })
       .catch((error) => {
         console.error("Could not delete reports ", error);
+      });
+  }
+
+  async function setReviewReportsZero() {   
+    await axios
+      .post(`${config.serverUrl}/recipes/${review!.id}/set_reports_zero`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not set reports to zero", error);
       });
   }
 
@@ -229,6 +306,11 @@ export default function ReportPage() {
     deleteReview();
   }
 
+  function handleRemoveReviewReports() {
+    deleteReviewReports();
+    setReviewReportsZero();
+  }
+
   async function deleteMessageReports() {
     await axios
       .delete(`${config.serverUrl}/groups/${message!.id}/delete_message_reports`)
@@ -237,6 +319,17 @@ export default function ReportPage() {
       })
       .catch((error) => {
         console.error("Could not delete reports", error);
+      });
+  }
+
+  async function setMessageReportsZero() {
+    await axios
+      .post(`${config.serverUrl}/groups/${message!.id}/set_message_reports_zero`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not set reports to zero", error);
       });
   }
 
@@ -254,6 +347,11 @@ export default function ReportPage() {
   function handleRemoveMessage(){
     deleteMessageReports();
     deleteMessage();
+  }
+
+  function handleRemoveMessageReports() {
+    deleteMessageReports();
+    setMessageReportsZero();
   }
 
   React.useEffect(() => {
@@ -430,6 +528,16 @@ export default function ReportPage() {
             >
               Remove Group
             </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                handleRemoveGroupReports();
+                handleCloseGroupModal();
+              }}
+            >
+              Dismiss Report(s)
+            </Button>
           </Box>
         </Modal>
 
@@ -445,6 +553,8 @@ export default function ReportPage() {
             >
               <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
             </IconButton>
+            
+            <Review review={review} />
 
             <Typography id="modal-title" variant="h4" component="h2">
               {`Review submitted by ${
@@ -478,6 +588,16 @@ export default function ReportPage() {
               }}
             >
               Remove Review
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                handleRemoveReviewReports();
+                handleCloseReviewModal();
+              }}
+            >
+              Dismiss Report(s)
             </Button>
           </Box>
         </Modal>
@@ -527,6 +647,16 @@ export default function ReportPage() {
               }}
             >
               Remove Message
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                handleRemoveMessageReports();
+                handleCloseMessageModal();
+              }}
+            >
+              Dismiss Report(s)
             </Button>
           </Box>
         </Modal>
