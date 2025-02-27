@@ -3,21 +3,18 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
-  CardContent,
   CardMedia,
   Typography,
-  Grid2,
   Box,
   Container,
   Button,
-  MenuItem,
-  Menu,
   IconButton,
   Avatar,
-  ButtonBase,
   TextField,
   CardActionArea,
   CardHeader,
+  useMediaQuery,
+  Grid2,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
@@ -93,6 +90,9 @@ const Groups: React.FC = () => {
   const [profile_picture, setProfile_picture] = useState<string>();
   const [friends, setFriends] = useState<[]>([]);
   const [searchLabel, setSearchLabel] = useState<string>("");
+
+  const isSmallScreen = useMediaQuery("(max-width:600px)");
+  const isMediumScreen = useMediaQuery("(min-width:600px) and (max-width:900px)");
 
   const fetchGroups = async () => {
     try {
@@ -349,9 +349,13 @@ const Groups: React.FC = () => {
               <Typography variant="h5" gutterBottom>
                 My Groups
               </Typography>
-              <Grid2 container spacing={2}>
+              <Grid2
+                container
+                spacing={2}
+                columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
+              >
                 {myGroups.map((group) => (
-                  <Grid2 item xs={12} sm={6} md={4} key={group.id}>
+                  <Grid2 key={group.id}>
                     <Group {...group} />
                   </Grid2>
                 ))}
@@ -382,9 +386,13 @@ const Groups: React.FC = () => {
             <Typography variant="h5" gutterBottom>
               All Groups
             </Typography>
-            <Grid2 container spacing={2}>
+            <Grid2
+              container
+              spacing={2}
+              columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
+            >
               {filteredGroups.map((group) => (
-                <Grid2 item xs={12} sm={6} md={4} key={group.id}>
+                <Grid2 key={group.id}>
                   <Group {...group} />
                 </Grid2>
               ))}

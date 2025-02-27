@@ -4,10 +4,11 @@ import { useNavigate } from "react-router-dom";
 import {
   Button,
   Typography,
-  Grid2,
   Box,
   Container,
   TextField,
+  useMediaQuery,
+  Grid2,
 } from "@mui/material";
 import Header from "./Header";
 import Challenge from "./Challenge";
@@ -52,11 +53,13 @@ const Challenges: React.FC = () => {
   const [profile_picture, setProfile_picture] = useState<string>();
   const [pastChallenges, setPastChallenges] = useState<ChallengeData[]>([]);
 
+  const isSmallScreen = useMediaQuery("(max-width:600px)");
+  const isMediumScreen = useMediaQuery("(min-width:600px) and (max-width:900px)");
+
   const getResponse = async () => {
     try {
       const response = await axios.get(`${config.serverUrl}/challenges/`);
       const data: ChallengeData[] = response.data;
-      console.log(data);
       const now = new Date();
       const validChallenges = data.filter(
         (challenge) =>
@@ -291,15 +294,14 @@ const Challenges: React.FC = () => {
               <Typography variant="h5" gutterBottom>
                 My Challenges
               </Typography>
-              <Box
-                sx={{
-                  maxHeight: showMoreMyChallenges ? "none" : 300,
-                  overflowY: "auto",
-                }}
-              >
-                <Grid2 container spacing={2}>
+              <Box>
+                <Grid2
+                  container
+                  spacing={2}
+                  columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
+                >
                   {filteredMyChallenges.map((challenge) => (
-                    <Grid2 item xs={12} sm={6} md={4} key={challenge.id}>
+                    <Grid2 key={challenge.id}>
                       <Challenge {...challenge} />
                     </Grid2>
                   ))}
@@ -325,15 +327,14 @@ const Challenges: React.FC = () => {
               <Typography variant="h5" gutterBottom>
                 Joined Challenges
               </Typography>
-              <Box
-                sx={{
-                  maxHeight: showMoreJoinedChallenges ? "none" : 300,
-                  overflowY: "auto",
-                }}
-              >
-                <Grid2 container spacing={2}>
+              <Box>
+                <Grid2
+                  container
+                  spacing={2}
+                  columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
+                >
                   {filteredJoinedChallenges.map((challenge) => (
-                    <Grid2 item xs={12} sm={6} md={4} key={challenge.id}>
+                    <Grid2 key={challenge.id}>
                       <Challenge {...challenge} />
                     </Grid2>
                   ))}
@@ -358,9 +359,13 @@ const Challenges: React.FC = () => {
             <Typography variant="h5" gutterBottom>
               All Challenges
             </Typography>
-            <Grid2 container spacing={2}>
+            <Grid2
+              container
+              spacing={2}
+              columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
+            >
               {filteredAllChallenges.map((challenge) => (
-                <Grid2 item xs={12} sm={6} md={4} key={challenge.id}>
+                <Grid2 key={challenge.id}>
                   <Challenge {...challenge} />
                 </Grid2>
               ))}

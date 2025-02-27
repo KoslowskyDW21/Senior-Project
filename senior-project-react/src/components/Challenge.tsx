@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardMedia,
   CardContent,
+  Typography,
 } from "@mui/material";
 import Difficulty from "./Difficulty";
 import config from "../config.js";
@@ -31,18 +32,30 @@ const Challenge: React.FC<ChallengeProps> = ({
   return (
     <Card
       variant="outlined"
-      sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        flexShrink: 1,
+        maxHeight: 400, // Set a fixed height for all cards
+      }}
     >
       <CardActionArea onClick={handleGoToChallenge}>
         <CardHeader
-          title={name}
+          title={
+            <Typography
+              variant="h5"
+              sx={{ fontSize: "clamp(1rem, 1.5vw, 2rem)", textAlign: "center" }}
+            >
+              {name}
+            </Typography>
+          }
+          subheader={<Difficulty difficulty={difficulty} />}
           sx={{
             justifyContent: "center",
             alignItems: "center",
-            textAlign: "center",
-            flexShrink: 0,
-            width: "90%",
-            fontSize: "clamp(1rem, 4vw, 2rem)",
+            flexShrink: 1,
+            width: "auto",
           }}
         />
         {image && (
@@ -50,9 +63,10 @@ const Challenge: React.FC<ChallengeProps> = ({
             component="img"
             image={`${config.serverUrl}/${image}`}
             sx={{
-              height: 200,
-              objectFit: "cover",
+              height: "auto",
+              objectFit: "contain",
               width: "100%",
+              maxHeight: 200, // Limit the image height
             }}
           />
         )}
