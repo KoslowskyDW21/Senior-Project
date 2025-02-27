@@ -86,14 +86,13 @@ const Login = () => {
   };
 
   useEffect(() => {
-    // Handle the redirect callback when the page is reloaded after successful login
     instance
       .handleRedirectPromise()
       .then((response) => {
         if (response) {
           const idToken = response.idToken;
-          localStorage.setItem("idToken", idToken); // Save the token
-          // navigate("/recipes");
+          localStorage.setItem("idToken", idToken); 
+          handleSSOLogin(); 
         }
       })
       .catch((error) => {

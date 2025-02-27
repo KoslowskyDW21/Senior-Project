@@ -261,7 +261,8 @@ def validate_user():
 def sso_login():
     data = request.json
     if not data:
-        return jsonify({"message": "Invalid request"}), 400
+        print("invalid request no data ")
+        return jsonify({"message": "Invalid request. No data"}), 400
     token = data.get("token")
 
     decoded = jwt.decode(token, options={"verify_signature": False})
@@ -271,10 +272,12 @@ def sso_login():
 
 
     if not token:
+        print("invalid request no token")
         return jsonify({"message": "No token provided"}), 400
 
     decoded_token = validate_jwt(token)
     if not decoded_token:
+        print("invalid token")
         return jsonify({"message": "Invalid token"}), 401
 
     email = decoded_token.get("preferred_username")  #email
@@ -284,10 +287,12 @@ def sso_login():
         fname = name[1].replace(",", "")
         lname = name[0]
     else:
+        print("no name found")
         return jsonify({"message": "Invalid token: No name found"}), 401
 
 
     if not email:
+        print("no email found")
         return jsonify({"message": "Invalid token: No email found"}), 401
 
     user = User.query.filter_by(email_address=email).first()
@@ -295,6 +300,7 @@ def sso_login():
    # print(user)
 
     if user:
+        print("logging in")
         login_user(user, remember=True)
         return jsonify({"message": "Login successful", "user_id": user.id}), 200
     else:

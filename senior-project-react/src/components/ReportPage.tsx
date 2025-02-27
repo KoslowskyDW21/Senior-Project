@@ -67,6 +67,7 @@ interface MessageReport {
   reason: string;
 }
 
+// React component that lets the user see which reviews have been reported
 function Review({ review }) {
   return (
     <Card
@@ -110,6 +111,7 @@ function Review({ review }) {
   )
 }
 
+// React component that lets the user see which messages have been reported
 function Message({ message }) {
   return (
     <Card
@@ -392,6 +394,7 @@ export default function ReportPage() {
     setMessages(newMessages);
   }
 
+  // Checks to see if the current user is an admin and loads the reported groups, reviews, and messages
   React.useEffect(() => {
     isAdmin();
     loadGroups();
@@ -413,6 +416,7 @@ export default function ReportPage() {
 
         <h2>Reported Groups</h2>
 
+        {/* List each group that has been reported in a table */}
         {groups.length > 0 ? (
           <table>
             <thead>
@@ -452,6 +456,7 @@ export default function ReportPage() {
 
         <h2>Reported Reviews</h2>
 
+        {/* List each review that has been reported in a table */}
         {reviews.length > 0 ? (
           <table>
             <thead>
@@ -489,6 +494,7 @@ export default function ReportPage() {
 
         <h2>Reported Messages</h2>
 
+        {/* List each message that has been reported in a table */}
         {messages.length > 0 ? (
           <table>
             <thead>
@@ -522,6 +528,8 @@ export default function ReportPage() {
           <p>No Messages Reported</p>
         )}
 
+        {/* Modal for seeing reports associated with specific group - gives the option
+            to remove the group or dismiss the reports */}
         <Modal
           open={openGroup}
           onClose={handleCloseGroupModal}
@@ -578,7 +586,10 @@ export default function ReportPage() {
             </Button>
           </Box>
         </Modal>
-
+        
+        {/* Modal for seeing reports associated with specific review - gives the option
+            to remove the review or dismiss the reports - also displays the review to 
+            the user */}
         <Modal
           open={openReview}
           onClose={handleCloseReviewModal}
@@ -640,6 +651,9 @@ export default function ReportPage() {
           </Box>
         </Modal>
 
+        {/* Modal for seeing reports associated with specific message - gives the option
+            to remove the message or dismiss the reports - also displays the message to 
+            the user */}
         <Modal
           open={openMessage}
           onClose={handleCloseMessageModal}
