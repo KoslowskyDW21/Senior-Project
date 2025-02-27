@@ -55,8 +55,8 @@ interface ReviewReport {
 
 interface Message {
   id: number;
-  group_id: number;
   user_id: number;
+  username: string;
   num_reports: number;
   text: string;
 }
@@ -105,6 +105,26 @@ function Review({ review }) {
             }}
           />
         )}
+      </CardContent>
+    </Card>
+  )
+}
+
+function Message({ message }) {
+  return (
+    <Card
+      sx={{
+        marginBottom: 2,
+        border: "1px solid #ccc",
+        borderRadius: 2,
+        boxShadow: 2,
+      }}    
+    >
+      <CardContent>
+        <Typography variant="h6">{message.username}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {message.text}
+        </Typography>
       </CardContent>
     </Card>
   )
@@ -261,11 +281,17 @@ export default function ReportPage() {
   function handleRemoveGroup() {
     deleteGroupReports();
     deleteGroup();
+
+    const newGroups = groups.filter(item => item !== group);
+    setGroups(newGroups);
   }
 
   function handleRemoveGroupReports() {
     deleteGroupReports();
     setGroupReportsZero();
+
+    const newGroups = groups.filter(item => item !== group);
+    setGroups(newGroups);
   }
 
   async function deleteReviewReports() {
@@ -304,11 +330,17 @@ export default function ReportPage() {
   function handleRemoveReview() {
     deleteReviewReports();
     deleteReview();
+
+    const newReviews = reviews.filter(item => item !== review);
+    setReviews(newReviews);
   }
 
   function handleRemoveReviewReports() {
     deleteReviewReports();
     setReviewReportsZero();
+
+    const newReviews = reviews.filter(item => item !== review);
+    setReviews(newReviews);
   }
 
   async function deleteMessageReports() {
@@ -347,11 +379,17 @@ export default function ReportPage() {
   function handleRemoveMessage(){
     deleteMessageReports();
     deleteMessage();
+
+    const newMessages = messages.filter(item => item !== message);
+    setMessages(newMessages);
   }
 
   function handleRemoveMessageReports() {
     deleteMessageReports();
     setMessageReportsZero();
+
+    const newMessages = messages.filter(item => item !== message);
+    setMessages(newMessages);
   }
 
   React.useEffect(() => {
@@ -614,6 +652,8 @@ export default function ReportPage() {
             >
               <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
             </IconButton>
+            
+            <Message message={message} />
 
             <Typography id="modal-title" variant="h4" component="h2">
               {`Message written by ${

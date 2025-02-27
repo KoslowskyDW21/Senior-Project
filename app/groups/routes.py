@@ -35,7 +35,20 @@ def get_reported_groups():
 @login_required
 def get_reported_messages():
     reportedMessages = Message.query.filter(Message.num_reports > 0).all()
-    return jsonify([message.to_json() for message in reportedMessages]), 200
+
+    message_data = []
+    for message in reportedMessages:
+        user = User.query.get(message.user_id)
+        if(not user):
+            continue
+        message_data.append({
+            "id": message.id,
+            "user_id": message.user_id,
+            "username": user.username,
+            "text": message.text,
+            "num_reports": message.num_reports
+        })
+    return jsonify(message_data), 200
 
 @bp.route("/reports/<int:id>/", methods=["GET"])
 @login_required
@@ -69,7 +82,7 @@ def join_group(group_id):
         group_id=group_id, #type: ignore
         user_id=current_user.id, #type: ignore
         text=f"{current_user.username} has joined the group.", #type: ignore
-        num_reports=0 #type: ignore
+        num_reports=-1 #type: ignore
     )
     db.session.add(message)
     db.session.commit()
@@ -93,7 +106,7 @@ def leave_group(group_id):
             group_id=group_id, #type: ignore
             user_id=current_user.id, #type: ignore
             text=f"{current_user.username} has left the group.", #type: ignore
-            num_reports=0 #type: ignore
+            num_reports=-1 #type: ignore
         )
         db.session.add(message)
         db.session.commit()
@@ -186,7 +199,8 @@ def get_messages(group_id):
             "id": message.id,
             "user_id": message.user_id,
             "username": user.username,
-            "text": message.text
+            "text": message.text,
+            "num_reports": message.num_reports
         })
     return jsonify(message_data), 200
 
