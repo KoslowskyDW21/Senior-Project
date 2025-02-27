@@ -52,6 +52,8 @@ class User(UserMixin, db.Model):
     shopping_lists = db.relationship('ShoppingList', backref='user', cascade="all, delete-orphan")
     user_achievements = db.relationship('UserAchievement', backref='user', cascade="all, delete-orphan")
     user_notifications = db.relationship('UserNotifications', backref='user', cascade="all, delete-orphan")
+    friend_requests_sent = relationship('FriendRequest', foreign_keys="[FriendRequest.requestFrom]", cascade="all, delete-orphan")
+    friend_requests_received = relationship('FriendRequest', foreign_keys="[FriendRequest.requestTo]", cascade="all, delete-orphan")
 
     @property
     def password(self):
