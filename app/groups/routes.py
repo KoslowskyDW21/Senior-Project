@@ -69,7 +69,7 @@ def join_group(group_id):
         group_id=group_id, #type: ignore
         user_id=current_user.id, #type: ignore
         text=f"{current_user.username} has joined the group.", #type: ignore
-        is_reported=False #type: ignore
+        num_reports=0 #type: ignore
     )
     db.session.add(message)
     db.session.commit()
@@ -93,7 +93,7 @@ def leave_group(group_id):
             group_id=group_id, #type: ignore
             user_id=current_user.id, #type: ignore
             text=f"{current_user.username} has left the group.", #type: ignore
-            is_reported=False #type: ignore
+            num_reports=0 #type: ignore
         )
         db.session.add(message)
         db.session.commit()
@@ -204,7 +204,7 @@ def send_message(group_id):
     if not text:
         return jsonify({"message": "Message text is required"}), 400
 
-    message = Message(group_id=group_id, user_id=current_user.id, text=text, is_reported=False) #type: ignore
+    message = Message(group_id=group_id, user_id=current_user.id, text=text, num_reports=0) #type: ignore
     db.session.add(message)
     db.session.commit()
 
