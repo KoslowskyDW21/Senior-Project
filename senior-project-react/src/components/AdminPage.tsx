@@ -70,17 +70,22 @@ export default function AdminPage() {
 
   function CreateAdminButton({ user, handleAdminChange }) {
     if (superAdmin) {
-      return (
-        <Button
-          onClick={() => {
-            handleAdminChange(user);
-          }}
-          variant="contained"
-          color={user.is_admin ? "error" : "success"}
-        >
-          {user.is_admin ? "Remove Status" : "Make Admin"}
-        </Button>
-      );
+      if(user.is_super_admin) {
+        return <></>;
+      }
+      else {
+        return (
+          <Button
+            onClick={() => {
+              handleAdminChange(user);
+            }}
+            variant="contained"
+            color={user.is_admin ? "error" : "success"}
+          >
+            {user.is_admin ? "Remove Status" : "Make Admin"}
+          </Button>
+        );
+      }
     } else if (!user.is_admin) {
       return (
         <Button
@@ -280,27 +285,31 @@ export default function AdminPage() {
                 </td>
                 <td>{CreateAdminButton({ user, handleAdminChange })}</td>
                 <td>
-                  {!user.is_banned ? (
-                    <Button
-                      variant="contained"
-                      color="error"
-                      onClick={() => {
-                        handleOpenModal();
-                        setUserToBan(user);
-                      }}
-                    >
-                      Ban User
-                    </Button>
+                  {!user.is_super_admin ? (
+                    !user.is_banned ? (
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => {
+                          handleOpenModal();
+                          setUserToBan(user);
+                        }}
+                      >
+                        Ban User
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        color="success"
+                        onClick={() => {
+                          handleUnban(user.id);
+                        }}
+                      >
+                        Unban User
+                      </Button>
+                    )
                   ) : (
-                    <Button
-                      variant="contained"
-                      color="success"
-                      onClick={() => {
-                        handleUnban(user.id);
-                      }}
-                    >
-                      Unban User
-                    </Button>
+                    <></>
                   )}
                 </td>
               </tr>
