@@ -387,7 +387,8 @@ const Recipes: React.FC = () => {
                       id={recipe.id}
                       name={recipe.recipe_name}
                       difficulty={recipe.difficulty}
-                      image={recipe.image}
+                      //image={recipe.image}
+                      image={`${config.serverUrl}/${recipe.image}`}
                     />
                   </Box>
                 </Grid2>
