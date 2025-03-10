@@ -52,8 +52,6 @@ class User(UserMixin, db.Model):
     shopping_lists = relationship('ShoppingList', backref='user', cascade="all, delete-orphan")
     user_achievements = relationship('UserAchievement', backref='user', cascade="all, delete-orphan")
     user_notifications = relationship('UserNotifications', backref='user', cascade="all, delete-orphan")
-    user_report_by = relationship('UserReport', foreign_keys="[UserBlock.blocked_user]", cascade="all, delete-orphan")
-    user_report_to = relationship('UserReport', foreign_keys="[UserBlock.blocked_by]", cascade="all, delete-orphan")
     friend_requests_sent = relationship('FriendRequest', foreign_keys="[FriendRequest.requestFrom]", cascade="all, delete-orphan")
     friend_requests_received = relationship('FriendRequest', foreign_keys="[FriendRequest.requestTo]", cascade="all, delete-orphan")
 
