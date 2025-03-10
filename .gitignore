@@ -10,4 +10,3 @@
 # Security files #
 cert.pem
 key.pem
-config.ts
