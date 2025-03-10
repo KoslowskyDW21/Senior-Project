@@ -11,6 +11,7 @@ import {
 import Difficulty from "./Difficulty";
 import config from "../config.js";
 
+
 interface ChallengeProps {
   id: number;
   name: string;

@@ -10,6 +10,7 @@ import uuid
 from werkzeug.utils import secure_filename
 from math import ceil
 from sqlalchemy.orm import aliased
+import re
 
 
 
@@ -82,28 +83,28 @@ def post_recipes():
         user_rating_weight = case(
             (review_alias.user_id == current_user.id, 
               case(
-                  (review_alias.rating >= 3, 3),  
-                   (review_alias.rating < 3, -1), 
+                  (review_alias.rating >= 3, 0),  
+                   (review_alias.rating < 3, 0), 
                   else_=0
               )),
             else_=0
         )
 
         recipe_rating_weight = case(
-            (Recipe.rating >= 3, 1),  
-             (Recipe.rating < 3, -1),  
+            (Recipe.rating >= 3, 0),  
+             (Recipe.rating < 3, 0),  
             else_=0
         )
 
         cuisine_preference_weight = case(
-            (user_cuisine_alias.user_id == current_user.id, 3),  
+            (user_cuisine_alias.user_id == current_user.id, 0),  
             else_=0
         )
 
         completion_weight = case(
-            (user_cuisine_alias.numComplete > 20, 3),  
-             (user_cuisine_alias.numComplete > 5, 2),  
-             (user_cuisine_alias.numComplete > 0, 1),  
+            (user_cuisine_alias.numComplete > 20, 0),  
+             (user_cuisine_alias.numComplete > 5, 0),  
+             (user_cuisine_alias.numComplete > 0, 0),  
             else_=0
         )
 
@@ -412,3 +413,8 @@ def completedAchievement():
     db.session.add(current_user)
     db.session.commit()
     checkLevel()
+
+
+
+
+

@@ -295,17 +295,17 @@ const Challenges: React.FC = () => {
                 My Challenges
               </Typography>
               <Box>
-                <Grid2
-                  container
-                  spacing={2}
-                  columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
-                >
-                  {filteredMyChallenges.map((challenge) => (
-                    <Grid2 key={challenge.id}>
-                      <Challenge {...challenge} />
-                    </Grid2>
-                  ))}
-                </Grid2>
+              <Grid2
+                container
+                spacing={2}
+                columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
+              >
+                {filteredMyChallenges.map((challenge) => (
+                  <Grid2 key={challenge.id}>
+                    <Challenge {...challenge} />
+                  </Grid2>
+                ))}
+              </Grid2>
               </Box>
               {filteredMyChallenges.length > 3 && (
                 <Box textAlign="center" mt={2}>

@@ -132,7 +132,7 @@ const Achievements: React.FC = () => {
               >
                 {achievement.image && (
                   <img
-                    src={achievement.image}
+                    src={`${config.serverUrl}/${achievement.image}`}
                     alt={achievement.title}
                     style={{
                       width: "100%",
@@ -201,7 +201,7 @@ const Achievements: React.FC = () => {
               <Typography id="modal-image">
                 <Box>
                   <img
-                    src={selectedAchievement.image}
+                    src={`${config.serverUrl}/${selectedAchievement.image}`}
                     style={{
                       width: "100%",
                       height: "100%",
