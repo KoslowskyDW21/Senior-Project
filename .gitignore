@@ -6,3 +6,7 @@
 *.appenv
 *.flaskenv
 *.env
+
+# Security files #
+cert.pem
+key.pem
