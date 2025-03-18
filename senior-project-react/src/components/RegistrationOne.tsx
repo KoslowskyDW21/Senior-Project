@@ -1,16 +1,11 @@
 import { useState, useEffect } from "react"; //react
 import { useRegistration } from "./RegistrationContext";
 import axios, { AxiosError } from "axios";
-import { Button, TextField, Container } from "@mui/material"; //matui components
+import { Button, TextField, Container, Box } from "@mui/material"; //matui components
 import { useNavigate } from "react-router-dom"; // React Router for nav
 import { useMsal } from "@azure/msal-react";
 import config from "../config.js";
 
-interface RegisterResponse {
-  message: string;
-}
-
-//NOTE: This will change a bit once we integrate SSO
 const RegisterOne = () => {
   const { data, setData } = useRegistration();
   const { instance } = useMsal();
@@ -111,7 +106,23 @@ const RegisterOne = () => {
 
   return (
     <Container>
-      <h1>Let Them Cook</h1>
+      <Box
+        sx={{
+          width: 300,
+          height: 300,
+          backgroundColor: "lightgray",
+          borderRadius: 1,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <img
+          src={`${config.serverUrl}/static/uploads/2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg`}
+          alt="Image"
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+      </Box>
       <h2>Create Account</h2>
       <TextField
         label="Username*"
@@ -122,7 +133,8 @@ const RegisterOne = () => {
         error={!!errors.username}
         helperText={errors.username}
       />
-      <Button variant="contained" onClick={handleNext}>
+
+      <Button variant="contained" onClick={handleNext} sx={{ mt: 3 }}>
         Next
       </Button>
     </Container>

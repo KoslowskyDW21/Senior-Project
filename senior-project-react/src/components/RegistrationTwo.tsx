@@ -1,12 +1,14 @@
 import { useRegistration } from "./RegistrationContext";
 import {
   Button,
+  Box,
   Checkbox,
   Container,
   FormGroup,
   FormControlLabel,
 } from "@mui/material"; //matui components
 import { useNavigate } from "react-router-dom"; // React Router for nav
+import config from "../config.js";
 
 const RegisterTwo = () => {
   const { data, setData } = useRegistration();
@@ -36,7 +38,24 @@ const RegisterTwo = () => {
 
   return (
     <Container>
-      <h1>Let Them Cook</h1>
+      <Box
+        sx={{
+          width: 150,
+          height: 150,
+          backgroundColor: "lightgray",
+          borderRadius: 1,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          mx: "auto", // Centers the Box horizontally
+        }}
+      >
+        <img
+          src={`${config.serverUrl}/static/uploads/2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg`}
+          alt="Image"
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+      </Box>
       <h2>Dietary Restrictions</h2>
       <FormGroup>
         {Object.entries(data.dietaryRestrictions).map(([key, value]) => (
@@ -54,7 +73,7 @@ const RegisterTwo = () => {
           />
         ))}
       </FormGroup>
-      <Button variant="contained" onClick={handleNext}>
+      <Button variant="contained" onClick={handleNext} sx={{ mt: 3 }}>
         Continue
       </Button>
     </Container>

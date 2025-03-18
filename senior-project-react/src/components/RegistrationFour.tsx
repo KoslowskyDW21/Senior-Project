@@ -5,6 +5,7 @@ import { useRegistration, Floor, Side } from "./RegistrationContext";
 import { useNavigate } from "react-router-dom"; // React Router for nav
 import {
   Avatar,
+  Box,
   Button,
   Container,
   MenuItem,
@@ -15,10 +16,6 @@ import {
 import config from "../config.js";
 
 interface RegistrationResponse {
-  message: string;
-}
-
-interface LoginResponse {
   message: string;
 }
 
@@ -120,6 +117,24 @@ const RegisterThree = () => {
 
   return (
     <Container>
+      <Box
+        sx={{
+          width: 150,
+          height: 150,
+          backgroundColor: "lightgray",
+          borderRadius: 1,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          mx: "auto", // Centers the Box horizontally
+        }}
+      >
+        <img
+          src={`${config.serverUrl}/static/uploads/2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg`}
+          alt="Image"
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+      </Box>
       <h2>Hall Details</h2>
       <InputLabel id="floor-label">Floor</InputLabel>
       <Select
@@ -156,17 +171,18 @@ const RegisterThree = () => {
       </Select>
 
       <h2>Upload a Profile Picture</h2>
-      <div
-        style={{
+      <Box
+        sx={{
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           marginBottom: "16px",
           cursor: "pointer",
-          width: "150px",
-          height: "150px",
+          width: "120px",
+          height: "120px",
           borderRadius: "50%",
           border: "2px solid #ccc",
+          mx: "auto", // Centers the Box horizontally
         }}
         onClick={() =>
           document.getElementById("profile-picture-input")?.click()
@@ -177,7 +193,7 @@ const RegisterThree = () => {
         ) : (
           <FolderIcon sx={{ fontSize: 80 }} />
         )}
-      </div>
+      </Box>
 
       <input
         type="file"
@@ -192,6 +208,7 @@ const RegisterThree = () => {
         variant="contained"
         color="primary"
         fullWidth
+        sx={{ mt: 3 }}
       >
         Next
       </Button>
