@@ -2,27 +2,15 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {
-  Card,
-  CardContent,
-  CardMedia,
   Typography,
-  Grid2,
   Box,
-  Container,
-  Button,
-  MenuItem,
-  Menu,
-  IconButton,
   Avatar,
-  ButtonBase,
   TextField,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import config from "../config.js";
 
 import Header from "./Header";
-import { set } from "date-fns";
 
 interface Friendship {
   friends: [];

@@ -2,22 +2,14 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // React Router for nav
 import {
-  Button,
   ButtonBase,
-  Card,
-  CardHeader,
-  CardMedia,
-  CardActionArea,
   Menu,
   MenuItem,
   IconButton,
   Avatar,
-  TextField,
   Box,
 } from "@mui/material"; //matui components
-import Grid from "@mui/material/Grid2";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import { Star, StarBorder } from "@mui/icons-material";
 import PersonIcon from "@mui/icons-material/Person";
 import config from "../config.js";
 
