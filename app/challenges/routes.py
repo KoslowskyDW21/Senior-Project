@@ -367,6 +367,12 @@ def handle_challenge_invite_response(challenge_id):
         db.session.commit()
         return jsonify({"message": "Challenge invitation accepted!"}), 200
     elif response == 'deny':
+        UserNotifications.query.filter_by(
+            user_id=current_user.id,  # type: ignore
+            challenge_id=challenge_id,
+            notification_type='challenge_reminder'
+        ).delete()
+        db.session.commit()
         return jsonify({"message": "Challenge invitation denied!"}), 200
     else:
         return jsonify({"message": "Invalid response"}), 400
@@ -426,3 +432,37 @@ def get_unviewed_invites(challenge_id):
         invites_data.append({"user_id": invite.user_id})
 
     return jsonify(invites_data), 200
+
+
+@bp.route('/<int:challenge_id>/invite_status', methods=['GET'])
+@login_required
+def get_invite_status(challenge_id):
+    challenge = Challenge.query.get(challenge_id)
+    if not challenge:
+        return jsonify({"message": "Challenge not found"}), 404
+
+    # Check if there is an unviewed invite for the current user
+    invite = UserNotifications.query.filter_by(
+        challenge_id=challenge_id,
+        user_id=current_user.id,  # type: ignore
+        notification_type='challenge_reminder',
+        isRead=False
+    ).first()
+
+    if invite:
+        inviter = User.query.get(challenge.creator)
+        return jsonify({"invited_by": inviter.username if inviter else "Unknown"}), 200
+
+    return jsonify({"invited_by": None}), 200
+
+
+@bp.route('/notifications', methods=['GET'])
+@login_required
+def get_notifications():
+    notifications = UserNotifications.query.filter_by(
+            user_id=current_user.id,  # type: ignore
+            notification_type='challenge_reminder'
+        )
+    return jsonify({
+        "notifications": [notification.to_json() for notification in notifications]
+    }), 200
