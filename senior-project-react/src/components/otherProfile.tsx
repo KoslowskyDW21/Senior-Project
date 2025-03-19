@@ -98,6 +98,7 @@ const OtherProfile: React.FC = () => {
   const [friendRequestsTo, setFriendRequestsTo] = useState<[]>([]);
   const [friendRequestsFrom, setFriendRequestsFrom] = useState<[]>([]);
   const [open, setOpen] = useState(false);
+  const [profileNotFound, setProfileNotFound] = useState(false);
   const handleOpenModal = () => setOpen(true);
   const handleCloseModal = () => setOpen(false);
 
@@ -155,7 +156,11 @@ const OtherProfile: React.FC = () => {
         setProfilePicUrl(`${config.serverUrl}/${profile_picture}`);
       }
     } catch (error) {
-      console.error("Error getting profile:", error);
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        setProfileNotFound(true);
+      } else {
+        console.error("Error getting profile:", error);
+      }
     }
   };
 
@@ -327,6 +332,13 @@ const OtherProfile: React.FC = () => {
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
+
+      {profileNotFound ? (
+      <Typography variant="h4" textAlign="center" marginTop={5}>
+        Profile not found
+      </Typography>
+    ) : (
+      <>
 
       <h1>This is {username}'s profile!</h1>
       <Box
@@ -566,6 +578,8 @@ const OtherProfile: React.FC = () => {
           )}
         </Box>
       </Modal>
+      </>
+    )}
     </>
   );
 };
