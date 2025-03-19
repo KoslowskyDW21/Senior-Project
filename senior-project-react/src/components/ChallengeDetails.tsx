@@ -70,7 +70,7 @@ const ChallengeDetail: React.FC = () => {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedFriends, setSelectedFriends] = useState<number[]>([]);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
-  const [invitedBy, setInvitedBy] = useState<string | null>(null);
+  const [invited, setInvited] = useState(false);
 
   const navigate = useNavigate();
 
@@ -117,9 +117,10 @@ const ChallengeDetail: React.FC = () => {
       const response = await axios.get(
         `${config.serverUrl}/challenges/${id}/invite_status`
       );
-      if (response.data.invited_by) {
-        setInvitedBy(response.data.invited_by);
+      if (response.data) {
+        setInvited(response.data.isInvited);
       }
+      console.log("Invite status:", response.data);
     } catch (error) {
       console.error("Error checking invite status:", error);
     }
@@ -131,7 +132,7 @@ const ChallengeDetail: React.FC = () => {
         response: "accept",
       });
       fetchParticipants();
-      setInvitedBy(null);
+      setInvited(false);
     } catch (error) {
       console.error("Error accepting invite:", error);
     }
@@ -142,7 +143,7 @@ const ChallengeDetail: React.FC = () => {
       await axios.post(`${config.serverUrl}/challenges/${id}/invite_response`, {
         response: "deny",
       });
-      setInvitedBy(null);
+      setInvited(false);
     } catch (error) {
       console.error("Error denying invite:", error);
     }
@@ -299,10 +300,10 @@ const ChallengeDetail: React.FC = () => {
             </Typography>
           </Box>
           <Box textAlign="center" mt={3}>
-            {invitedBy ? (
+            {invited === true ? (
               <>
                 <Typography variant="body1" gutterBottom>
-                  {invitedBy} invited you to join the challenge!
+                  You have been invited to join the challenge!
                 </Typography>
                 <Button
                   variant="contained"

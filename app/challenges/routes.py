@@ -360,22 +360,21 @@ def handle_challenge_invite_response(challenge_id):
     challenge = Challenge.query.get(challenge_id)
     if not challenge:
         return jsonify({"message": "Challenge not found"}), 404
+    
+    UserNotifications.query.filter_by(
+        user_id=current_user.id,  # type: ignore
+        challenge_id=challenge_id,
+        notification_type='challenge_reminder'
+    ).delete()
+    db.session.commit()
 
     if response == 'accept':
         participant = ChallengeParticipant(challenge_id=challenge_id, user_id=current_user.id) #type: ignore
         db.session.add(participant)
         db.session.commit()
         return jsonify({"message": "Challenge invitation accepted!"}), 200
-    elif response == 'deny':
-        UserNotifications.query.filter_by(
-            user_id=current_user.id,  # type: ignore
-            challenge_id=challenge_id,
-            notification_type='challenge_reminder'
-        ).delete()
-        db.session.commit()
-        return jsonify({"message": "Challenge invitation denied!"}), 200
-    else:
-        return jsonify({"message": "Invalid response"}), 400
+
+    return jsonify({"message": "Challenge invitation denied!"}), 200
     
 
 @bp.route('/<int:challenge_id>/kick', methods=['POST'])
@@ -446,14 +445,12 @@ def get_invite_status(challenge_id):
         challenge_id=challenge_id,
         user_id=current_user.id,  # type: ignore
         notification_type='challenge_reminder',
-        isRead=False
     ).first()
 
     if invite:
-        inviter = User.query.get(challenge.creator)
-        return jsonify({"invited_by": inviter.username if inviter else "Unknown"}), 200
+        return jsonify({"isInvited": True}), 200
 
-    return jsonify({"invited_by": None}), 200
+    return jsonify({"isInvited": False}), 200
 
 
 @bp.route('/notifications', methods=['GET'])
