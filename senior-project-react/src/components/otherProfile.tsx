@@ -6,6 +6,7 @@ import {
   Avatar,
   Box,
   Button,
+  Menu,
   Modal,
   Typography,
   LinearProgress,
@@ -14,12 +15,12 @@ import {
   FormControl,
   InputLabel,
   Select,
+  MenuItem,
 } from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import config from "../config.js";
-
-//TODO: If profile doesn't exist, display a message saying so instead of loading an empty profile
 
 interface ProfileResponse {
   lname: string;
@@ -97,10 +98,25 @@ const OtherProfile: React.FC = () => {
   const [friends, setFriends] = useState<[]>([]);
   const [friendRequestsTo, setFriendRequestsTo] = useState<[]>([]);
   const [friendRequestsFrom, setFriendRequestsFrom] = useState<[]>([]);
-  const [open, setOpen] = useState(false);
+  const [openReportModal, setOpenReportModal] = useState(false);
+  const [openBlockModal, setOpenBlockModal] = useState(false);
   const [profileNotFound, setProfileNotFound] = useState(false);
-  const handleOpenModal = () => setOpen(true);
-  const handleCloseModal = () => setOpen(false);
+  const handleOpenReportModal = () => setOpenReportModal(true);
+  const handleCloseReportModal = () => setOpenReportModal(false);
+  const handleOpenBlockModal = () => setOpenBlockModal(true);
+  const handleCloseBlockModal = () => setOpenBlockModal(false);
+
+  const [ellipsisAnchorEl, setEllipsisAnchorEl] = useState<null | HTMLElement>(
+    null
+  );
+
+  const handleClickEllipsis = (event: React.MouseEvent<HTMLElement>) => {
+    setEllipsisAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseEllipsis = () => {
+    setEllipsisAnchorEl(null);
+  };
 
   const [openAchievementModal, setOpenAchievementModal] = useState(false);
   const [selectedAchievement, setSelectedAchievement] =
@@ -334,252 +350,285 @@ const OtherProfile: React.FC = () => {
       </IconButton>
 
       {profileNotFound ? (
-      <Typography variant="h4" textAlign="center" marginTop={5}>
-        Profile not found
-      </Typography>
-    ) : (
-      <>
-
-      <h1>This is {username}'s profile!</h1>
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        gap={2} // Space between avatar and button container
-        marginBottom={2}
-      >
-        {/* Profile Picture */}
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          width={150}
-          height={150}
-          borderRadius="50%"
-          border="2px solid #ccc"
-        >
-          {profilePicUrl ? (
-            <Avatar src={profilePicUrl} sx={{ width: 120, height: 120 }} />
-          ) : (
-            <FolderIcon sx={{ fontSize: 80 }} />
-          )}
-        </Box>
-
-        {/* Button Container (Stacked Vertically) */}
-        <Box display="flex" flexDirection="column" gap={1}>
-          {/* If they sent you a friend request, have option to accept or decline */}
-          {/* If you sent them a friend request, button should say "requested" */}
-          {/* If friends, button should say "remove friend" */}
-          {isFriend ? (
-            <Button
-              variant="contained"
-              color="warning"
-              onClick={() => removeFriend(numericId)}
+        <Typography variant="h4" textAlign="center" marginTop={5}>
+          Profile not found
+        </Typography>
+      ) : (
+        <>
+          <h1>This is {username}'s profile!</h1>
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            gap={2} // Space between avatar and button container
+            marginBottom={2}
+          >
+            {/* Profile Picture */}
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              width={150}
+              height={150}
+              borderRadius="50%"
+              border="2px solid #ccc"
             >
-              Remove Friend
-            </Button>
-          ) : isFriendRequestReceived ? (
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => acceptFriendRequest(numericId)}
+              {profilePicUrl ? (
+                <Avatar src={profilePicUrl} sx={{ width: 120, height: 120 }} />
+              ) : (
+                <FolderIcon sx={{ fontSize: 80 }} />
+              )}
+            </Box>
+
+            {/* Button Container*/}
+            <Box display="flex" flexDirection="row" gap={1}>
+              {/* If they sent you a friend request, have option to accept or decline */}
+              {/* If you sent them a friend request, button should say "requested" */}
+              {/* If friends, button should say "remove friend" */}
+              {isFriend ? (
+                <Button
+                  variant="contained"
+                  color="warning"
+                  onClick={() => removeFriend(numericId)}
+                >
+                  Remove Friend
+                </Button>
+              ) : isFriendRequestReceived ? (
+                <Box display="flex" flexDirection="column" gap={1}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => acceptFriendRequest(numericId)}
+                  >
+                    Accept Friend Request
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={() => declineFriendRequest(numericId)}
+                  >
+                    Decline Friend Request
+                  </Button>
+                </Box>
+              ) : isFriendRequestGiven ? (
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={() => revokeFriendRequest(numericId)}
+                >
+                  Revoke Friend Request
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => sendFriendRequest(numericId)}
+                >
+                  Send Friend Request
+                </Button>
+              )}
+              <Menu
+                anchorEl={ellipsisAnchorEl}
+                open={Boolean(ellipsisAnchorEl)}
+                onClose={handleCloseEllipsis}
               >
-                Accept Friend Request
-              </Button>
+                <MenuItem onClick={handleOpenReportModal} sx={{ color: "red" }}>
+                  Report User
+                </MenuItem>
+                <MenuItem onClick={handleOpenBlockModal} sx={{ color: "red" }}>
+                  Block User
+                </MenuItem>
+              </Menu>
+              <Modal open={openBlockModal} onClose={handleCloseBlockModal}>
+                <Box sx={modalStyle}>
+                  <h2>Are you sure you want to block this user?</h2>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    sx={{ marginRight: 2 }}
+                  >
+                    Block User
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleCloseBlockModal}
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              </Modal>
+              <IconButton onClick={handleClickEllipsis}>
+                <MoreVertIcon />
+              </IconButton>
+            </Box>
+          </Box>
+          <input
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            id="profile-picture-input"
+          />
+
+          <Box
+            sx={{
+              width: "100%",
+              textAlign: "center",
+              marginBottom: 2,
+              marginTop: 5,
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Level {user_level}
+            </Typography>
+            <Tooltip
+              title={`XP: ${xp_points} / ${xpForNextLevel}`}
+              open={hovered}
+              placement="top"
+              onOpen={() => setHovered(true)}
+              onClose={() => setHovered(false)}
+            >
+              <Box sx={{ width: "100%", position: "relative" }} ref={xpBarRef}>
+                <LinearProgress
+                  variant="determinate"
+                  value={progressPercentage}
+                  sx={{
+                    height: 20,
+                    borderRadius: 5,
+                    backgroundColor: "#e0e0e0",
+                  }}
+                  color="success"
+                />
+              </Box>
+            </Tooltip>
+          </Box>
+          <p>Recent Achievements:</p>
+          <div
+            style={{
+              display: "flex",
+              gap: "16px",
+              alignItems: "flex-start",
+              flexWrap: "wrap",
+            }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${Math.min(
+                  3,
+                  achievements.length
+                )}, 1fr)`,
+                gap: "16px",
+                flexGrow: 1,
+                width: "auto", // Ensure the grid only takes up as much space as needed
+              }}
+            >
+              {achievements.slice(0, 3).map((achievement: Achievement) => (
+                <div key={achievement.id}>
+                  <button
+                    onClick={() => handleOpenAchievementModal(achievement)}
+                  >
+                    <img
+                      src={`${config.serverUrl}/${achievement.image}`}
+                      width="100"
+                      alt={achievement.title}
+                    />
+                  </button>
+                  <p>{achievement.title}</p>
+                </div>
+              ))}
+            </div>
+
+            <Button
+              onClick={handleGoToAchievements}
+              sx={{
+                alignSelf: "center",
+                whiteSpace: "nowrap",
+                minWidth: "max-content",
+                marginLeft: "16px",
+              }}
+            >
+              See More
+            </Button>
+          </div>
+
+          <Modal
+            open={openReportModal}
+            onClose={handleCloseReportModal}
+            aria-labelledby="modal-title"
+          >
+            <Box sx={reportModalStyle}>
+              <IconButton
+                onClick={handleCloseReportModal}
+                style={{ position: "absolute", top: 5, right: 5 }}
+              >
+                <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+              </IconButton>
+
+              <Typography id="modal-title" variant="h4" component="h2">
+                Report User
+              </Typography>
+
+              <FormControl
+                variant="filled"
+                sx={{ m: 1, width: 250 }}
+                size="small"
+              >
+                <InputLabel id="reason-label">Reason</InputLabel>
+                <Select labelId="reason-label"></Select>
+              </FormControl>
+              <br />
               <Button
                 variant="contained"
                 color="error"
-                onClick={() => declineFriendRequest(numericId)}
+                onClick={() => {
+                  handleReportUser();
+                  handleCloseModal();
+                }}
               >
-                Decline Friend Request
+                Confirm Report
               </Button>
             </Box>
-          ) : isFriendRequestGiven ? (
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => revokeFriendRequest(numericId)}
-            >
-              Revoke Friend Request
-            </Button>
-          ) : (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => sendFriendRequest(numericId)}
-            >
-              Send Friend Request
-            </Button>
-          )}
+          </Modal>
 
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => {
-              handleOpenModal();
-            }}
+          <Modal
+            open={openAchievementModal}
+            onClose={handleCloseAchievementModal}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
           >
-            Report User
-          </Button>
-        </Box>
-      </Box>
-      <input
-        type="file"
-        accept="image/*"
-        style={{ display: "none" }}
-        id="profile-picture-input"
-      />
-
-      <Box
-        sx={{
-          width: "100%",
-          textAlign: "center",
-          marginBottom: 2,
-          marginTop: 5,
-        }}
-      >
-        <Typography variant="h6" gutterBottom>
-          Level {user_level}
-        </Typography>
-        <Tooltip
-          title={`XP: ${xp_points} / ${xpForNextLevel}`}
-          open={hovered}
-          placement="top"
-          onOpen={() => setHovered(true)}
-          onClose={() => setHovered(false)}
-        >
-          <Box sx={{ width: "100%", position: "relative" }} ref={xpBarRef}>
-            <LinearProgress
-              variant="determinate"
-              value={progressPercentage}
-              sx={{
-                height: 20,
-                borderRadius: 5,
-                backgroundColor: "#e0e0e0",
-              }}
-              color="success"
-            />
-          </Box>
-        </Tooltip>
-      </Box>
-      <p>Recent Achievements:</p>
-      <div
-        style={{
-          display: "flex",
-          gap: "16px",
-          alignItems: "flex-start",
-          flexWrap: "wrap",
-        }}
-      >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${Math.min(
-              3,
-              achievements.length
-            )}, 1fr)`,
-            gap: "16px",
-            flexGrow: 1,
-            width: "auto", // Ensure the grid only takes up as much space as needed
-          }}
-        >
-          {achievements.slice(0, 3).map((achievement: Achievement) => (
-            <div key={achievement.id}>
-              <button onClick={() => handleOpenAchievementModal(achievement)}>
-                <img
-                  src={`${config.serverUrl}/${achievement.image}`}
-                  width="100"
-                  alt={achievement.title}
-                />
-              </button>
-              <p>{achievement.title}</p>
-            </div>
-          ))}
-        </div>
-
-        <Button
-          onClick={handleGoToAchievements}
-          sx={{
-            alignSelf: "center",
-            whiteSpace: "nowrap",
-            minWidth: "max-content",
-            marginLeft: "16px",
-          }}
-        >
-          See More
-        </Button>
-      </div>
-
-      <Modal
-        open={open}
-        onClose={handleCloseModal}
-        aria-labelledby="modal-title"
-      >
-        <Box sx={reportModalStyle}>
-          <IconButton
-            onClick={handleCloseModal}
-            style={{ position: "absolute", top: 5, right: 5 }}
-          >
-            <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
-          </IconButton>
-
-          <Typography id="modal-title" variant="h4" component="h2">
-            Report User
-          </Typography>
-
-          <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
-            <InputLabel id="reason-label">Reason</InputLabel>
-            <Select labelId="reason-label"></Select>
-          </FormControl>
-          <br />
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => {
-              handleReportUser();
-              handleCloseModal();
-            }}
-          >
-            Confirm Report
-          </Button>
-        </Box>
-      </Modal>
-
-      <Modal
-        open={openAchievementModal}
-        onClose={handleCloseAchievementModal}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={modalStyle}>
-          {selectedAchievement && (
-            <>
-              <Typography id="modal-modal-title" variant="h6" component="h2">
-                {selectedAchievement.title}
-              </Typography>
-              <Typography id="modal-image">
-                <Box>
-                  <img
-                    src={selectedAchievement.image}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                    alt={selectedAchievement.title}
-                  />
-                </Box>
-              </Typography>
-              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                {selectedAchievement.description}
-              </Typography>
-            </>
-          )}
-        </Box>
-      </Modal>
-      </>
-    )}
+            <Box sx={modalStyle}>
+              {selectedAchievement && (
+                <>
+                  <Typography
+                    id="modal-modal-title"
+                    variant="h6"
+                    component="h2"
+                  >
+                    {selectedAchievement.title}
+                  </Typography>
+                  <Typography id="modal-image">
+                    <Box>
+                      <img
+                        src={selectedAchievement.image}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                        alt={selectedAchievement.title}
+                      />
+                    </Box>
+                  </Typography>
+                  <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                    {selectedAchievement.description}
+                  </Typography>
+                </>
+              )}
+            </Box>
+          </Modal>
+        </>
+      )}
     </>
   );
 };
