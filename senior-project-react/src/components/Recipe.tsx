@@ -491,14 +491,6 @@ const IndividualRecipe: React.FC = () => {
         <Rating name="recipe-rating" value={Number(rating)} precision={0.5} readOnly />
       </Box>
       </Box>
-
-      <Button
-        onClick={handleGoToCompletedRecipe}
-        variant="contained"
-        color="primary"
-      >
-        Complete Recipe
-      </Button>
       <br />
       <br />
       <FormControl sx={{ width: 400 }}>
@@ -618,6 +610,14 @@ const IndividualRecipe: React.FC = () => {
           />
         ))}
       </Box>
+
+      <Button
+        onClick={handleGoToCompletedRecipe}
+        variant="contained"
+        color="primary"
+      >
+        Complete Recipe
+      </Button>
 
       <h2>Reviews: </h2>
 
