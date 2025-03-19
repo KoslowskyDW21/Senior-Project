@@ -329,16 +329,26 @@ def invite_friends_to_challenge(challenge_id):
         return jsonify({"message": "Invalid request"}), 400
     friend_ids = json.get('friend_ids', [])
     for friend_id in friend_ids:
-        notification = UserNotifications(
-            user_id=friend_id, #type: ignore
-            notification_text=f"You have been invited to join the challenge {challenge.name}.", #type: ignore
-            notification_type='challenge_reminder', #type: ignore
-            challenge_id=challenge_id #type: ignore
-        )
-        db.session.add(notification)
+        # Check if an unread notification of this type already exists for this user and challenge
+        existing_notification = UserNotifications.query.filter_by(
+            user_id=friend_id,
+            challenge_id=challenge_id,
+            notification_type='challenge_reminder',
+            isRead=False
+        ).first()
+
+        if not existing_notification:
+            notification = UserNotifications(
+                user_id=friend_id,  # type: ignore
+                notification_text=f"You have been invited to join the challenge {challenge.name}.",  # type: ignore
+                notification_type='challenge_reminder',  # type: ignore
+                challenge_id=challenge_id  # type: ignore
+            )
+            db.session.add(notification)
     db.session.commit()
 
     return jsonify({"message": "Invitations sent successfully!"}), 200
+
 
 @bp.route('/<int:challenge_id>/invite_response', methods=['POST'])
 @login_required
@@ -393,3 +403,26 @@ def checkLevel():
         current_user.hasLeveled = 1
         db.session.add(current_user)
         db.session.commit()
+
+
+@bp.route('/<int:challenge_id>/unviewed_invites', methods=['GET'])
+@login_required
+def get_unviewed_invites(challenge_id):
+    challenge = Challenge.query.get(challenge_id)
+    if not challenge:
+        return jsonify({"message": "Challenge not found"}), 404
+
+    # Query unviewed invites for the challenge
+    unviewed_invites = UserNotifications.query.filter_by(
+        challenge_id=challenge_id,
+        notification_type='challenge_reminder',
+        isRead=False
+    ).all()
+
+    # Format the response
+    invites_data = []
+
+    for invite in unviewed_invites:
+        invites_data.append({"user_id": invite.user_id})
+
+    return jsonify(invites_data), 200

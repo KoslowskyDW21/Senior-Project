@@ -113,10 +113,31 @@ const ChallengeDetail: React.FC = () => {
 
   const fetchFriends = async () => {
     try {
-      const response = await axios.post(
-        `${config.serverUrl}/friends/get_friends/`
+      const response = await axios.post(`${config.serverUrl}/friends/get_friends/`);
+      const allFriends = response.data.friends;
+  
+      // Fetch participants and unviewed invites
+      const participantsResponse = await axios.get(
+        `${config.serverUrl}/challenges/${id}/participants`
       );
-      setFriends(response.data.friends);
+      const participants = participantsResponse.data.map(
+        (participant: Participant) => participant.user_id
+      );
+  
+      const invitesResponse = await axios.get(
+        `${config.serverUrl}/challenges/${id}/unviewed_invites`
+      );
+      const unviewedInvites = invitesResponse.data.map(
+        (invite: { user_id: number }) => invite.user_id
+      );
+  
+      // Filter friends to exclude participants and those with unviewed invites
+      const filteredFriends = allFriends.filter(
+        (friend: Friend) =>
+          !participants.includes(friend.id) && !unviewedInvites.includes(friend.id)
+      );
+  
+      setFriends(filteredFriends);
     } catch (error) {
       console.error("Error fetching friends:", error);
     }
