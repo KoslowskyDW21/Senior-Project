@@ -20,6 +20,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import ChallengeParticipantsList from "./ChallengeParticipantsList";
 import config from "../config.js";
+import { set } from "date-fns";
 
 interface Challenge {
   id: number;
@@ -71,6 +72,7 @@ const ChallengeDetail: React.FC = () => {
   const [selectedFriends, setSelectedFriends] = useState<number[]>([]);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [invited, setInvited] = useState(false);
+  const [inviteMessage, setInviteMessage] = useState("");
 
   const navigate = useNavigate();
 
@@ -119,6 +121,7 @@ const ChallengeDetail: React.FC = () => {
       );
       if (response.data) {
         setInvited(response.data.isInvited);
+        setInviteMessage(response.data.notificationText);
       }
       console.log("Invite status:", response.data);
     } catch (error) {
@@ -303,7 +306,7 @@ const ChallengeDetail: React.FC = () => {
             {invited === true ? (
               <>
                 <Typography variant="body1" gutterBottom>
-                  You have been invited to join the challenge!
+                  {inviteMessage}
                 </Typography>
                 <Button
                   variant="contained"

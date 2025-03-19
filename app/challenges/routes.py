@@ -340,7 +340,7 @@ def invite_friends_to_challenge(challenge_id):
         if not existing_notification:
             notification = UserNotifications(
                 user_id=friend_id,  # type: ignore
-                notification_text=f"You have been invited to join the challenge {challenge.name}.",  # type: ignore
+                notification_text=f"{current_user.username} invited you join the challenge {challenge.name}.",  # type: ignore
                 notification_type='challenge_reminder',  # type: ignore
                 challenge_id=challenge_id  # type: ignore
             )
@@ -448,7 +448,7 @@ def get_invite_status(challenge_id):
     ).first()
 
     if invite:
-        return jsonify({"isInvited": True}), 200
+        return jsonify({"isInvited": True, "notificationText": invite.notification_text}), 200
 
     return jsonify({"isInvited": False}), 200
 
