@@ -411,7 +411,7 @@ const Profile: React.FC = () => {
               <Typography id="modal-image">
                 <Box>
                   <img
-                    src={selectedAchievement.image}
+                    src={`${config.serverUrl}/${selectedAchievement.image}`}
                     style={{
                       width: "100%",
                       height: "100%",
