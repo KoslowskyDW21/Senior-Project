@@ -67,13 +67,10 @@ const Challenge: React.FC<ChallengeProps> = ({
               height: "auto",
               objectFit: "contain",
               width: "100%",
-              maxHeight: 200, // Limit the image height
+              maxHeight: 200,
             }}
           />
         )}
-        <CardContent>
-          <Difficulty difficulty={difficulty} />
-        </CardContent>
       </CardActionArea>
     </Card>
   );

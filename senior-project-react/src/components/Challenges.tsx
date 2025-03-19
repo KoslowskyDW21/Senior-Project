@@ -40,6 +40,7 @@ const Challenges: React.FC = () => {
   const [challenges, setChallenges] = useState<ChallengeData[]>([]);
   const [myChallenges, setMyChallenges] = useState<ChallengeData[]>([]);
   const [joinedChallenges, setJoinedChallenges] = useState<ChallengeData[]>([]);
+  const [invitedChallenges, setInvitedChallenges] = useState<ChallengeData[]>([]);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [participants, setParticipants] = useState<{ [key: number]: boolean }>(
     {}
@@ -102,6 +103,23 @@ const Challenges: React.FC = () => {
       }
       setParticipants(participantStatus);
       setJoinedChallenges(joinedChallengesList);
+
+      // Fetch challenges with invite notifications
+      const notificationsResponse = await axios.get(
+        `${config.serverUrl}/challenges/notifications`
+      );
+      const inviteNotifications = notificationsResponse.data.notifications.filter(
+        (notification: any) =>
+          notification.notification_type === "challenge_reminder"
+      );
+      const invitedChallengeIds = inviteNotifications.map(
+        (notification: any) => notification.challenge_id
+      );
+      const invitedChallengesList = data.filter((challenge) =>
+        invitedChallengeIds.includes(challenge.id)
+      );
+      setInvitedChallenges(invitedChallengesList);
+
     } catch (error) {
       console.error("Error fetching challenges:", error);
     }
@@ -175,6 +193,10 @@ const Challenges: React.FC = () => {
       (challenge) => !pastChallenges.some((past) => past.id === challenge.id)
     )
     .filter((challenge) =>
+      challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+  const filteredInvitedChallenges = invitedChallenges.filter((challenge) =>
       challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -319,6 +341,27 @@ const Challenges: React.FC = () => {
                   </Button>
                 </Box>
               )}
+            </Box>
+          )}
+
+          {filteredInvitedChallenges.length > 0 && (
+            <Box mt={4}>
+              <Typography variant="h5" gutterBottom>
+                Invited Challenges
+              </Typography>
+              <Box>
+                <Grid2
+                  container
+                  spacing={2}
+                  columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
+                >
+                  {filteredInvitedChallenges.map((challenge) => (
+                    <Grid2 key={challenge.id}>
+                      <Challenge {...challenge} />
+                    </Grid2>
+                  ))}
+                </Grid2>
+              </Box>
             </Box>
           )}
 

@@ -8,10 +8,12 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
+  Alert,
 } from "@mui/material";
 import axios from "axios";
 import { PhotoCamera } from "@mui/icons-material";
 import config from "../config.js";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 interface Recipe {
   id: string;
@@ -23,20 +25,26 @@ interface Recipe {
 }
 
 const CompletedRecipe: React.FC = () => {
-  const [recipe_name, setRecipe_name] = React.useState<String>();
+  const [recipe_name, setRecipe_name] = React.useState<string>();
   const [notes, setNotes] = useState<string>("");
   const [rating, setRating] = useState<number | null>(null);
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [difficulty, setDifficulty] = useState<string | null>(null);
+  const [reviewSubmitted, setReviewSubmitted] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // For error messages
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const handleGoToRecipes = async () => {
-    navigate(`/recipes`);
-  };
-
   const handleGoToReview = async () => {
+    if (!rating && !notes && !image && !difficulty) {
+      setErrorMessage("At least one field must be filled out to submit the review.");
+      return; 
+    }
+
+    // Clear any previous error message if validation passes
+    setErrorMessage(null);
+
     // Create FormData to send the data including the difficulty, rating, notes, and image
     const formData = new FormData();
     formData.append("rating", rating?.toString() || "");
@@ -57,6 +65,7 @@ const CompletedRecipe: React.FC = () => {
         }
       );
       console.log("Data successfully submitted:", response.data);
+      setReviewSubmitted(true); // Set the review as submitted
     } catch (error) {
       console.error("Error submitting review:", error);
     }
@@ -107,75 +116,96 @@ const CompletedRecipe: React.FC = () => {
 
   return (
     <>
-      <h1>Recipe completed: {recipe_name}</h1>
+      <IconButton
+        onClick={() => navigate(-1)}
+        style={{ position: "fixed", top: 30, left: 30 }}
+      >
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+      </IconButton>
 
-      <p>Your Review</p>
-      <div>
-        {imagePreview ? (
-          <img
-            src={imagePreview}
-            alt="Recipe"
-            style={{
-              width: "200px",
-              height: "200px",
-              objectFit: "cover",
-              borderRadius: "8px",
-            }}
-          />
-        ) : (
-          <IconButton component="label" color="primary">
-            <input
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={handleImageChange}
+      {/* Show this content only if review is not submitted */}
+      {!reviewSubmitted ? (
+        <>
+          <h1>Recipe completed: {recipe_name}</h1>
+          <p>Your Review</p>
+
+          {/* Error message for validation */}
+          {errorMessage && (
+            <Alert severity="error" style={{ marginBottom: "20px" }}>
+              {errorMessage}
+            </Alert>
+          )}
+
+          <div>
+            {imagePreview ? (
+              <img
+                src={imagePreview}
+                alt="Recipe"
+                style={{
+                  width: "200px",
+                  height: "200px",
+                  objectFit: "cover",
+                  borderRadius: "8px",
+                }}
+              />
+            ) : (
+              <IconButton component="label" color="primary">
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={handleImageChange}
+                />
+                <PhotoCamera />
+              </IconButton>
+            )}
+          </div>
+
+          <div>
+            <Rating
+              name="recipe-rating"
+              value={rating}
+              onChange={handleRatingChange}
+              precision={0.5}
             />
-            <PhotoCamera />
-          </IconButton>
-        )}
-      </div>
+          </div>
 
-      <div>
-        <Rating
-          name="recipe-rating"
-          value={rating}
-          onChange={handleRatingChange}
-          precision={0.5}
-        />
-      </div>
+          <TextField
+            label="Add Notes"
+            multiline
+            rows={4}
+            value={notes}
+            onChange={handleNotesChange}
+            variant="outlined"
+            fullWidth
+          />
 
-      <TextField
-        label="Add Notes"
-        multiline
-        rows={4}
-        value={notes}
-        onChange={handleNotesChange}
-        variant="outlined"
-        fullWidth
-      />
-
-      <div>
-        <Typography gutterBottom>Difficulty</Typography>
-        <ToggleButtonGroup
-          value={difficulty}
-          exclusive
-          onChange={handleDifficultyChange}
-          aria-labelledby="difficulty-rating"
-        >
-          <ToggleButton value="1">1</ToggleButton>
-          <ToggleButton value="2">2</ToggleButton>
-          <ToggleButton value="3">3</ToggleButton>
-          <ToggleButton value="4">4</ToggleButton>
-          <ToggleButton value="5">5</ToggleButton>
-        </ToggleButtonGroup>
-      </div>
-      <Button onClick={handleGoToReview} variant="contained" color="primary">
-        Submit Review
-      </Button>
-
-      <Button onClick={handleGoToRecipes} variant="contained" color="primary">
-        Recipes
-      </Button>
+          <div>
+            <Typography gutterBottom>Difficulty</Typography>
+            <ToggleButtonGroup
+              value={difficulty}
+              exclusive
+              onChange={handleDifficultyChange}
+              aria-labelledby="difficulty-rating"
+            >
+              <ToggleButton value="1">1</ToggleButton>
+              <ToggleButton value="2">2</ToggleButton>
+              <ToggleButton value="3">3</ToggleButton>
+              <ToggleButton value="4">4</ToggleButton>
+              <ToggleButton value="5">5</ToggleButton>
+            </ToggleButtonGroup>
+          </div>
+          <Button onClick={handleGoToReview} variant="contained" color="primary">
+            Submit Review
+          </Button>
+        </>
+      ) : (
+        <div>
+          <h1>
+            Review Submitted Successfully!
+          </h1>
+        </div>
+      )}
     </>
   );
 };

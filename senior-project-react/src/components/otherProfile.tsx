@@ -476,7 +476,7 @@ const OtherProfile: React.FC = () => {
             <div key={achievement.id}>
               <button onClick={() => handleOpenAchievementModal(achievement)}>
                 <img
-                  src={achievement.image}
+                  src={`${config.serverUrl}/${achievement.image}`}
                   width="100"
                   alt={achievement.title}
                 />
