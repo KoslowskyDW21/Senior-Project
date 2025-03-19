@@ -201,9 +201,9 @@ const CompletedRecipe: React.FC = () => {
         </>
       ) : (
         <div>
-          <Typography variant="h5" color="success.main">
+          <h1>
             Review Submitted Successfully!
-          </Typography>
+          </h1>
         </div>
       )}
     </>
