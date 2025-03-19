@@ -283,10 +283,7 @@ const ChallengeDetail: React.FC = () => {
           </Typography>
           <Box mb={2}>
             <Typography variant="body1">
-              <strong>Creator:</strong> {challenge.creator}
-            </Typography>
-            <Typography variant="body1">
-              <strong>Difficulty:</strong> {challenge.difficulty}
+              <strong>Difficulty:</strong> {challenge.difficulty}/5
             </Typography>
             <Typography variant="body1">
               <strong>Theme:</strong> {challenge.theme}
@@ -330,8 +327,19 @@ const ChallengeDetail: React.FC = () => {
                     variant="contained"
                     color="error"
                     onClick={handleDeleteChallenge}
+                    sx={{ mr: 2 }}
                   >
                     Delete Challenge
+                  </Button>
+                )}
+                {isParticipant && now < startTime && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => setInviteModalOpen(true)}
+                    sx={{ mr: 2 }}
+                  >
+                    Invite Friend
                   </Button>
                 )}
                 {!isCreator && !isParticipant && now < startTime && (
