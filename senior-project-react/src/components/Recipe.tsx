@@ -422,6 +422,8 @@ const IndividualRecipe: React.FC = () => {
         })
         .then((response) => {
           console.log(response.data.message);
+          setMessage("Review successfully reported.")
+          setSnackBarOpen(true);
         })
         .catch((error) => {
           console.log("Could not report review", error);
