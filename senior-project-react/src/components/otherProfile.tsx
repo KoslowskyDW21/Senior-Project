@@ -294,6 +294,19 @@ const OtherProfile: React.FC = () => {
     }
   };
 
+  const blockUser = async (userId: number) => {
+    try {
+      const response = await axios.post(
+        `${config.serverUrl}/profile/block_user/${userId}`,
+        { userId: userId },
+        { withCredentials: true }
+      );
+      console.log("User blocked:", response.data);
+    } catch (error) {
+      console.error("Error blocking user:", error);
+    }
+  };
+
   useEffect(() => {
     getProfileResponse();
     getFriends();
@@ -443,6 +456,7 @@ const OtherProfile: React.FC = () => {
                 <Box sx={modalStyle}>
                   <h2>Are you sure you want to block this user?</h2>
                   <Button
+                    onClick={() => blockUser(numericId)}
                     variant="contained"
                     color="error"
                     sx={{ marginRight: 2 }}
