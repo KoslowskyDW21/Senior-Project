@@ -302,6 +302,7 @@ const OtherProfile: React.FC = () => {
         { withCredentials: true }
       );
       console.log("User blocked:", response.data);
+      removeFriend(userId);
     } catch (error) {
       console.error("Error blocking user:", error);
     }

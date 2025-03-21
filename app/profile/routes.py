@@ -86,6 +86,8 @@ def get_other_profile(id):
 def block_user(id):
     new_block = UserBlock(blocked_user=id, blocked_by=current_user.id)
     db.session.add(new_block)
+    #TODO: If they are in your friends list, remove them from your friends list
+    
     try:
         db.session.commit()
         
