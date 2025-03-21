@@ -101,6 +101,7 @@ const OtherProfile: React.FC = () => {
   const [openReportModal, setOpenReportModal] = useState(false);
   const [openBlockModal, setOpenBlockModal] = useState(false);
   const [profileNotFound, setProfileNotFound] = useState(false);
+  const [isUserBlocked, setIsUserBlocked] = useState(false);
   const handleOpenReportModal = () => setOpenReportModal(true);
   const handleCloseReportModal = () => setOpenReportModal(false);
   const handleOpenBlockModal = () => setOpenBlockModal(true);
@@ -280,6 +281,7 @@ const OtherProfile: React.FC = () => {
     }
   };
 
+  //TODO: Have confirmation modal before removing a friend
   const removeFriend = async (friendId: number) => {
     try {
       const response = await axios.post(
@@ -294,6 +296,20 @@ const OtherProfile: React.FC = () => {
     }
   };
 
+  const is_user_blocked = async (userId: number) => {
+    try {
+      const response = await axios.post(
+        `${config.serverUrl}/profile/is_blocked/${userId}`,
+        { userId: userId },
+        { withCredentials: true }
+      );
+      console.log("Is user blocked?:", response.data.is_blocked);
+      setIsUserBlocked(response.data.is_blocked);
+    } catch (error) {
+      console.error("Error checking if user is blocked:", error);
+    }
+  };
+
   const blockUser = async (userId: number) => {
     try {
       const response = await axios.post(
@@ -303,8 +319,24 @@ const OtherProfile: React.FC = () => {
       );
       console.log("User blocked:", response.data);
       removeFriend(userId);
+      is_user_blocked(numericId);
+      handleCloseBlockModal();
     } catch (error) {
       console.error("Error blocking user:", error);
+    }
+  };
+
+  const unblockUser = async (userId: number) => {
+    try {
+      const response = await axios.post(
+        `${config.serverUrl}/profile/unblock_user/${userId}`,
+        { userId: userId },
+        { withCredentials: true }
+      );
+      console.log("User unblocked:", response.data);
+      is_user_blocked(numericId);
+    } catch (error) {
+      console.error("Error unblocking user:", error);
     }
   };
 
@@ -313,7 +345,21 @@ const OtherProfile: React.FC = () => {
     getFriends();
     getFriendRequestsFrom();
     getFriendRequestsTo();
+    is_user_blocked(numericId);
   }, []);
+
+  //purely for debugging
+  useEffect(() => {
+    is_user_blocked(numericId);
+  }, [numericId]);
+
+  useEffect(() => {
+    console.log("User Blocked State: ", isUserBlocked);
+  }, [isUserBlocked]);
+  //TODO: Delete, debugging
+  const debugBlocked = () => {
+    console.log("userBlocked");
+  };
 
   const handleGoToRecipes = async () => {
     navigate(`/recipes`);
@@ -399,7 +445,15 @@ const OtherProfile: React.FC = () => {
               {/* If they sent you a friend request, have option to accept or decline */}
               {/* If you sent them a friend request, button should say "requested" */}
               {/* If friends, button should say "remove friend" */}
-              {isFriend ? (
+              {isUserBlocked ? (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => unblockUser(numericId)}
+                >
+                  Unblock
+                </Button>
+              ) : isFriend ? (
                 <Button
                   variant="contained"
                   color="warning"
@@ -449,10 +503,15 @@ const OtherProfile: React.FC = () => {
                 <MenuItem onClick={handleOpenReportModal} sx={{ color: "red" }}>
                   Report User
                 </MenuItem>
-                <MenuItem onClick={handleOpenBlockModal} sx={{ color: "red" }}>
-                  Block User
+                <MenuItem
+                  onClick={() => handleOpenBlockModal()}
+                  disabled={isUserBlocked} // Disable if already blocked
+                  sx={{ color: "red" }}
+                >
+                  {isUserBlocked ? "Unblock User" : "Block User"}
                 </MenuItem>
               </Menu>
+
               <Modal open={openBlockModal} onClose={handleCloseBlockModal}>
                 <Box sx={modalStyle}>
                   <h2>Are you sure you want to block this user?</h2>
@@ -598,7 +657,7 @@ const OtherProfile: React.FC = () => {
                 color="error"
                 onClick={() => {
                   handleReportUser();
-                  handleCloseModal();
+                  handleCloseReportModal();
                 }}
               >
                 Confirm Report
