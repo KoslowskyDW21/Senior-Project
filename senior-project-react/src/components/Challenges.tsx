@@ -3,16 +3,12 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {
   Button,
-  Card,
-  CardContent,
-  CardMedia,
   Typography,
-  Grid2,
   Box,
   Container,
-  CardActionArea,
-  CardHeader,
   TextField,
+  useMediaQuery,
+  Grid2,
 } from "@mui/material";
 import Header from "./Header";
 import Challenge from "./Challenge";
@@ -44,6 +40,7 @@ const Challenges: React.FC = () => {
   const [challenges, setChallenges] = useState<ChallengeData[]>([]);
   const [myChallenges, setMyChallenges] = useState<ChallengeData[]>([]);
   const [joinedChallenges, setJoinedChallenges] = useState<ChallengeData[]>([]);
+  const [invitedChallenges, setInvitedChallenges] = useState<ChallengeData[]>([]);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [participants, setParticipants] = useState<{ [key: number]: boolean }>(
     {}
@@ -57,9 +54,12 @@ const Challenges: React.FC = () => {
   const [profile_picture, setProfile_picture] = useState<string>();
   const [pastChallenges, setPastChallenges] = useState<ChallengeData[]>([]);
 
+  const isSmallScreen = useMediaQuery("(max-width:600px)");
+  const isMediumScreen = useMediaQuery("(min-width:600px) and (max-width:900px)");
+
   const getResponse = async () => {
     try {
-      const response = await axios.get("${config.serverUrl}/challenges/");
+      const response = await axios.get(`${config.serverUrl}/challenges/`);
       const data: ChallengeData[] = response.data;
       const now = new Date();
       const validChallenges = data.filter(
@@ -70,7 +70,7 @@ const Challenges: React.FC = () => {
       setChallenges(validChallenges);
 
       const userResponse: UserId = await axios.get(
-        "${config.serverUrl}/challenges/current_user_id"
+        `${config.serverUrl}/challenges/current_user_id`
       );
       const currentUserId = userResponse.data;
       setCurrentUserId(currentUserId);
@@ -103,6 +103,23 @@ const Challenges: React.FC = () => {
       }
       setParticipants(participantStatus);
       setJoinedChallenges(joinedChallengesList);
+
+      // Fetch challenges with invite notifications
+      const notificationsResponse = await axios.get(
+        `${config.serverUrl}/challenges/notifications`
+      );
+      const inviteNotifications = notificationsResponse.data.notifications.filter(
+        (notification: any) =>
+          notification.notification_type === "challenge_reminder"
+      );
+      const invitedChallengeIds = inviteNotifications.map(
+        (notification: any) => notification.challenge_id
+      );
+      const invitedChallengesList = data.filter((challenge) =>
+        invitedChallengeIds.includes(challenge.id)
+      );
+      setInvitedChallenges(invitedChallengesList);
+
     } catch (error) {
       console.error("Error fetching challenges:", error);
     }
@@ -111,33 +128,11 @@ const Challenges: React.FC = () => {
   const fetchPastChallenges = async () => {
     try {
       const response = await axios.get(
-        "${config.serverUrl}/challenges/past_challenges"
+        `${config.serverUrl}/challenges/past_challenges`
       );
       setPastChallenges(response.data);
     } catch (error) {
       console.error("Error fetching past challenges:", error);
-    }
-  };
-
-  const handleJoinChallenge = async (challengeId: number) => {
-    try {
-      await axios.post(`${config.serverUrl}/challenges/${challengeId}/join`);
-      setParticipants((prev) => ({ ...prev, [challengeId]: true }));
-      navigate(`/challenges/${challengeId}`);
-    } catch (error) {
-      console.error("Error joining challenge:", error);
-    }
-  };
-
-  const handleLeaveChallenge = async (challengeId: number) => {
-    try {
-      await axios.post(`${config.serverUrl}/challenges/${challengeId}/leave`);
-      setParticipants((prev) => ({ ...prev, [challengeId]: false }));
-      setJoinedChallenges((prev) =>
-        prev.filter((challenge) => challenge.id !== challengeId)
-      );
-    } catch (error) {
-      console.error("Error leaving challenge:", error);
     }
   };
 
@@ -198,6 +193,10 @@ const Challenges: React.FC = () => {
       (challenge) => !pastChallenges.some((past) => past.id === challenge.id)
     )
     .filter((challenge) =>
+      challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+  const filteredInvitedChallenges = invitedChallenges.filter((challenge) =>
       challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -317,19 +316,18 @@ const Challenges: React.FC = () => {
               <Typography variant="h5" gutterBottom>
                 My Challenges
               </Typography>
-              <Box
-                sx={{
-                  maxHeight: showMoreMyChallenges ? "none" : 300,
-                  overflowY: "auto",
-                }}
+              <Box>
+              <Grid2
+                container
+                spacing={2}
+                columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
               >
-                <Grid2 container spacing={2}>
-                  {filteredMyChallenges.map((challenge) => (
-                    <Grid2 item xs={12} sm={6} md={4} key={challenge.id}>
-                      <Challenge {...challenge} />
-                    </Grid2>
-                  ))}
-                </Grid2>
+                {filteredMyChallenges.map((challenge) => (
+                  <Grid2 key={challenge.id}>
+                    <Challenge {...challenge} />
+                  </Grid2>
+                ))}
+              </Grid2>
               </Box>
               {filteredMyChallenges.length > 3 && (
                 <Box textAlign="center" mt={2}>
@@ -346,20 +344,40 @@ const Challenges: React.FC = () => {
             </Box>
           )}
 
+          {filteredInvitedChallenges.length > 0 && (
+            <Box mt={4}>
+              <Typography variant="h5" gutterBottom>
+                Invited Challenges
+              </Typography>
+              <Box>
+                <Grid2
+                  container
+                  spacing={2}
+                  columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
+                >
+                  {filteredInvitedChallenges.map((challenge) => (
+                    <Grid2 key={challenge.id}>
+                      <Challenge {...challenge} />
+                    </Grid2>
+                  ))}
+                </Grid2>
+              </Box>
+            </Box>
+          )}
+
           {filteredJoinedChallenges.length > 0 && (
             <Box mt={4}>
               <Typography variant="h5" gutterBottom>
                 Joined Challenges
               </Typography>
-              <Box
-                sx={{
-                  maxHeight: showMoreJoinedChallenges ? "none" : 300,
-                  overflowY: "auto",
-                }}
-              >
-                <Grid2 container spacing={2}>
+              <Box>
+                <Grid2
+                  container
+                  spacing={2}
+                  columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
+                >
                   {filteredJoinedChallenges.map((challenge) => (
-                    <Grid2 item xs={12} sm={6} md={4} key={challenge.id}>
+                    <Grid2 key={challenge.id}>
                       <Challenge {...challenge} />
                     </Grid2>
                   ))}
@@ -384,9 +402,13 @@ const Challenges: React.FC = () => {
             <Typography variant="h5" gutterBottom>
               All Challenges
             </Typography>
-            <Grid2 container spacing={2}>
+            <Grid2
+              container
+              spacing={2}
+              columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
+            >
               {filteredAllChallenges.map((challenge) => (
-                <Grid2 item xs={12} sm={6} md={4} key={challenge.id}>
+                <Grid2 key={challenge.id}>
                   <Challenge {...challenge} />
                 </Grid2>
               ))}

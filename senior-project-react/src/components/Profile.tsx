@@ -232,6 +232,7 @@ const Profile: React.FC = () => {
   };
 
   const [confettiVisible, setConfettiVisible] = useState(false);
+  const [confettiOpacity, setConfettiOpacity] = useState(1); 
   const [confettiSource, setConfettiSource] = useState({ x: 0, y: 0 });
 
   const xpBarRef = useRef<HTMLDivElement | null>(null);
@@ -247,6 +248,20 @@ const Profile: React.FC = () => {
       }
 
       setConfettiVisible(true);
+      const fadeOutInterval = setInterval(() => {
+        setConfettiOpacity((prevOpacity) => {
+          if (prevOpacity <= 0) {
+            clearInterval(fadeOutInterval); // Stop fading when opacity reaches 0
+            setConfettiVisible(false); // Hide confetti when opacity is 0
+            handleConfettiComplete();
+            return 0;
+          }
+          return prevOpacity - 0.05; // Gradually decrease opacity
+        });
+      }, 50);
+
+      
+      
 
       setTimeout(() => {
         setConfettiVisible(false);
@@ -263,15 +278,17 @@ const Profile: React.FC = () => {
     <>
       <IconButton
         onClick={() => navigate(-1)}
-        style={{ position: "absolute", top: 30, left: 30 }}
+        style={{ position: "fixed", top: 30, left: 30 }}
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
+      {/* Confetti with fading effect */}
       {confettiVisible && (
         <Confetti
           width={window.innerWidth}
           height={window.innerHeight}
           confettiSource={confettiSource}
+          opacity={confettiOpacity} // Apply the opacity to the confetti
           onConfettiComplete={handleConfettiComplete}
         />
       )}
@@ -373,7 +390,7 @@ const Profile: React.FC = () => {
             <div key={achievement.id}>
               <button onClick={() => handleOpenAchievementModal(achievement)}>
                 <img
-                  src={achievement.image}
+                  src={`${config.serverUrl}/${achievement.image}`}
                   width="100"
                   alt={achievement.title}
                 />
@@ -411,7 +428,7 @@ const Profile: React.FC = () => {
               <Typography id="modal-image">
                 <Box>
                   <img
-                    src={selectedAchievement.image}
+                    src={`${config.serverUrl}/${selectedAchievement.image}`}
                     style={{
                       width: "100%",
                       height: "100%",

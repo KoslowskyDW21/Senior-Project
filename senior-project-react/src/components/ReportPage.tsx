@@ -13,6 +13,9 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  Card,
+  CardContent,
+  CardMedia,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
@@ -36,6 +39,10 @@ interface GroupReport {
 
 interface Review {
   id: number;
+  text: string;
+  image: string;
+  rating: string;
+  difficulty: string;
   num_reports: number;
   username: string;
 }
@@ -48,8 +55,8 @@ interface ReviewReport {
 
 interface Message {
   id: number;
-  group_id: number;
   user_id: number;
+  username: string;
   num_reports: number;
   text: string;
 }
@@ -58,6 +65,71 @@ interface MessageReport {
   user_id: number;
   message_id: number;
   reason: string;
+}
+
+// React component that lets the user see which reviews have been reported
+function Review({ review }) {
+  return (
+    <Card
+      sx={{
+        marginBottom: 2,
+        border: "1px solid #ccc",
+        borderRadius: 2,
+        boxShadow: 2,
+      }}
+    >
+      <CardContent>
+        <Typography variant="h6">{review.username}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {review.text}
+        </Typography>
+        {review.difficulty !== "0" && (
+          <Typography variant="body2" color="text.secondary">
+            Difficulty: {review.difficulty}
+          </Typography>
+        )}
+        {review.rating !== "0" && (
+          <Typography variant="body2" color="text.secondary">
+            Rating: {review.rating}
+          </Typography>
+        )}
+        {review.image != "NULL" && (
+          <CardMedia
+            component="img"
+            height="200"
+            image={`${config.serverUrl}/${review.image}`}
+            alt="Review Image"
+            sx={{
+              objectFit: "contain",
+              maxWidth: "100%",
+              marginBottom: 2,
+            }}
+          />
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+// React component that lets the user see which messages have been reported
+function Message({ message }) {
+  return (
+    <Card
+      sx={{
+        marginBottom: 2,
+        border: "1px solid #ccc",
+        borderRadius: 2,
+        boxShadow: 2,
+      }}    
+    >
+      <CardContent>
+        <Typography variant="h6">{message.username}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {message.text}
+        </Typography>
+      </CardContent>
+    </Card>
+  )
 }
 
 const modalStyle = {
@@ -186,6 +258,17 @@ export default function ReportPage() {
       });
   }
 
+  async function setGroupReportsZero() {
+    await axios
+      .post(`${config.serverUrl}/groups/${group!.id}/set_group_reports_zero`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not set reports to zero", error);
+      });
+  }
+
   async function deleteGroup() {
     await axios
       .delete(`${config.serverUrl}/groups/${group!.id}/delete`)
@@ -200,6 +283,17 @@ export default function ReportPage() {
   function handleRemoveGroup() {
     deleteGroupReports();
     deleteGroup();
+
+    const newGroups = groups.filter(item => item !== group);
+    setGroups(newGroups);
+  }
+
+  function handleRemoveGroupReports() {
+    deleteGroupReports();
+    setGroupReportsZero();
+
+    const newGroups = groups.filter(item => item !== group);
+    setGroups(newGroups);
   }
 
   async function deleteReviewReports() {
@@ -210,6 +304,17 @@ export default function ReportPage() {
       })
       .catch((error) => {
         console.error("Could not delete reports ", error);
+      });
+  }
+
+  async function setReviewReportsZero() {   
+    await axios
+      .post(`${config.serverUrl}/recipes/${review!.id}/set_reports_zero`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not set reports to zero", error);
       });
   }
 
@@ -227,6 +332,17 @@ export default function ReportPage() {
   function handleRemoveReview() {
     deleteReviewReports();
     deleteReview();
+
+    const newReviews = reviews.filter(item => item !== review);
+    setReviews(newReviews);
+  }
+
+  function handleRemoveReviewReports() {
+    deleteReviewReports();
+    setReviewReportsZero();
+
+    const newReviews = reviews.filter(item => item !== review);
+    setReviews(newReviews);
   }
 
   async function deleteMessageReports() {
@@ -237,6 +353,17 @@ export default function ReportPage() {
       })
       .catch((error) => {
         console.error("Could not delete reports", error);
+      });
+  }
+
+  async function setMessageReportsZero() {
+    await axios
+      .post(`${config.serverUrl}/groups/${message!.id}/set_message_reports_zero`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not set reports to zero", error);
       });
   }
 
@@ -254,8 +381,20 @@ export default function ReportPage() {
   function handleRemoveMessage(){
     deleteMessageReports();
     deleteMessage();
+
+    const newMessages = messages.filter(item => item !== message);
+    setMessages(newMessages);
   }
 
+  function handleRemoveMessageReports() {
+    deleteMessageReports();
+    setMessageReportsZero();
+
+    const newMessages = messages.filter(item => item !== message);
+    setMessages(newMessages);
+  }
+
+  // Checks to see if the current user is an admin and loads the reported groups, reviews, and messages
   React.useEffect(() => {
     isAdmin();
     loadGroups();
@@ -277,6 +416,7 @@ export default function ReportPage() {
 
         <h2>Reported Groups</h2>
 
+        {/* List each group that has been reported in a table */}
         {groups.length > 0 ? (
           <table>
             <thead>
@@ -316,6 +456,7 @@ export default function ReportPage() {
 
         <h2>Reported Reviews</h2>
 
+        {/* List each review that has been reported in a table */}
         {reviews.length > 0 ? (
           <table>
             <thead>
@@ -353,6 +494,7 @@ export default function ReportPage() {
 
         <h2>Reported Messages</h2>
 
+        {/* List each message that has been reported in a table */}
         {messages.length > 0 ? (
           <table>
             <thead>
@@ -386,6 +528,8 @@ export default function ReportPage() {
           <p>No Messages Reported</p>
         )}
 
+        {/* Modal for seeing reports associated with specific group - gives the option
+            to remove the group or dismiss the reports */}
         <Modal
           open={openGroup}
           onClose={handleCloseGroupModal}
@@ -430,9 +574,22 @@ export default function ReportPage() {
             >
               Remove Group
             </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                handleRemoveGroupReports();
+                handleCloseGroupModal();
+              }}
+            >
+              Dismiss Report(s)
+            </Button>
           </Box>
         </Modal>
-
+        
+        {/* Modal for seeing reports associated with specific review - gives the option
+            to remove the review or dismiss the reports - also displays the review to 
+            the user */}
         <Modal
           open={openReview}
           onClose={handleCloseReviewModal}
@@ -445,6 +602,8 @@ export default function ReportPage() {
             >
               <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
             </IconButton>
+            
+            <Review review={review} />
 
             <Typography id="modal-title" variant="h4" component="h2">
               {`Review submitted by ${
@@ -479,9 +638,22 @@ export default function ReportPage() {
             >
               Remove Review
             </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                handleRemoveReviewReports();
+                handleCloseReviewModal();
+              }}
+            >
+              Dismiss Report(s)
+            </Button>
           </Box>
         </Modal>
 
+        {/* Modal for seeing reports associated with specific message - gives the option
+            to remove the message or dismiss the reports - also displays the message to 
+            the user */}
         <Modal
           open={openMessage}
           onClose={handleCloseMessageModal}
@@ -494,6 +666,8 @@ export default function ReportPage() {
             >
               <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
             </IconButton>
+            
+            <Message message={message} />
 
             <Typography id="modal-title" variant="h4" component="h2">
               {`Message written by ${
@@ -527,6 +701,16 @@ export default function ReportPage() {
               }}
             >
               Remove Message
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                handleRemoveMessageReports();
+                handleCloseMessageModal();
+              }}
+            >
+              Dismiss Report(s)
             </Button>
           </Box>
         </Modal>

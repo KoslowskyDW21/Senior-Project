@@ -1,6 +1,6 @@
 from __future__ import annotations
 import math
-from sqlalchemy import case, func, or_
+from sqlalchemy import case, func, or_, and_
 from flask import request, jsonify, render_template, redirect, url_for, abort, flash, current_app
 from flask_login import current_user, login_required
 from app.recipes import bp
@@ -10,6 +10,7 @@ import uuid
 from werkzeug.utils import secure_filename
 from math import ceil
 from sqlalchemy.orm import aliased
+import re
 
 
 
@@ -23,6 +24,20 @@ def post_recipes():
     
     recipes_query = Recipe.query
 
+    if dietary_restrictions:
+        for i, restriction in enumerate(dietary_restrictions):
+            # Create a new alias for each restriction
+            dietary_restriction_alias = aliased(RecipeDietaryRestriction)
+            print(f"Filtering by restriction {i+1}: {restriction}")
+            
+            recipes_query = recipes_query.join(
+                dietary_restriction_alias, dietary_restriction_alias.recipe_id == Recipe.id
+            ).filter(
+                ~dietary_restriction_alias.dietary_restrictions.ilike(f"%{restriction}%")
+            )
+    else:
+        print("No dietary restrictions provided")
+    
     if search_query != "":
         name_filter_start = Recipe.recipe_name.ilike(f"{search_query}%")
         name_filter_contains = Recipe.recipe_name.ilike(f"%{search_query}%")
@@ -50,24 +65,79 @@ def post_recipes():
             category_filter.desc(),
             cuisine_filter.desc()
         )
-
-    if dietary_restrictions:
-        for i, restriction in enumerate(dietary_restrictions):
-            # Create a new alias for each restriction
-            dietary_restriction_alias = aliased(RecipeDietaryRestriction)
-            print(f"Filtering by restriction {i+1}: {restriction}")
-            
-            recipes_query = recipes_query.join(
-                dietary_restriction_alias, dietary_restriction_alias.recipe_id == Recipe.id
-            ).filter(
-                ~dietary_restriction_alias.dietary_restrictions.ilike(f"%{restriction}%")
-            )
+    
     else:
-        print("No dietary restrictions provided")
+        print("No search query provided")
 
-    recipes_paginated = recipes_query.paginate(page=page, per_page=per_page, error_out=False)
+        review_alias = aliased(Review)
+        recipes_query = recipes_query.outerjoin(review_alias, review_alias.recipe_id == Recipe.id)
+
+        user_cuisine_alias = aliased(UserCuisinePreference)
+        recipes_query = recipes_query.join(
+            RecipeCuisine, RecipeCuisine.recipe_id == Recipe.id
+        ).join(
+            user_cuisine_alias, user_cuisine_alias.cuisine_id == RecipeCuisine.cuisine_id
+        )
+
+
+        user_rating_weight = case(
+            (review_alias.user_id == current_user.id, 
+              case(
+                  (review_alias.rating >= 3, 0),  
+                   (review_alias.rating < 3, 0), 
+                  else_=0
+              )),
+            else_=0
+        )
+
+        recipe_rating_weight = case(
+            (Recipe.rating >= 3, 0),  
+             (Recipe.rating < 3, 0),  
+            else_=0
+        )
+
+        cuisine_preference_weight = case(
+            (user_cuisine_alias.user_id == current_user.id, 0),  
+            else_=0
+        )
+
+        completion_weight = case(
+            (user_cuisine_alias.numComplete > 20, 0),  
+             (user_cuisine_alias.numComplete > 5, 0),  
+             (user_cuisine_alias.numComplete > 0, 0),  
+            else_=0
+        )
+
+
+        total_weight = (user_rating_weight +
+                        recipe_rating_weight +
+                        cuisine_preference_weight +
+                        completion_weight)
+
+
+        recipes_query = recipes_query.add_columns(
+            Recipe.id, 
+            Recipe.recipe_name, 
+            func.sum(total_weight).label('total_weight') 
+        )
+
+
+        recipes_query = recipes_query.group_by(Recipe.id)
+        recipes_query = recipes_query.order_by(
+            func.sum(total_weight).desc(),
+            Recipe.recipe_name.asc()
+        )
+
+
+    # Paginate the results
+    recipes_paginated = recipes_query.paginate(page=page, per_page=per_page, error_out=False)  # type: ignore
     total_pages = ceil(recipes_paginated.total / per_page)  # type: ignore
-    recipes = [recipe.to_json() for recipe in recipes_paginated.items]
+
+    # Convert the results to JSON using `to_json()`
+    if not search_query:
+        recipes = [recipe[0].to_json() for recipe in recipes_paginated.items]
+    else:
+        recipes = [recipe.to_json() for recipe in recipes_paginated.items]
 
     return jsonify({
         'recipes': recipes,
@@ -232,6 +302,16 @@ def delete_reports(review_id: int):
     db.session.commit()
     return jsonify({"message": "Reports successfully deleted"}), 200
 
+@bp.route("/<int:review_id>/set_reports_zero", methods=["POST"])
+@login_required
+def set_reports_zero(review_id: int):
+    review: Review = Review.query.get(review_id) # type: ignore
+    print(review)
+    review.num_reports = 0
+
+    db.session.commit()
+    return jsonify({"message": "Dismissed all reports"}), 200
+
 @bp.route("/<int:review_id>/delete", methods=["DELETE"])
 @login_required
 def delete_review(review_id):
@@ -333,3 +413,8 @@ def completedAchievement():
     db.session.add(current_user)
     db.session.commit()
     checkLevel()
+
+
+
+
+

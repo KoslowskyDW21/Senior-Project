@@ -157,6 +157,7 @@ const IndividualRecipe: React.FC = () => {
   const [message, setMessage] = React.useState("");
   const [lid, setLid] = React.useState("");
   const [recipeLists, setRecipeLists] = React.useState<RecipeList[]>([]);
+  const [recipeListsIn, setRecipeListsIn] = React.useState<RecipeList[]>([]);
   const [steps, setSteps] = React.useState<Step[]>([]);
   const [snackbarOpen, setSnackBarOpen] = React.useState(false);
   const { id } = useParams<{ id: string }>();
@@ -345,6 +346,16 @@ const IndividualRecipe: React.FC = () => {
     }
   };
 
+  const getRecipeListsIn = async () => {
+    if (id == undefined) {
+      return;
+    }
+    const response = await axios.get(`${config.serverUrl}/recipe_lists/all_containing/${id}`);
+    const rli: RecipeList[] = response.data;
+    console.log(rli);
+    setRecipeListsIn(rli);
+  }
+
   const getRecipeName = async () => {
     try {
       const response = await axios.get(`${config.serverUrl}/recipes/${id}`);
@@ -411,6 +422,8 @@ const IndividualRecipe: React.FC = () => {
         })
         .then((response) => {
           console.log(response.data.message);
+          setMessage("Review successfully reported.")
+          setSnackBarOpen(true);
         })
         .catch((error) => {
           console.log("Could not report review", error);
@@ -427,13 +440,14 @@ const IndividualRecipe: React.FC = () => {
     getSteps();
     getIngredients();
     getReviews();
+    getRecipeListsIn();
   }, []);
 
   return (
     <>
       <IconButton
         onClick={() => navigate(-1)}
-        style={{ position: "absolute", top: 30, left: 30 }}
+        style={{ position: "fixed", top: 30, left: 30 }}
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
@@ -479,14 +493,6 @@ const IndividualRecipe: React.FC = () => {
         <Rating name="recipe-rating" value={Number(rating)} precision={0.5} readOnly />
       </Box>
       </Box>
-
-      <Button
-        onClick={handleGoToCompletedRecipe}
-        variant="contained"
-        color="primary"
-      >
-        Complete Recipe
-      </Button>
       <br />
       <br />
       <FormControl sx={{ width: 400 }}>
@@ -514,9 +520,9 @@ const IndividualRecipe: React.FC = () => {
           value={lid}
           onChange={handleRemoveRecipeFromList}
         >
-          {recipeLists.map(
+          {recipeListsIn.map(
             (
-              recipeList // TODO: remove lists the recipe is not in
+              recipeList
             ) => (
               <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
             )
@@ -606,6 +612,14 @@ const IndividualRecipe: React.FC = () => {
           />
         ))}
       </Box>
+
+      <Button
+        onClick={handleGoToCompletedRecipe}
+        variant="contained"
+        color="primary"
+      >
+        Complete Recipe
+      </Button>
 
       <h2>Reviews: </h2>
 

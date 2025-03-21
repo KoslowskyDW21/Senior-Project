@@ -2,7 +2,7 @@ from __future__ import annotations
 from flask import jsonify, redirect, url_for, current_app, request
 from flask_login import current_user, login_required
 from app.profile import bp
-from app.models import User, UserAchievement, Achievement, UserReport, db
+from app.models import User, UserAchievement, Achievement, UserReport, db, UserBlock
 from werkzeug.utils import secure_filename
 import uuid
 import os
@@ -81,6 +81,21 @@ def get_other_profile(id):
 
     return jsonify(user_info), 200
 
+
+@bp.route('/block_user/<int:id>', methods=['POST'])
+def block_user(id):
+    new_block = UserBlock(blocked_user=id, blocked_by=current_user.id)
+    db.session.add(new_block)
+    try:
+        db.session.commit()
+        
+    except IntegrityError as e:
+        db.session.rollback()
+        print(f"Error blocking user {id}: {e}")
+        return jsonify({"error": "Error blocking user"}), 500
+    return {"message": "User blocked successfully"}, 200
+
+
 @bp.route('/current_user/', methods=['POST'])
 def post_current_user():
     return jsonify(
@@ -111,7 +126,8 @@ def allowed_file(filename):
 def change_profile_pic():
     profile_picture = request.files.get('profile_picture')
     user = db.session.query(User).filter(User.id == current_user.id).first()
-    
+    if not user:
+        return jsonify({"message": "User not found"}), 404
     if profile_picture and allowed_file(profile_picture.filename):
         upload_folder = current_app.config['UPLOAD_FOLDER']
         os.makedirs(upload_folder, exist_ok=True)
@@ -124,7 +140,10 @@ def change_profile_pic():
                 except OSError as e:
                     current_app.logger.error(f"Error deleting old profile picture: {e}")
 
-        filename = f"{uuid.uuid4().hex}_{secure_filename(profile_picture.filename)}"
+        insecureFilename = profile_picture.filename
+        if not insecureFilename:
+            return jsonify({"message": "Invalid file name"}), 400
+        filename = f"{uuid.uuid4().hex}_{secure_filename(insecureFilename)}"
         file_path = os.path.join(upload_folder, filename)
         profile_picture.save(file_path)
 
@@ -144,6 +163,8 @@ def change_profile_pic():
 @bp.route('/remove_profile_pic/', methods=['POST'])
 def remove_profile_pic():
     user = db.session.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        return jsonify({"message": "User not found"}), 404
     if user.profile_picture:
             old_file_path = os.path.join(current_app.root_path, user.profile_picture)
             if os.path.exists(old_file_path):

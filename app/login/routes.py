@@ -1,9 +1,9 @@
 from __future__ import annotations
+from sqlite3 import IntegrityError
 from app.login import bp
 from app.models import *
-from app.login.loginforms import RegisterForm, LoginForm
 from better_profanity import profanity
-from datetime import datetime
+from datetime import datetime, UTC
 import html
 from flask import request, jsonify, render_template, redirect, url_for, flash, current_app
 from flask_login import login_required
@@ -30,8 +30,6 @@ def get_signing_keys():
     response = requests.get(JWKS_URL)
     print("Response: ", response) # TODO: remove debugging
     keys = response.json()['keys']
-    # Debugging - Print out all keys for inspection
-    # print("Available Keys:", keys)
     return {key['kid']: RSAAlgorithm.from_jwk(key) for key in keys}
 
 SIGNING_KEYS = get_signing_keys()
@@ -48,9 +46,11 @@ def validate_jwt(token):
             print("KID not found in signing keys. Refreshing keys...")
             SIGNING_KEYS = get_signing_keys()
 
+        key = SIGNING_KEYS.get(kid, None)
+
         decoded_token = jwt.decode(
             token,
-            key=SIGNING_KEYS.get(kid, None),
+            key=key,
             algorithms=['RS256'],
             audience=CLIENT_ID,
             issuer=f"https://login.microsoftonline.com/{TENANT_ID}/v2.0"
@@ -85,7 +85,7 @@ def add_dietary_restrictions(restriction_ids, user_id):
     UserDietaryRestriction.query.filter_by(user_id=user_id).delete()
 
     for restriction_id in restriction_ids:
-        new_restriction = UserDietaryRestriction(user_id=user_id, restriction_id=restriction_id)
+        new_restriction = UserDietaryRestriction(user_id=user_id, restriction_id=restriction_id) #type: ignore
         db.session.add(new_restriction)
 
     try:
@@ -99,7 +99,7 @@ def add_cuisines(cuisine_ids, user_id):
     UserCuisinePreference.query.filter_by(user_id=user_id).delete()
 
     for cuisine_id in cuisine_ids:
-        new_cuisine = UserCuisinePreference(user_id=user_id, cuisine_id=cuisine_id, numComplete = 0, userSelected = 1)
+        new_cuisine = UserCuisinePreference(user_id=user_id, cuisine_id=cuisine_id, numComplete = 0, userSelected = 1) #type: ignore
         db.session.add(new_cuisine)
 
     try:
@@ -125,6 +125,8 @@ def api_register():
     dietary_restrictions = request.form.get('dietaryRestrictions')
     cuisines = request.form.get('cuisines')
 
+    if not lname:
+        return jsonify({"message": "Last name is required"}), 400
     lname = lname.replace(",", "")
 
     user = User.query.filter_by(email_address=email).first()
@@ -144,19 +146,19 @@ def api_register():
         colonial_side = None
 
     new_user = User(
-        fname=fname,
-        lname=lname,
-        username=username,
-        email_address=email,  
-        colonial_floor=colonial_floor,
-        colonial_side=colonial_side,
-        xp_points=0,
-        is_admin=False,
-        num_recipes_completed=0,
-        date_created=datetime.utcnow(),
-        num_reports=0,
-        user_level=1,
-        last_logged_in=datetime.utcnow()
+        fname=fname, #type: ignore
+        lname=lname, #type: ignore
+        username=username, #type: ignore
+        email_address=email, #type: ignore
+        colonial_floor=colonial_floor, #type: ignore
+        colonial_side=colonial_side, #type: ignore
+        xp_points=0, #type: ignore
+        is_admin=False, #type: ignore
+        num_recipes_completed=0, #type: ignore
+        date_created=datetime.now(UTC), #type: ignore
+        num_reports=0, #type: ignore
+        user_level=1, #type: ignore
+        last_logged_in=datetime.now(UTC) #type: ignore
     )
     db.session.add(new_user)
     db.session.commit()  # Commit so `new_user.id` is generated
@@ -164,8 +166,10 @@ def api_register():
     if profile_picture and allowed_file(profile_picture.filename):
         upload_folder = current_app.config['UPLOAD_FOLDER']
         os.makedirs(upload_folder, exist_ok=True)
-
-        filename = f"{uuid.uuid4().hex}_{secure_filename(profile_picture.filename)}"
+        filename = profile_picture.filename
+        if not filename:
+            return jsonify({"message": "No file part"}), 400
+        filename = f"{uuid.uuid4().hex}_{secure_filename(filename)}"
         file_path = os.path.join(upload_folder, filename)
         profile_picture.save(file_path)
 
@@ -222,8 +226,11 @@ def api_register():
 
 @bp.route('/validate_user', methods=['POST']) 
 def validate_user():
-    username = request.json.get('username')
-    email = request.json.get('email')
+    json = request.json
+    if not json:
+        return jsonify({"valid": False, "message": "Invalid request"}), 400
+    username = json.get('username')
+    email = json.get('email')
 
 
     if username and User.query.filter_by(username=username).first():
@@ -238,9 +245,9 @@ def validate_user():
         print("invalid 3")
         return jsonify({"valid": False, "message": "Username cannot contain inappropriate language"}), 400
     
-    if check_username_direct(username, bad_words) is False:
-        print("invalid 4")
-        return jsonify({"valid": False, "message": "Username cannot contain inappropriate language"}), 400
+    # if check_username_direct(username, bad_words) is False:
+    #     print("invalid 4")
+    #     return jsonify({"valid": False, "message": "Username cannot contain inappropriate language"}), 400
 
     if " " in username:
         print("invalid 5")
@@ -254,6 +261,9 @@ def validate_user():
 @bp.route('/login/sso', methods=['POST'])
 def sso_login():
     data = request.json
+    if not data:
+        print("invalid request no data ")
+        return jsonify({"message": "Invalid request. No data"}), 400
     token = data.get("token")
 
     decoded = jwt.decode(token, options={"verify_signature": False})
@@ -263,10 +273,12 @@ def sso_login():
 
 
     if not token:
+        print("invalid request no token")
         return jsonify({"message": "No token provided"}), 400
 
     decoded_token = validate_jwt(token)
     if not decoded_token:
+        print("invalid token")
         return jsonify({"message": "Invalid token"}), 401
 
     email = decoded_token.get("preferred_username")  #email
@@ -276,10 +288,12 @@ def sso_login():
         fname = name[1].replace(",", "")
         lname = name[0]
     else:
+        print("no name found")
         return jsonify({"message": "Invalid token: No name found"}), 401
 
 
     if not email:
+        print("no email found")
         return jsonify({"message": "Invalid token: No email found"}), 401
 
     user = User.query.filter_by(email_address=email).first()
@@ -287,6 +301,7 @@ def sso_login():
    # print(user)
 
     if user:
+        print("logging in")
         login_user(user, remember=True)
         return jsonify({"message": "Login successful", "user_id": user.id}), 200
     else:
@@ -296,6 +311,8 @@ def sso_login():
 @bp.route('/get_initial_data', methods=['POST'])
 def get_initial_data():
     data = request.json
+    if not data:
+        return jsonify({"message": "Invalid request"}), 400
     token = data.get("token")
 
     if not token:

@@ -42,6 +42,7 @@ interface Message {
   user_id: number;
   text: string;
   username: string;
+  num_reports: number;
 }
 
 const GroupMessages: React.FC = () => {
@@ -152,16 +153,20 @@ const GroupMessages: React.FC = () => {
                     primary={message.username}
                     secondary={message.text}
                   />
-                  <Button
-                    variant="contained"
-                    color="error"
-                    onClick={() => {
-                      setMessageId(message.id);
-                      handleOpenModal();
-                    }}
-                  >
-                    Report
-                  </Button>
+                  {message.num_reports !== -1 ?
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => {
+                        setMessageId(message.id);
+                        handleOpenModal();
+                      }}
+                    >
+                      Report
+                    </Button>
+                    :
+                    <></>
+                  }
                 </ListItem>
                 <Divider variant="inset" component="li" />
               </React.Fragment>

@@ -130,22 +130,26 @@ const GroupMembersList: React.FC<GroupMembersListProps> = ({
             {isTrustedOrCreator(currentUserId) &&
               member.user_id !== groupCreatorId && (
                 <>
-                  {trustedMemberIds.includes(member.user_id) ? (
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      onClick={() => handleRevokeTrusted(member.user_id)}
-                    >
-                      Revoke Trusted
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleSetTrusted(member.user_id)}
-                    >
-                      Set Trusted
-                    </Button>
+                  {currentUserId === groupCreatorId && (
+                    <>
+                      {trustedMemberIds.includes(member.user_id) ? (
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={() => handleRevokeTrusted(member.user_id)}
+                        >
+                          Revoke Trusted
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleSetTrusted(member.user_id)}
+                        >
+                          Set Trusted
+                        </Button>
+                      )}
+                    </>
                   )}
                   {currentUserId === groupCreatorId ||
                   !trustedMemberIds.includes(member.user_id) ? (

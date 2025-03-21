@@ -3,21 +3,18 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
-  CardContent,
   CardMedia,
   Typography,
-  Grid2,
   Box,
   Container,
   Button,
-  MenuItem,
-  Menu,
   IconButton,
   Avatar,
-  ButtonBase,
   TextField,
   CardActionArea,
   CardHeader,
+  useMediaQuery,
+  Grid2
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
@@ -51,19 +48,40 @@ const Group: React.FC<UserGroup> = ({ id, name, description, image }) => {
   return (
     <Card
       variant="outlined"
-      sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        transition: "all 0.3s ease",
+        "&:hover": {
+          borderColor: "#1976d2",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+        },
+      }}
     >
       <CardActionArea onClick={handleGoToGroup}>
         <CardHeader
-          title={name}
-          subheader={description}
+          title={
+            <Typography
+              variant="h5"
+              sx={{ fontSize: "clamp(1rem, 1.5vw, 2rem)", textAlign: "center" }}
+            >
+              {name}
+            </Typography>
+          }
+          subheader={
+            <Typography
+              variant="body2"
+              sx={{ fontSize: "clamp(0.8rem, 1.2vw, 1.5rem)", textAlign: "center" }}
+            >
+              {description}
+            </Typography>
+          }
           sx={{
             justifyContent: "center",
             alignItems: "center",
-            textAlign: "center",
             flexShrink: 0,
             width: "90%",
-            fontSize: "clamp(1rem, 4vw, 2rem)",
           }}
         />
         {image && (
@@ -71,9 +89,10 @@ const Group: React.FC<UserGroup> = ({ id, name, description, image }) => {
             component="img"
             image={`${config.serverUrl}/${image}`}
             sx={{
-              height: 200,
-              objectFit: "cover",
+              height: "auto",
+              objectFit: "contain",
               width: "100%",
+              maxHeight: { xs: 150, sm: 200 }, // Adjust max height for different screen sizes
             }}
           />
         )}
@@ -93,6 +112,9 @@ const Groups: React.FC = () => {
   const [profile_picture, setProfile_picture] = useState<string>();
   const [friends, setFriends] = useState<[]>([]);
   const [searchLabel, setSearchLabel] = useState<string>("");
+
+  const isSmallScreen = useMediaQuery("(max-width:600px)");
+  const isMediumScreen = useMediaQuery("(min-width:600px) and (max-width:900px)");
 
   const fetchGroups = async () => {
     try {
@@ -349,7 +371,11 @@ const Groups: React.FC = () => {
               <Typography variant="h5" gutterBottom>
                 My Groups
               </Typography>
-              <Grid2 container spacing={2}>
+              <Grid2
+                container
+                spacing={2}
+                columns={12}
+              >
                 {myGroups.map((group) => (
                   <Grid2 item xs={12} sm={6} md={4} key={group.id}>
                     <Group {...group} />
@@ -382,7 +408,11 @@ const Groups: React.FC = () => {
             <Typography variant="h5" gutterBottom>
               All Groups
             </Typography>
-            <Grid2 container spacing={2}>
+            <Grid2
+              container
+              spacing={2}
+              columns={12}
+            >
               {filteredGroups.map((group) => (
                 <Grid2 item xs={12} sm={6} md={4} key={group.id}>
                   <Group {...group} />

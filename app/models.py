@@ -48,10 +48,12 @@ class User(UserMixin, db.Model):
     banned_from_groups = relationship('GroupBannedMember', cascade="all, delete-orphan")
     messages = relationship('Message', cascade="all, delete-orphan")
     challenge_participants = db.relationship('ChallengeParticipant', backref='user', cascade="all, delete-orphan")
-    recipes = db.relationship('RecipeList', backref='user', cascade="all, delete-orphan")
-    shopping_lists = db.relationship('ShoppingList', backref='user', cascade="all, delete-orphan")
-    user_achievements = db.relationship('UserAchievement', backref='user', cascade="all, delete-orphan")
-    user_notifications = db.relationship('UserNotifications', backref='user', cascade="all, delete-orphan")
+    recipes = relationship('RecipeList', backref='user', cascade="all, delete-orphan")
+    shopping_lists = relationship('ShoppingList', backref='user', cascade="all, delete-orphan")
+    user_achievements = relationship('UserAchievement', backref='user', cascade="all, delete-orphan")
+    user_notifications = relationship('UserNotifications', backref='user', cascade="all, delete-orphan")
+    friend_requests_sent = relationship('FriendRequest', foreign_keys="[FriendRequest.requestFrom]", cascade="all, delete-orphan")
+    friend_requests_received = relationship('FriendRequest', foreign_keys="[FriendRequest.requestTo]", cascade="all, delete-orphan")
 
     @property
     def password(self):

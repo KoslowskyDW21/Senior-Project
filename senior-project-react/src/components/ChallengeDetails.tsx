@@ -20,6 +20,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import ChallengeParticipantsList from "./ChallengeParticipantsList";
 import config from "../config.js";
+import { set } from "date-fns";
 
 interface Challenge {
   id: number;
@@ -70,6 +71,8 @@ const ChallengeDetail: React.FC = () => {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedFriends, setSelectedFriends] = useState<number[]>([]);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [invited, setInvited] = useState(false);
+  const [inviteMessage, setInviteMessage] = useState("");
 
   const navigate = useNavigate();
 
@@ -111,12 +114,71 @@ const ChallengeDetail: React.FC = () => {
     }
   };
 
+  const checkInviteStatus = async () => {
+    try {
+      const response = await axios.get(
+        `${config.serverUrl}/challenges/${id}/invite_status`
+      );
+      if (response.data) {
+        setInvited(response.data.isInvited);
+        setInviteMessage(response.data.notificationText);
+      }
+      console.log("Invite status:", response.data);
+    } catch (error) {
+      console.error("Error checking invite status:", error);
+    }
+  };
+
+  const handleAcceptInvite = async () => {
+    try {
+      await axios.post(`${config.serverUrl}/challenges/${id}/invite_response`, {
+        response: "accept",
+      });
+      fetchParticipants();
+      setInvited(false);
+    } catch (error) {
+      console.error("Error accepting invite:", error);
+    }
+  };
+
+  const handleDenyInvite = async () => {
+    try {
+      await axios.post(`${config.serverUrl}/challenges/${id}/invite_response`, {
+        response: "deny",
+      });
+      setInvited(false);
+    } catch (error) {
+      console.error("Error denying invite:", error);
+    }
+  };
+
   const fetchFriends = async () => {
     try {
-      const response = await axios.post(
-        `${config.serverUrl}/friends/get_friends/`
+      const response = await axios.post(`${config.serverUrl}/friends/get_friends/`);
+      const allFriends = response.data.friends;
+  
+      // Fetch participants and unviewed invites
+      const participantsResponse = await axios.get(
+        `${config.serverUrl}/challenges/${id}/participants`
       );
-      setFriends(response.data.friends);
+      const participants = participantsResponse.data.map(
+        (participant: Participant) => participant.user_id
+      );
+  
+      const invitesResponse = await axios.get(
+        `${config.serverUrl}/challenges/${id}/unviewed_invites`
+      );
+      const unviewedInvites = invitesResponse.data.map(
+        (invite: { user_id: number }) => invite.user_id
+      );
+  
+      // Filter friends to exclude participants and those with unviewed invites
+      const filteredFriends = allFriends.filter(
+        (friend: Friend) =>
+          !participants.includes(friend.id) && !unviewedInvites.includes(friend.id)
+      );
+  
+      setFriends(filteredFriends);
     } catch (error) {
       console.error("Error fetching friends:", error);
     }
@@ -181,6 +243,7 @@ const ChallengeDetail: React.FC = () => {
     fetchParticipants();
     fetchCurrentUser();
     fetchFriends();
+    checkInviteStatus();
   }, [id]);
 
   if (!challenge || !currentUser) {
@@ -224,10 +287,7 @@ const ChallengeDetail: React.FC = () => {
           </Typography>
           <Box mb={2}>
             <Typography variant="body1">
-              <strong>Creator:</strong> {challenge.creator}
-            </Typography>
-            <Typography variant="body1">
-              <strong>Difficulty:</strong> {challenge.difficulty}
+              <strong>Difficulty:</strong> {challenge.difficulty}/5
             </Typography>
             <Typography variant="body1">
               <strong>Theme:</strong> {challenge.theme}
@@ -243,41 +303,68 @@ const ChallengeDetail: React.FC = () => {
             </Typography>
           </Box>
           <Box textAlign="center" mt={3}>
-            {(isCreator || currentUser.is_admin) && (
-              <Button
-                variant="contained"
-                color="error"
-                onClick={handleDeleteChallenge}
-              >
-                Delete Challenge
-              </Button>
-            )}
-            {!isCreator && !isParticipant && now < startTime && (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleJoinChallenge}
-              >
-                Join Challenge
-              </Button>
-            )}
-            {!isCreator && isParticipant && now < startTime && (
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleLeaveChallenge}
-              >
-                Leave Challenge
-              </Button>
-            )}
-            {isParticipant && now < startTime && (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => setInviteModalOpen(true)}
-              >
-                Invite Friends
-              </Button>
+            {invited === true ? (
+              <>
+                <Typography variant="body1" gutterBottom>
+                  {inviteMessage}
+                </Typography>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleAcceptInvite}
+                  sx={{ mr: 2 }}
+                >
+                  Accept
+                </Button>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={handleDenyInvite}
+                >
+                  Deny
+                </Button>
+              </>
+            ) : (
+              <>
+                {(isCreator || currentUser.is_admin) && (
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={handleDeleteChallenge}
+                    sx={{ mr: 2 }}
+                  >
+                    Delete Challenge
+                  </Button>
+                )}
+                {isParticipant && now < startTime && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => setInviteModalOpen(true)}
+                    sx={{ mr: 2 }}
+                  >
+                    Invite Friend
+                  </Button>
+                )}
+                {!isCreator && !isParticipant && now < startTime && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleJoinChallenge}
+                  >
+                    Join Challenge
+                  </Button>
+                )}
+                {!isCreator && isParticipant && now < startTime && (
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={handleLeaveChallenge}
+                  >
+                    Leave Challenge
+                  </Button>
+                )}
+              </>
             )}
           </Box>
           <Box mt={4}>

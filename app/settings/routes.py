@@ -169,6 +169,8 @@ def read_notification():
     id = data['id']
     print(id)
     notification = UserNotifications.query.filter_by(id=id).first()
+    if not notification:
+        return jsonify({"message": "Notification not found"}), 404
     print(notification.notification_text)
     notification.isRead = 1
     try:
@@ -176,7 +178,7 @@ def read_notification():
         if notification.notification_type == 'group_message' and notification.group_id:
             return jsonify({"message": "Notification read successfully", "redirect_url": f"/groups/{notification.group_id}/invite_response"}), 200
         elif notification.notification_type == 'challenge_reminder' and notification.challenge_id:
-            return jsonify({"message": "Notification read successfully", "redirect_url": f"/challenges/{notification.challenge_id}/invite_response"}), 200
+            return jsonify({"message": "Notification read successfully", "redirect_url": f"/challenges/{notification.challenge_id}"}), 200
             
         return jsonify({"message": "Notification read successfully"}), 200
     except Exception as e:
