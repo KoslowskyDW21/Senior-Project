@@ -6,7 +6,16 @@ import mkcert from 'vite-plugin-mkcert'
 export default defineConfig({
   plugins: [react(), mkcert() ],
   server: {
-    https: true
+    port: 443,
+    hmr: false,
+    https: true,
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:5000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      }
+    }
   }
   // server: {
   //   https: {

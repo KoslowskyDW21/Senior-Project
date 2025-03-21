@@ -15,7 +15,7 @@ export const msalConfig = {
     auth: {
         clientId: "b181c352-bccf-4a49-a49e-407ab2f03ce3",
         authority: "https://login.microsoftonline.com/83918960-2218-4cd3-81fe-302a8e771da9",
-        redirectUri: "https://letthemcook.gcc.edu/",
+        redirectUri: "https://letthemcook.gcc.edu:443/",
     },
     cache: {
         cacheLocation: "localStorage", // This configures where your cache will be stored

@@ -18,14 +18,17 @@ from jwt.algorithms import RSAAlgorithm
 import redis
 import time
 
-TENANT_ID = os.getenv("TENANT_ID")
-CLIENT_ID = os.getenv("CLIENT_ID")
+#TENANT_ID = os.getenv("TENANT_ID")
+TENANT_ID = "83918960-2218-4cd3-81fe-302a8e771da9"
+#CLIENT_ID = os.getenv("CLIENT_ID")
+CLIENT_ID = "b181c352-bccf-4a49-a49e-407ab2f03ce3"
 JWKS_URL = f"https://login.microsoftonline.com/{TENANT_ID}/discovery/v2.0/keys"
 
 profanity.load_censor_words()
 
 def get_signing_keys():
     response = requests.get(JWKS_URL)
+    print("Response: ", response) # TODO: remove debugging
     keys = response.json()['keys']
     # Debugging - Print out all keys for inspection
     # print("Available Keys:", keys)
@@ -110,7 +113,7 @@ def escape_html(input_text):
     return html.escape(input_text)
 
 # route for registering through API
-@bp.route('/api/register/', methods=['POST'])
+@bp.route('/register', methods=['POST'])
 def api_register():
     username = request.form.get('username')
     email = request.form.get('email')
@@ -217,7 +220,7 @@ def api_register():
 #             return False
 #     return True
 
-@bp.route('/api/validate_user/', methods=['POST']) 
+@bp.route('/validate_user', methods=['POST']) 
 def validate_user():
     username = request.json.get('username')
     email = request.json.get('email')
@@ -248,7 +251,7 @@ def validate_user():
 
 
 
-@bp.route('/api/login/sso/', methods=['POST'])
+@bp.route('/login/sso', methods=['POST'])
 def sso_login():
     data = request.json
     token = data.get("token")
@@ -290,7 +293,7 @@ def sso_login():
         print("User not registered")
         return jsonify({"message": "User not registered"}), 200
 
-@bp.route('/api/get_initial_data/', methods=['POST'])
+@bp.route('/get_initial_data', methods=['POST'])
 def get_initial_data():
     data = request.json
     token = data.get("token")
@@ -321,7 +324,7 @@ def get_initial_data():
     }), 200
 
 
-@bp.route('/api/logout/', methods=['POST'])
+@bp.route('/logout', methods=['POST'])
 def logout():
     # Get the token from the Authorization header
     token = request.headers.get('Authorization')
@@ -368,7 +371,7 @@ def logout():
     logout_user()
     return jsonify({"message": "Successfully logged out"}), 200
 
-@bp.route('/current_user/', methods=['GET'])
+@bp.route('/current_user', methods=['GET'])
 def get_current_user():
     return current_user.to_json(), 200
 

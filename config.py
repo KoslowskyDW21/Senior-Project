@@ -1,4 +1,5 @@
 import os
+import app_secrets
 from dotenv import load_dotenv
 
 # record the absolute path of the directory in which this file is located
@@ -9,8 +10,10 @@ load_dotenv(os.path.join(basedir, '.appenv'))
 # define a config singleton to be used in configuring apps
 class Config:
     # for each config option find it in an environment variable
-    SECRET_KEY = os.environ.get('SECRET_KEY')
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    # SECRET_KEY = os.environ.get('SECRET_KEY')
+    SECRET_KEY = app_secrets.SECRET_KEY
+    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://username:intellectuallychallengeddata@10.18.101.49:3306/sys"
+    #SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') # old version
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # during debugging disable caching (remove for final version)
     SEND_FILE_MAX_AGE_DEFAULT = 0

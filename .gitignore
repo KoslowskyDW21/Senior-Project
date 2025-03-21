@@ -10,3 +10,4 @@
 # Security files #
 cert.pem
 key.pem
+app_secrets.py

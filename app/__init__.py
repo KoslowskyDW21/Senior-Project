@@ -1,5 +1,4 @@
 from flask import Flask, request, current_app
-from flask_session import Session
 from config import Config
 from flask_login import LoginManager
 from flask_cors import CORS  
@@ -15,11 +14,12 @@ login_manager = LoginManager()
 def create_app(config=Config):
     app = Flask(__name__)
     app.config.from_object(config)
+    print(config.SQLALCHEMY_DATABASE_URI) # TODO: remove debugging
     app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
     #max file size for uploads
     app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # 2 MB limit
     # Allow requests only from React frontend
-    CORS(app, origins="https://letthemcook.gcc.edu/", supports_credentials=True) 
+    CORS(app, origins="https://letthemcook.gcc.edu:443/", supports_credentials=True) 
     login_manager.init_app(app)
     login_manager.login_view = 'login.get_login' # type: ignore
     login_manager.session_protection = "strong"

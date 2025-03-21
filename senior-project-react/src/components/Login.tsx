@@ -64,7 +64,7 @@ const Login = () => {
 
       // Send ID Token to backend
       const response = await axios.post(
-        `${config.serverUrl}/api/login/sso/`,
+        `${config.serverUrl}/login/sso`,
         { token: idToken },
         { withCredentials: true }
       );
