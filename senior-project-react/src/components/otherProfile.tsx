@@ -100,10 +100,14 @@ const OtherProfile: React.FC = () => {
   const [friendRequestsFrom, setFriendRequestsFrom] = useState<[]>([]);
   const [openReportModal, setOpenReportModal] = useState(false);
   const [openBlockModal, setOpenBlockModal] = useState(false);
+  const [openRemoveFriendModal, setOpenRemoveFriendModal] = useState(false);
   const [profileNotFound, setProfileNotFound] = useState(false);
   const [isUserBlocked, setIsUserBlocked] = useState(false);
+  const [isCurrentUserBlocked, setIsCurrentUserBlocked] = useState(false);
   const handleOpenReportModal = () => setOpenReportModal(true);
   const handleCloseReportModal = () => setOpenReportModal(false);
+  const handleOpenRemoveFriendModal = () => setOpenRemoveFriendModal(true);
+  const handleCloseRemoveFriendModal = () => setOpenRemoveFriendModal(false);
   const handleOpenBlockModal = () => setOpenBlockModal(true);
   const handleCloseBlockModal = () => setOpenBlockModal(false);
 
@@ -281,7 +285,6 @@ const OtherProfile: React.FC = () => {
     }
   };
 
-  //TODO: Have confirmation modal before removing a friend
   const removeFriend = async (friendId: number) => {
     try {
       const response = await axios.post(
@@ -290,6 +293,7 @@ const OtherProfile: React.FC = () => {
         { withCredentials: true }
       );
       console.log("Friend removed:", response.data);
+      handleCloseRemoveFriendModal();
       getFriends();
     } catch (error) {
       console.error("Error removingFriend:", error);
@@ -307,6 +311,23 @@ const OtherProfile: React.FC = () => {
       setIsUserBlocked(response.data.is_blocked);
     } catch (error) {
       console.error("Error checking if user is blocked:", error);
+    }
+  };
+
+  const is_current_user_blocked = async (userId: number) => {
+    try {
+      const response = await axios.post(
+        `${config.serverUrl}/profile/is_current_user_blocked/${userId}`,
+        { userId: userId },
+        { withCredentials: true }
+      );
+      console.log(
+        "Is current user blocked?:",
+        response.data.is_current_user_blocked
+      );
+      setIsCurrentUserBlocked(response.data.is_current_user_blocked);
+    } catch (error) {
+      console.error("Error checking if current user is blocked:", error);
     }
   };
 
@@ -346,24 +367,8 @@ const OtherProfile: React.FC = () => {
     getFriendRequestsFrom();
     getFriendRequestsTo();
     is_user_blocked(numericId);
+    is_current_user_blocked(numericId);
   }, []);
-
-  //purely for debugging
-  useEffect(() => {
-    is_user_blocked(numericId);
-  }, [numericId]);
-
-  useEffect(() => {
-    console.log("User Blocked State: ", isUserBlocked);
-  }, [isUserBlocked]);
-  //TODO: Delete, debugging
-  const debugBlocked = () => {
-    console.log("userBlocked");
-  };
-
-  const handleGoToRecipes = async () => {
-    navigate(`/recipes`);
-  };
 
   const handleGoToAchievements = () => {
     navigate("/achievements");
@@ -457,7 +462,7 @@ const OtherProfile: React.FC = () => {
                 <Button
                   variant="contained"
                   color="warning"
-                  onClick={() => removeFriend(numericId)}
+                  onClick={() => handleOpenRemoveFriendModal()}
                 >
                   Remove Friend
                 </Button>
@@ -491,6 +496,7 @@ const OtherProfile: React.FC = () => {
                   variant="contained"
                   color="primary"
                   onClick={() => sendFriendRequest(numericId)}
+                  disabled={isCurrentUserBlocked} // Disable if current user is blocked by this user
                 >
                   Send Friend Request
                 </Button>
@@ -527,6 +533,30 @@ const OtherProfile: React.FC = () => {
                     variant="contained"
                     color="primary"
                     onClick={handleCloseBlockModal}
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              </Modal>
+
+              <Modal
+                open={openRemoveFriendModal}
+                onClose={handleCloseRemoveFriendModal}
+              >
+                <Box sx={modalStyle}>
+                  <h2>Are you sure you want to unfriend this user?</h2>
+                  <Button
+                    onClick={() => removeFriend(numericId)}
+                    variant="contained"
+                    color="error"
+                    sx={{ marginRight: 2 }}
+                  >
+                    Unfriend
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleCloseRemoveFriendModal}
                   >
                     Cancel
                   </Button>

@@ -115,7 +115,11 @@ def unblock_user(id):
 def is_blocked(id):
     is_blocked = db.session.query(UserBlock).filter(and_(UserBlock.blocked_user==id, UserBlock.blocked_by==current_user.id)).first()
     return jsonify({"is_blocked": bool(is_blocked)}), 200
-    
+
+@bp.route('/is_current_user_blocked/<int:id>', methods=['POST'])
+def is_current_user_blocked(id):
+    is_current_user_blocked = db.session.query(UserBlock).filter(and_(UserBlock.blocked_user==current_user.id, UserBlock.blocked_by==id)).first()
+    return jsonify({"is_current_user_blocked": bool(is_current_user_blocked)}), 200
 
 @bp.route('/current_user/', methods=['POST'])
 def post_current_user():
