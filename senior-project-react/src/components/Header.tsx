@@ -9,6 +9,7 @@ import {
   Avatar,
   Box,
 } from "@mui/material"; //matui components
+import handleLogout from "./Settings";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import PersonIcon from "@mui/icons-material/Person";
 import config from "../config.js";
@@ -325,6 +326,9 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem>
             <MenuItem onClick={handleGoToShoppingList}>Shopping List</MenuItem>
             <MenuItem onClick={handleGoToAchievements}>Achievements</MenuItem>
+            <MenuItem onClick={handleLogout} sx={{ color: "red" }}>
+              Log Out
+            </MenuItem>
             {admin ? (
               <MenuItem onClick={handleGoToAdmin}>Admin Controls</MenuItem>
             ) : (
