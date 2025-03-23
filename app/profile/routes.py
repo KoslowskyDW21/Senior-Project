@@ -2,7 +2,8 @@ from __future__ import annotations
 from flask import jsonify, redirect, url_for, current_app, request
 from flask_login import current_user, login_required
 from app.profile import bp
-from app.models import User, UserAchievement, Achievement, UserReport, db
+from app.models import User, UserAchievement, Achievement, UserReport, db, UserBlock
+from sqlalchemy import or_, and_
 from werkzeug.utils import secure_filename
 import uuid
 import os
@@ -81,6 +82,45 @@ def get_other_profile(id):
 
     return jsonify(user_info), 200
 
+
+@bp.route('/block_user/<int:id>', methods=['POST'])
+def block_user(id):
+    new_block = UserBlock(blocked_user=id, blocked_by=current_user.id)
+    db.session.add(new_block)
+    
+    try:
+        db.session.commit()
+        
+    except IntegrityError as e:
+        db.session.rollback()
+        print(f"Error blocking user {id}: {e}")
+        return jsonify({"error": "Error blocking user"}), 500
+    return {"message": "User blocked successfully"}, 200
+
+@bp.route('/unblock_user/<int:id>', methods=['POST'])
+def unblock_user(id):
+    db.session.query(UserBlock).filter(and_(UserBlock.blocked_user==id, UserBlock.blocked_by==current_user.id)).delete()
+    
+    try:
+        db.session.commit()
+        
+    except IntegrityError as e:
+        db.session.rollback()
+        print(f"Error unblocking user {id}: {e}")
+        return jsonify({"error": "Error unblocking user"}), 500
+    return {"message": "User unblocked successfully"}, 200
+
+#This tells the backend whether or not the profile being displayed is a blocked user
+@bp.route('/is_blocked/<int:id>', methods=['POST'])
+def is_blocked(id):
+    is_blocked = db.session.query(UserBlock).filter(and_(UserBlock.blocked_user==id, UserBlock.blocked_by==current_user.id)).first()
+    return jsonify({"is_blocked": bool(is_blocked)}), 200
+
+@bp.route('/is_current_user_blocked/<int:id>', methods=['POST'])
+def is_current_user_blocked(id):
+    is_current_user_blocked = db.session.query(UserBlock).filter(and_(UserBlock.blocked_user==current_user.id, UserBlock.blocked_by==id)).first()
+    return jsonify({"is_current_user_blocked": bool(is_current_user_blocked)}), 200
+
 @bp.route('/current_user/', methods=['POST'])
 def post_current_user():
     return jsonify(
@@ -93,7 +133,6 @@ def get_profile_pic():
     user = db.session.query(User).filter(User.id == current_user.id).first()
     if user and user.profile_picture:
         print(user.profile_picture)
-        #TODO: Fix this
         profile_picture = f'{user.profile_picture}'
         print(jsonify({"profile_picture": profile_picture}))
         return jsonify({

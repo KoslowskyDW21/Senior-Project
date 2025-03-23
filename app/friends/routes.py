@@ -190,7 +190,6 @@ def delete_notification(requestFrom, requestTo):
 
 @bp.route('/send_request/<int:id>', methods=['POST'])
 def send_request(id):
-    #TODO: verify notification functionality
     new_request = FriendRequest(requestFrom=current_user.id, requestTo=id) #type: ignore
     request_notification(current_user.id, id, notificationType.send_request)
     db.session.add(new_request)

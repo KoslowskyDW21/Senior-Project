@@ -229,7 +229,7 @@ const RecipeLists: React.FC = () => {
         <Card variant="outlined">
           <CardActionArea onClick={handleGoToRecipe}>
             <CardHeader title={name} subheader={Difficulty({ difficulty })} />
-            <CardMedia component="img" image={image} />
+            <CardMedia component="img" image={`${config.serverUrl}/${image}`} />
           </CardActionArea>
         </Card>
         <Button
