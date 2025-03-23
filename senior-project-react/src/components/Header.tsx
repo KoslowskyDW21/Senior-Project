@@ -9,10 +9,10 @@ import {
   Avatar,
   Box,
 } from "@mui/material"; //matui components
-import handleLogout from "./Settings";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import PersonIcon from "@mui/icons-material/Person";
 import config from "../config.js";
+import { useMsal } from "@azure/msal-react";
 
 interface HeaderProps {
   title: string;
@@ -166,6 +166,35 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         console.error("Unable to check if user is admin", error);
       });
   }
+
+  const { instance } = useMsal();
+
+  const handleLogout = async () => {
+    try {
+      // Get access token
+      const response = await instance.acquireTokenSilent({
+        scopes: ["User.Read"],
+      });
+
+      const token = response.idToken;
+
+      await axios.post(
+        `${config.serverUrl}/api/logout/`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      instance.logoutRedirect().then(() => {
+        navigate("/");
+      });
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
 
   React.useEffect(() => {
     getCurrentUser();
