@@ -110,7 +110,7 @@ def escape_html(input_text):
     return html.escape(input_text)
 
 # route for registering through API
-@bp.route('/api/register/', methods=['POST'])
+@bp.route('/register/', methods=['POST'])
 def api_register():
     username = request.form.get('username')
     email = request.form.get('email')
@@ -221,7 +221,7 @@ def api_register():
 #             return False
 #     return True
 
-@bp.route('/api/validate_user/', methods=['POST']) 
+@bp.route('/validate_user/', methods=['POST']) 
 def validate_user():
     json = request.json
     if not json:
@@ -255,7 +255,7 @@ def validate_user():
 
 
 
-@bp.route('/api/login/sso/', methods=['POST'])
+@bp.route('/login/sso/', methods=['POST'])
 def sso_login():
     data = request.json
     if not data:
@@ -305,7 +305,7 @@ def sso_login():
         print("User not registered")
         return jsonify({"message": "User not registered"}), 200
 
-@bp.route('/api/get_initial_data/', methods=['POST'])
+@bp.route('/get_initial_data/', methods=['POST'])
 def get_initial_data():
     data = request.json
     if not data:
@@ -338,7 +338,7 @@ def get_initial_data():
     }), 200
 
 
-@bp.route('/api/logout/', methods=['POST'])
+@bp.route('/logout/', methods=['POST'])
 def logout():
     # Get the token from the Authorization header
     token = request.headers.get('Authorization')

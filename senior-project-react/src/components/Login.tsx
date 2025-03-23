@@ -64,7 +64,7 @@ const Login = () => {
 
       // Send ID Token to backend
       const response = await axios.post(
-        `${config.serverUrl}/api/login/sso/`,
+        `${config.serverUrl}/login/sso/`,
         { token: idToken },
         { withCredentials: true }
       );
@@ -91,8 +91,8 @@ const Login = () => {
       .then((response) => {
         if (response) {
           const idToken = response.idToken;
-          localStorage.setItem("idToken", idToken); 
-          handleSSOLogin(); 
+          localStorage.setItem("idToken", idToken);
+          handleSSOLogin();
         }
       })
       .catch((error) => {
