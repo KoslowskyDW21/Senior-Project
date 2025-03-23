@@ -179,7 +179,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
       const token = response.idToken;
 
       await axios.post(
-        `${config.serverUrl}/api/logout/`,
+        `${config.serverUrl}/logout/`,
         {},
         {
           headers: {

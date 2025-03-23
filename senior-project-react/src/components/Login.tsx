@@ -91,8 +91,8 @@ const Login = () => {
       .then((response) => {
         if (response) {
           const idToken = response.idToken;
-          localStorage.setItem("idToken", idToken); 
-          handleSSOLogin(); 
+          localStorage.setItem("idToken", idToken);
+          handleSSOLogin();
         }
       })
       .catch((error) => {
