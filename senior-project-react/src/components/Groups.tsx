@@ -104,6 +104,7 @@ const Group: React.FC<UserGroup> = ({ id, name, description, image }) => {
 const Groups: React.FC = () => {
   const [groups, setGroups] = useState<UserGroup[]>([]);
   const [myGroups, setMyGroups] = useState<UserGroup[]>([]);
+  const [invitedGroups, setInvitedGroups] = useState<UserGroup[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
@@ -140,6 +141,17 @@ const Groups: React.FC = () => {
     }
   };
 
+  const fetchInvitedGroups = async () => {
+    try {
+      const response = await axios.get(`${config.serverUrl}/groups/notifications`);
+      const invitedGroupsList = response.data.invited_groups
+      setInvitedGroups(invitedGroupsList);
+      console.log("Invited Groups:", invitedGroupsList);
+    } catch (error) {
+      console.error("Error fetching invited groups:", error);
+    }
+  };
+
   const loadMoreGroups = useCallback(() => {
     if (loading || !hasMore) return;
     setLoading(true);
@@ -152,6 +164,7 @@ const Groups: React.FC = () => {
   useEffect(() => {
     loadMoreGroups();
     fetchMyGroups();
+    fetchInvitedGroups();
     getCurrentUser();
     getFriends();
   }, []);
@@ -377,6 +390,21 @@ const Groups: React.FC = () => {
                 columns={12}
               >
                 {myGroups.map((group) => (
+                  <Grid2 item xs={12} sm={6} md={4} key={group.id}>
+                    <Group {...group} />
+                  </Grid2>
+                ))}
+              </Grid2>
+            </Box>
+          )}
+
+          {invitedGroups.length > 0 && (
+            <Box mt={4}>
+              <Typography variant="h5" gutterBottom>
+                Invited Groups
+              </Typography>
+              <Grid2 container spacing={2} columns={12}>
+                {invitedGroups.map((group) => (
                   <Grid2 item xs={12} sm={6} md={4} key={group.id}>
                     <Group {...group} />
                   </Grid2>

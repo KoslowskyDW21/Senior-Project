@@ -88,6 +88,9 @@ const GroupDetails: React.FC = () => {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedFriends, setSelectedFriends] = useState<number[]>([]);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [isInvited, setIsInvited] = useState(false);
+  const [inviteMessage, setInviteMessage] = useState("");
+  const navigate = useNavigate();
 
   // States for report modal
   const [open, setOpen] = useState(false);
@@ -98,8 +101,6 @@ const GroupDetails: React.FC = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const handleOpenDeleteModal = () => setDeleteModalOpen(true);
   const handleCloseDeleteModal = () => setDeleteModalOpen(false);
-
-  const navigate = useNavigate();
 
   const fetchGroup = async () => {
     try {
@@ -181,15 +182,6 @@ const GroupDetails: React.FC = () => {
       console.error("Error fetching friends:", error);
     }
   };
-
-  useEffect(() => {
-    fetchGroup();
-    checkMembership();
-    fetchMembers();
-    fetchCurrentUser();
-    fetchFriends();
-    console.log("Members updated: ", members);
-  }, [id]);
 
   const handleJoinGroup = async () => {
     try {
@@ -276,6 +268,51 @@ const GroupDetails: React.FC = () => {
     );
   };
 
+  const checkInviteStatus = async () => {
+    try {
+      const response = await axios.get(`${config.serverUrl}/groups/${id}/invite_status`);
+      if (response.data) {
+        setIsInvited(response.data.isInvited);
+        setInviteMessage(response.data.notificationText);
+      }
+    } catch (error) {
+      console.error("Error checking invite status:", error);
+    }
+  };
+
+  const handleAcceptInvite = async () => {
+    try {
+      await axios.post(`${config.serverUrl}/groups/${id}/invite_response`, {
+        response: "accept",
+      });
+      setIsInvited(false);
+      fetchGroup();
+      fetchMembers();
+    } catch (error) {
+      console.error("Error accepting invite:", error);
+    }
+  };
+
+  const handleDenyInvite = async () => {
+    try {
+      await axios.post(`${config.serverUrl}/groups/${id}/invite_response`, {
+        response: "deny",
+      });
+      setIsInvited(false);
+    } catch (error) {
+      console.error("Error denying invite:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchGroup();
+    checkMembership();
+    fetchMembers();
+    fetchCurrentUser();
+    fetchFriends();
+    checkInviteStatus();
+  }, [id]);
+
   if (!group) {
     return (
       <Container>
@@ -329,6 +366,29 @@ const GroupDetails: React.FC = () => {
               )}
           </Box>
           <Box>
+          {isInvited ? (
+              <>
+                <Typography variant="body1" gutterBottom>
+                  {inviteMessage}
+                </Typography>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleAcceptInvite}
+                  sx={{ mr: 2 }}
+                >
+                  Accept
+                </Button>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={handleDenyInvite}
+                >
+                  Deny
+                </Button>
+              </>
+            ) : ( 
+            <>
             {isMember && currentUser && group.creator !== currentUser.id && (
               <Button
                 variant="contained"
@@ -339,8 +399,6 @@ const GroupDetails: React.FC = () => {
                 Leave Group
               </Button>
             )}
-          </Box>
-          <Box>
             {!isMember && (
               <Button
                 variant="contained"
@@ -351,7 +409,9 @@ const GroupDetails: React.FC = () => {
                 Join Group
               </Button>
             )}
-          </Box>
+            </>)}
+          </Box> 
+          
           <Box>
             <Button
               variant="contained"
