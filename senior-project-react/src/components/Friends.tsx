@@ -379,6 +379,61 @@ const Friends: React.FC = () => {
               ))}
             </Box>
           </Box>
+          <Box>
+            <Typography variant="h4" mt={7} sx={{ fontWeight: "bold" }}>
+              Suggested Friends
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "flex-start",
+                gap: 2,
+                mt: 3,
+              }}
+            >
+              {friendRequestsFrom.map((friend) => (
+                <Box
+                  key={friend.id}
+                  sx={{
+                    width: "120px",
+                    minHeight: "120px",
+                    border: "2px solid rgb(172, 169, 169)",
+                    borderRadius: 2,
+                    boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                    transition: "all 0.3s ease",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    p: 1,
+                    "&:hover": {
+                      borderColor: "#1976d2",
+                      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                    },
+                  }}
+                  onClick={() => handleGoToOtherProfile(friend.id)}
+                >
+                  {friend.profile_picture ? (
+                    <Avatar
+                      alt="Profile Picture"
+                      src={`${config.serverUrl}/${friend.profile_picture}`}
+                      sx={{ width: 70, height: 70, border: "1px solid #000" }}
+                    />
+                  ) : (
+                    <Avatar
+                      sx={{ width: 70, height: 70, backgroundColor: "gray" }}
+                    >
+                      <PersonIcon sx={{ color: "white" }} />
+                    </Avatar>
+                  )}
+                  <Typography variant="body2" mt={1}>
+                    {friend.username}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
         </main>
       </Box>
     </div>

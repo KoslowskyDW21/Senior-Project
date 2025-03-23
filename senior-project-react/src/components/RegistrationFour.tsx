@@ -19,7 +19,7 @@ interface RegistrationResponse {
   message: string;
 }
 
-const RegisterThree = () => {
+const RegisterFour = () => {
   const { data, setData } = useRegistration();
   const [message, setMessage] = useState("");
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
@@ -109,8 +109,11 @@ const RegisterThree = () => {
       if (axiosError.response && axiosError.response.data) {
         const errorData = axiosError.response.data as RegistrationResponse; // Type assertion
         setMessage(errorData.message); // Error message from server
+        console.log(error);
+        console.log(errorData.message);
       } else {
         setMessage("An unknown error occurred");
+        console.log(error);
       }
     }
   };
@@ -216,4 +219,4 @@ const RegisterThree = () => {
   );
 };
 
-export default RegisterThree;
+export default RegisterFour;
