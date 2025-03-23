@@ -91,7 +91,7 @@ const RegisterThree = () => {
 
     try {
       const response = await axios.post(
-        `${config.serverUrl}/api/register/`,
+        `${config.serverUrl}/register/`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
