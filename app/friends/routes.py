@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from app.friends import bp
 from app.models import *
 from flask_login import current_user, login_required
+import random
 from enum import Enum
 
 class notificationType(Enum):
@@ -39,6 +40,47 @@ def get_friends():
     return jsonify({
         "friends": friends_list
     }), 200
+
+import random
+from sqlalchemy.orm import aliased
+
+@bp.route('/get_suggested_friends/', methods=['POST'])
+def get_suggested_friends():
+    F1 = aliased(Friendship)
+    F2 = aliased(Friendship)
+
+    friend_ids = db.session.query(F1.user2).filter(F1.user1 == current_user_id).union(
+        db.session.query(F2.user1).filter(F2.user2 == current_user_id)
+    ).subquery()
+
+    suggested_friends = db.session.query(
+        User.id,
+        User.username,
+        User.email_address,
+        User.profile_picture
+    ).filter(
+        User.colonial_floor == current_user.colonial_floor,
+        User.colonial_side == current_user.colonial_side,
+        User.id != current_user_id, 
+        ~User.id.in_(friend_ids) 
+    ).all()
+
+    suggested_friends_list = [
+        {
+            "id": user_id,
+            "username": username,
+            "email_address": email_address,
+            "profile_picture": profile_picture
+        }
+        for user_id, username, email_address, profile_picture in suggested_friends
+    ]
+
+    # randomizing order
+    random.shuffle(suggested_friends_list)
+
+    return jsonify({
+        "suggested_friends": suggested_friends_list
+    }), 200  
 
 @bp.route('/search_for_friends/', methods=['POST'])
 def search_for_friends():
@@ -161,7 +203,6 @@ def request_notification(requestFrom, requestTo, requestType):
         return jsonify({"error": "sending notification"}), 500
 
 def delete_notification(requestFrom, requestTo):
-    #TODO: This is wrong. Fix it
     user = db.session.query(User).filter(User.id == requestFrom).first()
     if not user:
         return jsonify({"error": "Invalid user ID"}), 400

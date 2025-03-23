@@ -10,7 +10,7 @@ import {
 import { useNavigate } from "react-router-dom"; // React Router for nav
 import config from "../config.js";
 
-const RegisterTwo = () => {
+const RegisterThree = () => {
   const { data, setData } = useRegistration();
   const navigate = useNavigate();
 
@@ -77,4 +77,4 @@ const RegisterTwo = () => {
   );
 };
 
-export default RegisterTwo;
+export default RegisterThree;
