@@ -12,6 +12,7 @@ import {
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import PersonIcon from "@mui/icons-material/Person";
 import config from "../config.js";
+import { useMsal } from "@azure/msal-react";
 
 interface HeaderProps {
   title: string;
@@ -166,6 +167,35 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
       });
   }
 
+  const { instance } = useMsal();
+
+  const handleLogout = async () => {
+    try {
+      // Get access token
+      const response = await instance.acquireTokenSilent({
+        scopes: ["User.Read"],
+      });
+
+      const token = response.idToken;
+
+      await axios.post(
+        `${config.serverUrl}/api/logout/`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      instance.logoutRedirect().then(() => {
+        navigate("/");
+      });
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
+
   React.useEffect(() => {
     getCurrentUser();
     getNotifications();
@@ -187,7 +217,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
           zIndex: 1000,
           height: "100px",
-          justifyContent: "space-between",
+          justifyContent: "center",
           // Responsive styles
           "@media (max-width: 600px)": {
             height: "80px", // Shrink header height on small screens
@@ -215,7 +245,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             />
           </Box>
         </ButtonBase>
-
         <Box
           sx={{
             display: "flex",
@@ -228,82 +257,12 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         >
           <h1>{title}</h1>
         </Box>
-
-        {/* Notification Icon */}
-        <IconButton
-          onClick={handleClickNotification}
-          style={{ position: "relative", top: 8, right: 6 }}
-        >
-          <Avatar
-            sx={{
-              width: "clamp(40px, 8vw, 70px)", // Avatar width scales between 40px and 70px based on screen width
-              height: "clamp(40px, 8vw, 70px)", // Avatar height scales between 40px and 70px based on screen width
-              backgroundColor: "gray",
-            }}
+        <Box>
+          {/* Notification Icon */}
+          <IconButton
+            onClick={handleClickNotification}
+            style={{ position: "relative", top: 8, right: 6 }}
           >
-            <NotificationsIcon sx={{ color: "white" }} />
-            {notifications.length > 0 &&
-              notifications.some((n) => n.isRead === 0) && (
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 5,
-                    right: 5,
-                    width: "clamp(10px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
-                    height: "clamp(10px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
-                    backgroundColor: "red",
-                    borderRadius: "50%",
-                  }}
-                />
-              )}
-          </Avatar>
-        </IconButton>
-
-        <Menu
-          anchorEl={notificationAnchorEl}
-          open={Boolean(notificationAnchorEl)}
-          onClose={handleCloseNotification}
-        >
-          {notifications.length > 0 &&
-          notifications.some((n) => n.isRead === 0) ? (
-            notifications
-              .filter((notification) => notification.isRead === 0)
-              .map((notification, index) => (
-                <MenuItem
-                  key={index}
-                  onClick={(event) =>
-                    handleReadNotification(
-                      event,
-                      notification.id,
-                      notification.notification_type,
-                      notification.group_id,
-                      notification.challenge_id
-                    )
-                  }
-                >
-                  {notification.notification_text}
-                </MenuItem>
-              ))
-          ) : (
-            <MenuItem>No new notifications</MenuItem>
-          )}
-        </Menu>
-        {/* Avatar Icon */}
-        <IconButton
-          onClick={handleClickAvatar}
-          style={{ position: "relative", top: 8, right: 8 }}
-        >
-          {profile_picture ? (
-            <Avatar
-              alt="Profile Picture"
-              src={profile_picture}
-              sx={{
-                width: "clamp(40px, 8vw, 70px)", // Avatar width scales between 40px and 70px based on screen width
-                height: "clamp(40px, 8vw, 70px)", // Avatar height scales between 40px and 70px based on screen width
-                border: "1px solid #000",
-              }}
-            />
-          ) : (
             <Avatar
               sx={{
                 width: "clamp(40px, 8vw, 70px)", // Avatar width scales between 40px and 70px based on screen width
@@ -311,28 +270,102 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                 backgroundColor: "gray",
               }}
             >
-              <PersonIcon sx={{ color: "white" }} />
+              <NotificationsIcon sx={{ color: "white" }} />
+              {notifications.length > 0 &&
+                notifications.some((n) => n.isRead === 0) && (
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: 5,
+                      right: 5,
+                      width: "clamp(10px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
+                      height: "clamp(10px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
+                      backgroundColor: "red",
+                      borderRadius: "50%",
+                    }}
+                  />
+                )}
             </Avatar>
-          )}
-        </IconButton>
+          </IconButton>
 
-        <Menu
-          anchorEl={avatarAnchorEl}
-          open={Boolean(avatarAnchorEl)}
-          onClose={handleCloseAvatar}
-        >
-          <MenuItem onClick={handleGoToProfile}>Profile</MenuItem>
-          <MenuItem onClick={handleGoToSettings}>Settings</MenuItem>
-          <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem>
-          <MenuItem onClick={handleGoToShoppingList}>Shopping List</MenuItem>
-          <MenuItem onClick={handleGoToAchievements}>Achievements</MenuItem>
-          {admin ? (
-            <MenuItem onClick={handleGoToAdmin}>Admin Controls</MenuItem>
-          ) : (
-            <></>
-          )}
-        </Menu>
-      </Box>{" "}
+          <Menu
+            anchorEl={notificationAnchorEl}
+            open={Boolean(notificationAnchorEl)}
+            onClose={handleCloseNotification}
+          >
+            {notifications.length > 0 &&
+            notifications.some((n) => n.isRead === 0) ? (
+              notifications
+                .filter((notification) => notification.isRead === 0)
+                .map((notification, index) => (
+                  <MenuItem
+                    key={index}
+                    onClick={(event) =>
+                      handleReadNotification(
+                        event,
+                        notification.id,
+                        notification.notification_type,
+                        notification.group_id,
+                        notification.challenge_id
+                      )
+                    }
+                  >
+                    {notification.notification_text}
+                  </MenuItem>
+                ))
+            ) : (
+              <MenuItem>No new notifications</MenuItem>
+            )}
+          </Menu>
+          {/* Avatar Icon */}
+          <IconButton
+            onClick={handleClickAvatar}
+            style={{ position: "relative", top: 8, right: 8 }}
+          >
+            {profile_picture ? (
+              <Avatar
+                alt="Profile Picture"
+                src={profile_picture}
+                sx={{
+                  width: "clamp(40px, 8vw, 70px)", // Avatar width scales between 40px and 70px based on screen width
+                  height: "clamp(40px, 8vw, 70px)", // Avatar height scales between 40px and 70px based on screen width
+                  border: "1px solid #000",
+                }}
+              />
+            ) : (
+              <Avatar
+                sx={{
+                  width: "clamp(40px, 8vw, 70px)", // Avatar width scales between 40px and 70px based on screen width
+                  height: "clamp(40px, 8vw, 70px)", // Avatar height scales between 40px and 70px based on screen width
+                  backgroundColor: "gray",
+                }}
+              >
+                <PersonIcon sx={{ color: "white" }} />
+              </Avatar>
+            )}
+          </IconButton>
+
+          <Menu
+            anchorEl={avatarAnchorEl}
+            open={Boolean(avatarAnchorEl)}
+            onClose={handleCloseAvatar}
+          >
+            <MenuItem onClick={handleGoToProfile}>Profile</MenuItem>
+            <MenuItem onClick={handleGoToSettings}>Settings</MenuItem>
+            <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem>
+            <MenuItem onClick={handleGoToShoppingList}>Shopping List</MenuItem>
+            <MenuItem onClick={handleGoToAchievements}>Achievements</MenuItem>
+            <MenuItem onClick={handleLogout} sx={{ color: "red" }}>
+              Log Out
+            </MenuItem>
+            {admin ? (
+              <MenuItem onClick={handleGoToAdmin}>Admin Controls</MenuItem>
+            ) : (
+              <></>
+            )}
+          </Menu>
+        </Box>{" "}
+      </Box>
       {/* End of menu bar Box */}
     </div>
   );

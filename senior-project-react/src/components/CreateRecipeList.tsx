@@ -24,7 +24,6 @@ const CreateRecipeList: React.FC = () => {
   const navigate = useNavigate();
 
   const handleCreateRecipeList = async () => {
-    console.log(`Trying to create a recipe list with the name ${name}`);
     const formData = new FormData();
     formData.append("name", name);
     if (image) {
@@ -38,7 +37,6 @@ const CreateRecipeList: React.FC = () => {
       );
       const data: CreateRecipeListResponse = response.data;
       setMessage(data.message);
-      console.log(data.message);
     } catch (error) {
       const axiosError = error as AxiosError;
       if (axiosError.response && axiosError.response.data) {
@@ -52,7 +50,6 @@ const CreateRecipeList: React.FC = () => {
   };
 
   const handleGoToRecipeLists = async () => {
-    console.log("Navigating to recipe lists page");
     navigate(`/recipe-lists`);
   };
 

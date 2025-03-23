@@ -27,8 +27,6 @@ profanity.load_censor_words()
 def get_signing_keys():
     response = requests.get(JWKS_URL)
     keys = response.json()['keys']
-    # Debugging - Print out all keys for inspection
-    # print("Available Keys:", keys)
     return {key['kid']: RSAAlgorithm.from_jwk(key) for key in keys}
 
 SIGNING_KEYS = get_signing_keys()

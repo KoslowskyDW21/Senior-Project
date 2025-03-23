@@ -86,13 +86,6 @@ interface AddRecipeToListResponse {
   message: string;
 }
 
-interface ShoppingListItem {
-  id: number;
-  shopping_list_id: number;
-  ingredient_id: number;
-  measure: string;
-}
-
 interface Step {
   recipe_id: string;
   step_number: number;
@@ -128,7 +121,7 @@ function Step({ recipe_id, step_number, step_description }: Step) {
   );
 }
 
-function Difficulty({ difficulty }) {
+function Difficulty({ difficulty }: any) {
   const diamondStyle = {
     width: "clamp(5px, 2vw, 24px)", // Min size 16px, max size 24px, grows based on viewport width
     height: "clamp(5px, 2vw, 24px)",
@@ -137,7 +130,7 @@ function Difficulty({ difficulty }) {
     marginRight: "clamp(4px, 1vw, 8px)",
   };
 
-  const renderDiamonds = (num) => {
+  const renderDiamonds = (num: any) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Box key={i} sx={{ ...diamondStyle, opacity: i < num ? 1 : 0.1 }} />
     ));
@@ -148,6 +141,46 @@ function Difficulty({ difficulty }) {
       {renderDiamonds(Number(difficulty))}
     </Box>
   );
+}
+
+function RecipeRemoveSelect({ lid, handleRemoveRecipeFromList, recipeListsIn }: any) {
+  if (recipeListsIn.length === 0) {
+    return (
+      <FormControl sx={{ width: 400, opacity: 0.5}}>
+        <InputLabel>
+          Remove from a list
+        </InputLabel>
+        <Select
+        variant = "outlined"
+        disabled = {true}
+        >
+
+        </Select>
+      </FormControl>
+    )
+  }
+  return (
+    <FormControl sx={{ width: 400 }}>
+        <InputLabel id="demo-simple-select-label">
+          Remove from a list
+        </InputLabel>
+        <Select
+          labelId="remove-from-list-select-label"
+          id="remove-from-list-select"
+          label="Remove from a list"
+          value={lid}
+          onChange={handleRemoveRecipeFromList}
+        >
+          {recipeListsIn.map(
+            (
+              recipeList: any
+            ) => (
+              <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
+            )
+          )}
+        </Select>
+      </FormControl>
+  )
 }
 
 
@@ -217,6 +250,7 @@ const IndividualRecipe: React.FC = () => {
         setMessage("An unknown error occurred");
       }
     }
+    getRecipeListsIn();
     setSnackBarOpen(true);
   };
 
@@ -255,6 +289,7 @@ const IndividualRecipe: React.FC = () => {
         setMessage("An unknown error occurred");
       }
     }
+    getRecipeListsIn();
     setSnackBarOpen(true);
   };
 
@@ -453,6 +488,7 @@ const IndividualRecipe: React.FC = () => {
       </IconButton>
 
       <Box
+
         sx={{
           display: "flex",
           justifyContent: "center",
@@ -464,6 +500,7 @@ const IndividualRecipe: React.FC = () => {
       >
         {recipe_name}
       </Box>
+
     
       <Box sx={{
         display: "flex",
@@ -494,7 +531,6 @@ const IndividualRecipe: React.FC = () => {
       </Box>
       </Box>
       <br />
-      <br />
       <FormControl sx={{ width: 400 }}>
         <InputLabel id="demo-simple-select-label">Add to a list</InputLabel>
         <Select
@@ -509,37 +545,26 @@ const IndividualRecipe: React.FC = () => {
           ))}
         </Select>
       </FormControl>
-      <FormControl sx={{ width: 400 }}>
-        <InputLabel id="demo-simple-select-label">
-          Remove from a list
-        </InputLabel>
-        <Select
-          labelId="remove-from-list-select-label"
-          id="remove-from-list-select"
-          label="Remove from a list"
-          value={lid}
-          onChange={handleRemoveRecipeFromList}
-        >
-          {recipeListsIn.map(
-            (
-              recipeList
-            ) => (
-              <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
-            )
-          )}
-        </Select>
-      </FormControl>
+
+      <br/>
+
+      <RecipeRemoveSelect
+        lid={lid}
+        handleRemoveRecipeFromList={handleRemoveRecipeFromList}
+        recipeListsIn={recipeListsIn}
+      ></RecipeRemoveSelect>
+
+      <br/>
 
       {/* Add recipe's ingredients to the shopping list */}
-      <FormControl sx={{ width: 400 }}>
-        <InputLabel>Add ingredients to shopping list</InputLabel>
+      <FormControl>
         <Button
-          sx={{ width: 400, height: 55 }}
-          variant="outlined"
+          sx={{ width: 250, height: 45 }}
+          variant="contained"
           onClick={() => {
             handleAddIngredientsOfRecipe();
           }}
-        ></Button>
+        >Add to shopping list</Button>
       </FormControl>
 
       <Box
