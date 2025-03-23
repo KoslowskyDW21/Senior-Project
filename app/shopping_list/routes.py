@@ -1,6 +1,6 @@
 from __future__ import annotations
 from flask import jsonify
-from flask_login import current_user, login_required
+from flask_login import current_user
 from app.shopping_list import bp
 from app.models import ShoppingList, ShoppingListItem, RecipeIngredient, RecipeRecipeList, Recipe, db
 import sys
@@ -104,7 +104,7 @@ def remove_all_shopping_list_items_from_shopping_list_of_cu():
             db.session.delete(sli)
         db.session.commit()
         print("All shopping list items have been utterly committed to destruction")
-        return jsonify("Hurray"), 200
+        return jsonify("Hooray"), 200
     except:
         print(f"Failed to remove all shopping list items from current user's list", file=sys.stderr)
         return jsonify("Sadge"), 500

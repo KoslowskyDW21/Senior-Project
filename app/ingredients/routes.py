@@ -21,6 +21,4 @@ def get_ingredients_for_shopping_list(shopping_list_id):
     shopping_list_items = ShoppingListItem.query.filter_by(shopping_list_id=shopping_list_id).all()
     ingredient_ids = [shopping_list_item.ingredient_id for shopping_list_item in shopping_list_items]
     ingredients = [Ingredient.query.filter_by(id=ingredient_id).first() for ingredient_id in ingredient_ids]
-    #for ingredient in ingredients:
-        # print(ingredient.ingredient_name) #type: ignore
     return jsonify([ingredient.to_json() for ingredient in ingredients]), 200 # type:ignore
