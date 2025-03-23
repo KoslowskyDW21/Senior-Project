@@ -97,7 +97,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     if (notification_type === "friend_request") {
       navigate("/friends");
     } else if (notification_type === "group_message" && group_id) {
-      navigate(`/groups/${group_id}/invite_response`);
+      navigate(`/groups/${group_id}`);
     } else if (notification_type === "challenge_reminder") {
       navigate(`/challenges/${challenge_id}`);
     }

@@ -444,6 +444,13 @@ def invite_response(group_id):
     group = UserGroup.query.get(group_id)
     if not group:
         return jsonify({"message": "Group not found"}), 404
+    
+    UserNotifications.query.filter_by(
+        user_id=current_user.id,  # type: ignore
+        group_id=group_id,
+        notification_type='group_message'
+    ).delete()
+    db.session.commit()
 
     json = request.json
     if not json:
@@ -481,3 +488,64 @@ def kick_user_from_group(group_id):
     db.session.commit()
 
     return jsonify({"message": "User kicked successfully!"}), 200
+
+
+@bp.route('/<int:group_id>/unviewed_invites', methods=['GET'])
+@login_required
+def get_unviewed_invites(group_id):
+    group = UserGroup.query.get(group_id)
+    if not group:
+        return jsonify({"message": "Group not found"}), 404
+
+    unviewed_invites = UserNotifications.query.filter_by(
+        group_id=group_id,
+        notification_type='group_message',
+        isRead=False
+    ).all()
+
+    # Format the response
+    invites_data = []
+
+    for invite in unviewed_invites:
+        invites_data.append({"user_id": invite.user_id})
+
+    return jsonify(invites_data), 200
+
+
+@bp.route('/<int:group_id>/invite_status', methods=['GET'])
+@login_required
+def get_invite_status(group_id):
+    group = UserGroup.query.get(group_id)
+    if not group:
+        return jsonify({"message": "Group not found"}), 404
+
+    # Check if there is an unviewed invite for the current user
+    invite = UserNotifications.query.filter_by(
+        group_id=group_id,
+        user_id=current_user.id,  # type: ignore
+        notification_type='group_message',
+    ).first()
+
+    if invite:
+        return jsonify({"isInvited": True, "notificationText": invite.notification_text}), 200
+
+    return jsonify({"isInvited": False}), 200
+
+
+@bp.route('/notifications', methods=['GET'])
+@login_required
+def get_notifications():
+    notifications = UserNotifications.query.filter_by(
+            user_id=current_user.id,  # type: ignore
+            notification_type='group_message'
+        )
+    
+    invited_groups = []
+    for notification in notifications:
+        group = UserGroup.query.get(notification.group_id)
+        if group:
+            invited_groups.append(group.to_json())
+
+    return jsonify({
+        "invited_groups": invited_groups
+    }), 200
