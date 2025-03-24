@@ -28,7 +28,7 @@ const RegisterOne = () => {
         })
       ).idToken;
       const response = await axios.post<any>(
-        `${config.serverUrl}/get_initial_data/`,
+        `${config.serverUrl}/login/get_initial_data`,
         { token: idToken },
         { withCredentials: true }
       );
@@ -58,10 +58,13 @@ const RegisterOne = () => {
     // validating email and username aren't used
     try {
       console.log("Validating user");
-      const response = await axios.post(`${config.serverUrl}/validate_user/`, {
-        username: data.username,
-        email: data.email,
-      });
+      const response = await axios.post(
+        `${config.serverUrl}/login/validate_user`,
+        {
+          username: data.username,
+          email: data.email,
+        }
+      );
       if (!response.data.valid) {
         if (response.data.message.includes("Username")) {
           newErrors.username = response.data.message;
