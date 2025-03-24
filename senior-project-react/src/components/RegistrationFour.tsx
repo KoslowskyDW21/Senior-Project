@@ -91,7 +91,7 @@ const RegisterFour = () => {
 
     try {
       const response = await axios.post(
-        `${config.serverUrl}/register/`,
+        `${config.serverUrl}/login/register`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
