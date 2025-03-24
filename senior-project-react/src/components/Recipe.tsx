@@ -195,6 +195,7 @@ const IndividualRecipe: React.FC = () => {
   const [snackbarOpen, setSnackBarOpen] = React.useState(false);
   const { id } = useParams<{ id: string }>();
   const [reviews, setReviews] = React.useState<Review[]>([]);
+  const [userReview, setUserReview] = useState<Review | null>(null); // Store the user's review here
   const [reviewId, setReviewId] = useState<number | null>(null);
   const [difficulty, setDifficulty] = useState<string | undefined>();
   const [rating, setRating] = useState<string | undefined>();
@@ -208,17 +209,6 @@ const IndividualRecipe: React.FC = () => {
   const handleGoToCompletedRecipe = async () => {
     console.log("Navigating to completed recipe page");
     navigate(`/recipes/completed/${id}`);
-  };
-
-  const getReviews = async () => {
-    try {
-      const response = await axios.get(
-        `${config.serverUrl}/recipes/reviews/${id}`
-      );
-      setReviews(response.data.reviews);
-    } catch (error) {
-      console.error("Error fetching reviews: ", error);
-    }
   };
 
   const handleAddRecipeToList = async (event: SelectChangeEvent) => {
@@ -364,6 +354,25 @@ const IndividualRecipe: React.FC = () => {
       console.error("Error fetching recipe: ", error);
     }
   };
+
+  const getReviews = async () => {
+    try {
+      const response = await axios.get(
+        `${config.serverUrl}/recipes/reviews/${id}`
+      );
+      setReviews(response.data.reviews);
+      const userReview = response.data.reviews.find(
+        (review: Review) => review.user_id === current_user?.id
+      );
+      if (userReview) {
+        setUserReview(userReview); // Set the current user's review if they have one
+      }
+    } catch (error) {
+      console.error("Error fetching reviews: ", error);
+    }
+  };
+
+  const displayRating = userReview ? userReview.rating : rating;
 
   const getRecipeLists = async () => {
     try {
@@ -527,7 +536,7 @@ const IndividualRecipe: React.FC = () => {
       </Box>
 
       <Box sx={{ marginLeft: 2, display: "flex", alignItems: "center" }}>
-        <Rating name="recipe-rating" value={Number(rating)} precision={0.5} readOnly />
+        <Rating name="recipe-rating" value={Number(displayRating)} precision={0.5} readOnly />
       </Box>
       </Box>
       <br />
