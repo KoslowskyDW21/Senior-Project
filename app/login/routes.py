@@ -255,7 +255,7 @@ def validate_user():
 
 
 
-@bp.route('/sso/', methods=['POST'])
+@bp.route('/sso', methods=['POST'])
 def sso_login():
     data = request.json
     if not data:
@@ -305,7 +305,7 @@ def sso_login():
         print("User not registered")
         return jsonify({"message": "User not registered"}), 200
 
-@bp.route('/get_initial_data/', methods=['POST'])
+@bp.route('/get_initial_data', methods=['POST'])
 def get_initial_data():
     data = request.json
     if not data:
