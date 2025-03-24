@@ -23,31 +23,96 @@ def get_all_shopping_list_items_of_shopping_list(id):
     # print(f"Shopping list items of shopping list {id}: {shopping_list_items}")
     return jsonify([shopping_list_item.to_json() for shopping_list_item in shopping_list_items]), 200
 
+import re
+
 @bp.post("/items/add/<int:recipe_id>")
 def add_recipe_to_shopping_list_items_of_current_user(recipe_id):
     print(f"Trying to add recipe {recipe_id}'s ingredients to the shopping list of user number {current_user.id}")
     slis: list[ShoppingListItem] = []
+    
     try:
         recipe_ingredients = RecipeIngredient.query.filter_by(recipe_id=recipe_id).all()
         print(f"RecipeIngredients: {recipe_ingredients}")
         curr_shopping_list = ShoppingList.query.filter_by(user_id=current_user.id).first()
         print(curr_shopping_list)
+        
         if not curr_shopping_list:
             return jsonify({"message": "No shopping list found for user"}), 404
+        
         for recipe_ingredient in recipe_ingredients:
             print(f"RecipeIngredient: {recipe_ingredient}")
-            sli: ShoppingListItem = ShoppingListItem()
-            sli.shopping_list_id = curr_shopping_list.id
-            sli.ingredient_id = recipe_ingredient.ingredient_id
-            sli.measure = recipe_ingredient.measure
-            print(sli)
-            slis.append(sli)
-            db.session.add(sli)
+            
+            # Check if the ingredient is already in the shopping list
+            existing_sli = ShoppingListItem.query.filter_by(
+                shopping_list_id=curr_shopping_list.id,
+                ingredient_id=recipe_ingredient.ingredient_id
+            ).first()
+            
+            if existing_sli:
+                # If ingredient exists, let's merge the measurements
+                new_measurement = recipe_ingredient.measure
+                existing_measurement = existing_sli.measure
+                
+                # Extract numeric and unit parts of both measurements
+                try:
+                    existing_num, existing_unit = extract_measurement(existing_measurement)
+                    new_num, new_unit = extract_measurement(new_measurement)
+                except ValueError:
+                    print(f"Skipping invalid measurement format for {recipe_ingredient.ingredient_id}")
+                    continue  # Skip this ingredient if the measurement format is invalid
+                
+                if existing_unit == new_unit:
+                    # If units are the same, sum the numeric parts
+                    total_num = existing_num + new_num
+                    existing_sli.measure = f"{total_num}{existing_unit}"
+                    print(f"Updated existing ingredient: {existing_sli}")
+                else:
+                    # If units are different, append as strings
+                    existing_sli.measure = f"{existing_measurement}, {new_measurement}"
+                    print(f"Updated existing ingredient with different units: {existing_sli}")
+            else:
+                # If ingredient does not exist, create a new shopping list item
+                sli: ShoppingListItem = ShoppingListItem()
+                sli.shopping_list_id = curr_shopping_list.id
+                sli.ingredient_id = recipe_ingredient.ingredient_id
+                sli.measure = recipe_ingredient.measure
+                print(f"Adding new ingredient: {sli}")
+                slis.append(sli)
+                db.session.add(sli)
+
         db.session.commit()
-    except:
-        print("Error")
+    except Exception as e:
+        print(f"Error: {e}")
         return jsonify({"message": "Error"}), 500
     return jsonify({"message": "Success"}), 200
+
+
+def extract_measurement(measurement: str):
+    """
+    Extract the numeric and unit parts of a measurement.
+    Example: "30g" -> (30, 'g'), "1tbsp" -> (1, 'tbsp'), "dash" -> (0, 'dash')
+    """
+    # First, check for non-numeric measurements like "dash", "pinch", etc.
+    non_numeric_units = ["dash", "pinch", "cup", "tablespoon", "teaspoon", "tbsp", "tsp", "ml", "liter", "kg"]
+    
+    # Normalize measurement to lowercase
+    measurement = measurement.strip().lower()
+
+    if measurement in non_numeric_units:
+        return 0, measurement  # Return 0 as the numeric part for non-numeric measurements
+    
+    # Now, try to match a numeric value followed by letters (unit)
+    match = re.match(r"(\d+)([a-zA-Z]+)", measurement)
+    
+    if match:
+        num = int(match.group(1))
+        unit = match.group(2).lower()  # Normalize the unit to lowercase
+        return num, unit
+    else:
+        # Handle invalid measurement format
+        raise ValueError(f"Invalid measurement format: {measurement}")
+
+
 
 @bp.post("/items/addlist/<int:recipe_list_id>")
 def add_all_recipes_in_recipe_list_to_sl(recipe_list_id):

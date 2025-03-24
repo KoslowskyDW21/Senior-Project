@@ -1,16 +1,30 @@
 import React from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
+  Card,
   Checkbox,
-  TextField,
-  Typography,
+  Grid2,
   IconButton,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  Typography,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import Header from "./Header";
 import config from "../config.js";
+import DeleteIcon from "@mui/icons-material/Delete";
+
+interface ShoppingListInterface {
+  id: number;
+  user_id: number;
+}
 
 interface ShoppingListItem {
   id: number;
@@ -22,82 +36,275 @@ interface ShoppingListItem {
 interface Ingredient {
   id: number;
   ingredient_name: string;
-  checked: boolean;  // Ensure checked state is part of the ingredient
-  measure: string;   // Ensure measure is part of the ingredient
+}
+
+class _ShoppingListItemIngredient {
+  id: number = -1;
+  shopping_list_id: number = -1;
+  ingredient_id: number = -1;
+  measure: string = "uninitialized";
+  ingredient_name: string = "uninitialized";
+  checked: boolean | undefined;
+}
+
+interface Recipe {
+  id: number;
+  recipe_name: string;
+  xp_amount: number;
+  difficulty: "1" | "2" | "3" | "4" | "5";
+  image: string;
+}
+
+interface AddRecipeToListResponse {
+  message: string;
+  objects: ShoppingListItem[];
 }
 
 const ShoppingList: React.FC = () => {
-  const [shoppingListItems, setShoppingListItems] = React.useState<ShoppingListItem[]>([]);
+  const [shoppingList, setShoppingList] =
+    React.useState<ShoppingListInterface>();
+  const [shoppingListItems, setShoppingListItems] = React.useState<
+    ShoppingListItem[]
+  >([]);
   const [ingredients, setIngredients] = React.useState<Ingredient[]>([]);
+  const [shoppingListItemIngredients, setShoppingListItemIngredients] =
+    React.useState<_ShoppingListItemIngredient[]>([]);
+  const [
+    filteredShoppingListItemIngredients,
+    setFilteredShoppingListItemIngredients,
+  ] = React.useState<_ShoppingListItemIngredient[]>([]);
+  const [recipes, setRecipes] = React.useState<Recipe[]>([]);
+  const [message, setMessage] = React.useState<string>("");
+  const [recipe_id, setRecipe_id] = React.useState<string>("");
   const [searchQuery, setSearchQuery] = React.useState<string>("");
-  const [filteredShoppingListItemIngredients, setFilteredShoppingListItemIngredients] = React.useState<Ingredient[]>([]);
 
   const navigate = useNavigate();
 
-  // Fetch shopping list and ingredients
-  const getShoppingListInfo = async () => {
+  async function getShoppingListInfo() {
     try {
-      const shoppingListResponse = await axios.get(`${config.serverUrl}/shopping_lists/user_list`);
-      const shoppingList = shoppingListResponse.data;
+      let response = await axios.get(
+        `${config.serverUrl}/shopping_lists/user_list`
+      );
+      const shopping_list: ShoppingListInterface = response.data;
+      setShoppingList(shopping_list);
+      console.log(
+        `Shopping list now set: ${shopping_list.id} ${shopping_list.user_id}`
+      );
 
-      const shoppingListItemsResponse = await axios.get(`${config.serverUrl}/shopping_lists/items/${shoppingList.id}`);
-      setShoppingListItems(shoppingListItemsResponse.data);
+      response = await axios.get(
+        `${config.serverUrl}/shopping_lists/items/${shopping_list.id}`
+      );
+      const shopping_list_items: ShoppingListItem[] = response.data;
+      setShoppingListItems(shopping_list_items);
+      // console.log(`Shopping list items now set: ${shopping_list_items}`);
 
-      const ingredientsResponse = await axios.get(`${config.serverUrl}/ingredients/shopping_list/${shoppingList.id}`);
-      const ingredientsList = ingredientsResponse.data.map((ingredient: any) => ({
-        ...ingredient,
-        checked: false, // Ensure each ingredient starts with unchecked state
-        measure: "",  // Initialize measure as empty string
-      }));
+      response = await axios.get(
+        `${config.serverUrl}/ingredients/shopping_list/${shopping_list.id}`
+      );
+      const ingredients_list: Ingredient[] = response.data;
+      setIngredients(ingredients_list);
+      console.log(`Ingredients now set:`);
+      // for (const ingredient of ingredients_list) {
+      //     console.log(`${ingredient.ingredient_name}`);
+      // }
 
-      // Combine the shoppingListItems and ingredientsList
-      const combinedIngredients = ingredientsList.map((ingredient: Ingredient) => {
-        const shoppingListItem = shoppingListItemsResponse.data.find((item: ShoppingListItem) => item.ingredient_id === ingredient.id);
-        return {
-          ...ingredient,
-          measure: shoppingListItem ? shoppingListItem.measure : "N/A",  // Use N/A if no measure is found
-        };
-      });
-
-      // Set ingredients with the combined measure
-      setIngredients(combinedIngredients);
-
-      // Filter ingredients based on search query
-      filterIngredients(combinedIngredients);
-
+      let shopping_list_item_ingredients: _ShoppingListItemIngredient[] = [];
+      for (const shopping_list_item of shopping_list_items) {
+        const corresponding_ingredient: Ingredient = ingredients_list.filter(
+          (ingredient) => ingredient.id == shopping_list_item.ingredient_id
+        )[0];
+        const shoppingListItemIngredient = new _ShoppingListItemIngredient();
+        shoppingListItemIngredient.id = shopping_list_item.id;
+        shoppingListItemIngredient.shopping_list_id =
+          shopping_list_item.shopping_list_id;
+        shoppingListItemIngredient.ingredient_id =
+          shopping_list_item.ingredient_id;
+        shoppingListItemIngredient.measure = shopping_list_item.measure;
+        shoppingListItemIngredient.ingredient_name =
+          corresponding_ingredient.ingredient_name;
+        shopping_list_item_ingredients.push(shoppingListItemIngredient);
+      }
+      setShoppingListItemIngredients(shopping_list_item_ingredients);
     } catch (error) {
       console.error("Error fetching shopping list info: ", error);
     }
+  }
+
+  async function getRecipes() {
+    try {
+      const response = await axios.get(`${config.serverUrl}/recipes/all`);
+      setRecipes(response.data.recipes);
+      console.log(
+        `Grabbed all recipes: ${response.data.recipes.length} recipes grabbed`
+      );
+      // for (const recipe of recipes) {
+      //     console.log(recipe.recipe_name)
+      // }
+    } catch (error) {
+      console.error("Error fetching all recipes: ", error);
+    }
+  }
+
+  // Handle search changes and trigger navigation immediately
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const query = event.target.value;
+      setSearchQuery(query);
+  
+      // Update URL with the new search query
+      if (query) {
+        navigate({
+          pathname: location.pathname,
+          search: `?search=${query}`,
+        });
+      } else {
+        navigate({
+          pathname: location.pathname,
+          search: "",
+        });
+      }
+    };
+
+  const filterShoppingListItemIngredients = (
+    shoppingListItemIngredients_: _ShoppingListItemIngredient[]
+  ) => {
+    const urlParams = new URLSearchParams(location.search);
+    const searchQuery = urlParams.get("search")?.toLowerCase() || "";
+    if (searchQuery) {
+      const filtered = shoppingListItemIngredients_.filter(
+        (_shoppingListItemIngredient) =>
+          _shoppingListItemIngredient.ingredient_name
+            .toLowerCase()
+            .includes(searchQuery)
+      );
+      setFilteredShoppingListItemIngredients(filtered);
+    } else {
+      setFilteredShoppingListItemIngredients(shoppingListItemIngredients_);
+    }
   };
 
-  // Filter ingredients based on the search query
-  const filterIngredients = (ingredientsList: Ingredient[]) => {
-    const filtered = ingredientsList.filter((ingredient) =>
-      ingredient.ingredient_name.toLowerCase().includes(searchQuery.toLowerCase())
+  async function handleAddIngredientsOfRecipe(event: SelectChangeEvent) {
+    console.log(
+      `Trying to add recipe id=${event.target.value}'s ingredients to list`
     );
-    setFilteredShoppingListItemIngredients(filtered);
-  };
-
-  // Handle search field change
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value;
-    setSearchQuery(query);
-    filterIngredients(ingredients);  // Re-filter ingredients based on the new search query
-  };
-
-  // Toggle the checked state of an ingredient
-  const handleIngredientCheck = (ingredientId: number, checked: boolean) => {
-    const updatedIngredients = ingredients.map((ingredient) =>
-      ingredient.id === ingredientId ? { ...ingredient, checked } : ingredient
+    if (event.target.value == undefined) {
+      console.log("How did that happen? Selected recipe_id is undefined!");
+      return;
+    }
+    console.log(
+      `Trying to add all ingredients of recipe ${event.target.value} to shopping list`
     );
-    setIngredients(updatedIngredients);
-    // Re-filter the ingredients after changing the checked state
-    filterIngredients(updatedIngredients);
-  };
+    try {
+      const response = await axios.post(
+        `${config.serverUrl}/shopping_lists/items/add/${event.target.value}`
+      );
+      if (response.status == 200) {
+        setMessage("Recipe successfully added to list");
+        console.log(`Recipe id=${event.target.value} added to list`);
+        getShoppingListInfo();
+      } else {
+        setMessage("Recipe failed to be added to list");
+      }
+    } catch (error) {
+      setMessage(
+        "Error in trying to add recipe's ingredients to shopping list"
+      );
+      console.error(
+        "Error in trying to add recipe's ingredients to shopping list",
+        error
+      );
+    }
+  }
+
+  async function handleRemoveSLI(sli_id: number) {
+    console.log(`Trying to remove SLI with id=${sli_id}`);
+    try {
+      const response = await axios.post(
+        `${config.serverUrl}/shopping_lists/items/remove/${sli_id}`
+      );
+      if (response.status == 200) {
+        setMessage("Item successfully removed from list");
+        getShoppingListInfo();
+        return;
+      } else {
+        setMessage("Failed to remove item from list");
+        return;
+      }
+    } catch (error) {
+      setMessage(
+        `An error occurred while trying to remove item ${sli_id} from list`
+      );
+      return;
+    }
+  }
+
+  async function handleRemoveAllSLIs() {
+    console.log("Trying to remove all SLIs for user");
+    try {
+      const response = await axios.post(
+        `${config.serverUrl}/shopping_lists/items/remove-all`
+      );
+      if (response.status == 200) {
+        setMessage("All items successfully cleared from list");
+        getShoppingListInfo();
+        return;
+      } else {
+        setMessage("Failed to remove all items from list");
+      }
+    } catch (error) {
+      setMessage(
+        "An error occurred while trying to remove all items from list"
+      );
+      return;
+    }
+  }
+
+  function RecipesDropdown({ recipes }) {
+    if (recipes.length == 0) {
+      return <p>Loading...</p>;
+    } else {
+      return (
+        <>
+          <FormControl sx={{ width: 400 }}>
+            <InputLabel>Add all ingredients of a recipe</InputLabel>
+            <Select value={recipe_id} onChange={handleAddIngredientsOfRecipe}>
+              {recipes.map((recipe: Recipe) => {
+                return (
+                  <MenuItem value={recipe.id}>{recipe.recipe_name}</MenuItem>
+                );
+              })}
+              ;
+            </Select>
+          </FormControl>
+        </>
+      );
+    }
+  }
 
   React.useEffect(() => {
     getShoppingListInfo();
   }, []);
+
+  React.useEffect(() => {
+    filterShoppingListItemIngredients(shoppingListItemIngredients);
+  }, [location.search, shoppingListItemIngredients]);
+
+  React.useEffect(() => {
+    getRecipes();
+  }, []);
+
+  const handleIngredientCheck = (ingredientId: number, checked: boolean) => {
+    // Find the ingredient and update its checked status
+    const updatedIngredients = shoppingListItemIngredients.map((ingredient) => {
+      if (ingredient.id === ingredientId) {
+        return { ...ingredient, checked };
+      }
+      return ingredient;
+    });
+  
+    // Update the state with the new checked status for the ingredient
+    setShoppingListItemIngredients(updatedIngredients);
+  };
+  
 
   return (
     <>
@@ -125,7 +332,7 @@ const ShoppingList: React.FC = () => {
       {/* Remove All button */}
       <Button
         onClick={() => {
-          setIngredients(ingredients.map((ingredient) => ({ ...ingredient, checked: false })));
+          handleRemoveAllSLIs();
         }}
         variant="contained"
         color="error"
@@ -158,6 +365,13 @@ const ShoppingList: React.FC = () => {
                 <Typography variant="body2" color="text.secondary">
                   {ingredient.measure || "N/A"} {/* Display ingredient's measure */}
                 </Typography>
+                <IconButton
+              onClick={() => handleRemoveSLI(ingredient.id)} // Remove ingredient when clicked
+              color="error"
+              aria-label="delete"
+            >
+              <DeleteIcon />
+            </IconButton>
               </Box>
             ))}
           </Box>
