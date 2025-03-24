@@ -263,7 +263,6 @@ export default function Settings() {
     setSelectedCuisines(preselectedCuisines);
   }, [cuisines, userCuisines]);
 
-
   React.useEffect(() => {
     const preselectedDietaryRestrictions = dietaryRestrictions
       .filter((dietaryRestriction) =>
@@ -362,7 +361,7 @@ export default function Settings() {
       const token = response.idToken;
 
       await axios.post(
-        `${config.serverUrl}/api/logout/`,
+        `${config.serverUrl}/logout/`,
         {},
         {
           headers: {
