@@ -35,7 +35,7 @@ def create_app(config=Config):
         
 
     from app.login import bp as login_bp
-    app.register_blueprint(login_bp, url_prefix='/')
+    app.register_blueprint(login_bp, url_prefix='/login')
     from app.recipes import bp as recipes_bp
     app.register_blueprint(recipes_bp, url_prefix='/recipes')
     from app.profile import bp as profile_bp
