@@ -258,7 +258,7 @@ def validate_user():
 
 
 
-@bp.route('/login/sso', methods=['POST'])
+@bp.route('/sso/', methods=['POST'])
 def sso_login():
     data = request.json
     if not data:
