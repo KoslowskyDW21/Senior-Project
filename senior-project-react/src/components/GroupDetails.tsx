@@ -138,7 +138,9 @@ const GroupDetails: React.FC = () => {
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await axios.get(`${config.serverUrl}/current_user`);
+      const response = await axios.get(
+        `${config.serverUrl}/login/current_user`
+      );
       setCurrentUser(response.data);
     } catch (error) {
       console.error("Error fetching current user:", error);
@@ -270,7 +272,9 @@ const GroupDetails: React.FC = () => {
 
   const checkInviteStatus = async () => {
     try {
-      const response = await axios.get(`${config.serverUrl}/groups/${id}/invite_status`);
+      const response = await axios.get(
+        `${config.serverUrl}/groups/${id}/invite_status`
+      );
       if (response.data) {
         setIsInvited(response.data.isInvited);
         setInviteMessage(response.data.notificationText);
@@ -366,7 +370,7 @@ const GroupDetails: React.FC = () => {
               )}
           </Box>
           <Box>
-          {isInvited ? (
+            {isInvited ? (
               <>
                 <Typography variant="body1" gutterBottom>
                   {inviteMessage}
@@ -387,31 +391,34 @@ const GroupDetails: React.FC = () => {
                   Deny
                 </Button>
               </>
-            ) : ( 
-            <>
-            {isMember && currentUser && group.creator !== currentUser.id && (
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleLeaveGroup}
-                sx={{ mb: 2 }}
-              >
-                Leave Group
-              </Button>
+            ) : (
+              <>
+                {isMember &&
+                  currentUser &&
+                  group.creator !== currentUser.id && (
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={handleLeaveGroup}
+                      sx={{ mb: 2 }}
+                    >
+                      Leave Group
+                    </Button>
+                  )}
+                {!isMember && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleJoinGroup}
+                    sx={{ mb: 2 }}
+                  >
+                    Join Group
+                  </Button>
+                )}
+              </>
             )}
-            {!isMember && (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleJoinGroup}
-                sx={{ mb: 2 }}
-              >
-                Join Group
-              </Button>
-            )}
-            </>)}
-          </Box> 
-          
+          </Box>
+
           <Box>
             <Button
               variant="contained"
