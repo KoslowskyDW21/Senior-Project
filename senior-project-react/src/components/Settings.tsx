@@ -361,7 +361,7 @@ export default function Settings() {
       const token = response.idToken;
 
       await axios.post(
-        `${config.serverUrl}/logout/`,
+        `${config.serverUrl}/login/logout/`,
         {},
         {
           headers: {

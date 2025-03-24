@@ -338,7 +338,7 @@ def get_initial_data():
     }), 200
 
 
-@bp.route('/api/logout', methods=['POST'])
+@bp.route('/logout', methods=['POST'])
 def logout():
     # Get the token from the Authorization header
     token = request.headers.get('Authorization')
