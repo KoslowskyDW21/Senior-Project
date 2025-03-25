@@ -18,12 +18,14 @@ import {
   ListItem,
   ListItemText,
   Checkbox,
+  Snackbar,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import GroupMembersList from "./GroupMembersList";
 import config from "../config.js";
+import ConfirmationMessage from "./ConfirmationMessage.js";
 
 interface UserGroup {
   id: number;
@@ -90,6 +92,7 @@ const GroupDetails: React.FC = () => {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [isInvited, setIsInvited] = useState(false);
   const [inviteMessage, setInviteMessage] = useState("");
+  const [confirmation, setConfirmation] = useState<boolean>(false);
   const navigate = useNavigate();
 
   // States for report modal
@@ -506,6 +509,7 @@ const GroupDetails: React.FC = () => {
                 onClick={() => {
                   handleReportGroup();
                   handleCloseModal();
+                  setConfirmation(true);
                 }}
               >
                 Confirm Report
@@ -602,6 +606,12 @@ const GroupDetails: React.FC = () => {
           </Modal>
         </CardContent>
       </Card>
+      
+      {confirmation &&
+        <ConfirmationMessage 
+          message={"Group Successfully Reported"}
+        />
+      }
     </Container>
   );
 };
