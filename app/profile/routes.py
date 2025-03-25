@@ -123,9 +123,11 @@ def is_current_user_blocked(id):
 
 @bp.route('/current_user/', methods=['POST'])
 def post_current_user():
-    return jsonify(
-        current_user.to_json() # type: ignore
-    ), 200
+    if(current_user is not None):
+        return jsonify(
+            current_user.to_json() # type: ignore
+        ), 200
+    return "<h1>404: profile not found</h1>", 404
 
 @bp.route('/get_profile_pic/', methods=['POST'])
 def get_profile_pic():

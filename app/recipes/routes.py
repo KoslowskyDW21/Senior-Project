@@ -145,6 +145,11 @@ def post_recipes():
         'current_page': page
     }), 200
 
+@bp.post("/user")
+def getUserId():
+    print (current_user.id)
+    return jsonify({'id': current_user.id})
+
 @bp.get("/all/")
 def get_all_recipes_at_once():
     print("Fetching all recipes")
