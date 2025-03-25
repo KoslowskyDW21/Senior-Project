@@ -18,12 +18,14 @@ import {
   ListItem,
   ListItemText,
   Checkbox,
+  Snackbar,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import GroupMembersList from "./GroupMembersList";
 import config from "../config.js";
+import ConfirmationMessage from "./ConfirmationMessage.js";
 
 interface UserGroup {
   id: number;
@@ -90,6 +92,7 @@ const GroupDetails: React.FC = () => {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [isInvited, setIsInvited] = useState(false);
   const [inviteMessage, setInviteMessage] = useState("");
+  const [confirmation, setConfirmation] = useState<boolean>(false);
   const navigate = useNavigate();
 
   // States for report modal
@@ -138,7 +141,9 @@ const GroupDetails: React.FC = () => {
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await axios.get(`${config.serverUrl}/current_user`);
+      const response = await axios.get(
+        `${config.serverUrl}/login/current_user`
+      );
       setCurrentUser(response.data);
     } catch (error) {
       console.error("Error fetching current user:", error);
@@ -270,7 +275,9 @@ const GroupDetails: React.FC = () => {
 
   const checkInviteStatus = async () => {
     try {
-      const response = await axios.get(`${config.serverUrl}/groups/${id}/invite_status`);
+      const response = await axios.get(
+        `${config.serverUrl}/groups/${id}/invite_status`
+      );
       if (response.data) {
         setIsInvited(response.data.isInvited);
         setInviteMessage(response.data.notificationText);
@@ -366,7 +373,7 @@ const GroupDetails: React.FC = () => {
               )}
           </Box>
           <Box>
-          {isInvited ? (
+            {isInvited ? (
               <>
                 <Typography variant="body1" gutterBottom>
                   {inviteMessage}
@@ -387,31 +394,34 @@ const GroupDetails: React.FC = () => {
                   Deny
                 </Button>
               </>
-            ) : ( 
-            <>
-            {isMember && currentUser && group.creator !== currentUser.id && (
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleLeaveGroup}
-                sx={{ mb: 2 }}
-              >
-                Leave Group
-              </Button>
+            ) : (
+              <>
+                {isMember &&
+                  currentUser &&
+                  group.creator !== currentUser.id && (
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={handleLeaveGroup}
+                      sx={{ mb: 2 }}
+                    >
+                      Leave Group
+                    </Button>
+                  )}
+                {!isMember && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleJoinGroup}
+                    sx={{ mb: 2 }}
+                  >
+                    Join Group
+                  </Button>
+                )}
+              </>
             )}
-            {!isMember && (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleJoinGroup}
-                sx={{ mb: 2 }}
-              >
-                Join Group
-              </Button>
-            )}
-            </>)}
-          </Box> 
-          
+          </Box>
+
           <Box>
             <Button
               variant="contained"
@@ -499,6 +509,7 @@ const GroupDetails: React.FC = () => {
                 onClick={() => {
                   handleReportGroup();
                   handleCloseModal();
+                  setConfirmation(true);
                 }}
               >
                 Confirm Report
@@ -595,6 +606,12 @@ const GroupDetails: React.FC = () => {
           </Modal>
         </CardContent>
       </Card>
+      
+      {confirmation &&
+        <ConfirmationMessage 
+          message={"Group Successfully Reported"}
+        />
+      }
     </Container>
   );
 };

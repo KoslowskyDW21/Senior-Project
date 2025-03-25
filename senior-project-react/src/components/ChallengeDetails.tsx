@@ -107,7 +107,9 @@ const ChallengeDetail: React.FC = () => {
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await axios.get(`${config.serverUrl}/current_user`);
+      const response = await axios.get(
+        `${config.serverUrl}/login/current_user`
+      );
       setCurrentUser(response.data);
     } catch (error) {
       console.error("Error fetching current user:", error);
@@ -154,9 +156,11 @@ const ChallengeDetail: React.FC = () => {
 
   const fetchFriends = async () => {
     try {
-      const response = await axios.post(`${config.serverUrl}/friends/get_friends/`);
+      const response = await axios.post(
+        `${config.serverUrl}/friends/get_friends/`
+      );
       const allFriends = response.data.friends;
-  
+
       // Fetch participants and unviewed invites
       const participantsResponse = await axios.get(
         `${config.serverUrl}/challenges/${id}/participants`
@@ -164,20 +168,21 @@ const ChallengeDetail: React.FC = () => {
       const participants = participantsResponse.data.map(
         (participant: Participant) => participant.user_id
       );
-  
+
       const invitesResponse = await axios.get(
         `${config.serverUrl}/challenges/${id}/unviewed_invites`
       );
       const unviewedInvites = invitesResponse.data.map(
         (invite: { user_id: number }) => invite.user_id
       );
-  
+
       // Filter friends to exclude participants and those with unviewed invites
       const filteredFriends = allFriends.filter(
         (friend: Friend) =>
-          !participants.includes(friend.id) && !unviewedInvites.includes(friend.id)
+          !participants.includes(friend.id) &&
+          !unviewedInvites.includes(friend.id)
       );
-  
+
       setFriends(filteredFriends);
     } catch (error) {
       console.error("Error fetching friends:", error);
@@ -371,7 +376,12 @@ const ChallengeDetail: React.FC = () => {
             <Typography variant="h5" gutterBottom>
               Participants
             </Typography>
-            <ChallengeParticipantsList participants={participants} isCreator={isCreator} challengeId={challenge.id} creatorId={challenge.creator}/>
+            <ChallengeParticipantsList
+              participants={participants}
+              isCreator={isCreator}
+              challengeId={challenge.id}
+              creatorId={challenge.creator}
+            />
           </Box>
           {isParticipant && now >= startTime && now <= votingEndTime && (
             <Box textAlign="center" mt={3}>

@@ -119,7 +119,7 @@ def create_challenge():
     return jsonify({"message": "Challenge created successfully!",
                     "challenge_id": challenge.id}), 200
 
-@bp.route('/current_user_id/', methods=['GET', 'POST'])
+@bp.route('/current_user_id', methods=['GET', 'POST'])
 def post_current_user():
     return jsonify(
         current_user.id
