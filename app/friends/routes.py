@@ -44,14 +44,20 @@ def get_friends():
 import random
 from sqlalchemy.orm import aliased
 
+#this method grabs people on your hall and suggests them as friends if they are NOT already a friend of yours
 @bp.route('/get_suggested_friends/', methods=['POST'])
 def get_suggested_friends():
+    #TODO: Maybe suggest friends who are in the same group as you?
+    #TODO: Also don't suggest them if either of you have a friend request to each other
     F1 = aliased(Friendship)
     F2 = aliased(Friendship)
+    FR1 = aliased(FriendRequest)
+    FR2 = aliased(FriendRequest)
 
-    friend_ids = db.session.query(F1.user2).filter(F1.user1 == current_user_id).union(
-        db.session.query(F2.user1).filter(F2.user2 == current_user_id)
+    friend_ids = db.session.query(F1.user2).filter(F1.user1 == current_user.id).union(
+        db.session.query(F2.user1).filter(F2.user2 == current_user.id)
     ).subquery()
+
 
     suggested_friends = db.session.query(
         User.id,
@@ -61,7 +67,7 @@ def get_suggested_friends():
     ).filter(
         User.colonial_floor == current_user.colonial_floor,
         User.colonial_side == current_user.colonial_side,
-        User.id != current_user_id, 
+        User.id != current_user.id, 
         ~User.id.in_(friend_ids) 
     ).all()
 
@@ -75,7 +81,7 @@ def get_suggested_friends():
         for user_id, username, email_address, profile_picture in suggested_friends
     ]
 
-    # randomizing order
+    # randomizing order so the same people don't always show up first
     random.shuffle(suggested_friends_list)
 
     return jsonify({

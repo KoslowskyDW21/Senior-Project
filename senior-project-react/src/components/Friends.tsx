@@ -11,6 +11,10 @@ interface Friendship {
   friends: [];
 }
 
+interface suggestedFriends {
+  suggested_friends: [];
+}
+
 interface User {
   users: [];
 }
@@ -27,6 +31,7 @@ const Friends: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResults, setSearchResults] = useState<[]>([]);
   const [friends, setFriends] = useState<[]>([]);
+  const [suggestedFriends, setSuggestedFriends] = useState<[]>([]);
   const [friendRequestsTo, setFriendRequestsTo] = useState<[]>([]);
   const [friendRequestsFrom, setFriendRequestsFrom] = useState<[]>([]);
   const navigate = useNavigate();
@@ -80,6 +85,10 @@ const Friends: React.FC = () => {
     console.log("useEffect FriendRequestsTo:", friendRequestsTo);
   }, [friendRequestsTo]);
 
+  useEffect(() => {
+    console.log("useEffect suggestedFriends:", suggestedFriends);
+  }, [suggestedFriends]);
+
   // end debugging
 
   const handleGoToOtherProfile = (id: number) => {
@@ -95,6 +104,20 @@ const Friends: React.FC = () => {
       );
       const data: Friendship = response.data;
       setFriends(data.friends);
+    } catch (error) {
+      console.error("Error fetching friends: ", error);
+    }
+  };
+
+  const getSuggestedFriends = async () => {
+    try {
+      const response = await axios.post(
+        `${config.serverUrl}/friends/get_suggested_friends/`,
+        {},
+        { withCredentials: true }
+      );
+      const data: suggestedFriends = response.data;
+      setSuggestedFriends(data.suggested_friends);
     } catch (error) {
       console.error("Error fetching friends: ", error);
     }
@@ -131,6 +154,7 @@ const Friends: React.FC = () => {
 
   useEffect(() => {
     getFriends();
+    getSuggestedFriends();
     getFriendRequestsTo();
     getFriendRequestsFrom();
   }, []);
@@ -379,61 +403,63 @@ const Friends: React.FC = () => {
               ))}
             </Box>
           </Box>
-          <Box>
-            <Typography variant="h4" mt={7} sx={{ fontWeight: "bold" }}>
-              Suggested Friends
-            </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "flex-start",
-                gap: 2,
-                mt: 3,
-              }}
-            >
-              {friendRequestsFrom.map((friend) => (
-                <Box
-                  key={friend.id}
-                  sx={{
-                    width: "120px",
-                    minHeight: "120px",
-                    border: "2px solid rgb(172, 169, 169)",
-                    borderRadius: 2,
-                    boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
-                    transition: "all 0.3s ease",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    p: 1,
-                    "&:hover": {
-                      borderColor: "#1976d2",
-                      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-                    },
-                  }}
-                  onClick={() => handleGoToOtherProfile(friend.id)}
-                >
-                  {friend.profile_picture ? (
-                    <Avatar
-                      alt="Profile Picture"
-                      src={`${config.serverUrl}/${friend.profile_picture}`}
-                      sx={{ width: 70, height: 70, border: "1px solid #000" }}
-                    />
-                  ) : (
-                    <Avatar
-                      sx={{ width: 70, height: 70, backgroundColor: "gray" }}
-                    >
-                      <PersonIcon sx={{ color: "white" }} />
-                    </Avatar>
-                  )}
-                  <Typography variant="body2" mt={1}>
-                    {friend.username}
-                  </Typography>
-                </Box>
-              ))}
+          {suggestedFriends.length > 0 && (
+            <Box>
+              <Typography variant="h4" mt={7} sx={{ fontWeight: "bold" }}>
+                Suggested Friends
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "flex-start",
+                  gap: 2,
+                  mt: 7,
+                }}
+              >
+                {suggestedFriends.map((friend) => (
+                  <Box
+                    key={friend.id}
+                    sx={{
+                      width: "120px",
+                      minHeight: "120px",
+                      border: "2px solid rgb(172, 169, 169)",
+                      borderRadius: 2,
+                      boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                      transition: "all 0.3s ease",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      p: 1,
+                      "&:hover": {
+                        borderColor: "#1976d2",
+                        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                      },
+                    }}
+                    onClick={() => handleGoToOtherProfile(friend.id)}
+                  >
+                    {friend.profile_picture ? (
+                      <Avatar
+                        alt="Profile Picture"
+                        src={`${config.serverUrl}/${friend.profile_picture}`}
+                        sx={{ width: 70, height: 70, border: "1px solid #000" }}
+                      />
+                    ) : (
+                      <Avatar
+                        sx={{ width: 70, height: 70, backgroundColor: "gray" }}
+                      >
+                        <PersonIcon sx={{ color: "white" }} />
+                      </Avatar>
+                    )}
+                    <Typography variant="body2" mt={1}>
+                      {friend.username}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
             </Box>
-          </Box>
+          )}
         </main>
       </Box>
     </div>
