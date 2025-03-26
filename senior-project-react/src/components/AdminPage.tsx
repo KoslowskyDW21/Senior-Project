@@ -40,6 +40,12 @@ interface User {
   is_banned: boolean;
 }
 
+interface Report {
+  reported_user: number;
+  reported_by: number;
+  reason: string;
+}
+
 const modalStyle = {
   position: "absolute",
   top: "50%",
@@ -64,9 +70,14 @@ export default function AdminPage() {
   const [idInput, setIdInput] = useState("");
   const [userToBan, setUserToBan] = useState<User | null>(null);
   const [indexOfLength, setIndexOfLength] = useState<number>(-1);
+  const [userReport, setUserReport] = useState<User | null>(null);
+  const [reports, setReports] = useState<Report[]>([]);
   const [open, setOpen] = useState(false);
   const handleOpenModal = () => setOpen(true);
   const handleCloseModal = () => setOpen(false);
+  const [openReports, setOpenReports] = useState<boolean>(false);
+  const handleOpenReportModal = () => setOpenReports(true);
+  const handleCloseReportModal = () => setOpenReports(false);
 
   function CreateAdminButton({ user, handleAdminChange }) {
     if (superAdmin) {
@@ -241,6 +252,51 @@ export default function AdminPage() {
     setIndexOfLength(length);
   };
 
+  async function loadReports(id: number) {
+    await axios
+      .get(`${config.serverUrl}/admin/reports/${id}`)
+      .then((response) => {
+        setReports(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not fetch reports", error);
+      });
+  }
+
+  async function deleteReports() {
+    await axios
+      .delete(`${config.serverUrl}/admin/reports/${userReport!.id}/delete_reports`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not delete reports", error);
+      });
+  }
+
+  async function setReportsZero() {
+    await axios
+      .post(`${config.serverUrl}/admin/reports/${userReport!.id}/set_reports_zero`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not set reports to zero", error);
+      })
+  }
+
+  async function handleRemoveReports() {
+    deleteReports();
+    setReportsZero();
+
+    location.reload();
+  }
+  
+  function getUserById(id: number) {
+    const user = users.find(user => user.id === id)
+    return user?.username;
+  }
+
   if (admin) {
     return (
       <>
@@ -262,6 +318,7 @@ export default function AdminPage() {
               <td>Username</td>
               <td>Admin Status</td>
               <td>Reports</td>
+              <td></td>
               <td></td>
               <td></td>
               <td></td>
@@ -312,10 +369,84 @@ export default function AdminPage() {
                     <></>
                   )}
                 </td>
+                <td>
+                  {user.num_reports > 0 && (
+                    <Button
+                      variant="contained"
+                      color="info"
+                      onClick={() => {
+                        setUserReport(user);
+                        loadReports(user.id);
+                        handleOpenReportModal();
+                      }}
+                    >
+                      View Reports
+                    </Button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
+
+        <Modal
+          open={openReports}
+          onClose={handleCloseReportModal}
+          aria-labelledby="modal-title"
+        >
+          <Box sx={modalStyle}>
+            <IconButton
+              onClick={handleCloseReportModal}
+              style={{ position: "absolute", top: 5, right: 5 }}
+            >
+              <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+            </IconButton>
+
+            <Typography id="modal-title" variant="h4" component="h2">
+              {`Reports pertaining to ${
+                userReport?.username
+              }`}
+            </Typography>
+
+            <table>
+              <thead>
+                <tr>
+                  <td>Reported by</td>
+                  <td>Reason</td>
+                </tr>
+              </thead>
+              <tbody>
+                {reports.map((report) => (
+                  <tr key={report.reported_by}>
+                    <td>{getUserById(report.reported_by)}</td>
+                    <td>{report.reason}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                handleRemoveReport();
+                handleCloseReportModal();
+              }}
+            >
+              Remove Review
+            </Button> */}
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                handleRemoveReports();
+                handleCloseReportModal();
+              }}
+            >
+              Dismiss Report(s)
+            </Button>
+          </Box>
+        </Modal>
 
         <Modal
           open={open}

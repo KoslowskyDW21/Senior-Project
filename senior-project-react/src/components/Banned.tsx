@@ -1,8 +1,10 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import config from "../config.js";
 import axios from "axios";
 
 export default function Banned() {
+  const [reasons, setReasons] = useState<string>("")
+
   async function checkBanStatus() {
     await axios.post(`${config.serverUrl}/admin/stillBanned`)
     .then((response) => {
@@ -18,13 +20,26 @@ export default function Banned() {
     });
   }
 
-  useEffect(() => {checkBanStatus();}, [])
+  async function getReasons() {
+    await axios.get(`${config.serverUrl}/admin/reasons`)
+      .then((response) => {
+        setReasons(response.data.reasons);
+      })
+      .catch((error) => {
+        console.error("Could not fetch reasons", error);
+      });
+  }
+
+  useEffect(() => {
+    checkBanStatus();
+    getReasons();
+  }, [])
 
   return (
     <>
       <h1>Banned</h1>
       <h3>You have been banned for:</h3>
-      <h3>x, y, z</h3>
+      <h3>{reasons}</h3>
     </>
   )
 }

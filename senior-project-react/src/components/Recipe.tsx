@@ -92,7 +92,7 @@ interface Step {
   step_description: string;
 }
 
-function Step({ recipe_id, step_number, step_description }: Step) {
+function Step({step_number, step_description }: Step) {
   // State to track whether the step is checked off
   const [checked, setChecked] = useState(false);
 
@@ -195,9 +195,12 @@ const IndividualRecipe: React.FC = () => {
   const [snackbarOpen, setSnackBarOpen] = React.useState(false);
   const { id } = useParams<{ id: string }>();
   const [reviews, setReviews] = React.useState<Review[]>([]);
+  const [userReview, setUserReview] = useState<Review | null>(null); // Store the user's review here
   const [reviewId, setReviewId] = useState<number | null>(null);
   const [difficulty, setDifficulty] = useState<string | undefined>();
   const [rating, setRating] = useState<string | undefined>();
+  const [displayRating, setDisplayRating] = useState<string | undefined>();
+  const[userId, setUserId] = useState<string>();
   const [ingredients, setIngredients] = React.useState<RecipeIngredient[]>([]);
   const [open, setOpen] = useState(false);
   const handleOpenModal = () => setOpen(true);
@@ -208,17 +211,6 @@ const IndividualRecipe: React.FC = () => {
   const handleGoToCompletedRecipe = async () => {
     console.log("Navigating to completed recipe page");
     navigate(`/recipes/completed/${id}`);
-  };
-
-  const getReviews = async () => {
-    try {
-      const response = await axios.get(
-        `${config.serverUrl}/recipes/reviews/${id}`
-      );
-      setReviews(response.data.reviews);
-    } catch (error) {
-      console.error("Error fetching reviews: ", error);
-    }
   };
 
   const handleAddRecipeToList = async (event: SelectChangeEvent) => {
@@ -359,11 +351,47 @@ const IndividualRecipe: React.FC = () => {
         `${config.serverUrl}/profile/current_user`
       );
       const data: User = response.data;
-      setCurrent_user(data);
+      setCurrent_user(data)
+      
     } catch (error) {
-      console.error("Error fetching recipe: ", error);
+      console.error("Error fetching user: ", error);
     }
   };
+
+  const getReviews = async () => {
+    //i am WELL aware that this is stupid - but i could NOT get it to accurately display the user id otherwise
+    let myId = "-100"
+    try {
+      const response = await axios.get(
+        `${config.serverUrl}/recipes/reviews/${id}`
+      );
+      try {
+        const response = await axios.post(
+          `${config.serverUrl}/recipes/user`
+        );
+        myId = response.data.id
+      }
+      catch (error){
+        console.error("Error fetching ingredients: ", error)
+      }
+      setReviews(response.data.reviews);
+      const userReview = response.data.reviews.find(
+        (review: Review) => review.user_id === myId
+      );
+      if (userReview) {
+        console.log("should be working")
+        setUserReview(userReview); // Set the current user's review if they have one
+        setDisplayRating(userReview.rating)
+      }
+      else{
+        console.log("didnt find nothing")
+      }
+    } catch (error) {
+      console.error("Error fetching reviews: ", error);
+    }
+  };
+
+  
 
   const getRecipeLists = async () => {
     try {
@@ -380,6 +408,7 @@ const IndividualRecipe: React.FC = () => {
       }
     }
   };
+
 
   const getRecipeListsIn = async () => {
     if (id == undefined) {
@@ -398,6 +427,7 @@ const IndividualRecipe: React.FC = () => {
       setRecipe_name(data.recipe_name);
       setDifficulty(data.difficulty);
       setRating(data.rating);
+      setDisplayRating(data.rating);
     } catch (error) {
       console.error("Error fetching recipe: ", error);
     }
@@ -471,10 +501,10 @@ const IndividualRecipe: React.FC = () => {
   React.useEffect(() => {
     getRecipeName();
     getCurrentUser();
+    getReviews();
     getRecipeLists();
     getSteps();
     getIngredients();
-    getReviews();
     getRecipeListsIn();
   }, []);
 
@@ -527,7 +557,7 @@ const IndividualRecipe: React.FC = () => {
       </Box>
 
       <Box sx={{ marginLeft: 2, display: "flex", alignItems: "center" }}>
-        <Rating name="recipe-rating" value={Number(rating)} precision={0.5} readOnly />
+        <Rating name="recipe-rating" value={Number(displayRating)} precision={0.5} readOnly />
       </Box>
       </Box>
       <br />

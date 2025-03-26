@@ -121,11 +121,13 @@ def is_current_user_blocked(id):
     is_current_user_blocked = db.session.query(UserBlock).filter(and_(UserBlock.blocked_user==current_user.id, UserBlock.blocked_by==id)).first()
     return jsonify({"is_current_user_blocked": bool(is_current_user_blocked)}), 200
 
-@bp.route('/current_user/', methods=['POST'])
+@bp.route('/current_user', methods=['POST'])
 def post_current_user():
-    return jsonify(
-        current_user.to_json() # type: ignore
-    ), 200
+    if(current_user is not None):
+        return jsonify(
+            current_user.to_json() # type: ignore
+        ), 200
+    return "<h1>404: profile not found</h1>", 404
 
 @bp.route('/get_profile_pic/', methods=['POST'])
 def get_profile_pic():

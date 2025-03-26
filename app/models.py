@@ -502,6 +502,7 @@ class ShoppingList(db.Model):
     __tablename__ = 'ShoppingList'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    shopping_list_items = relationship('ShoppingListItem', backref='shopping_list', cascade="all, delete-orphan")
     
     def to_json(self):
         return {

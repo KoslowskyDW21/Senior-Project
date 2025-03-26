@@ -22,6 +22,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import config from "../config.js";
+import ConfirmationMessage from "./ConfirmationMessage.js";
 
 const reportModalStyle = {
   position: "absolute",
@@ -51,6 +52,7 @@ const GroupMessages: React.FC = () => {
   const [newMessage, setNewMessage] = useState<string>("");
   const [messageId, setMessageId] = useState<number>(-1);
   const [open, setOpen] = useState<boolean>(false);
+  const [confirmation, setConfirmation] = useState<boolean>(false);
   const handleOpenModal = () => setOpen(true);
   const handleCloseModal = () => setOpen(false);
   const messagesEndRef = useRef(null);
@@ -203,6 +205,7 @@ const GroupMessages: React.FC = () => {
               onClick={() => {
                 handleReportMessage();
                 handleCloseModal();
+                setConfirmation(true);
               }}
             >
               Confirm Report
@@ -228,6 +231,12 @@ const GroupMessages: React.FC = () => {
           </Button>
         </Box>
       </Box>
+
+      {confirmation &&
+      <ConfirmationMessage
+        message={"Message Successfully Reported"}
+      />
+      }
     </Container>
   );
 };
