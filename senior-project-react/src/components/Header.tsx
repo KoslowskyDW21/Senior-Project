@@ -352,8 +352,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           >
             <MenuItem onClick={handleGoToProfile}>Profile</MenuItem>
             <MenuItem onClick={handleGoToSettings}>Settings</MenuItem>
-            <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem>
-            <MenuItem onClick={handleGoToShoppingList}>Shopping List</MenuItem>
+            {/* <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem> */}
+            {/* <MenuItem onClick={handleGoToShoppingList}>Shopping List</MenuItem> */}
             <MenuItem onClick={handleGoToAchievements}>Achievements</MenuItem>
             <MenuItem onClick={handleLogout} sx={{ color: "red" }}>
               Log Out
