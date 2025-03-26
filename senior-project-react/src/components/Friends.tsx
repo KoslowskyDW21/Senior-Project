@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Typography, Box, Avatar, TextField } from "@mui/material";
+import { Typography, Box, Avatar, TextField, IconButton } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import config from "../config.js";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import Header from "./Header";
 
@@ -170,6 +171,17 @@ const Friends: React.FC = () => {
         }}
       >
         <Header title="Friends" />
+        <IconButton
+          onClick={() => navigate(-1)}
+          style={{
+            position: "fixed",
+            top: "clamp(70px, 10vw, 120px)",
+            left: "clamp(0px, 1vw, 100px)",
+            zIndex: 1000,
+          }}
+        >
+          <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+        </IconButton>
 
         <main role="main">
           <Box sx={{ position: "relative", width: "50vw", margin: "auto" }}>
@@ -300,15 +312,15 @@ const Friends: React.FC = () => {
                 flexWrap: "wrap",
                 justifyContent: "flex-start",
                 gap: 2,
-                mt: 3,
               }}
             >
               {friendRequestsFrom.map((friend) => (
                 <Box
                   key={friend.id}
+                  mt={5}
                   sx={{
-                    width: "120px",
-                    minHeight: "120px",
+                    width: "100px",
+                    minHeight: "100px",
                     border: "2px solid rgb(172, 169, 169)",
                     borderRadius: 2,
                     boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
@@ -318,6 +330,7 @@ const Friends: React.FC = () => {
                     alignItems: "center",
                     justifyContent: "center",
                     p: 1,
+                    height: "100%",
                     "&:hover": {
                       borderColor: "#1976d2",
                       boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
@@ -414,15 +427,17 @@ const Friends: React.FC = () => {
                   flexWrap: "wrap",
                   justifyContent: "flex-start",
                   gap: 2,
-                  mt: 7,
+                  mt: 1,
+                  mb: 3,
                 }}
               >
                 {suggestedFriends.map((friend) => (
                   <Box
                     key={friend.id}
+                    mt={5}
                     sx={{
-                      width: "120px",
-                      minHeight: "120px",
+                      width: "100px",
+                      minHeight: "100px",
                       border: "2px solid rgb(172, 169, 169)",
                       borderRadius: 2,
                       boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
@@ -432,6 +447,7 @@ const Friends: React.FC = () => {
                       alignItems: "center",
                       justifyContent: "center",
                       p: 1,
+                      height: "100%",
                       "&:hover": {
                         borderColor: "#1976d2",
                         boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",

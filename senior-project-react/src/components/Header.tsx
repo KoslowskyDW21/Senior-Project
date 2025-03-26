@@ -122,6 +122,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   };
 
   const getNotifications = async () => {
+    //TODO: Change to periodically update instead of just on refresh
     try {
       const response = await axios.post(
         `${config.serverUrl}/settings/get_notifications/`,
