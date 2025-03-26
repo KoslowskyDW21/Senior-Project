@@ -67,6 +67,47 @@ interface MessageReport {
   reason: string;
 }
 
+// React component that lets the user see which groups have been reported
+function Group({ group }) {
+  return (
+    <Card
+      sx={{
+        marginBottom: 2,
+        border: "1px solid #ccc",
+        borderRadius: 2,
+        boxShadow: 2,
+      }}
+    >
+      <CardContent>
+        <Typography variant="h6">{group.name}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {group.description}
+        </Typography>
+
+        <a
+          href={`/groups/${group.id}`}
+        >
+          {`Go to ${group.name}`}
+        </a>
+
+        {group.image != "NULL" && (
+          <CardMedia
+            component="img"
+            height="200"
+            image={`${config.serverUrl}/${group.image}`}
+            alt="Group Image"
+            sx={{
+              objectFit: "contain",
+              maxWidth: "100%",
+              marginBottom: 2,
+            }}
+          />
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 // React component that lets the user see which reviews have been reported
 function Review({ review }) {
   return (
@@ -543,6 +584,8 @@ export default function ReportPage() {
               <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
             </IconButton>
 
+            <Group group={group} />
+
             <Typography id="modal-title" variant="h4" component="h2">
               {group !== null ? group.name : ""}
             </Typography>
@@ -550,7 +593,7 @@ export default function ReportPage() {
             <table>
               <thead>
                 <tr>
-                  <td>User ID</td>
+                  <td>Reported by</td>
                   <td>Reason</td>
                 </tr>
               </thead>
@@ -614,7 +657,7 @@ export default function ReportPage() {
             <table>
               <thead>
                 <tr>
-                  <td>User ID</td>
+                  <td>Reported by</td>
                   <td>Reason</td>
                 </tr>
               </thead>
@@ -671,14 +714,14 @@ export default function ReportPage() {
 
             <Typography id="modal-title" variant="h4" component="h2">
               {`Message written by ${
-                message !== null ? message.user_id : "null"
+                message !== null ? message.username : "null"
               }`}
             </Typography>
 
             <table>
               <thead>
                 <tr>
-                  <td>User ID</td>
+                  <td>Reported by</td>
                   <td>Reason</td>
                 </tr>
               </thead>
