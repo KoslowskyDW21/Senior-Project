@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import React from "react";
 import {
   Button,
@@ -21,6 +21,26 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import config from "../config.js";
+
+interface User {
+  id: number;
+  fname: string;
+  lname: string;
+  email_address: string;
+  username: string;
+  profile_picture: string;
+  xp_points: number;
+  user_level: number;
+  is_admin: boolean;
+  is_super_admin: boolean;
+  num_recipes_completed: number;
+  colonial_floor: string;
+  colonial_side: string;
+  date_create: Date;
+  last_logged_in: Date;
+  num_reports: number;
+  is_banned: boolean;
+}
 
 interface UserGroup {
   id: number;
@@ -65,6 +85,47 @@ interface MessageReport {
   user_id: number;
   message_id: number;
   reason: string;
+}
+
+// React component that lets the user see which groups have been reported
+function Group({ group }) {
+  return (
+    <Card
+      sx={{
+        marginBottom: 2,
+        border: "1px solid #ccc",
+        borderRadius: 2,
+        boxShadow: 2,
+      }}
+    >
+      <CardContent>
+        <Typography variant="h6">{group.name}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {group.description}
+        </Typography>
+
+        <a
+          href={`/groups/${group.id}`}
+        >
+          {`Go to ${group.name}`}
+        </a>
+
+        {group.image != "NULL" && (
+          <CardMedia
+            component="img"
+            height="200"
+            image={`${config.serverUrl}/${group.image}`}
+            alt="Group Image"
+            sx={{
+              objectFit: "contain",
+              maxWidth: "100%",
+              marginBottom: 2,
+            }}
+          />
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
 // React component that lets the user see which reviews have been reported
@@ -157,6 +218,7 @@ export default function ReportPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState<Message | null>(null);
   const [messageReports, setMessageReports] = useState<MessageReport[]>([]);
+  const [users, setUsers] = useState<User[]>([]);  
   const [openGroup, setOpenGroup] = useState(false);
   const handleOpenGroupModal = () => setOpenGroup(true);
   const handleCloseGroupModal = () => setOpenGroup(false);
@@ -394,12 +456,29 @@ export default function ReportPage() {
     setMessages(newMessages);
   }
 
+  async function loadUsers() {
+    await axios
+      .get(`${config.serverUrl}/admin/users/`)
+      .then((response) => {
+        setUsers(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not load users", error);
+      });
+  }
+
+  const getUserById = (id: number) => {
+    const user = users.find(user => user.id === id)
+    return user?.username;
+  }
+
   // Checks to see if the current user is an admin and loads the reported groups, reviews, and messages
   React.useEffect(() => {
     isAdmin();
     loadGroups();
     loadReviews();
     loadMessages();
+    loadUsers();
   }, []);
 
   if (admin) {
@@ -421,7 +500,6 @@ export default function ReportPage() {
           <table>
             <thead>
               <tr>
-                <td>ID</td>
                 <td>Name</td>
                 <td>Reports</td>
                 <td></td>
@@ -430,7 +508,6 @@ export default function ReportPage() {
             <tbody>
               {groups.map((group) => (
                 <tr key={group.id}>
-                  <td>{group.id}</td>
                   <td>{group.name}</td>
                   <td>{group.num_reports}</td>
                   <td>
@@ -543,6 +620,8 @@ export default function ReportPage() {
               <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
             </IconButton>
 
+            <Group group={group} />
+
             <Typography id="modal-title" variant="h4" component="h2">
               {group !== null ? group.name : ""}
             </Typography>
@@ -550,14 +629,14 @@ export default function ReportPage() {
             <table>
               <thead>
                 <tr>
-                  <td>User ID</td>
+                  <td>Reported by</td>
                   <td>Reason</td>
                 </tr>
               </thead>
               <tbody>
                 {groupReports.map((report) => (
                   <tr key={report.user_id}>
-                    <td>{report.user_id}</td>
+                    <td>{getUserById(report.user_id)}</td>
                     <td>{report.reason}</td>
                   </tr>
                 ))}
@@ -614,14 +693,14 @@ export default function ReportPage() {
             <table>
               <thead>
                 <tr>
-                  <td>User ID</td>
+                  <td>Reported by</td>
                   <td>Reason</td>
                 </tr>
               </thead>
               <tbody>
                 {reviewReports.map((report) => (
                   <tr key={report.user_id}>
-                    <td>{report.user_id}</td>
+                    <td>{getUserById(report.user_id)}</td>
                     <td>{report.reason}</td>
                   </tr>
                 ))}
@@ -671,21 +750,21 @@ export default function ReportPage() {
 
             <Typography id="modal-title" variant="h4" component="h2">
               {`Message written by ${
-                message !== null ? message.user_id : "null"
+                message !== null ? message.username : "null"
               }`}
             </Typography>
 
             <table>
               <thead>
                 <tr>
-                  <td>User ID</td>
+                  <td>Reported by</td>
                   <td>Reason</td>
                 </tr>
               </thead>
               <tbody>
                 {messageReports.map((message) => (
                   <tr key={message.user_id}>
-                    <td>{message.user_id}</td>
+                    <td>{getUserById(message.user_id)}</td>
                     <td>{message.reason}</td>
                   </tr>
                 ))}

@@ -16,6 +16,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  TextField,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -520,6 +521,12 @@ const OtherProfile: React.FC = () => {
 
               <Modal open={openBlockModal} onClose={handleCloseBlockModal}>
                 <Box sx={modalStyle}>
+                  <TextField 
+                    fullWidth
+                    id="reason-for-blocking"
+                    label="Why are you blocking this user?"
+                    variant="outlined"
+                  />
                   <h2>Are you sure you want to block this user?</h2>
                   <Button
                     onClick={() => blockUser(numericId)}
