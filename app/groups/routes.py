@@ -196,10 +196,17 @@ def create_group():
 @bp.route('/<int:group_id>/messages', methods=['GET'])
 @login_required
 def get_messages(group_id):
-    messages = Message.query.filter_by(group_id=group_id).order_by(Message.id.asc()).all()
+    user: User = current_user._get_current_object() # type: ignore
+    messages: list[Message] = Message.query.filter_by(group_id=group_id).order_by(Message.id.asc()).all()
+
+    if not user.is_admin:
+        reports: list[MessageReport] = MessageReport.query.filter(MessageReport.user_id == user.id).all()
+        reportedMessages: list[int] = [report.message_id for report in reports]
+        messages = [message for message in messages if not message.id in reportedMessages]
+ 
     message_data = []
     for message in messages:
-        user = User.query.get(message.user_id)
+        user = User.query.get(message.user_id) # type: ignore
         if(not user):
             continue
         message_data.append({
