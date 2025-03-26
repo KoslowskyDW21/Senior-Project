@@ -39,6 +39,32 @@ def make_admin():
         return jsonify({"message": "Error: Could not update user"}), 500
     
 @login_required
+@bp.get("/reports/<int:id>")
+def get_reports(id):
+    reports: list[UserReport] = UserReport.query.filter(UserReport.reported_user == id).all()
+    return jsonify([report.to_json() for report in reports]), 200
+
+@login_required
+@bp.delete("/reports/<int:id>/delete_reports")
+def delete_reports(id):
+    reports: list[UserReport] = UserReport.query.filter(UserReport.reported_user == id).all()
+    
+    for report in reports:
+        db.session.delete(report)
+
+    db.session.commit()
+    return jsonify({"message": "Reports successfully deleted"}), 200
+
+@login_required
+@bp.post("/reports/<int:id>/set_reports_zero")
+def set_reports_zero(id):
+    user: User = User.query.get(id) # type: ignore
+    user.num_reports = 0
+
+    db.session.commit()
+    return jsonify({"message": "Dismissed reports successfully"}), 200
+
+@login_required
 @bp.post("/ban/")
 def ban_user():
     data = request.get_json()
