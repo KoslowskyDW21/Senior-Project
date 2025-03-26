@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import React from "react";
 import {
   Button,
@@ -21,6 +21,26 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import config from "../config.js";
+
+interface User {
+  id: number;
+  fname: string;
+  lname: string;
+  email_address: string;
+  username: string;
+  profile_picture: string;
+  xp_points: number;
+  user_level: number;
+  is_admin: boolean;
+  is_super_admin: boolean;
+  num_recipes_completed: number;
+  colonial_floor: string;
+  colonial_side: string;
+  date_create: Date;
+  last_logged_in: Date;
+  num_reports: number;
+  is_banned: boolean;
+}
 
 interface UserGroup {
   id: number;
@@ -198,6 +218,7 @@ export default function ReportPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState<Message | null>(null);
   const [messageReports, setMessageReports] = useState<MessageReport[]>([]);
+  const [users, setUsers] = useState<User[]>([]);  
   const [openGroup, setOpenGroup] = useState(false);
   const handleOpenGroupModal = () => setOpenGroup(true);
   const handleCloseGroupModal = () => setOpenGroup(false);
@@ -435,12 +456,29 @@ export default function ReportPage() {
     setMessages(newMessages);
   }
 
+  async function loadUsers() {
+    await axios
+      .get(`${config.serverUrl}/admin/users/`)
+      .then((response) => {
+        setUsers(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not load users", error);
+      });
+  }
+
+  const getUserById = (id: number) => {
+    const user = users.find(user => user.id === id)
+    return user?.username;
+  }
+
   // Checks to see if the current user is an admin and loads the reported groups, reviews, and messages
   React.useEffect(() => {
     isAdmin();
     loadGroups();
     loadReviews();
     loadMessages();
+    loadUsers();
   }, []);
 
   if (admin) {
@@ -462,7 +500,6 @@ export default function ReportPage() {
           <table>
             <thead>
               <tr>
-                <td>ID</td>
                 <td>Name</td>
                 <td>Reports</td>
                 <td></td>
@@ -471,7 +508,6 @@ export default function ReportPage() {
             <tbody>
               {groups.map((group) => (
                 <tr key={group.id}>
-                  <td>{group.id}</td>
                   <td>{group.name}</td>
                   <td>{group.num_reports}</td>
                   <td>
@@ -600,7 +636,7 @@ export default function ReportPage() {
               <tbody>
                 {groupReports.map((report) => (
                   <tr key={report.user_id}>
-                    <td>{report.user_id}</td>
+                    <td>{getUserById(report.user_id)}</td>
                     <td>{report.reason}</td>
                   </tr>
                 ))}
@@ -664,7 +700,7 @@ export default function ReportPage() {
               <tbody>
                 {reviewReports.map((report) => (
                   <tr key={report.user_id}>
-                    <td>{report.user_id}</td>
+                    <td>{getUserById(report.user_id)}</td>
                     <td>{report.reason}</td>
                   </tr>
                 ))}
@@ -728,7 +764,7 @@ export default function ReportPage() {
               <tbody>
                 {messageReports.map((message) => (
                   <tr key={message.user_id}>
-                    <td>{message.user_id}</td>
+                    <td>{getUserById(message.user_id)}</td>
                     <td>{message.reason}</td>
                   </tr>
                 ))}
