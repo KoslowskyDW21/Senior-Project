@@ -22,7 +22,14 @@ def get_group(id):
 
 @bp.route('/', methods=['GET'])
 def get_groups():
-    groups = UserGroup.query.filter_by(is_public=True).all()
+    user: User = current_user._get_current_object() # type: ignore
+    groups: list[UserGroup] = UserGroup.query.filter_by(is_public=True).all()
+
+    if not user.is_admin:
+        reports: list[GroupReport] = GroupReport.query.filter_by(user_id = user.id).all()
+        reportedGroups: list[int] = [report.group_id for report in reports]
+        groups = [group for group in groups if not group.id in reportedGroups]
+
     return jsonify([group.to_json() for group in groups]), 200
 
 @bp.route('/reported/', methods=["GET"])
