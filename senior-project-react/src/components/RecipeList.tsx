@@ -315,7 +315,7 @@ const RecipeLists: React.FC = () => {
     } else {
       return (
         <>
-          <FormControl sx={{ width: 400 }}>
+          <FormControl sx={{ width: 400, mt: 2, mb: 2 }}>
             <InputLabel>Add a recipe</InputLabel>
             <Select value={recipeToAddId} onChange={handleAddRecipeToList}>
               {allRecipes.map((recipe: Recipe) => {
@@ -455,9 +455,9 @@ const RecipeLists: React.FC = () => {
       <br />
       <br />
       {/* Button to find more recipes (return to recipe page) */}
-      <Button onClick={handleGoToRecipes} variant="contained" color="primary">
+      {/* <Button onClick={handleGoToRecipes} variant="contained" color="primary">
         Find Recipes
-      </Button>
+      </Button> */}
       {/* Button to add all ingredients in all recipes to shopping list */}
       <Button
         onClick={handleAddAllIngredientsToShoppingList}

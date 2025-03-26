@@ -18,6 +18,7 @@ import {
   ListItemText,
   FormHelperText,
   SelectChangeEvent,
+  Stack,
 } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import Header from "./Header";
@@ -138,6 +139,14 @@ const Recipes: React.FC = () => {
       .map((dietaryRestriction) => dietaryRestriction.id);
     setSelectedDietaryRestrictions(selectedNames);
     setSelectedIds(selectedIdz);
+  };
+
+  const handleGoToShoppingList = async () => {
+    navigate("/shopping-list");
+  };
+
+  const handleGoToRecipeLists = async () => {
+    navigate(`/recipe-lists/`);
   };
 
   useEffect(() => {
@@ -293,7 +302,8 @@ const Recipes: React.FC = () => {
   return (
     <div>
       <Header title="Recipes" />
-      <Box
+
+    <Box
         mt={{ xs: 10, sm: 14, md: 14 }}
         textAlign="center"
         display="flex"
@@ -310,7 +320,42 @@ const Recipes: React.FC = () => {
             width: "100%",
           }}
         />
-      </Box>
+    </Box>
+
+    <Box
+      display="flex"
+      mt={{ xs: 0, sm: 0, md: 3 }}
+      mb={{xs: 0}}
+      justifyContent="center"
+    >
+      <Stack
+        direction="row"
+        spacing={2}
+      >
+        <Button
+          variant="contained"
+          sx={{
+            width: "75",
+            height: "40",
+          }}
+          onClick={handleGoToRecipeLists}
+        >
+          Recipe Lists
+        </Button>
+
+        <Button
+          variant="contained"
+          sx={{
+            width: "75",
+            height: "40"
+          }}
+          onClick={handleGoToShoppingList}
+        >
+          Shopping List
+        </Button>
+      </Stack>
+    </Box>
+
       <Box mt={2} display="flex" justifyContent="center">
         <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
           <InputLabel id="dietary_restriction-select-label">
@@ -336,7 +381,7 @@ const Recipes: React.FC = () => {
               </MenuItem>
             ))}
           </Select>
-          <FormHelperText>Select Dietary Restrictions</FormHelperText>
+          <FormHelperText>Filter by Dietary Restrictions</FormHelperText>
         </FormControl>
       </Box>
 
