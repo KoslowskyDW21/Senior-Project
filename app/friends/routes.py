@@ -47,17 +47,19 @@ from sqlalchemy.orm import aliased
 #this method grabs people on your hall and suggests them as friends if they are NOT already a friend of yours
 @bp.route('/get_suggested_friends/', methods=['POST'])
 def get_suggested_friends():
-    #TODO: Maybe suggest friends who are in the same group as you?
     #TODO: Also don't suggest them if either of you have a friend request to each other
     F1 = aliased(Friendship)
     F2 = aliased(Friendship)
     FR1 = aliased(FriendRequest)
     FR2 = aliased(FriendRequest)
 
-    friend_ids = db.session.query(F1.user2).filter(F1.user1 == current_user.id).union(
-        db.session.query(F2.user1).filter(F2.user2 == current_user.id)
+    friend_ids = db.session.query(F1.user2.label("user_id")).filter(F1.user1 == current_user.id).union(
+    db.session.query(F2.user1.label("user_id")).filter(F2.user2 == current_user.id)
     ).subquery()
 
+    friend_request_ids = db.session.query(FR1.requestTo.label("user_id")).filter(FR1.requestFrom == current_user.id).union(
+    db.session.query(FR2.requestFrom.label("user_id")).filter(FR2.requestTo == current_user.id)
+    ).subquery()
 
     suggested_friends = db.session.query(
         User.id,
@@ -67,8 +69,9 @@ def get_suggested_friends():
     ).filter(
         User.colonial_floor == current_user.colonial_floor,
         User.colonial_side == current_user.colonial_side,
-        User.id != current_user.id, 
-        ~User.id.in_(friend_ids) 
+        User.id != current_user.id,
+        ~User.id.in_(db.session.query(friend_ids.c.user_id)),  # ✅ Correct column alias
+        ~User.id.in_(db.session.query(friend_request_ids.c.user_id))  # ✅ Correct column alias
     ).all()
 
     suggested_friends_list = [

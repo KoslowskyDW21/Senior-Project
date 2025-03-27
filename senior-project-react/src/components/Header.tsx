@@ -122,6 +122,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   };
 
   const getNotifications = async () => {
+    //TODO: Change to periodically update instead of just on refresh
     try {
       const response = await axios.post(
         `${config.serverUrl}/settings/get_notifications/`,
@@ -216,13 +217,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           backgroundColor: "#fff",
           boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
           zIndex: 1000,
-          height: "100px",
+          height: "clamp(50px, 6vw, 80px)",
           justifyContent: "center",
-          // Responsive styles
-          "@media (max-width: 600px)": {
-            height: "80px", // Shrink header height on small screens
-            padding: "5px 10px", // Reduce padding on small screens
-          },
         }}
       >
         <ButtonBase onClick={handleGoToRecipes}>
@@ -251,7 +247,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             justifyContent: "center",
             flexGrow: 1,
             alignItems: "center",
-            fontSize: "clamp(8px, 2vw, 24px)", // Scales based on screen width, between 16px and 24px
+            fontSize: "clamp(8px, 2vw, 20px)", // Scales based on screen width, between 16px and 24px
             fontWeight: "bold",
           }}
         >
@@ -265,8 +261,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           >
             <Avatar
               sx={{
-                width: "clamp(40px, 8vw, 70px)", // Avatar width scales between 40px and 70px based on screen width
-                height: "clamp(40px, 8vw, 70px)", // Avatar height scales between 40px and 70px based on screen width
+                width: "clamp(20px, 8vw, 50px)", // Avatar width scales between 40px and 70px based on screen width
+                height: "clamp(20px, 8vw, 50px)", // Avatar height scales between 40px and 70px based on screen width
                 backgroundColor: "gray",
               }}
             >
@@ -278,8 +274,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                       position: "absolute",
                       top: 5,
                       right: 5,
-                      width: "clamp(10px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
-                      height: "clamp(10px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
+                      width: "clamp(7px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
+                      height: "clamp(7px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
                       backgroundColor: "red",
                       borderRadius: "50%",
                     }}
@@ -327,8 +323,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                 alt="Profile Picture"
                 src={profile_picture}
                 sx={{
-                  width: "clamp(40px, 8vw, 70px)", // Avatar width scales between 40px and 70px based on screen width
-                  height: "clamp(40px, 8vw, 70px)", // Avatar height scales between 40px and 70px based on screen width
+                  width: "clamp(20px, 8vw, 50px)", // Avatar width scales between 40px and 70px based on screen width
+                  height: "clamp(20px, 8vw, 50px)", // Avatar height scales between 40px and 70px based on screen width
                   border: "1px solid #000",
                 }}
               />

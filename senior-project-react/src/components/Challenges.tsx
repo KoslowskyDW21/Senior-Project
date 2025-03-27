@@ -40,7 +40,9 @@ const Challenges: React.FC = () => {
   const [challenges, setChallenges] = useState<ChallengeData[]>([]);
   const [myChallenges, setMyChallenges] = useState<ChallengeData[]>([]);
   const [joinedChallenges, setJoinedChallenges] = useState<ChallengeData[]>([]);
-  const [invitedChallenges, setInvitedChallenges] = useState<ChallengeData[]>([]);
+  const [invitedChallenges, setInvitedChallenges] = useState<ChallengeData[]>(
+    []
+  );
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [participants, setParticipants] = useState<{ [key: number]: boolean }>(
     {}
@@ -55,11 +57,13 @@ const Challenges: React.FC = () => {
   const [pastChallenges, setPastChallenges] = useState<ChallengeData[]>([]);
 
   const isSmallScreen = useMediaQuery("(max-width:600px)");
-  const isMediumScreen = useMediaQuery("(min-width:600px) and (max-width:900px)");
+  const isMediumScreen = useMediaQuery(
+    "(min-width:600px) and (max-width:900px)"
+  );
 
   const getResponse = async () => {
     try {
-      const response = await axios.get(`${config.serverUrl}/challenges/`);
+      const response = await axios.get(`${config.serverUrl}/challenges`);
       const data: ChallengeData[] = response.data;
       const now = new Date();
       const validChallenges = data.filter(
@@ -108,10 +112,11 @@ const Challenges: React.FC = () => {
       const notificationsResponse = await axios.get(
         `${config.serverUrl}/challenges/notifications`
       );
-      const inviteNotifications = notificationsResponse.data.notifications.filter(
-        (notification: any) =>
-          notification.notification_type === "challenge_reminder"
-      );
+      const inviteNotifications =
+        notificationsResponse.data.notifications.filter(
+          (notification: any) =>
+            notification.notification_type === "challenge_reminder"
+        );
       const invitedChallengeIds = inviteNotifications.map(
         (notification: any) => notification.challenge_id
       );
@@ -119,7 +124,6 @@ const Challenges: React.FC = () => {
         invitedChallengeIds.includes(challenge.id)
       );
       setInvitedChallenges(invitedChallengesList);
-
     } catch (error) {
       console.error("Error fetching challenges:", error);
     }
@@ -139,7 +143,7 @@ const Challenges: React.FC = () => {
   const getCurrentUser = async () => {
     try {
       const response = await axios.post(
-        `${config.serverUrl}/profile/get_profile_pic/`
+        `${config.serverUrl}/profile/get_profile_pic`
       );
       const data: User = response.data;
       setProfile_picture(data.profile_picture);
@@ -197,8 +201,8 @@ const Challenges: React.FC = () => {
     );
 
   const filteredInvitedChallenges = invitedChallenges.filter((challenge) =>
-      challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const filteredAllChallenges = challenges
     .filter(
@@ -317,17 +321,17 @@ const Challenges: React.FC = () => {
                 My Challenges
               </Typography>
               <Box>
-              <Grid2
-                container
-                spacing={2}
-                columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
-              >
-                {filteredMyChallenges.map((challenge) => (
-                  <Grid2 key={challenge.id}>
-                    <Challenge {...challenge} />
-                  </Grid2>
-                ))}
-              </Grid2>
+                <Grid2
+                  container
+                  spacing={2}
+                  columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
+                >
+                  {filteredMyChallenges.map((challenge) => (
+                    <Grid2 key={challenge.id}>
+                      <Challenge {...challenge} />
+                    </Grid2>
+                  ))}
+                </Grid2>
               </Box>
               {filteredMyChallenges.length > 3 && (
                 <Box textAlign="center" mt={2}>

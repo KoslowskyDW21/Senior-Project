@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   CardContent,
+  CardMedia,
   Typography,
   Grid2,
   IconButton,
@@ -17,6 +18,7 @@ interface RecipeList {
   id: number;
   name: string;
   belongs_to: number;
+  image: string;
 }
 
 interface RecipeListDeletionResponse {
@@ -87,8 +89,7 @@ const RecipeLists: React.FC = () => {
     }
   };
 
-  // @ts-expect-error
-  function RecipeList({ lid, name, belongs_to }) {
+  function RecipeList({ lid, name, belongs_to, image }: any) {
     const handleGoToRecipeList = async () => {
       console.log(`Navigating to page of RecipeList ${lid}`);
       navigate(`/recipe-lists/${lid}`);
@@ -133,7 +134,18 @@ const RecipeLists: React.FC = () => {
               {name}
             </Typography>
             <br />
-            <br />
+            {image && (
+              <CardMedia
+                component="img"
+                image={`${config.serverUrl}/${image}`}
+                sx={{
+                  height: "auto",
+                  objectFit: "contain",
+                  width: "100%",
+                  maxHeight: 200,
+                }}
+              />
+            )}
             <Button
               variant="outlined"
               color="error"
@@ -230,6 +242,7 @@ const RecipeLists: React.FC = () => {
                   lid={recipeList.id}
                   name={recipeList.name}
                   belongs_to={recipeList.belongs_to}
+                  image={recipeList.image}
                 />
               </Box>
             </Grid2>

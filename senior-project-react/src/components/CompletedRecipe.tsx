@@ -11,7 +11,7 @@ import {
   Alert,
 } from "@mui/material";
 import axios from "axios";
-import { PhotoCamera } from "@mui/icons-material";
+import { PhotoCamera, NoPhotography } from "@mui/icons-material";
 import config from "../config.js";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
@@ -136,7 +136,7 @@ const CompletedRecipe: React.FC = () => {
             </Alert>
           )}
 
-          <div>
+          {/* <div>
             {imagePreview ? (
               <img
                 src={imagePreview}
@@ -159,9 +159,34 @@ const CompletedRecipe: React.FC = () => {
                 <PhotoCamera />
               </IconButton>
             )}
+          </div> */}
+
+          <div>
+            {imagePreview && (
+              <img
+                src={imagePreview}
+                alt="Recipe"
+                style={{
+                  width: "200px",
+                  height: "200px",
+                  objectFit: "cover",
+                  borderRadius: "8px",
+                }}
+              />
+            )}
+            <IconButton component="label" color="primary">
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={handleImageChange}
+              />
+              <PhotoCamera />
+            </IconButton>
           </div>
 
           <div>
+          <Typography gutterBottom>Rating</Typography>
             <Rating
               name="recipe-rating"
               value={rating}
