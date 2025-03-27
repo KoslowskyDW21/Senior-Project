@@ -47,6 +47,21 @@ class User(UserMixin, db.Model):
     group_memberships = relationship('GroupMember', cascade="all, delete-orphan")
     banned_from_groups = relationship('GroupBannedMember', cascade="all, delete-orphan")
     messages = relationship('Message', cascade="all, delete-orphan")
+    messageReport = relationship('MessageReport', cascade="all, delete-orphan")
+    reported_users = db.relationship(
+        "UserReport",
+        foreign_keys="[UserReport.reported_user]",
+        backref="reported_user_obj",
+        cascade="all, delete-orphan"
+    )
+
+    reporters = db.relationship(
+        "UserReport",
+        foreign_keys="[UserReport.reported_by]",
+        backref="reporter_obj",
+        cascade="all, delete-orphan"
+    )
+    review = relationship('Review', cascade="all, delete-orphan")
     challenge_participants = db.relationship('ChallengeParticipant', backref='user', cascade="all, delete-orphan")
     recipes = relationship('RecipeList', backref='user', cascade="all, delete-orphan")
     shopping_lists = relationship('ShoppingList', backref='user', cascade="all, delete-orphan")
