@@ -5,6 +5,7 @@ import {
   ButtonBase,
   Menu,
   MenuItem,
+  Divider,
   IconButton,
   Avatar,
   Box,
@@ -103,6 +104,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
       navigate(`/challenges/${challenge_id}`);
     }
   };
+
+  const handleClearNotifications = () => {};
 
   const handleCloseNotification = () => {
     setNotificationAnchorEl(null);
@@ -291,24 +294,37 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           >
             {notifications.length > 0 &&
             notifications.some((n) => n.isRead === 0) ? (
-              notifications
-                .filter((notification) => notification.isRead === 0)
-                .map((notification, index) => (
-                  <MenuItem
-                    key={index}
-                    onClick={(event) =>
-                      handleReadNotification(
-                        event,
-                        notification.id,
-                        notification.notification_type,
-                        notification.group_id,
-                        notification.challenge_id
-                      )
-                    }
-                  >
-                    {notification.notification_text}
-                  </MenuItem>
-                ))
+              <>
+                <MenuItem
+                  onClick={handleClearNotifications}
+                  sx={{
+                    textAlign: "center",
+                    justifyContent: "center",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Clear Notifications
+                </MenuItem>
+                <Divider />
+                {notifications
+                  .filter((notification) => notification.isRead === 0)
+                  .map((notification, index) => (
+                    <MenuItem
+                      key={index}
+                      onClick={(event) =>
+                        handleReadNotification(
+                          event,
+                          notification.id,
+                          notification.notification_type,
+                          notification.group_id,
+                          notification.challenge_id
+                        )
+                      }
+                    >
+                      {notification.notification_text}
+                    </MenuItem>
+                  ))}
+              </>
             ) : (
               <MenuItem>No new notifications</MenuItem>
             )}

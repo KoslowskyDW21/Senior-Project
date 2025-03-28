@@ -1,5 +1,6 @@
 import axios, { AxiosError } from "axios";
 import FolderIcon from "@mui/icons-material/Folder";
+import { Typography } from "@mui/material";
 import { useState, ChangeEvent } from "react"; //react
 import { useRegistration, Floor, Side } from "./RegistrationContext";
 import { useNavigate } from "react-router-dom"; // React Router for nav
@@ -174,6 +175,9 @@ const RegisterFour = () => {
       </Select>
 
       <h2>Upload a Profile Picture</h2>
+      <Typography fontStyle="italic" sx={{ textAlign: "center", mb: 2 }}>
+        Supported File Types: PNG, JPG, JPEG
+      </Typography>
       <Box
         sx={{
           display: "flex",

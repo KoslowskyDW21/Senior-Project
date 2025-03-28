@@ -232,7 +232,7 @@ const Profile: React.FC = () => {
   };
 
   const [confettiVisible, setConfettiVisible] = useState(false);
-  const [confettiOpacity, setConfettiOpacity] = useState(1); 
+  const [confettiOpacity, setConfettiOpacity] = useState(1);
   const [confettiSource, setConfettiSource] = useState({ x: 0, y: 0 });
 
   const xpBarRef = useRef<HTMLDivElement | null>(null);
@@ -259,9 +259,6 @@ const Profile: React.FC = () => {
           return prevOpacity - 0.05; // Gradually decrease opacity
         });
       }, 50);
-
-      
-      
 
       setTimeout(() => {
         setConfettiVisible(false);
@@ -324,6 +321,9 @@ const Profile: React.FC = () => {
       />
       <Modal open={openPfpModal} onClose={handleClosePfpModal}>
         <Box sx={modalStyle}>
+          <Typography fontStyle="italic" sx={{ textAlign: "center" }}>
+            File Types: PNG, JPG, JPEG
+          </Typography>
           <Button onClick={handleChangePfp} fullWidth>
             Change Profile Picture
           </Button>
