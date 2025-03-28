@@ -64,7 +64,7 @@ const Login = () => {
 
       // Send ID Token to backend
       const response = await axios.post(
-        `${config.serverUrl}/login/sso`,
+        `${config.serverUrl}/login/sso/`,
         { token: idToken },
         { withCredentials: true }
       );
@@ -75,10 +75,10 @@ const Login = () => {
       if (response.data.message === "Login successful") {
         if (idToken) {
           localStorage.setItem("idToken", idToken);
-          navigate("/recipes");
+          navigate("/recipes/");
         }
       } else if (response.data.message === "User not registered") {
-        navigate("/registration-one");
+        navigate("/registration-one/");
       }
     } catch (error) {
       console.error("SSO Login Failed", error);
