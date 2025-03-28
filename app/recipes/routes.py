@@ -145,7 +145,7 @@ def post_recipes():
         'current_page': page
     }), 200
 
-@bp.post("/user")
+@bp.post("/user/")
 def getUserId():
     print (current_user.id)
     return jsonify({'id': current_user.id})
@@ -164,7 +164,7 @@ def get_recipe_page(id):
         return jsonify(recipe.to_json())
     return "<h1>404: recipe not found</h1>", 404
 
-@bp.post("/steps/<int:id>")
+@bp.post("/steps/<int:id>/")
 def post_recipe_steps(id):
     print(f"searching for steps of recipe {id}")
     steps = RecipeStep.query.filter_by(recipe_id=id).all()
@@ -172,7 +172,7 @@ def post_recipe_steps(id):
         return jsonify([step.to_json() for step in steps])
     return f"<h1>404: steps not found for recipe {id}</h1>", 404
 
-@bp.post("/ingredients/<int:id>")
+@bp.post("/ingredients/<int:id>/")
 def post_recipe_ingredients(id):
     ingredients = RecipeIngredient.query.filter_by(recipe_id = id).all()
     if ingredients is not None:
@@ -241,7 +241,7 @@ def delete_recipe():
     flash('recipe deleted successfully')
     return render_template('home.html', current_user=current_user, recipes=Recipe.query.all())
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -290,13 +290,13 @@ def reviews(id):
         "reviews": [review.to_json() for review in reviews],
     }), 200
 
-@bp.route("/reported_reviews", methods=["GET"])
+@bp.route("/reported_reviews/", methods=["GET"])
 @login_required
 def get_reported_reviews():
     reportedReviews = Review.query.filter(Review.num_reports > 0).all()
     return jsonify([review.to_json() for review in reportedReviews]), 200
 
-@bp.route("/<int:review_id>/delete_reports", methods=["DELETE"])
+@bp.route("/<int:review_id>/delete_reports/", methods=["DELETE"])
 @login_required
 def delete_reports(review_id: int):
     reports = ReviewReport.query.filter_by(review_id=review_id).all()
@@ -307,7 +307,7 @@ def delete_reports(review_id: int):
     db.session.commit()
     return jsonify({"message": "Reports successfully deleted"}), 200
 
-@bp.route("/<int:review_id>/set_reports_zero", methods=["POST"])
+@bp.route("/<int:review_id>/set_reports_zero/", methods=["POST"])
 @login_required
 def set_reports_zero(review_id: int):
     review: Review = Review.query.get(review_id) # type: ignore
@@ -317,7 +317,7 @@ def set_reports_zero(review_id: int):
     db.session.commit()
     return jsonify({"message": "Dismissed all reports"}), 200
 
-@bp.route("/<int:review_id>/delete", methods=["DELETE"])
+@bp.route("/<int:review_id>/delete/", methods=["DELETE"])
 @login_required
 def delete_review(review_id):
     review = Review.query.get(review_id)
@@ -329,7 +329,7 @@ def delete_review(review_id):
 
     return jsonify({"message": "Review deleted successfully"}), 200
 
-@bp.get("/<int:review_id>/report")
+@bp.get("/<int:review_id>/report/")
 @login_required
 def get_report_review(review_id: int):
     user = current_user._get_current_object()
@@ -341,7 +341,7 @@ def get_report_review(review_id: int):
     
     return jsonify({"alreadyReported": False, "id": user.id}) # type: ignore
 
-@bp.post("/<int:review_id>/report")
+@bp.post("/<int:review_id>/report/")
 @login_required
 def post_report_review(review_id: int):
     data = request.get_json()
@@ -365,7 +365,7 @@ def post_report_review(review_id: int):
         print(f"Error reporting review: {e}")
         return jsonify({"message": "Error: could not report review"}), 500
     
-@bp.route("/reports/<int:id>", methods=["GET"])
+@bp.route("/reports/<int:id>/", methods=["GET"])
 @login_required
 def get_reports(id: int):
     reports = ReviewReport.query.filter_by(review_id=id).all()

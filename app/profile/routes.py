@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 import uuid
 import os
 
-@bp.route('/<int:id>', methods=['POST'])
+@bp.route('/<int:id>/', methods=['POST'])
 def post_profile_page(id=1):
     print("searching for user " + str(id))
     print(current_user)
@@ -29,7 +29,7 @@ def post_profile_page(id=1):
                          }), 200
     return "<h1>404: profile not found</h1>", 404
 
-@bp.route('/get_other_profile/<int:id>', methods=['GET'])
+@bp.route('/get_other_profile/<int:id>/', methods=['GET'])
 def get_other_profile(id):
     user_data = (
         db.session.query(
@@ -83,7 +83,7 @@ def get_other_profile(id):
     return jsonify(user_info), 200
 
 
-@bp.route('/block_user/<int:id>', methods=['POST'])
+@bp.route('/block_user/<int:id>/', methods=['POST'])
 def block_user(id):
     new_block = UserBlock(blocked_user=id, blocked_by=current_user.id)
     db.session.add(new_block)
@@ -97,7 +97,7 @@ def block_user(id):
         return jsonify({"error": "Error blocking user"}), 500
     return {"message": "User blocked successfully"}, 200
 
-@bp.route('/unblock_user/<int:id>', methods=['POST'])
+@bp.route('/unblock_user/<int:id>/', methods=['POST'])
 def unblock_user(id):
     db.session.query(UserBlock).filter(and_(UserBlock.blocked_user==id, UserBlock.blocked_by==current_user.id)).delete()
     
@@ -111,17 +111,17 @@ def unblock_user(id):
     return {"message": "User unblocked successfully"}, 200
 
 #This tells the backend whether or not the profile being displayed is a blocked user
-@bp.route('/is_blocked/<int:id>', methods=['POST'])
+@bp.route('/is_blocked/<int:id>/', methods=['POST'])
 def is_blocked(id):
     is_blocked = db.session.query(UserBlock).filter(and_(UserBlock.blocked_user==id, UserBlock.blocked_by==current_user.id)).first()
     return jsonify({"is_blocked": bool(is_blocked)}), 200
 
-@bp.route('/is_current_user_blocked/<int:id>', methods=['POST'])
+@bp.route('/is_current_user_blocked/<int:id>/', methods=['POST'])
 def is_current_user_blocked(id):
     is_current_user_blocked = db.session.query(UserBlock).filter(and_(UserBlock.blocked_user==current_user.id, UserBlock.blocked_by==id)).first()
     return jsonify({"is_current_user_blocked": bool(is_current_user_blocked)}), 200
 
-@bp.route('/current_user', methods=['POST'])
+@bp.route('/current_user/', methods=['POST'])
 def post_current_user():
     if(current_user is not None):
         return jsonify(
@@ -210,7 +210,7 @@ def leveled():
     return {"message": "Level trigger updated successfully!"}, 200
 
 @login_required
-@bp.route("/report", methods=["POST"])
+@bp.route("/report/", methods=["POST"])
 def report():
     user = current_user._get_current_object()
     data = request.get_json()

@@ -10,7 +10,7 @@ import os
 import pytz
 import uuid
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -28,14 +28,14 @@ def challenges():
     return jsonify([challenge.to_json() for challenge in challenges]), 200
 
 @login_required
-@bp.route('/<int:id>', methods=['GET'])
+@bp.route('/<int:id>/', methods=['GET'])
 def get_challenge(id):
     challenge = Challenge.query.get(id)
     if not challenge:
         abort(404, description="Challenge not found")
     return jsonify(challenge.to_json()), 200
 
-@bp.route('/create', methods=['POST'])
+@bp.route('/create/', methods=['POST'])
 @login_required
 def create_challenge():
     name = request.form.get('name')
@@ -119,13 +119,13 @@ def create_challenge():
     return jsonify({"message": "Challenge created successfully!",
                     "challenge_id": challenge.id}), 200
 
-@bp.route('/current_user_id', methods=['GET', 'POST'])
+@bp.route('/current_user_id/', methods=['GET', 'POST'])
 def post_current_user():
     return jsonify(
         current_user.id
     ), 200
 
-@bp.route('/<int:challenge_id>/join', methods=['POST'])
+@bp.route('/<int:challenge_id>/join/', methods=['POST'])
 @login_required
 def join_challenge(challenge_id):
     challenge = Challenge.query.get(challenge_id)
@@ -141,7 +141,7 @@ def join_challenge(challenge_id):
 
     return jsonify({"message": "Joined challenge successfully!"}), 200
 
-@bp.route('/<int:challenge_id>/leave', methods=['POST'])
+@bp.route('/<int:challenge_id>/leave/', methods=['POST'])
 @login_required
 def leave_challenge(challenge_id):
     challenge = Challenge.query.get(challenge_id)
@@ -157,7 +157,8 @@ def leave_challenge(challenge_id):
         db.session.commit()
 
     return jsonify({"message": "Left challenge successfully!"}), 200
-@bp.route('/<int:challenge_id>/participants', methods=['GET'])
+
+@bp.route('/<int:challenge_id>/participants/', methods=['GET'])
 @login_required
 def get_participants(challenge_id):
     participants = ChallengeParticipant.query.filter_by(challenge_id=challenge_id).all()
@@ -169,13 +170,13 @@ def get_participants(challenge_id):
         participant_data.append({"user_id": user.id, "username": user.username})
     return jsonify(participant_data), 200
 
-@bp.route('/<int:challenge_id>/is_participant', methods=['GET'])
+@bp.route('/<int:challenge_id>/is_participant/', methods=['GET'])
 @login_required
 def is_participant(challenge_id):
     participant = ChallengeParticipant.query.filter_by(challenge_id=challenge_id, user_id=current_user.id).first()
     return jsonify({"is_participant": participant is not None}), 200
 
-@bp.route('/<int:challenge_id>/delete', methods=['DELETE'])
+@bp.route('/<int:challenge_id>/delete/', methods=['DELETE'])
 @login_required
 def delete_challenge(challenge_id):
     challenge = Challenge.query.get(challenge_id)
@@ -192,7 +193,7 @@ def delete_challenge(challenge_id):
 
     return jsonify({"message": "Challenge deleted successfully!"}), 200
 
-@bp.route('/<int:challenge_id>/vote', methods=['POST'])
+@bp.route('/<int:challenge_id>/vote/', methods=['POST'])
 @login_required
 def submit_vote(challenge_id):
     data = request.get_json()
@@ -242,7 +243,7 @@ def submit_vote(challenge_id):
 
     return jsonify({"message": "Vote submitted successfully"}), 201
 
-@bp.route('/<int:challenge_id>/vote_results', methods=['GET'])
+@bp.route('/<int:challenge_id>/vote_results/', methods=['GET'])
 @login_required
 def get_vote_results(challenge_id):
     votes = ChallengeVote.query.filter_by(challenge_id=challenge_id).all()
@@ -288,7 +289,7 @@ def get_vote_results(challenge_id):
 
     return jsonify(results), 200
 
-@bp.route('/past_user_participated_challenges', methods=['GET'])
+@bp.route('/past_user_participated_challenges/', methods=['GET'])
 @login_required
 def get_past_user_challenges():
     now = datetime.now(UTC)
@@ -303,7 +304,7 @@ def get_past_user_challenges():
 
     return jsonify([challenge.to_json() for challenge in user_participated_challenges]), 200
 
-@bp.route('/past_challenges', methods=['GET'])
+@bp.route('/past_challenges/', methods=['GET'])
 @login_required
 def get_past_challenges():
     now = datetime.now(UTC)
@@ -314,7 +315,7 @@ def get_past_challenges():
     return jsonify([challenge.to_json() for challenge in past_challenges]), 200
 
 
-@bp.route('/<int:challenge_id>/invite', methods=['POST'])
+@bp.route('/<int:challenge_id>/invite/', methods=['POST'])
 @login_required
 def invite_friends_to_challenge(challenge_id):
     challenge = Challenge.query.get(challenge_id)
@@ -350,7 +351,7 @@ def invite_friends_to_challenge(challenge_id):
     return jsonify({"message": "Invitations sent successfully!"}), 200
 
 
-@bp.route('/<int:challenge_id>/invite_response', methods=['POST'])
+@bp.route('/<int:challenge_id>/invite_response/', methods=['POST'])
 @login_required
 def handle_challenge_invite_response(challenge_id):
     json = request.json
@@ -377,7 +378,7 @@ def handle_challenge_invite_response(challenge_id):
     return jsonify({"message": "Challenge invitation denied!"}), 200
     
 
-@bp.route('/<int:challenge_id>/kick', methods=['POST'])
+@bp.route('/<int:challenge_id>/kick/', methods=['POST'])
 @login_required
 def kick_user_from_challenge(challenge_id):
     data = request.get_json()
@@ -410,7 +411,7 @@ def checkLevel():
         db.session.commit()
 
 
-@bp.route('/<int:challenge_id>/unviewed_invites', methods=['GET'])
+@bp.route('/<int:challenge_id>/unviewed_invites/', methods=['GET'])
 @login_required
 def get_unviewed_invites(challenge_id):
     challenge = Challenge.query.get(challenge_id)
@@ -433,7 +434,7 @@ def get_unviewed_invites(challenge_id):
     return jsonify(invites_data), 200
 
 
-@bp.route('/<int:challenge_id>/invite_status', methods=['GET'])
+@bp.route('/<int:challenge_id>/invite_status/', methods=['GET'])
 @login_required
 def get_invite_status(challenge_id):
     challenge = Challenge.query.get(challenge_id)
@@ -453,7 +454,7 @@ def get_invite_status(challenge_id):
     return jsonify({"isInvited": False}), 200
 
 
-@bp.route('/notifications', methods=['GET'])
+@bp.route('/notifications/', methods=['GET'])
 @login_required
 def get_notifications():
     notifications = UserNotifications.query.filter_by(

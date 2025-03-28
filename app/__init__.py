@@ -34,6 +34,7 @@ def create_app(config=Config):
         pass
         
 
+    app.url_map.strict_slashes = True
     from app.login import bp as login_bp
     app.register_blueprint(login_bp, url_prefix='/login')
     from app.recipes import bp as recipes_bp

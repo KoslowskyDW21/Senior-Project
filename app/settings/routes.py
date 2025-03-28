@@ -186,5 +186,21 @@ def read_notification():
         print(f"Error updating notification: {e}")
         return jsonify({"message": "Error updating notification"}), 500
 
+@bp.route('/clear_notifications/', methods=['POST'])
+def clear_notifications():
+    notifications = UserNotifications.query.filter_by(user_id=current_user.id).all()
+    if not notifications:
+        return jsonify({"message": "Notification not found"}), 404
+    for notification in notifications:
+        notification.isRead = 1
+    
+    try:
+        db.session.commit()
+        return jsonify({"message": "Notifications cleared successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating notification: {e}")
+        return jsonify({"message": "Error updating notification"}), 500
+
 
     
