@@ -6,6 +6,7 @@ import mkcert from'vite-plugin-mkcert'
 export default defineConfig({
   plugins: [react(), mkcert() ],
   server: {
+    cors: true, // TODO: set to a limited list of allowed origins
     port: 443,
     hmr: false,
     https: true,
