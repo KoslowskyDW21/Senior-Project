@@ -305,55 +305,7 @@ def sso_login():
         print("User not registered")
         return jsonify({"message": "User not registered"}), 200
 
-@bp.route('/sso/', methods=['POST'])
-def sso_login_2():
-    data = request.json
-    if not data:
-        print("invalid request no data ")
-        return jsonify({"message": "Invalid request. No data"}), 400
-    token = data.get("token")
 
-    decoded = jwt.decode(token, options={"verify_signature": False})
-    print("DECODED TOKEN: ", decoded)
-    exp = decoded.get("exp", 0)
-    print(f"Token expires at: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(exp))}")
-
-
-    if not token:
-        print("invalid request no token")
-        return jsonify({"message": "No token provided"}), 400
-
-    decoded_token = validate_jwt(token)
-    if not decoded_token:
-        print("invalid token")
-        return jsonify({"message": "Invalid token"}), 401
-
-    email = decoded_token.get("preferred_username")  #email
-    name = decoded_token.get("name")
-    if name:
-        name = name.split()
-        fname = name[1].replace(",", "")
-        lname = name[0]
-    else:
-        print("no name found")
-        return jsonify({"message": "Invalid token: No name found"}), 401
-
-
-    if not email:
-        print("no email found")
-        return jsonify({"message": "Invalid token: No email found"}), 401
-
-    user = User.query.filter_by(email_address=email).first()
-
-   # print(user)
-
-    if user:
-        print("logging in")
-        login_user(user, remember=True)
-        return jsonify({"message": "Login successful", "user_id": user.id}), 200
-    else:
-        print("User not registered")
-        return jsonify({"message": "User not registered"}), 200
 
 @bp.route('/get_initial_data', methods=['POST'])
 def get_initial_data():
