@@ -10,21 +10,21 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@bp.get("/recipes/<int:id>")
+@bp.get("/recipes/<int:id>/")
 def post_array_of_recipes_in_list(id):
     print(f"searching for recipes in RecipeList {id}")
     recipe_ids = [rrl.recipe_id for rrl in (RecipeRecipeList.query.filter_by(recipe_list_id=id).all())]
     recipes = [Recipe.query.filter_by(id=recipe_id).first() for recipe_id in recipe_ids]
     return jsonify([recipe.to_json() for recipe in recipes]) # type: ignore
 
-@bp.get("/all")
+@bp.get("/all/")
 def get_all_recipe_lists_of_current_user():
     print(f"Attempting to return all recipe lists of the current user")
     recipe_lists = RecipeList.query.filter_by(belongs_to=current_user.id).all()
     print([recipe_list.to_json() for recipe_list in recipe_lists])
     return jsonify([recipe_list.to_json() for recipe_list in recipe_lists])
 
-@bp.get("/all_containing/<int:id>")
+@bp.get("/all_containing/<int:id>/")
 def get_all_recipe_lists_containing_recipe_with_id(id):
     print(f"Attempting to return all recipe lists containing recipe with id={id}")
     recipe_lists = RecipeList.query.filter_by(belongs_to=current_user.id).all()
@@ -38,7 +38,7 @@ def get_all_recipe_lists_containing_recipe_with_id(id):
         print(f"Recipe list this recipe is in: {recipe_list_in}")
     return jsonify([recipe_list_in.to_json() for recipe_list_in in recipe_lists_in]), 200
     
-@bp.get('/info/<int:rid>')
+@bp.get('/info/<int:rid>/')
 def get_recipe_list_name(rid):
     print(f"Searching for RecipeList {rid}")
     recipe_list = RecipeList.query.filter_by(id=rid).first()
@@ -46,7 +46,7 @@ def get_recipe_list_name(rid):
         return jsonify({"message": f"RecipeList {rid} not found"}), 404
     return jsonify(recipe_list.to_json())
 
-@bp.post('/createlist')
+@bp.post('/createlist/')
 def create_list():
     name = request.form.get("name")
     image = request.files.get("image")
@@ -80,7 +80,7 @@ def create_list():
     except Exception as e:
         return jsonify({"message": f"RecipeList creation failed: {str(e)}", "recipe_list_id": -1}), 500
 
-@bp.post('/deletelist') #type: ignore
+@bp.post('/deletelist/') #type: ignore
 def delete_list():
     lid = request.form.get('lid')
     if not lid:
@@ -101,7 +101,7 @@ def delete_list():
         return jsonify({"message": f"RecipeList {lid} failed to be deleted: {str(e)}"}), 500
         
 
-@bp.post('/add-recipe-to-list')
+@bp.post('/add-recipe-to-list/')
 @login_required
 def add_recipe_to_list():
     print(request)
@@ -121,7 +121,7 @@ def add_recipe_to_list():
     except:
         return jsonify({"message": "Failed to add recipe to list"}), 400
     
-@bp.post("/remove-recipe-from-list")
+@bp.post("/remove-recipe-from-list/")
 @login_required
 def remove_recipe_from_list():
     rid = request.form.get("rid")

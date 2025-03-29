@@ -19,14 +19,14 @@ def achievements():
         "specAchievements": [achievement.to_json() for achievement in specAchievements]
     }), 200
 
-@bp.route('/<int:id>', methods=['GET'])
+@bp.route('/<int:id>/', methods=['GET'])
 def get_achievement(id):
     achievement = Achievement.query.get(id)
     if not achievement:
         abort(404, description="Achievement not found")
     return jsonify(achievement.to_json()), 200
 
-@bp.route('/create', methods=['POST'])
+@bp.route('/create/', methods=['POST'])
 def create_achievement():
     return jsonify({"message": "Achievement created successfully!"}), 200
 

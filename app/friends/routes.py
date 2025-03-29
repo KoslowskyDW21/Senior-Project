@@ -238,7 +238,7 @@ def delete_notification(requestFrom, requestTo):
         print(f"No matching notifications found for user {requestTo}.")
     
 
-@bp.route('/send_request/<int:id>', methods=['POST'])
+@bp.route('/send_request/<int:id>/', methods=['POST'])
 def send_request(id):
     new_request = FriendRequest(requestFrom=current_user.id, requestTo=id) #type: ignore
     request_notification(current_user.id, id, notificationType.send_request)
@@ -254,7 +254,7 @@ def send_request(id):
     return {"message": "friend request sent successfully"}, 200
     
 
-@bp.route('/accept_request/<int:id>', methods=['POST'])
+@bp.route('/accept_request/<int:id>/', methods=['POST'])
 def accept_request(id):
     request = db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==id, FriendRequest.requestTo==current_user.id)).first()
     if request:
@@ -276,7 +276,7 @@ def accept_request(id):
         return jsonify({"error": "Error accepting friend request"}), 500
     return {"message": "friend request accepted successfully"}, 200
 
-@bp.route('/revoke_request/<int:id>', methods=['POST'])
+@bp.route('/revoke_request/<int:id>/', methods=['POST'])
 def revoke_request(id): 
     request = db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==current_user.id, FriendRequest.requestTo==id)).first()
     if request:
@@ -290,7 +290,7 @@ def revoke_request(id):
         return jsonify({"error": "Error revoking friend request"}), 500
     return {"message": "friend request revoked successfully"}, 200
 
-@bp.route('/remove_friend/<int:id>', methods=['POST'])
+@bp.route('/remove_friend/<int:id>/', methods=['POST'])
 def remove_friend(id):
     db.session.query(Friendship).filter(
         or_(
@@ -308,7 +308,7 @@ def remove_friend(id):
         print(f"Error removing friendship with user {id}: {e}")
         return jsonify({"error": "Could not remove friendship"}), 500
 
-@bp.route('/decline_request/<int:id>', methods=['POST'])
+@bp.route('/decline_request/<int:id>/', methods=['POST'])
 def decline_request(id):
     request = db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==id, FriendRequest.requestTo==current_user.id)).first()
     if request:
