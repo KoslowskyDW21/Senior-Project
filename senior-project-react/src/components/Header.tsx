@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useLocation, useNavigate } from "react-router-dom"; // React Router for nav
+import { useNavigate } from "react-router-dom"; // React Router for nav
 import {
   ButtonBase,
   Menu,
@@ -39,7 +39,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   const [notifications, setNotifications] = useState<[]>([]);
 
   const navigate = useNavigate();
-  const location = useLocation();
 
   const handleGoToProfile = async () => {
     navigate(`/profile`);
@@ -84,7 +83,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   };
 
   const handleClickNotification = (event: React.MouseEvent<HTMLElement>) => {
-    getNotifications();
     setNotificationAnchorEl(event.currentTarget);
   };
 
@@ -96,42 +94,18 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     challenge_id?: number
   ) => {
     console.log(id);
+    setNotificationAnchorEl(event.currentTarget);
     readNotificationsApi(id);
-    handleCloseNotification();
-
-    if (
-      notification_type === "friend_request" &&
-      location.pathname !== "/friends"
-    ) {
+    if (notification_type === "friend_request") {
       navigate("/friends");
-    } else if (
-      notification_type === "group_message" &&
-      group_id &&
-      location.pathname !== "/groups"
-    ) {
+    } else if (notification_type === "group_message" && group_id) {
       navigate(`/groups/${group_id}`);
-    } else if (
-      notification_type === "challenge_reminder" &&
-      location.pathname !== "/challenges"
-    ) {
+    } else if (notification_type === "challenge_reminder") {
       navigate(`/challenges/${challenge_id}`);
     }
   };
 
-  const clearNotifications = async () => {
-    try {
-      await axios.post(
-        `${config.serverUrl}/settings/clear_notifications/`,
-        {},
-        { withCredentials: true }
-      );
-      console.log("Notifications cleared successfully!");
-      handleCloseNotification();
-      getNotifications();
-    } catch (error) {
-      console.error("Error reading notification: ", error);
-    }
-  };
+  const handleClearNotifications = () => {};
 
   const handleCloseNotification = () => {
     setNotificationAnchorEl(null);
@@ -181,7 +155,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         }
       );
       console.log("Notification read successfully!");
-      getNotifications();
     } catch (error) {
       console.error("Error reading notification: ", error);
     }
@@ -231,7 +204,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     getCurrentUser();
     getNotifications();
     isAdmin();
-    console.log("useEffect pathname", location.pathname);
   }, []);
 
   return (
@@ -324,11 +296,11 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             notifications.some((n) => n.isRead === 0) ? (
               <>
                 <MenuItem
-                  onClick={clearNotifications}
+                  onClick={handleClearNotifications}
                   sx={{
                     textAlign: "center",
                     justifyContent: "center",
-                    color: "red",
+                    fontWeight: "bold",
                   }}
                 >
                   Clear Notifications
