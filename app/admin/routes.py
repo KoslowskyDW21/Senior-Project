@@ -39,13 +39,13 @@ def make_admin():
         return jsonify({"message": "Error: Could not update user"}), 500
     
 @login_required
-@bp.get("/reports/<int:id>/")
+@bp.get("/reports/<int:id>")
 def get_reports(id):
     reports: list[UserReport] = UserReport.query.filter(UserReport.reported_user == id).all()
     return jsonify([report.to_json() for report in reports]), 200
 
 @login_required
-@bp.delete("/reports/<int:id>/delete_reports/")
+@bp.delete("/reports/<int:id>/delete_reports")
 def delete_reports(id):
     reports: list[UserReport] = UserReport.query.filter(UserReport.reported_user == id).all()
     
@@ -56,7 +56,7 @@ def delete_reports(id):
     return jsonify({"message": "Reports successfully deleted"}), 200
 
 @login_required
-@bp.post("/reports/<int:id>/set_reports_zero/")
+@bp.post("/reports/<int:id>/set_reports_zero")
 def set_reports_zero(id):
     user: User = User.query.get(id) # type: ignore
     user.num_reports = 0
@@ -92,7 +92,7 @@ def ban_user():
         return jsonify({"message": "Error: Could not update user's ban status"})
     
 @login_required
-@bp.post("/stillBanned/")
+@bp.post("/stillBanned")
 def still_banned():
     user = current_user._get_current_object()
     now = datetime.now(UTC)
@@ -116,7 +116,7 @@ def still_banned():
         return jsonify({"message": "Error: Could not unban user", "banned": False}), 500
 
 @login_required
-@bp.get("/ban/")
+@bp.get("/ban")
 def get_ban():
     user: User = current_user._get_current_object() # type: ignore
     print(user)
@@ -124,7 +124,7 @@ def get_ban():
     return jsonify({"banned": isBanned})
 
     
-@bp.route("/delete/<int:id>/", methods = ["POST"])
+@bp.route("/delete/<int:id>", methods = ["POST"])
 def delete_recipe(id):
     recipe = Recipe.query.filter_by(id = id).first()
     if(recipe is not None):
