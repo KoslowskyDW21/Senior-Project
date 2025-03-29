@@ -5,7 +5,7 @@ from app.shopping_list import bp
 from app.models import ShoppingList, ShoppingListItem, RecipeIngredient, RecipeRecipeList, Recipe, db
 import sys
 
-@bp.get("/user_list/")
+@bp.get("/user_list")
 def get_all_shopping_lists_of_current_user():
     print("Attempting to return the shopping list of current user")
     shopping_list: ShoppingList | None = ShoppingList.query.filter_by(user_id=current_user.id).first()
@@ -16,7 +16,7 @@ def get_all_shopping_lists_of_current_user():
     print(f"User {current_user.id}'s shopping list metadata: {shopping_list}")
     return jsonify(shopping_list.to_json()), 200 # type: ignore
 
-@bp.get("/items/<int:id>/")
+@bp.get("/items/<int:id>")
 def get_all_shopping_list_items_of_shopping_list(id):
     print(f"Attempting to return all shopping list items of shopping list {id}")
     shopping_list_items = ShoppingListItem.query.filter_by(shopping_list_id=id).all()
@@ -25,7 +25,7 @@ def get_all_shopping_list_items_of_shopping_list(id):
 
 import re
 
-@bp.post("/items/add/<int:recipe_id>/")
+@bp.post("/items/add/<int:recipe_id>")
 def add_recipe_to_shopping_list_items_of_current_user(recipe_id):
     print(f"Trying to add recipe {recipe_id}'s ingredients to the shopping list of user number {current_user.id}")
     slis: list[ShoppingListItem] = []
