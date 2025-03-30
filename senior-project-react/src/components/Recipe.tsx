@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTheme } from "@mui/material/styles";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Button,
@@ -26,26 +27,26 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import config from "../config.js";
 
-const reportModalStyle = {
+const reportModalStyle = (theme) => ({
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  bgcolor: "#ffffff",
+  bgcolor: theme.palette.background.default,
   boxShadow: 24,
   paddingTop: 3,
   paddingLeft: 7,
   paddingRight: 7,
   paddingBottom: 3,
   textAlign: "center",
-};
+});
 
 interface Recipe {
   id: string;
   recipe_name: string;
   difficulty: "1" | "2" | "3" | "4" | "5";
   xp_amount: string;
-  rating: "0.5"| "1" |"1.5"| "2"|"2.5" | "3" | "3.5" | "4" | "4.5" | "5";
+  rating: "0.5" | "1" | "1.5" | "2" | "2.5" | "3" | "3.5" | "4" | "4.5" | "5";
   image: string;
   achievements: [];
 }
@@ -62,7 +63,6 @@ interface RecipeIngredient {
   ingredient_name: "ingredient_name";
   measure: "measure";
 }
-
 
 interface User {
   id: string;
@@ -92,9 +92,11 @@ interface Step {
   step_description: string;
 }
 
-function Step({step_number, step_description }: Step) {
+function Step({ step_number, step_description }: Step) {
   // State to track whether the step is checked off
   const [checked, setChecked] = useState(false);
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   const handleCheckboxChange = () => {
     setChecked(!checked);
@@ -109,10 +111,10 @@ function Step({step_number, step_description }: Step) {
       />
 
       {/* Step description with conditional strikethrough */}
-      <Typography 
+      <Typography
         sx={{
           textDecoration: checked ? "line-through" : "none", // Apply strikethrough if checked
-          color: checked ? "gray" : "black",  // Optional: change color when checked
+          color: checked ? "gray" : isDarkMode ? "white" : "black", // Optional: change color when checked
         }}
       >
         {step_description}
@@ -122,10 +124,12 @@ function Step({step_number, step_description }: Step) {
 }
 
 function Difficulty({ difficulty }: any) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const diamondStyle = {
     width: "clamp(5px, 2vw, 24px)", // Min size 16px, max size 24px, grows based on viewport width
     height: "clamp(5px, 2vw, 24px)",
-    backgroundColor: "black",
+    backgroundColor: isDarkMode ? "white" : "black",
     transform: "rotate(45deg)",
     marginRight: "clamp(4px, 1vw, 8px)",
   };
@@ -143,46 +147,36 @@ function Difficulty({ difficulty }: any) {
   );
 }
 
-function RecipeRemoveSelect({ lid, handleRemoveRecipeFromList, recipeListsIn }: any) {
+function RecipeRemoveSelect({
+  lid,
+  handleRemoveRecipeFromList,
+  recipeListsIn,
+}: any) {
   if (recipeListsIn.length === 0) {
     return (
-      <FormControl sx={{ width: 400, opacity: 0.5}}>
-        <InputLabel>
-          Remove from a list
-        </InputLabel>
-        <Select
-        variant = "outlined"
-        disabled = {true}
-        >
-
-        </Select>
+      <FormControl sx={{ width: 400, opacity: 0.5 }}>
+        <InputLabel>Remove from a list</InputLabel>
+        <Select variant="outlined" disabled={true}></Select>
       </FormControl>
-    )
+    );
   }
   return (
     <FormControl sx={{ width: 400 }}>
-        <InputLabel id="demo-simple-select-label">
-          Remove from a list
-        </InputLabel>
-        <Select
-          labelId="remove-from-list-select-label"
-          id="remove-from-list-select"
-          label="Remove from a list"
-          value={lid}
-          onChange={handleRemoveRecipeFromList}
-        >
-          {recipeListsIn.map(
-            (
-              recipeList: any
-            ) => (
-              <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
-            )
-          )}
-        </Select>
-      </FormControl>
-  )
+      <InputLabel id="demo-simple-select-label">Remove from a list</InputLabel>
+      <Select
+        labelId="remove-from-list-select-label"
+        id="remove-from-list-select"
+        label="Remove from a list"
+        value={lid}
+        onChange={handleRemoveRecipeFromList}
+      >
+        {recipeListsIn.map((recipeList: any) => (
+          <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  );
 }
-
 
 const IndividualRecipe: React.FC = () => {
   const [recipe_name, setRecipe_name] = React.useState<String>();
@@ -200,11 +194,13 @@ const IndividualRecipe: React.FC = () => {
   const [difficulty, setDifficulty] = useState<string | undefined>();
   const [rating, setRating] = useState<string | undefined>();
   const [displayRating, setDisplayRating] = useState<string | undefined>();
-  const[userId, setUserId] = useState<string>();
+  const [userId, setUserId] = useState<string>();
   const [ingredients, setIngredients] = React.useState<RecipeIngredient[]>([]);
   const [open, setOpen] = useState(false);
   const handleOpenModal = () => setOpen(true);
   const handleCloseModal = () => setOpen(false);
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   const navigate = useNavigate();
 
@@ -351,8 +347,7 @@ const IndividualRecipe: React.FC = () => {
         `${config.serverUrl}/profile/current_user`
       );
       const data: User = response.data;
-      setCurrent_user(data)
-      
+      setCurrent_user(data);
     } catch (error) {
       console.error("Error fetching user: ", error);
     }
@@ -360,38 +355,32 @@ const IndividualRecipe: React.FC = () => {
 
   const getReviews = async () => {
     //i am WELL aware that this is stupid - but i could NOT get it to accurately display the user id otherwise
-    let myId = "-100"
+    let myId = "-100";
     try {
       const response = await axios.get(
         `${config.serverUrl}/recipes/reviews/${id}/`
       );
       try {
-        const response = await axios.post(
-          `${config.serverUrl}/recipes/user`
-        );
-        myId = response.data.id
-      }
-      catch (error){
-        console.error("Error fetching ingredients: ", error)
+        const response = await axios.post(`${config.serverUrl}/recipes/user`);
+        myId = response.data.id;
+      } catch (error) {
+        console.error("Error fetching ingredients: ", error);
       }
       setReviews(response.data.reviews);
       const userReview = response.data.reviews.find(
         (review: Review) => review.user_id === myId
       );
       if (userReview) {
-        console.log("should be working")
+        console.log("should be working");
         setUserReview(userReview); // Set the current user's review if they have one
-        setDisplayRating(userReview.rating)
-      }
-      else{
-        console.log("didnt find nothing")
+        setDisplayRating(userReview.rating);
+      } else {
+        console.log("didnt find nothing");
       }
     } catch (error) {
       console.error("Error fetching reviews: ", error);
     }
   };
-
-  
 
   const getRecipeLists = async () => {
     try {
@@ -409,16 +398,17 @@ const IndividualRecipe: React.FC = () => {
     }
   };
 
-
   const getRecipeListsIn = async () => {
     if (id == undefined) {
       return;
     }
-    const response = await axios.get(`${config.serverUrl}/recipe_lists/all_containing/${id}`);
+    const response = await axios.get(
+      `${config.serverUrl}/recipe_lists/all_containing/${id}`
+    );
     const rli: RecipeList[] = response.data;
     console.log(rli);
     setRecipeListsIn(rli);
-  }
+  };
 
   const getRecipeName = async () => {
     try {
@@ -448,18 +438,17 @@ const IndividualRecipe: React.FC = () => {
     }
   };
 
-  const getIngredients = async() => {
+  const getIngredients = async () => {
     try {
       const response = await axios.post(
         `${config.serverUrl}/recipes/ingredients/${id}`
       );
       const data: RecipeIngredient[] = response.data;
-      setIngredients(data)
+      setIngredients(data);
+    } catch (error) {
+      console.error("Error fetching ingredients: ", error);
     }
-    catch (error){
-      console.error("Error fetching ingredients: ", error)
-    }
-  }
+  };
 
   const handleReportReview = async () => {
     let data;
@@ -487,7 +476,7 @@ const IndividualRecipe: React.FC = () => {
         })
         .then((response) => {
           console.log(response.data.message);
-          setMessage("Review successfully reported.")
+          setMessage("Review successfully reported.");
           setSnackBarOpen(true);
         })
         .catch((error) => {
@@ -518,7 +507,6 @@ const IndividualRecipe: React.FC = () => {
       </IconButton>
 
       <Box
-
         sx={{
           display: "flex",
           justifyContent: "center",
@@ -531,17 +519,6 @@ const IndividualRecipe: React.FC = () => {
         {recipe_name}
       </Box>
 
-    
-      <Box sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexShrink: 1,
-        width: "auto",
-        marginTop: 2,  // Add space on top if necessary
-        marginBottom: 2,  // Add space on bottom if necessary
-        padding: "10px",  // Optional padding for extra space inside the Box
-      }}>
       <Box
         sx={{
           display: "flex",
@@ -549,16 +526,33 @@ const IndividualRecipe: React.FC = () => {
           alignItems: "center",
           flexShrink: 1,
           width: "auto",
-          fontSize: "24px",
-          padding: "30px",
+          marginTop: 2, // Add space on top if necessary
+          marginBottom: 2, // Add space on bottom if necessary
+          padding: "10px", // Optional padding for extra space inside the Box
         }}
       >
-      {difficulty && <Difficulty difficulty={difficulty} />}
-      </Box>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flexShrink: 1,
+            width: "auto",
+            fontSize: "24px",
+            padding: "30px",
+          }}
+        >
+          {difficulty && <Difficulty difficulty={difficulty} />}
+        </Box>
 
-      <Box sx={{ marginLeft: 2, display: "flex", alignItems: "center" }}>
-        <Rating name="recipe-rating" value={Number(displayRating)} precision={0.5} readOnly />
-      </Box>
+        <Box sx={{ marginLeft: 2, display: "flex", alignItems: "center" }}>
+          <Rating
+            name="recipe-rating"
+            value={Number(displayRating)}
+            precision={0.5}
+            readOnly
+          />
+        </Box>
       </Box>
       <br />
       <FormControl sx={{ width: 400 }}>
@@ -576,7 +570,7 @@ const IndividualRecipe: React.FC = () => {
         </Select>
       </FormControl>
 
-      <br/>
+      <br />
 
       <RecipeRemoveSelect
         lid={lid}
@@ -584,7 +578,7 @@ const IndividualRecipe: React.FC = () => {
         recipeListsIn={recipeListsIn}
       ></RecipeRemoveSelect>
 
-      <br/>
+      <br />
 
       {/* Add recipe's ingredients to the shopping list */}
       <FormControl>
@@ -594,65 +588,70 @@ const IndividualRecipe: React.FC = () => {
           onClick={() => {
             handleAddIngredientsOfRecipe();
           }}
-        >Add to shopping list</Button>
+        >
+          Add to shopping list
+        </Button>
       </FormControl>
 
       <Box
-  sx={{
-    textAlign: "left",
-    marginTop: 4, // Space between ingredients and other sections
-    marginBottom: 4, // Optional space for separation
-  }}
->
-  <Typography sx={{ fontWeight: "bold" }}>
-    Ingredients:
-  </Typography>
-  {ingredients.length > 0 ? (
-    <Box sx={{ marginTop: 2 }}>
-      {ingredients.map((ingredient) => (
-        <Box
-          key={ingredient.ingredient_id}
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            padding: "8px 0",
-            borderBottom: "1px solid #ccc",
-            alignItems: "center", // Center items vertically
-          }}
-        >
-          {/* Checkbox to the left of each ingredient */}
-          <Checkbox
-            onChange={(e) => {
-              // Toggle checked state of ingredient
-              const newIngredients = ingredients.map((item) =>
-                item.ingredient_id === ingredient.ingredient_id
-                  ? { ...item, checked: e.target.checked }
-                  : item
-              );
-              setIngredients(newIngredients); // Update ingredients state
-            }}
-          />
-          <Typography
-            variant="body1"
-            sx={{
-              textDecoration: ingredient.checked ? "line-through" : "none", // Strikethrough if checked
-              color: ingredient.checked ? "gray" : "black", // Optional: change color if checked
-              flex: 1, // Allow the ingredient name to grow and take available space
-            }}
-          >
-            {ingredient.ingredient_name}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {ingredient.measure}
-          </Typography>
-        </Box>
-      ))}
-    </Box>
-  ) : (
-    <Typography>No ingredients available.</Typography>
-  )}
-</Box>
-
+        sx={{
+          textAlign: "left",
+          marginTop: 4, // Space between ingredients and other sections
+          marginBottom: 4, // Optional space for separation
+        }}
+      >
+        <Typography sx={{ fontWeight: "bold" }}>Ingredients:</Typography>
+        {ingredients.length > 0 ? (
+          <Box sx={{ marginTop: 2 }}>
+            {ingredients.map((ingredient) => (
+              <Box
+                key={ingredient.ingredient_id}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "8px 0",
+                  borderBottom: "1px solid #ccc",
+                  alignItems: "center", // Center items vertically
+                }}
+              >
+                {/* Checkbox to the left of each ingredient */}
+                <Checkbox
+                  onChange={(e) => {
+                    // Toggle checked state of ingredient
+                    const newIngredients = ingredients.map((item) =>
+                      item.ingredient_id === ingredient.ingredient_id
+                        ? { ...item, checked: e.target.checked }
+                        : item
+                    );
+                    setIngredients(newIngredients); // Update ingredients state
+                  }}
+                />
+                <Typography
+                  variant="body1"
+                  sx={{
+                    textDecoration: ingredient.checked
+                      ? "line-through"
+                      : "none", // Strikethrough if checked
+                    color: ingredient.checked
+                      ? "gray"
+                      : isDarkMode
+                      ? "white"
+                      : "black", // Optional: change color if checked
+                    flex: 1, // Allow the ingredient name to grow and take available space
+                  }}
+                >
+                  {ingredient.ingredient_name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {ingredient.measure}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        ) : (
+          <Typography>No ingredients available.</Typography>
+        )}
+      </Box>
 
       <Box
         sx={{
@@ -747,7 +746,7 @@ const IndividualRecipe: React.FC = () => {
         onClose={handleCloseModal}
         aria-labelledby="modal-title"
       >
-        <Box sx={reportModalStyle}>
+        <Box sx={reportModalStyle(theme)}>
           <IconButton
             onClick={handleCloseModal}
             style={{ position: "absolute", top: 5, right: 5 }}

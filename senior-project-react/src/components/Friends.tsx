@@ -280,7 +280,7 @@ const Friends: React.FC = () => {
                 key={friend.id}
                 mt={10}
                 sx={{
-                  width: "100px",
+                  width: "125px",
                   minHeight: "100px",
                   border: "2px solid rgb(172, 169, 169)",
                   borderRadius: 2,
@@ -348,7 +348,7 @@ const Friends: React.FC = () => {
                   key={friend.id}
                   mt={5}
                   sx={{
-                    width: "100px",
+                    width: "125px",
                     minHeight: "100px",
                     border: "2px solid rgb(172, 169, 169)",
                     borderRadius: 2,
@@ -412,7 +412,7 @@ const Friends: React.FC = () => {
                   key={friend.id}
                   mt={5}
                   sx={{
-                    width: "100px",
+                    width: "125px",
                     minHeight: "100px",
                     border: "2px solid rgb(172, 169, 169)",
                     borderRadius: 2,
@@ -475,7 +475,7 @@ const Friends: React.FC = () => {
                     key={friend.id}
                     mt={5}
                     sx={{
-                      width: "100px",
+                      width: "125px",
                       minHeight: "100px",
                       border: "2px solid rgb(172, 169, 169)",
                       borderRadius: 2,

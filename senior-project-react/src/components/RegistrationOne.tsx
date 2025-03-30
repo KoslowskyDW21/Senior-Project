@@ -128,10 +128,17 @@ const RegisterOne = () => {
         label="Username*"
         fullWidth
         value={data.username}
-        onChange={(e) => setData({ ...data, username: e.target.value })}
+        onChange={(e) => {
+          const input = e.target.value;
+          if (input.length <= 16) {
+            setData({ ...data, username: input });
+          }
+        }}
         margin="normal"
         error={!!errors.username}
-        helperText={errors.username}
+        helperText={
+          errors.username || `${16 - data.username.length} characters remaining`
+        }
       />
 
       <Button variant="contained" onClick={handleNext} sx={{ mt: 3 }}>

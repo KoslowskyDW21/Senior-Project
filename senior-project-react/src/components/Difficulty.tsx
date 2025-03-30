@@ -1,4 +1,5 @@
 import React from "react";
+import { useTheme } from "@mui/material/styles";
 import { Box } from "@mui/material";
 
 interface DifficultyProps {
@@ -6,10 +7,12 @@ interface DifficultyProps {
 }
 
 const Difficulty: React.FC<DifficultyProps> = ({ difficulty }) => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const diamondStyle = {
     width: 24,
     height: 24,
-    backgroundColor: "black",
+    backgroundColor: isDarkMode ? "white" : "black",
     transform: "rotate(45deg)",
     marginRight: 2,
   };

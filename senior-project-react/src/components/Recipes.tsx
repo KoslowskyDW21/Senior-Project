@@ -43,10 +43,12 @@ interface DietaryRestrictions {
 }
 
 function Difficulty({ difficulty }) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const diamondStyle = {
     width: "clamp(5px, 2vw, 24px)", // Min size 16px, max size 24px, grows based on viewport width
     height: "clamp(5px, 2vw, 24px)",
-    backgroundColor: "black",
+    backgroundColor: isDarkMode ? "white" : "black",
     transform: "rotate(45deg)",
     marginRight: "clamp(4px, 1vw, 8px)",
   };
@@ -65,6 +67,8 @@ function Difficulty({ difficulty }) {
 }
 
 function Recipe({ id, name, difficulty, image }) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const navigate = useNavigate();
 
   const handleGoToRecipe = () => {
