@@ -363,7 +363,7 @@ const IndividualRecipe: React.FC = () => {
     let myId = "-100"
     try {
       const response = await axios.get(
-        `${config.serverUrl}/recipes/reviews/${id}`
+        `${config.serverUrl}/recipes/reviews/${id}/`
       );
       try {
         const response = await axios.post(
@@ -422,7 +422,7 @@ const IndividualRecipe: React.FC = () => {
 
   const getRecipeName = async () => {
     try {
-      const response = await axios.get(`${config.serverUrl}/recipes/${id}`);
+      const response = await axios.get(`${config.serverUrl}/recipes/${id}/`);
       const data: Recipe = response.data;
       setRecipe_name(data.recipe_name);
       setDifficulty(data.difficulty);
