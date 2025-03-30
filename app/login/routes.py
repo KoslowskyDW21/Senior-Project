@@ -229,6 +229,9 @@ def validate_user():
     username = json.get('username')
     email = json.get('email')
 
+    if len(username) > 20:
+        return jsonify({"valid": False, "message": "Username cannot be more than 20 characters"}), 400
+
 
     if username and User.query.filter_by(username=username).first():
         print("invalid 1")
