@@ -14,13 +14,14 @@ import {
   CardActionArea,
   CardHeader,
   useMediaQuery,
-  Grid2
+  Grid2,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import config from "../config.js";
 
 import Header from "./Header";
+import Footer from "./Footer";
 
 interface UserGroup {
   id: number;
@@ -72,7 +73,10 @@ const Group: React.FC<UserGroup> = ({ id, name, description, image }) => {
           subheader={
             <Typography
               variant="body2"
-              sx={{ fontSize: "clamp(0.8rem, 1.2vw, 1.5rem)", textAlign: "center" }}
+              sx={{
+                fontSize: "clamp(0.8rem, 1.2vw, 1.5rem)",
+                textAlign: "center",
+              }}
             >
               {description}
             </Typography>
@@ -115,7 +119,9 @@ const Groups: React.FC = () => {
   const [searchLabel, setSearchLabel] = useState<string>("");
 
   const isSmallScreen = useMediaQuery("(max-width:600px)");
-  const isMediumScreen = useMediaQuery("(min-width:600px) and (max-width:900px)");
+  const isMediumScreen = useMediaQuery(
+    "(min-width:600px) and (max-width:900px)"
+  );
 
   const fetchGroups = async () => {
     try {
@@ -143,8 +149,10 @@ const Groups: React.FC = () => {
 
   const fetchInvitedGroups = async () => {
     try {
-      const response = await axios.get(`${config.serverUrl}/groups/notifications`);
-      const invitedGroupsList = response.data.invited_groups
+      const response = await axios.get(
+        `${config.serverUrl}/groups/notifications`
+      );
+      const invitedGroupsList = response.data.invited_groups;
       setInvitedGroups(invitedGroupsList);
       console.log("Invited Groups:", invitedGroupsList);
     } catch (error) {
@@ -384,11 +392,7 @@ const Groups: React.FC = () => {
               <Typography variant="h5" gutterBottom>
                 My Groups
               </Typography>
-              <Grid2
-                container
-                spacing={2}
-                columns={12}
-              >
+              <Grid2 container spacing={2} columns={12}>
                 {myGroups.map((group) => (
                   <Grid2 item xs={12} sm={6} md={4} key={group.id}>
                     <Group {...group} />
@@ -436,11 +440,7 @@ const Groups: React.FC = () => {
             <Typography variant="h5" gutterBottom>
               All Groups
             </Typography>
-            <Grid2
-              container
-              spacing={2}
-              columns={12}
-            >
+            <Grid2 container spacing={2} columns={12}>
               {filteredGroups.map((group) => (
                 <Grid2 item xs={12} sm={6} md={4} key={group.id}>
                   <Group {...group} />
@@ -456,40 +456,7 @@ const Groups: React.FC = () => {
             </Box>
           )}
         </Container>
-        <div
-          style={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            display: "flex",
-            justifyContent: "space-around",
-            padding: "10px",
-            backgroundColor: "#fff",
-            boxShadow: "0px -2px 5px rgba(0, 0, 0, 0.1)",
-            zIndex: 1000,
-          }}
-        >
-          <Button
-            onClick={handleGoToRecipes}
-            variant="contained"
-            color="primary"
-            sx={{ flex: 1 }}
-          >
-            Recipes
-          </Button>
-          <Button
-            onClick={handleGoToChallenges}
-            variant="contained"
-            color="primary"
-            sx={{ flex: 1 }}
-          >
-            Challenges
-          </Button>
-          <Button variant="outlined" color="primary" sx={{ flex: 1 }}>
-            Community
-          </Button>
-        </div>
+        <Footer />
       </main>
     </div>
   );

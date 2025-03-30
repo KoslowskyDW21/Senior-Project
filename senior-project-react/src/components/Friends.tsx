@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Typography, Box, Avatar, TextField, IconButton } from "@mui/material";
+import {
+  Typography,
+  Box,
+  Avatar,
+  TextField,
+  IconButton,
+  useTheme,
+} from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import config from "../config.js";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -160,6 +167,9 @@ const Friends: React.FC = () => {
     getFriendRequestsFrom();
   }, []);
 
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+
   return (
     <div>
       <Box
@@ -168,6 +178,7 @@ const Friends: React.FC = () => {
           flexDirection: "column",
           height: "100vh",
           paddingTop: "150px",
+          backgroundColor: theme.palette.background.default,
         }}
       >
         <Header title="Friends" />
@@ -184,7 +195,14 @@ const Friends: React.FC = () => {
         </IconButton>
 
         <main role="main">
-          <Box sx={{ position: "relative", width: "50vw", margin: "auto" }}>
+          <Box
+            sx={{
+              position: "relative",
+              width: "50vw",
+              margin: "auto",
+              backgroundColor: theme.palette.background.default,
+            }}
+          >
             <TextField
               label="Find new friends"
               variant="outlined"
@@ -199,8 +217,10 @@ const Friends: React.FC = () => {
                   top: "100%",
                   left: 0,
                   width: "100%",
-                  backgroundColor: "white",
-                  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                  backgroundColor: theme.palette.background.default,
+                  boxShadow: isDarkMode
+                    ? "0px 2px 5px rgba(255, 255, 255, 0.1)"
+                    : "0px 2px 5px rgba(0, 0, 0, 0.1)",
                   borderRadius: "4px",
                   maxHeight: "300px",
                   overflowY: "auto",
@@ -215,7 +235,9 @@ const Friends: React.FC = () => {
                       display: "flex",
                       alignItems: "center",
                       cursor: "pointer",
-                      "&:hover": { backgroundColor: "#f5f5f5" },
+                      "&:hover": {
+                        backgroundColor: theme.palette.background.default,
+                      },
                     }}
                     onClick={() => navigate(`/OtherProfile/${user.id}`)}
                   >
@@ -250,6 +272,7 @@ const Friends: React.FC = () => {
               flexWrap: "wrap",
               justifyContent: "flex-start",
               gap: 2,
+              backgroundColor: theme.palette.background.default,
             }}
           >
             {friends.map((friend) => (
@@ -257,11 +280,14 @@ const Friends: React.FC = () => {
                 key={friend.id}
                 mt={10}
                 sx={{
-                  width: "100px",
+                  width: "125px",
                   minHeight: "100px",
                   border: "2px solid rgb(172, 169, 169)",
                   borderRadius: 2,
-                  boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                  backgroundColor: theme.palette.background.default,
+                  boxShadow: isDarkMode
+                    ? "0px 2px 5px rgba(255, 255, 255, 0.1)"
+                    : "0px 2px 5px rgba(0, 0, 0, 0.1)",
                   transition: "all 0.3s ease",
                   display: "flex",
                   flexDirection: "column",
@@ -271,7 +297,9 @@ const Friends: React.FC = () => {
                   height: "100%",
                   "&:hover": {
                     borderColor: "#1976d2",
-                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                    boxShadow: isDarkMode
+                      ? "0px 2px 5px rgba(255, 255, 255, 0.1)"
+                      : "0px 2px 5px rgba(0, 0, 0, 0.1)",
                   },
                 }}
                 onClick={() => handleGoToOtherProfile(friend.id)}
@@ -312,6 +340,7 @@ const Friends: React.FC = () => {
                 flexWrap: "wrap",
                 justifyContent: "flex-start",
                 gap: 2,
+                backgroundColor: theme.palette.background.default,
               }}
             >
               {friendRequestsFrom.map((friend) => (
@@ -319,11 +348,14 @@ const Friends: React.FC = () => {
                   key={friend.id}
                   mt={5}
                   sx={{
-                    width: "100px",
+                    width: "125px",
                     minHeight: "100px",
                     border: "2px solid rgb(172, 169, 169)",
                     borderRadius: 2,
-                    boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                    backgroundColor: theme.palette.background.default,
+                    boxShadow: isDarkMode
+                      ? "0px 2px 5px rgba(255, 255, 255, 0.1)"
+                      : "0px 2px 5px rgba(0, 0, 0, 0.1)",
                     transition: "all 0.3s ease",
                     display: "flex",
                     flexDirection: "column",
@@ -333,7 +365,9 @@ const Friends: React.FC = () => {
                     height: "100%",
                     "&:hover": {
                       borderColor: "#1976d2",
-                      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                      boxShadow: isDarkMode
+                        ? "0px 2px 5px rgba(255, 255, 255, 0.1)"
+                        : "0px 2px 5px rgba(0, 0, 0, 0.1)",
                     },
                   }}
                   onClick={() => handleGoToOtherProfile(friend.id)}
@@ -370,6 +404,7 @@ const Friends: React.FC = () => {
                 flexWrap: "wrap",
                 justifyContent: "flex-start",
                 gap: 2,
+                backgroundColor: theme.palette.background.default,
               }}
             >
               {friendRequestsTo.map((friend) => (
@@ -377,11 +412,13 @@ const Friends: React.FC = () => {
                   key={friend.id}
                   mt={5}
                   sx={{
-                    width: "100px",
+                    width: "125px",
                     minHeight: "100px",
                     border: "2px solid rgb(172, 169, 169)",
                     borderRadius: 2,
-                    boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                    boxShadow: isDarkMode
+                      ? "0px 2px 5px rgba(255, 255, 255, 0.1)"
+                      : "0px 2px 5px rgba(0, 0, 0, 0.1)",
                     transition: "all 0.3s ease",
                     display: "flex",
                     flexDirection: "column",
@@ -391,7 +428,9 @@ const Friends: React.FC = () => {
                     height: "100%",
                     "&:hover": {
                       borderColor: "#1976d2",
-                      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                      boxShadow: isDarkMode
+                        ? "0px 2px 5px rgba(255, 255, 255, 0.1)"
+                        : "0px 2px 5px rgba(0, 0, 0, 0.1)",
                     },
                   }}
                   onClick={() => handleGoToOtherProfile(friend.id)}
@@ -436,11 +475,13 @@ const Friends: React.FC = () => {
                     key={friend.id}
                     mt={5}
                     sx={{
-                      width: "100px",
+                      width: "125px",
                       minHeight: "100px",
                       border: "2px solid rgb(172, 169, 169)",
                       borderRadius: 2,
-                      boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                      boxShadow: isDarkMode
+                        ? "0px 2px 5px rgba(255, 255, 255, 0.1)"
+                        : "0px 2px 5px rgba(0, 0, 0, 0.1)",
                       transition: "all 0.3s ease",
                       display: "flex",
                       flexDirection: "column",
@@ -450,7 +491,9 @@ const Friends: React.FC = () => {
                       height: "100%",
                       "&:hover": {
                         borderColor: "#1976d2",
-                        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                        boxShadow: isDarkMode
+                          ? "0px 2px 5px rgba(255, 255, 255, 0.1)"
+                          : "0px 2px 5px rgba(0, 0, 0, 0.1)",
                       },
                     }}
                     onClick={() => handleGoToOtherProfile(friend.id)}

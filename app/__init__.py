@@ -7,7 +7,6 @@ import string, random
 from datetime import datetime
 import requests
 import os
-import redis
 
 login_manager = LoginManager()
 

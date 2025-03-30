@@ -56,7 +56,7 @@ const CompletedRecipe: React.FC = () => {
 
     try {
       const response = await axios.post(
-        `${config.serverUrl}/recipes/review/${id}`,
+        `${config.serverUrl}/recipes/review/${id}/`,
         formData,
         {
           headers: {
@@ -101,7 +101,7 @@ const CompletedRecipe: React.FC = () => {
   const getResponse = async () => {
     try {
       const response = await axios.post(
-        `${config.serverUrl}/recipes/completed/${id}`
+        `${config.serverUrl}/recipes/completed/${id}/`
       );
       const data: Recipe = response.data;
       setRecipe_name(data.recipe_name);

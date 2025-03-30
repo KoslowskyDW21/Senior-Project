@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTheme } from "@mui/material/styles";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom"; // React Router for nav
 import {
@@ -234,6 +235,9 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     console.log("useEffect pathname", location.pathname);
   }, []);
 
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+
   return (
     <div>
       <Box
@@ -245,8 +249,10 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           display: "flex",
           alignItems: "center",
           padding: "10px 20px",
-          backgroundColor: "#fff",
-          boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+          backgroundColor: theme.palette.background.default,
+          boxShadow: isDarkMode
+            ? "0px 2px 5px rgba(255, 255, 255, 0.1)"
+            : "0px 2px 5px rgba(0, 0, 0, 0.1)",
           zIndex: 1000,
           height: "clamp(50px, 6vw, 80px)",
           justifyContent: "center",
@@ -255,8 +261,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         <ButtonBase onClick={handleGoToRecipes}>
           <Box
             sx={{
-              width: "clamp(50px, 8vw, 70px)", // Width will scale between 50px and 70px
-              height: "clamp(50px, 8vw, 70px)", // Same for height
+              width: "clamp(40px, 6vw, 70px)", // Width will scale between 50px and 70px
+              height: "clamp(40px, 6vw, 70px)", // Same for height
               backgroundColor: "lightgray",
               borderRadius: 2,
               display: "flex",
@@ -278,7 +284,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             justifyContent: "center",
             flexGrow: 1,
             alignItems: "center",
-            fontSize: "clamp(8px, 2vw, 20px)", // Scales based on screen width, between 16px and 24px
+            fontSize: "clamp(8px, 1vw, 20px)", // Scales based on screen width, between 16px and 24px
             fontWeight: "bold",
           }}
         >
@@ -292,21 +298,27 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           >
             <Avatar
               sx={{
-                width: "clamp(20px, 8vw, 50px)", // Avatar width scales between 40px and 70px based on screen width
-                height: "clamp(20px, 8vw, 50px)", // Avatar height scales between 40px and 70px based on screen width
+                width: "clamp(20px, 4vw, 40px)", // Avatar width scales between 40px and 70px based on screen width
+                height: "clamp(20px, 4vw, 40px)", // Avatar height scales between 40px and 70px based on screen width
                 backgroundColor: "gray",
               }}
             >
-              <NotificationsIcon sx={{ color: "white" }} />
+              <NotificationsIcon
+                sx={{
+                  color: "white",
+                  width: "clamp(4px, 3vw, 20px)", // Notification indicator size scales between 10px and 15px
+                  height: "clamp(4px, 3vw, 20px)",
+                }}
+              />
               {notifications.length > 0 &&
                 notifications.some((n) => n.isRead === 0) && (
                   <Box
                     sx={{
                       position: "absolute",
-                      top: 5,
-                      right: 5,
-                      width: "clamp(7px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
-                      height: "clamp(7px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
+                      top: 4,
+                      right: 4,
+                      width: "clamp(4px, 1vw, 15px)", // Notification indicator size scales between 10px and 15px
+                      height: "clamp(4px, 1vw, 15px)", // Notification indicator size scales between 10px and 15px
                       backgroundColor: "red",
                       borderRadius: "50%",
                     }}
@@ -319,6 +331,12 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             anchorEl={notificationAnchorEl}
             open={Boolean(notificationAnchorEl)}
             onClose={handleCloseNotification}
+            sx={{
+              "& .MuiPaper-root": {
+                width: "clamp(130px, 20vw, 200px)",
+                maxHeight: "clamp(80px, 40vh, 380px)",
+              },
+            }}
           >
             {notifications.length > 0 &&
             notifications.some((n) => n.isRead === 0) ? (
@@ -326,9 +344,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                 <MenuItem
                   onClick={clearNotifications}
                   sx={{
-                    textAlign: "center",
-                    justifyContent: "center",
                     color: "red",
+                    fontSize: "clamp(13px, 1vw, 20px)",
                   }}
                 >
                   Clear Notifications
@@ -339,6 +356,9 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                   .map((notification, index) => (
                     <MenuItem
                       key={index}
+                      sx={{
+                        fontSize: "clamp(13px, 1vw, 20px)",
+                      }}
                       onClick={(event) =>
                         handleReadNotification(
                           event,
@@ -367,8 +387,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                 alt="Profile Picture"
                 src={profile_picture}
                 sx={{
-                  width: "clamp(20px, 8vw, 50px)", // Avatar width scales between 40px and 70px based on screen width
-                  height: "clamp(20px, 8vw, 50px)", // Avatar height scales between 40px and 70px based on screen width
+                  width: "clamp(20px, 4vw, 40px)", // Avatar width scales between 40px and 70px based on screen width
+                  height: "clamp(20px, 4vw, 40px)", // Avatar height scales between 40px and 70px based on screen width
                   border: "1px solid #000",
                 }}
               />
@@ -390,12 +410,36 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             open={Boolean(avatarAnchorEl)}
             onClose={handleCloseAvatar}
           >
-            <MenuItem onClick={handleGoToProfile}>Profile</MenuItem>
-            <MenuItem onClick={handleGoToSettings}>Settings</MenuItem>
+            <MenuItem
+              onClick={handleGoToProfile}
+              sx={{
+                fontSize: "clamp(14px, 1vw, 20px)",
+              }}
+            >
+              Profile
+            </MenuItem>
+            <MenuItem
+              onClick={handleGoToSettings}
+              sx={{
+                fontSize: "clamp(14px, 1vw, 20px)",
+              }}
+            >
+              Settings
+            </MenuItem>
             {/* <MenuItem onClick={handleGoToRecipeLists}>Recipe Lists</MenuItem> */}
             {/* <MenuItem onClick={handleGoToShoppingList}>Shopping List</MenuItem> */}
-            <MenuItem onClick={handleGoToAchievements}>Achievements</MenuItem>
-            <MenuItem onClick={handleLogout} sx={{ color: "red" }}>
+            <MenuItem
+              onClick={handleGoToAchievements}
+              sx={{
+                fontSize: "clamp(14px, 1vw, 20px)",
+              }}
+            >
+              Achievements
+            </MenuItem>
+            <MenuItem
+              onClick={handleLogout}
+              sx={{ color: "red", fontSize: "clamp(14px, 1vw, 20px)" }}
+            >
               Log Out
             </MenuItem>
             {admin ? (
