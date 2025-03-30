@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { ThemeProvider, CssBaseline} from "@mui/material";
+import { lightTheme, darkTheme } from "./theme";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { RegistrationProvider } from "./components/RegistrationContext";
 import Login from "./components/Login";
@@ -49,6 +51,13 @@ function App() {
   // State to indicate if MSAL instance is initialized
   const [isMsalInitialized, setIsMsalInitialized] = useState(false);
 
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const [isDarkMode, setIsDarkMode] = useState(prefersDark);
+  const theme = useMemo(
+    () => (isDarkMode ? darkTheme : lightTheme),
+    [isDarkMode]
+  );
+
   useEffect(() => {
     // Initialize MSAL instance
     msalInstance
@@ -72,96 +81,108 @@ function App() {
 
   return (
     <MsalProvider instance={msalInstance}>
-      <Router>
-        <RegistrationProvider>
-          <Routes>
-            {/* Default route (login page) */}
-            <Route path="/" element={<Login />} />
-            {/* Registration pages */}
-            <Route path="/registration-one" element={<RegistrationOne />} />
-            <Route path="/registration-two" element={<RegistrationTwo />} />
-            <Route path="/registration-three" element={<RegistrationThree />} />
-            <Route path="/registration-four" element={<RegistrationFour />} />
-            {/* Protected Routes for Authenticated Users */}
-            <Route element={<ProtectedRoute />}>
-              {/* recipes */}
-              <Route path="/recipes" element={<Recipes />} />
-              <Route path="/recipes/:id" element={<IndividualRecipe />} />
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Router>
+          <RegistrationProvider>
+            <Routes>
+              {/* Default route (login page) */}
+              <Route path="/" element={<Login />} />
+              {/* Registration pages */}
+              <Route path="/registration-one" element={<RegistrationOne />} />
+              <Route path="/registration-two" element={<RegistrationTwo />} />
               <Route
-                path="/recipes/completed/:id"
-                element={<CompletedRecipe />}
+                path="/registration-three"
+                element={<RegistrationThree />}
               />
+              <Route path="/registration-four" element={<RegistrationFour />} />
+              {/* Protected Routes for Authenticated Users */}
+              <Route element={<ProtectedRoute />}>
+                {/* recipes */}
+                <Route path="/recipes" element={<Recipes />} />
+                <Route path="/recipes/:id" element={<IndividualRecipe />} />
+                <Route
+                  path="/recipes/completed/:id"
+                  element={<CompletedRecipe />}
+                />
 
-              {/* recipelists */}
-              <Route path="/recipe-lists" element={<RecipeLists />} />
-              <Route path="/recipe-lists/:id" element={<RecipeList />} />
-              <Route
-                path="/recipe-lists/create"
-                element={<CreateRecipeList />}
-              />
+                {/* recipelists */}
+                <Route path="/recipe-lists" element={<RecipeLists />} />
+                <Route path="/recipe-lists/:id" element={<RecipeList />} />
+                <Route
+                  path="/recipe-lists/create"
+                  element={<CreateRecipeList />}
+                />
 
-              {/* shoppinglist */}
-              <Route path="/shopping-list" element={<ShoppingList />} />
+                {/* shoppinglist */}
+                <Route path="/shopping-list" element={<ShoppingList />} />
 
-              {/* profile */}
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/profile/:id" element={<Profile />} />
-              <Route path="/otherProfile/:id" element={<OtherProfile />} />
+                {/* profile */}
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/profile/:id" element={<Profile />} />
+                <Route path="/otherProfile/:id" element={<OtherProfile />} />
 
-              {/* challenges */}
-              <Route path="/challenges" element={<Challenges />} />
-              <Route path="/challenges/:id" element={<ChallengeDetail />} />
-              <Route path="/challenges/create" element={<CreateChallenge />} />
-              <Route
-                path="/challenges/:id/vote"
-                element={<ChallengeVoting />}
-              />
-              <Route path="/past-challenges" element={<PastChallenges />} />
-              <Route
-                path="/challenges/:id/vote_results"
-                element={<ChallengeResults />}
-              />
-              <Route
-                path="/challenges/:id/invite_response"
-                element={<ChallengeInviteResponse />}
-              />
+                {/* challenges */}
+                <Route path="/challenges" element={<Challenges />} />
+                <Route path="/challenges/:id" element={<ChallengeDetail />} />
+                <Route
+                  path="/challenges/create"
+                  element={<CreateChallenge />}
+                />
+                <Route
+                  path="/challenges/:id/vote"
+                  element={<ChallengeVoting />}
+                />
+                <Route path="/past-challenges" element={<PastChallenges />} />
+                <Route
+                  path="/challenges/:id/vote_results"
+                  element={<ChallengeResults />}
+                />
+                <Route
+                  path="/challenges/:id/invite_response"
+                  element={<ChallengeInviteResponse />}
+                />
 
-              {/*achievements*/}
-              <Route path="/achievements" element={<Achievements />} />
-              <Route
-                path="/achievements/:id"
-                element={<AchievementSpecific />}
-              />
+                {/*achievements*/}
+                <Route path="/achievements" element={<Achievements />} />
+                <Route
+                  path="/achievements/:id"
+                  element={<AchievementSpecific />}
+                />
 
-              {/* settings */}
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/deleted_account" element={<DeletedAccount />} />
+                {/* settings */}
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/deleted_account" element={<DeletedAccount />} />
 
-              {/* groups */}
-              <Route path="/groups" element={<Groups />} />
-              <Route path="/groups/:id" element={<GroupDetails />} />
-              <Route path="/groups/create" element={<CreateGroup />} />
-              <Route path="/groups/:id/messages" element={<GroupMessages />} />
-              <Route
-                path="/groups/:id/invite_response"
-                element={<GroupInviteResponse />}
-              />
+                {/* groups */}
+                <Route path="/groups" element={<Groups />} />
+                <Route path="/groups/:id" element={<GroupDetails />} />
+                <Route path="/groups/create" element={<CreateGroup />} />
+                <Route
+                  path="/groups/:id/messages"
+                  element={<GroupMessages />}
+                />
+                <Route
+                  path="/groups/:id/invite_response"
+                  element={<GroupInviteResponse />}
+                />
 
-              {/* friends */}
-              <Route path="/friends" element={<Friends />} />
+                {/* friends */}
+                <Route path="/friends" element={<Friends />} />
 
-              {/* admin */}
-              <Route path="/admin" element={<AdminPage />} />
-              <Route path="/reported_content" element={<ReportPage />} />
+                {/* admin */}
+                <Route path="/admin" element={<AdminPage />} />
+                <Route path="/reported_content" element={<ReportPage />} />
 
-              {/* banned */}
-              <Route path="/banned" element={<Banned />} />
-            </Route>
-            {/* Redirect unknown routes to login */}
-            <Route path="*" element={<Login />} />
-          </Routes>
-        </RegistrationProvider>
-      </Router>
+                {/* banned */}
+                <Route path="/banned" element={<Banned />} />
+              </Route>
+              {/* Redirect unknown routes to login */}
+              <Route path="*" element={<Login />} />
+            </Routes>
+          </RegistrationProvider>
+        </Router>
+      </ThemeProvider>
     </MsalProvider>
   );
 }

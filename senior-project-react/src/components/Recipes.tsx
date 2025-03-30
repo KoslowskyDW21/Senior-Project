@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { useTheme } from "@mui/material/styles";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Button,
@@ -22,6 +23,7 @@ import {
 } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import Header from "./Header";
+import Footer from "./Footer.js";
 import debounce from "lodash.debounce";
 import Typography from "@mui/material/Typography";
 import config from "../config.js";
@@ -123,10 +125,12 @@ const Recipes: React.FC = () => {
     new URLSearchParams(location.search).get("search") || "";
 
   const [dietaryRestrictions, setDietaryRestrictions] = useState<[]>([]);
-  const [userDietaryRestrictions, setUserDietaryRestrictions] = useState<[]>([]);
-  const [selectedDietaryRestrictions, setSelectedDietaryRestrictions] = useState<string[]>([]);
+  const [userDietaryRestrictions, setUserDietaryRestrictions] = useState<[]>(
+    []
+  );
+  const [selectedDietaryRestrictions, setSelectedDietaryRestrictions] =
+    useState<string[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  
 
   const handleDietaryRestrictionsChange = (
     event: SelectChangeEvent<typeof selectedDietaryRestrictions>
@@ -157,8 +161,6 @@ const Recipes: React.FC = () => {
     setNoResultsFound(false); // Reset no results state
     loadRecipes(true); // Load recipes with the initial settings
   }, [selectedDietaryRestrictions]);
-  
-  
 
   // Use the searchQuery directly without debouncing
   const debouncedSearch = searchQuery;
@@ -198,25 +200,25 @@ const Recipes: React.FC = () => {
   const loadRecipes = async (reset = false) => {
     if (loading || page > totalPages) return;
     setLoading(true);
-  
+
     try {
       const response = await axios.post(`${config.serverUrl}/recipes/`, null, {
         params: {
           page: reset ? 1 : page,
           per_page: 20,
-          search_query: debouncedSearch || "", 
-          dietary_restrictions: selectedIds, 
+          search_query: debouncedSearch || "",
+          dietary_restrictions: selectedIds,
         },
       });
-  
+
       const { recipes: newRecipes, total_pages } = response.data;
-  
+
       if (newRecipes.length === 0) {
         setNoResultsFound(true);
       } else {
         setNoResultsFound(false);
       }
-  
+
       setRecipes((prev) => (reset ? newRecipes : [...prev, ...newRecipes]));
       setTotalPages(total_pages);
     } catch (error) {
@@ -225,36 +227,34 @@ const Recipes: React.FC = () => {
       setLoading(false);
     }
   };
-  
 
   useEffect(() => {
     hasScrolled.current = false;
   }, [recipes]);
 
   useEffect(() => {
-    getDietaryRestrictions(); 
+    getDietaryRestrictions();
   }, []);
 
   React.useEffect(() => {
-      const preselectedDietaryRestrictions = dietaryRestrictions
-        .filter((dietaryRestriction) =>
-          userDietaryRestrictions.some(
-            (userDietaryRestriction) =>
-              userDietaryRestriction.restriction_id === //use the actual ID attribute from the SQL table
-              dietaryRestriction.id
-          )
+    const preselectedDietaryRestrictions = dietaryRestrictions
+      .filter((dietaryRestriction) =>
+        userDietaryRestrictions.some(
+          (userDietaryRestriction) =>
+            userDietaryRestriction.restriction_id === //use the actual ID attribute from the SQL table
+            dietaryRestriction.id
         )
-        .map((dietaryRestriction) => dietaryRestriction.name);
-      const selectedIdz = dietaryRestrictions
-      . filter((dietaryRestriction) =>
-          preselectedDietaryRestrictions.includes(dietaryRestriction.name)
-        )
-        .map((dietaryRestriction) => dietaryRestriction.id);
-  
-      setSelectedDietaryRestrictions(preselectedDietaryRestrictions);
-      setSelectedIds(selectedIdz);
-    }, [dietaryRestrictions, userDietaryRestrictions]);
+      )
+      .map((dietaryRestriction) => dietaryRestriction.name);
+    const selectedIdz = dietaryRestrictions
+      .filter((dietaryRestriction) =>
+        preselectedDietaryRestrictions.includes(dietaryRestriction.name)
+      )
+      .map((dietaryRestriction) => dietaryRestriction.id);
 
+    setSelectedDietaryRestrictions(preselectedDietaryRestrictions);
+    setSelectedIds(selectedIdz);
+  }, [dietaryRestrictions, userDietaryRestrictions]);
 
   const handleScroll = () => {
     if (loading || page >= totalPages || hasScrolled.current) return;
@@ -303,7 +303,7 @@ const Recipes: React.FC = () => {
     <div>
       <Header title="Recipes" />
 
-    <Box
+      <Box
         mt={{ xs: 10, sm: 14, md: 14 }}
         textAlign="center"
         display="flex"
@@ -320,41 +320,38 @@ const Recipes: React.FC = () => {
             width: "100%",
           }}
         />
-    </Box>
+      </Box>
 
-    <Box
-      display="flex"
-      mt={{ xs: 0, sm: 0, md: 3 }}
-      mb={{xs: 0}}
-      justifyContent="center"
-    >
-      <Stack
-        direction="row"
-        spacing={2}
+      <Box
+        display="flex"
+        mt={{ xs: 0, sm: 0, md: 3 }}
+        mb={{ xs: 0 }}
+        justifyContent="center"
       >
-        <Button
-          variant="contained"
-          sx={{
-            width: "75",
-            height: "40",
-          }}
-          onClick={handleGoToRecipeLists}
-        >
-          Recipe Lists
-        </Button>
+        <Stack direction="row" spacing={2}>
+          <Button
+            variant="contained"
+            sx={{
+              width: "75",
+              height: "40",
+            }}
+            onClick={handleGoToRecipeLists}
+          >
+            Recipe Lists
+          </Button>
 
-        <Button
-          variant="contained"
-          sx={{
-            width: "75",
-            height: "40"
-          }}
-          onClick={handleGoToShoppingList}
-        >
-          Shopping List
-        </Button>
-      </Stack>
-    </Box>
+          <Button
+            variant="contained"
+            sx={{
+              width: "75",
+              height: "40",
+            }}
+            onClick={handleGoToShoppingList}
+          >
+            Shopping List
+          </Button>
+        </Stack>
+      </Box>
 
       <Box mt={2} display="flex" justifyContent="center">
         <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
@@ -375,7 +372,9 @@ const Recipes: React.FC = () => {
             {dietaryRestrictions.map((restriction) => (
               <MenuItem key={restriction.id} value={restriction.name}>
                 <Checkbox
-                  checked={selectedDietaryRestrictions.includes(restriction.name)}
+                  checked={selectedDietaryRestrictions.includes(
+                    restriction.name
+                  )}
                 />
                 <ListItemText primary={restriction.name} />
               </MenuItem>
@@ -443,44 +442,9 @@ const Recipes: React.FC = () => {
         </main>
       </Box>
 
-      {/* Footer buttons */}
-      <div
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          display: "flex",
-          justifyContent: "space-around",
-          padding: "10px",
-          backgroundColor: "#fff",
-          boxShadow: "0px -2px 5px rgba(0, 0, 0, 0.1)",
-          zIndex: 1000,
-        }}
-      >
-        <Button variant="outlined" color="primary" sx={{ flex: 1 }}>
-          Recipes
-        </Button>
-        <Button
-          onClick={() => navigate("/challenges")}
-          variant="contained"
-          color="primary"
-          sx={{ flex: 1 }}
-        >
-          Challenges
-        </Button>
-        <Button
-          onClick={() => navigate("/groups")}
-          variant="contained"
-          color="primary"
-          sx={{ flex: 1 }}
-        >
-          Community
-        </Button>
-      </div>
+      <Footer />
     </div>
   );
 };
-
 
 export default Recipes;
