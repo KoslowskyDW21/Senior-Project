@@ -1,9 +1,10 @@
 import { useTheme } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom"; // React Router for nav
+import { useNavigate, useLocation } from "react-router-dom"; // React Router for nav
 import { Button } from "@mui/material"; //matui components
 
 const Footer = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
 
@@ -22,12 +23,17 @@ const Footer = () => {
         zIndex: 1000,
       }}
     >
-      <Button variant="outlined" color="primary" sx={{ flex: 1 }}>
+      <Button
+        onClick={() => navigate("/recipes")}
+        variant={location.pathname === "/recipes" ? "contained" : "outlined"} // Highlight selected
+        color="primary"
+        sx={{ flex: 1 }}
+      >
         Recipes
       </Button>
       <Button
         onClick={() => navigate("/challenges")}
-        variant="contained"
+        variant={location.pathname === "/challenges" ? "contained" : "outlined"}
         color="primary"
         sx={{ flex: 1 }}
       >
@@ -35,7 +41,7 @@ const Footer = () => {
       </Button>
       <Button
         onClick={() => navigate("/groups")}
-        variant="contained"
+        variant={location.pathname === "/groups" ? "contained" : "outlined"}
         color="primary"
         sx={{ flex: 1 }}
       >
