@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { Theme, useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
 import {
   Container,
@@ -16,7 +17,7 @@ import {
   Modal,
   FormControl,
   InputLabel,
-  Select
+  Select,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
@@ -24,19 +25,19 @@ import { useNavigate } from "react-router-dom";
 import config from "../config.js";
 import ConfirmationMessage from "./ConfirmationMessage.js";
 
-const reportModalStyle = {
+const reportModalStyle = (theme: Theme) => ({
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  bgcolor: "#ffffff",
+  bgcolor: theme.palette.background.default,
   boxShadow: 24,
   paddingTop: 3,
   paddingLeft: 7,
   paddingRight: 7,
   paddingBottom: 3,
   textAlign: "center",
-};
+});
 
 interface Message {
   id: number;
@@ -57,6 +58,8 @@ const GroupMessages: React.FC = () => {
   const handleCloseModal = () => setOpen(false);
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -101,36 +104,41 @@ const GroupMessages: React.FC = () => {
   const handleReportMessage = async () => {
     let data;
 
-    await axios.get(`${config.serverUrl}/groups/${messageId}/reportMessage`)
-    .then((response) => {
-      data = response.data;
-    })
-    .catch((error) => {
-      console.error("Could not get if already reported", error);
-    });
+    await axios
+      .get(`${config.serverUrl}/groups/${messageId}/reportMessage`)
+      .then((response) => {
+        data = response.data;
+      })
+      .catch((error) => {
+        console.error("Could not get if already reported", error);
+      });
 
-    if(!data!.alreadyReported) {
+    if (!data!.alreadyReported) {
       const newData = {
         user_id: data!.id,
         message_id: messageId,
       };
 
-      await axios.post(`${config.serverUrl}/groups/${messageId}/reportMessage`, newData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-      .then((response) => {
-        console.log(response.data.messsage);
-      })
-      .catch((error) => {
-        console.error("Could not report message", error);
-      });
-    }
-    else {
+      await axios
+        .post(
+          `${config.serverUrl}/groups/${messageId}/reportMessage`,
+          newData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        )
+        .then((response) => {
+          console.log(response.data.messsage);
+        })
+        .catch((error) => {
+          console.error("Could not report message", error);
+        });
+    } else {
       console.log("Review already reported");
     }
-  }
+  };
 
   return (
     <Container>
@@ -155,7 +163,7 @@ const GroupMessages: React.FC = () => {
                     primary={message.username}
                     secondary={message.text}
                   />
-                  {message.num_reports !== -1 ?
+                  {message.num_reports !== -1 ? (
                     <Button
                       variant="contained"
                       color="error"
@@ -166,9 +174,9 @@ const GroupMessages: React.FC = () => {
                     >
                       Report
                     </Button>
-                    :
+                  ) : (
                     <></>
-                  }
+                  )}
                 </ListItem>
                 <Divider variant="inset" component="li" />
               </React.Fragment>
@@ -182,7 +190,7 @@ const GroupMessages: React.FC = () => {
           onClose={handleCloseModal}
           aria-labelledby="modal-title"
         >
-          <Box sx={reportModalStyle}>
+          <Box sx={reportModalStyle(theme)}>
             <IconButton
               onClick={handleCloseModal}
               style={{ position: "absolute", top: 5, right: 5 }}
@@ -194,7 +202,11 @@ const GroupMessages: React.FC = () => {
               Report Message
             </Typography>
 
-            <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
+            <FormControl
+              variant="filled"
+              sx={{ m: 1, width: 250 }}
+              size="small"
+            >
               <InputLabel id="reason-label">Reason</InputLabel>
               <Select labelId="reason-label"></Select>
             </FormControl>
@@ -232,11 +244,9 @@ const GroupMessages: React.FC = () => {
         </Box>
       </Box>
 
-      {confirmation &&
-      <ConfirmationMessage
-        message={"Message Successfully Reported"}
-      />
-      }
+      {confirmation && (
+        <ConfirmationMessage message={"Message Successfully Reported"} />
+      )}
     </Container>
   );
 };

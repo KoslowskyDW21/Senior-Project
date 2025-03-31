@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useTheme } from "@mui/material/styles";
+import { Theme, useTheme } from "@mui/material/styles";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Button,
@@ -27,7 +27,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import config from "../config.js";
 
-const reportModalStyle = (theme) => ({
+const reportModalStyle = (theme: Theme) => ({
   position: "absolute",
   top: "50%",
   left: "50%",
