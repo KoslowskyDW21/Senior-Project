@@ -13,6 +13,7 @@ import {
   Box,
 } from "@mui/material";
 import config from "../config.js";
+import Header from "./Header";
 
 interface RecipeList {
   id: number;
@@ -169,46 +170,8 @@ const RecipeLists: React.FC = () => {
   }, []);
 
   return (
-    <>
-      {/* Navbar */}
-      <Box
-        sx={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          display: "flex",
-          alignItems: "center",
-          padding: "10px 20px",
-          backgroundColor: "#fff",
-          boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
-          zIndex: 1000,
-          height: "100px",
-          justifyContent: "space-between",
-        }}
-      >
-        {/* Back button */}
-        <IconButton
-          onClick={() => navigate("/recipes")}
-          style={{ position: "absolute", top: 30, left: 30 }}
-        >
-          <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
-        </IconButton>
-
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            flexGrow: 1,
-            alignItems: "center",
-            fontSize: "24px",
-            fontWeight: "bold",
-          }}
-        >
-          <h1>Recipe Lists</h1>
-        </Box>
-      </Box>
-
+    <div>
+      <Header title="Recipe Lists" />
       {/* Spacer */}
       <Box
         sx={{
@@ -255,7 +218,7 @@ const RecipeLists: React.FC = () => {
       <Button onClick={handleGoToRecipeCreation} variant="contained">
         Create new list
       </Button>
-    </>
+    </div>
   );
 };
 

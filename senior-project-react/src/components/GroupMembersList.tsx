@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import axios from "axios";
+import { Theme, useTheme } from "@mui/material/styles";
 import config from "../config.js";
 
 interface GroupMember {
@@ -73,6 +74,9 @@ const GroupMembersList: React.FC<GroupMembersListProps> = ({
     return userId === groupCreatorId || trustedMemberIds.includes(userId);
   };
 
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+
   return (
     <Box
       sx={{
@@ -100,9 +104,15 @@ const GroupMembersList: React.FC<GroupMembersListProps> = ({
                   sx={{
                     color:
                       member.user_id === groupCreatorId
-                        ? "blue"
+                        ? isDarkMode
+                          ? "lightblue"
+                          : "blue"
                         : trustedMemberIds.includes(member.user_id)
-                        ? "green"
+                        ? isDarkMode
+                          ? "lightgreen"
+                          : "green"
+                        : isDarkMode
+                        ? "white"
                         : "black",
                   }}
                 >
@@ -110,7 +120,10 @@ const GroupMembersList: React.FC<GroupMembersListProps> = ({
                   {member.user_id === groupCreatorId && (
                     <Typography
                       component="span"
-                      sx={{ color: "blue", marginLeft: 1 }}
+                      sx={{
+                        color: isDarkMode ? "lightblue" : "blue",
+                        marginLeft: 1,
+                      }}
                     >
                       (Creator)
                     </Typography>
@@ -119,7 +132,10 @@ const GroupMembersList: React.FC<GroupMembersListProps> = ({
                     member.user_id !== groupCreatorId && (
                       <Typography
                         component="span"
-                        sx={{ color: "green", marginLeft: 1 }}
+                        sx={{
+                          color: isDarkMode ? "lightgreen" : "green",
+                          marginLeft: 1,
+                        }}
                       >
                         (Trusted)
                       </Typography>

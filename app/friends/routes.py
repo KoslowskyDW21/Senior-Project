@@ -52,13 +52,19 @@ def get_suggested_friends():
     F2 = aliased(Friendship)
     FR1 = aliased(FriendRequest)
     FR2 = aliased(FriendRequest)
+    UB1 = aliased(UserBlock)
+    UB2 = aliased(UserBlock)
 
     friend_ids = db.session.query(F1.user2.label("user_id")).filter(F1.user1 == current_user.id).union(
-    db.session.query(F2.user1.label("user_id")).filter(F2.user2 == current_user.id)
+        db.session.query(F2.user1.label("user_id")).filter(F2.user2 == current_user.id)
     ).subquery()
 
     friend_request_ids = db.session.query(FR1.requestTo.label("user_id")).filter(FR1.requestFrom == current_user.id).union(
-    db.session.query(FR2.requestFrom.label("user_id")).filter(FR2.requestTo == current_user.id)
+        db.session.query(FR2.requestFrom.label("user_id")).filter(FR2.requestTo == current_user.id)
+    ).subquery()
+
+    blocked_ids = db.session.query(UB1.blocked_user.label("user_id")).filter(UB1.blocked_by == current_user.id).union(
+        db.session.query(UB2.blocked_by.label("user_id")).filter(UB2.blocked_user == current_user.id)
     ).subquery()
 
     suggested_friends = db.session.query(
@@ -70,8 +76,9 @@ def get_suggested_friends():
         User.colonial_floor == current_user.colonial_floor,
         User.colonial_side == current_user.colonial_side,
         User.id != current_user.id,
-        ~User.id.in_(db.session.query(friend_ids.c.user_id)),  # ✅ Correct column alias
-        ~User.id.in_(db.session.query(friend_request_ids.c.user_id))  # ✅ Correct column alias
+        ~User.id.in_(db.session.query(friend_ids.c.user_id)),  
+        ~User.id.in_(db.session.query(friend_request_ids.c.user_id)), 
+        ~User.id.in_(db.session.query(blocked_ids.c.user_id)) 
     ).all()
 
     suggested_friends_list = [

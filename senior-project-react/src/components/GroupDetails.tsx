@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Theme, useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
 import {
   Card,
@@ -66,19 +67,19 @@ interface User {
   num_reports: number;
 }
 
-const reportModalStyle = {
+const reportModalStyle = (theme: Theme) => ({
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  bgcolor: "#ffffff",
+  bgcolor: theme.palette.background.default,
   boxShadow: 24,
   paddingTop: 3,
   paddingLeft: 7,
   paddingRight: 7,
   paddingBottom: 3,
   textAlign: "center",
-};
+});
 
 const GroupDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -94,6 +95,8 @@ const GroupDetails: React.FC = () => {
   const [inviteMessage, setInviteMessage] = useState("");
   const [confirmation, setConfirmation] = useState<boolean>(false);
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   // States for report modal
   const [open, setOpen] = useState(false);
@@ -479,7 +482,7 @@ const GroupDetails: React.FC = () => {
             aria-labelledby="modal-title"
             aria-describedby="modal-description"
           >
-            <Box sx={reportModalStyle}>
+            <Box sx={reportModalStyle(theme)}>
               <IconButton
                 onClick={handleCloseModal}
                 style={{ position: "absolute", top: 5, right: 5 }}
@@ -523,7 +526,7 @@ const GroupDetails: React.FC = () => {
             aria-labelledby="invite-modal-title"
             aria-describedby="invite-modal-description"
           >
-            <Box sx={reportModalStyle}>
+            <Box sx={reportModalStyle(theme)}>
               <IconButton
                 onClick={() => setInviteModalOpen(false)}
                 style={{ position: "absolute", top: 5, right: 5 }}
@@ -566,7 +569,7 @@ const GroupDetails: React.FC = () => {
             aria-labelledby="delete-modal-title"
             aria-describedby="delete-modal-description"
           >
-            <Box sx={reportModalStyle}>
+            <Box sx={reportModalStyle(theme)}>
               <IconButton
                 onClick={handleCloseDeleteModal}
                 style={{ position: "absolute", top: 5, right: 5 }}
@@ -606,12 +609,10 @@ const GroupDetails: React.FC = () => {
           </Modal>
         </CardContent>
       </Card>
-      
-      {confirmation &&
-        <ConfirmationMessage 
-          message={"Group Successfully Reported"}
-        />
-      }
+
+      {confirmation && (
+        <ConfirmationMessage message={"Group Successfully Reported"} />
+      )}
     </Container>
   );
 };

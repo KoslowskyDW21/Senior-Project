@@ -1,7 +1,9 @@
 import axios, { AxiosError } from "axios";
 import FolderIcon from "@mui/icons-material/Folder";
+import { Theme, useTheme } from "@mui/material/styles";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, ChangeEvent, useRef } from "react";
+import Header from "./Header.js";
 import {
   Avatar,
   Box,
@@ -65,21 +67,22 @@ const modalStyle = {
   borderRadius: 2,
 };
 
-const reportModalStyle = {
+const reportModalStyle = (theme: Theme) => ({
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  bgcolor: "#ffffff",
+  bgcolor: theme.palette.background.default,
   boxShadow: 24,
   paddingTop: 3,
   paddingLeft: 7,
   paddingRight: 7,
   paddingBottom: 3,
   textAlign: "center",
-};
+});
 
 const OtherProfile: React.FC = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   let { id } = useParams<{ id: string }>();
   if (id == undefined) {
@@ -408,9 +411,15 @@ const OtherProfile: React.FC = () => {
 
   return (
     <>
+      <Header title="" />
       <IconButton
         onClick={() => navigate(-1)}
-        style={{ position: "absolute", top: 30, left: 30 }}
+        style={{
+          position: "fixed",
+          top: "clamp(70px, 10vw, 120px)",
+          left: "clamp(0px, 1vw, 100px)",
+          zIndex: 1000,
+        }}
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
@@ -421,7 +430,7 @@ const OtherProfile: React.FC = () => {
         </Typography>
       ) : (
         <>
-          <h1>This is {username}'s profile!</h1>
+          <h1>{username}'s profile</h1>
           <Box
             display="flex"
             justifyContent="center"
@@ -521,7 +530,7 @@ const OtherProfile: React.FC = () => {
 
               <Modal open={openBlockModal} onClose={handleCloseBlockModal}>
                 <Box sx={modalStyle}>
-                  <TextField 
+                  <TextField
                     fullWidth
                     id="reason-for-blocking"
                     label="Why are you blocking this user?"
@@ -668,7 +677,7 @@ const OtherProfile: React.FC = () => {
             onClose={handleCloseReportModal}
             aria-labelledby="modal-title"
           >
-            <Box sx={reportModalStyle}>
+            <Box sx={reportModalStyle(theme)}>
               <IconButton
                 onClick={handleCloseReportModal}
                 style={{ position: "absolute", top: 5, right: 5 }}

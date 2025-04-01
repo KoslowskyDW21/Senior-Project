@@ -273,9 +273,15 @@ const Profile: React.FC = () => {
 
   return (
     <>
+      <Header title="" />
       <IconButton
         onClick={() => navigate(-1)}
-        style={{ position: "fixed", top: 30, left: 30 }}
+        style={{
+          position: "fixed",
+          top: "clamp(70px, 10vw, 120px)",
+          left: "clamp(0px, 1vw, 100px)",
+          zIndex: 1000,
+        }}
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
@@ -290,7 +296,7 @@ const Profile: React.FC = () => {
         />
       )}
 
-      <h1>This is {username}'s profile!</h1>
+      <h1>{username}'s profile</h1>
       <div
         style={{
           display: "flex",
