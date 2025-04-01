@@ -26,6 +26,7 @@ import Snackbar, { SnackbarCloseReason } from "@mui/material/Snackbar";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import config from "../config.js";
+import Header from "./Header.js";
 
 const reportModalStyle = (theme: Theme) => ({
   position: "absolute",
@@ -179,7 +180,7 @@ function RecipeRemoveSelect({
 }
 
 const IndividualRecipe: React.FC = () => {
-  const [recipe_name, setRecipe_name] = React.useState<String>();
+  const [recipe_name, setRecipe_name] = React.useState<string>();
   const [current_user, setCurrent_user] = React.useState<User>();
   const [message, setMessage] = React.useState("");
   const [lid, setLid] = React.useState("");
@@ -296,8 +297,8 @@ const IndividualRecipe: React.FC = () => {
         `${config.serverUrl}/shopping_lists/items/add/${id}`
       );
       if (response.status == 200) {
-        setMessage("Recipe successfully added to list");
-        console.log(`This recipe added to list`);
+        setMessage("Recipe successfully added to shopping list");
+        console.log(`This recipe added to shopping list`);
       } else {
         setMessage("Recipe failed to be added to list");
         console.log("Recipe failed to be added to list");
@@ -504,23 +505,14 @@ const IndividualRecipe: React.FC = () => {
     <>
       <IconButton
         onClick={() => navigate(-1)}
-        style={{ position: "fixed", top: 30, left: 30 }}
+        style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
+          left: "clamp(0px, 1vw, 100px)",
+          zIndex: 1000, }}
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          flexGrow: 1,
-          alignItems: "center",
-          fontSize: "48px",
-          fontWeight: "bold",
-        }}
-      >
-        {recipe_name}
-      </Box>
+      <Header title={recipe_name ? recipe_name : "loading..."}></Header>
 
       <Box
         sx={{
@@ -529,7 +521,7 @@ const IndividualRecipe: React.FC = () => {
           alignItems: "center",
           flexShrink: 1,
           width: "auto",
-          marginTop: 2, // Add space on top if necessary
+          marginTop: 6, // Add space on top if necessary
           marginBottom: 2, // Add space on bottom if necessary
           padding: "10px", // Optional padding for extra space inside the Box
         }}
@@ -569,22 +561,24 @@ const IndividualRecipe: React.FC = () => {
         {image && (<img src={`${config.serverUrl}/${image}`} style={{height:400, width:400}} role="presentation"/>)}
       </Box>
 
-      <FormControl sx={{ width: 400 }}>
-        <InputLabel id="demo-simple-select-label">Add to a list</InputLabel>
-        <Select
-          labelId="add-to-list-select-label"
-          id="add-to-list-select"
-          label="Add to a list"
-          value={lid}
-          onChange={handleAddRecipeToList}
-        >
-          {recipeLists.map((recipeList) => (
-            <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
-      <br />
+      <Box
+        mb={2}
+      >
+        <FormControl sx={{ width: 400 }}>
+          <InputLabel id="demo-simple-select-label">Add to a list</InputLabel>
+          <Select
+            labelId="add-to-list-select-label"
+            id="add-to-list-select"
+            label="Add to a list"
+            value={lid}
+            onChange={handleAddRecipeToList}
+          >
+            {recipeLists.map((recipeList) => (
+              <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
 
       <RecipeRemoveSelect
         lid={lid}
@@ -595,17 +589,21 @@ const IndividualRecipe: React.FC = () => {
       <br />
 
       {/* Add recipe's ingredients to the shopping list */}
-      <FormControl>
-        <Button
-          sx={{ width: 250, height: 45 }}
-          variant="contained"
-          onClick={() => {
-            handleAddIngredientsOfRecipe();
-          }}
-        >
-          Add to shopping list
-        </Button>
-      </FormControl>
+      <Box
+        mt={2}
+      >
+        <FormControl>
+          <Button
+            sx={{ width: 250, height: 45 }}
+            variant="contained"
+            onClick={() => {
+              handleAddIngredientsOfRecipe();
+            }}
+          >
+            Add to shopping list
+          </Button>
+        </FormControl>
+      </Box>
 
       <Box
         sx={{

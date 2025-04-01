@@ -66,7 +66,7 @@ function Difficulty({ difficulty }) {
   );
 }
 
-function Recipe({ id, name, difficulty, image }) {
+function Recipe({ id, name, difficulty, image }: any) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
   const navigate = useNavigate();

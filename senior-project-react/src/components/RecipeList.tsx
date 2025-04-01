@@ -21,6 +21,7 @@ import Snackbar, { SnackbarCloseReason } from "@mui/material/Snackbar";
 import axios, { all, AxiosError } from "axios";
 import CloseIcon from "@mui/icons-material/Close";
 import config from "../config.js";
+import Header from "./Header";
 
 interface Recipe {
   id: number;
@@ -136,7 +137,7 @@ const RecipeLists: React.FC = () => {
 
   const getAllRecipes = async () => {
     try {
-      const response = await axios.get(`${config.serverUrl}/recipes/all`);
+      const response = await axios.get(`${config.serverUrl}/recipes/all/`);
       setAllRecipes(response.data.recipes);
     } catch (error) {
       console.error("Error fetching all recipes ", error);
@@ -309,7 +310,7 @@ const RecipeLists: React.FC = () => {
     getRecipesAndThisList();
   }
 
-  function RecipesDropdown({ allRecipes }) {
+  function RecipesDropdown({ allRecipes }: any) {
     if (allRecipes.length == 0) {
       return <p>Loading...</p>;
     } else {
@@ -349,68 +350,17 @@ const RecipeLists: React.FC = () => {
 
   return (
     <>
-      {/* Navbar */}
-      <Box
-        sx={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          display: "flex",
-          alignItems: "center",
-          padding: "10px 20px",
-          backgroundColor: "#fff",
-          boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
-          zIndex: 1000,
-          height: "100px",
-          justifyContent: "space-between",
-        }}
+      <Header title={recipe_list.name}></Header>
+
+      <IconButton
+        onClick={() => navigate(-1)}
+        style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
+          left: "clamp(0px, 1vw, 100px)",
+          zIndex: 1000, }}
       >
-        {/* Back button */}
-        <IconButton
-          onClick={() => navigate("/recipe-lists")}
-          style={{ position: "absolute", top: 30, left: 30 }}
-        >
-          <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
-        </IconButton>
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+      </IconButton>
 
-        {/* Recipe list name */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            flexGrow: 1,
-            alignItems: "center",
-            fontSize: "24px",
-            fontWeight: "bold",
-          }}
-        >
-          <h1>{recipe_list.name}</h1>
-        </Box>
-
-        {/* Search bar */}
-        <Box
-          mt={4}
-          mb={2}
-          textAlign="center"
-          display="flex"
-          justifyContent="center"
-          sx={{ flexGrow: 1 }}
-        >
-          <TextField
-            label="Search Recipes"
-            variant="outlined"
-            fullWidth
-            value={searchQuery}
-            onChange={handleSearchChange}
-            sx={{
-              zIndex: 1001,
-              width: 500,
-            }}
-          />
-        </Box>
-      </Box>{" "}
-      {/* End of header bar */}
       {/* Spacer */}
       <Box
         sx={{

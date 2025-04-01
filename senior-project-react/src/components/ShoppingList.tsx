@@ -261,7 +261,7 @@ const ShoppingList: React.FC = () => {
     }
   }
 
-  function RecipesDropdown({ recipes }) {
+  function RecipesDropdown({ recipes }: any) {
     if (recipes.length == 0) {
       return <p>Loading...</p>;
     } else {
@@ -310,29 +310,21 @@ const ShoppingList: React.FC = () => {
 
   return (
     <>
+
+      <Header title="Shopping List"></Header>
+
       {/* Back button */}
       <IconButton
-        onClick={() => navigate("/recipes")}
-        style={{ position: "fixed", top: 30, left: 30 }}
+        onClick={() => navigate(-1)}
+        style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
+          left: "clamp(0px, 1vw, 100px)",
+          zIndex: 1000, }}
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          flexGrow: 1,
-          alignItems: "center",
-          fontSize: "48px",
-          fontWeight: "bold",
-        }}
-      >
-        Shopping List
-      </Box>
-
       {/* Search field */}
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 12 }}>
         <TextField
           label="Search for ingredients"
           variant="outlined"

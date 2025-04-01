@@ -63,13 +63,13 @@ const RecipeLists: React.FC = () => {
   const getCurrentUser = async () => {
     console.log("Getting FULL JSON of current user");
     try {
-      const response = await axios.get(
+      const response = await axios.post( // why did we do this?
         `${config.serverUrl}/profile/current_user`
       );
       const data: User = response.data;
       setCurrentUserId(data.id);
     } catch (error) {
-      console.error("Error fetching recipe: ", error);
+      console.error("Error fetching current user: ", error);
     }
   };
 
@@ -185,10 +185,19 @@ const RecipeLists: React.FC = () => {
         }}
       ></Box>
 
+      <IconButton
+        onClick={() => navigate(-1)}
+        style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
+          left: "clamp(0px, 1vw, 100px)",
+          zIndex: 1000, }}
+      >
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+      </IconButton>
+
       <Box>
         <Grid2 container spacing={2} justifyContent="flex-start">
           {recipeLists.map((recipeList) => (
-            <Grid2 item xs={12} sm={6} md={4} key={recipeList.id}>
+            <Grid2 xs={12} sm={6} md={4} key={recipeList.id}>
               <Box
                 sx={{
                   border: "2px solid rgb(172, 169, 169)",
