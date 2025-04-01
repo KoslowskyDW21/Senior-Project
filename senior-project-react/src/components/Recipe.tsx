@@ -201,6 +201,7 @@ const IndividualRecipe: React.FC = () => {
   const handleCloseModal = () => setOpen(false);
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
+  const [image, setImage] = React.useState<string | undefined>("");
 
   const navigate = useNavigate();
 
@@ -410,7 +411,7 @@ const IndividualRecipe: React.FC = () => {
     setRecipeListsIn(rli);
   };
 
-  const getRecipeName = async () => {
+  const getRecipeInfo = async () => {
     try {
       const response = await axios.get(`${config.serverUrl}/recipes/${id}/`);
       const data: Recipe = response.data;
@@ -418,6 +419,8 @@ const IndividualRecipe: React.FC = () => {
       setDifficulty(data.difficulty);
       setRating(data.rating);
       setDisplayRating(data.rating);
+      setImage(data.image);
+      console.log(data.image); // TODO: remove debugging
     } catch (error) {
       console.error("Error fetching recipe: ", error);
     }
@@ -488,7 +491,7 @@ const IndividualRecipe: React.FC = () => {
   };
 
   React.useEffect(() => {
-    getRecipeName();
+    getRecipeInfo();
     getCurrentUser();
     getReviews();
     getRecipeLists();
@@ -555,6 +558,11 @@ const IndividualRecipe: React.FC = () => {
         </Box>
       </Box>
       <br />
+
+      <Box>
+        {image && (<img src={image} role="presentation"/>)}
+      </Box>
+
       <FormControl sx={{ width: 400 }}>
         <InputLabel id="demo-simple-select-label">Add to a list</InputLabel>
         <Select
