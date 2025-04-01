@@ -2,11 +2,13 @@ from __future__ import annotations
 from flask import jsonify, redirect, url_for, current_app, request
 from flask_login import current_user, login_required
 from app.profile import bp
-from app.models import User, UserAchievement, Achievement, UserReport, db, UserBlock
+from app.models import *
 from sqlalchemy import or_, and_
 from werkzeug.utils import secure_filename
 import uuid
 import os
+#TODO: Add the following imports:
+from app.friends.routes import remove_friend, revoke_request, delete_notification
 
 @bp.route('/<int:id>', methods=['POST'])
 def post_profile_page(id=1):
@@ -82,10 +84,28 @@ def get_other_profile(id):
 
     return jsonify(user_info), 200
 
+@bp.route('/revoke_sent_request/<int:id>', methods=['POST'])
+def revoke_sent_request(id): 
+    request = db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==id, FriendRequest.requestTo==current_user.id)).first()
+    if request:
+        delete_notification(request.requestFrom, request.requestTo)
+    db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==id, FriendRequest.requestTo==current_user.id)).delete()
+    try:
+        db.session.commit()
+    except IntegrityError as e:
+        db.session.rollback()
+        print(f"Error revoking friend request to {id}: {e}")
+        return jsonify({"error": "Error revoking friend request"}), 500
+    return {"message": "friend request revoked successfully"}, 200
+
 
 @bp.route('/block_user/<int:id>', methods=['POST'])
+#NOTE: Friend gets removed as a part of front end, this should change to be a part of the BACK END
 def block_user(id):
     new_block = UserBlock(blocked_user=id, blocked_by=current_user.id)
+    remove_friend(id)
+    revoke_request(id)
+    revoke_sent_request(id)
     db.session.add(new_block)
     
     try:

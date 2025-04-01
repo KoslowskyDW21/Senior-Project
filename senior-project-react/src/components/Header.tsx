@@ -374,7 +374,13 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                   ))}
               </>
             ) : (
-              <MenuItem>No new notifications</MenuItem>
+              <MenuItem
+                sx={{
+                  fontSize: "clamp(13px, 1vw, 20px)",
+                }}
+              >
+                No new notifications
+              </MenuItem>
             )}
           </Menu>
           {/* Avatar Icon */}

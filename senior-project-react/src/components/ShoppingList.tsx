@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Header from "./Header";
+import { useTheme } from "@mui/material/styles";
 import config from "../config.js";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -61,6 +62,8 @@ interface AddRecipeToListResponse {
 }
 
 const ShoppingList: React.FC = () => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const [shoppingList, setShoppingList] =
     React.useState<ShoppingListInterface>();
   const [shoppingListItems, setShoppingListItems] = React.useState<
@@ -146,23 +149,23 @@ const ShoppingList: React.FC = () => {
   }
 
   // Handle search changes and trigger navigation immediately
-    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const query = event.target.value;
-      setSearchQuery(query);
-  
-      // Update URL with the new search query
-      if (query) {
-        navigate({
-          pathname: location.pathname,
-          search: `?search=${query}`,
-        });
-      } else {
-        navigate({
-          pathname: location.pathname,
-          search: "",
-        });
-      }
-    };
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+
+    // Update URL with the new search query
+    if (query) {
+      navigate({
+        pathname: location.pathname,
+        search: `?search=${query}`,
+      });
+    } else {
+      navigate({
+        pathname: location.pathname,
+        search: "",
+      });
+    }
+  };
 
   const filterShoppingListItemIngredients = (
     shoppingListItemIngredients_: _ShoppingListItemIngredient[]
@@ -300,20 +303,31 @@ const ShoppingList: React.FC = () => {
       }
       return ingredient;
     });
-  
+
     // Update the state with the new checked status for the ingredient
     setShoppingListItemIngredients(updatedIngredients);
   };
-  
 
   return (
     <>
       {/* Back button */}
-      <IconButton onClick={() => navigate("/recipes")} style={{ position: "fixed", top: 30, left: 30 }}>
+      <IconButton
+        onClick={() => navigate("/recipes")}
+        style={{ position: "fixed", top: 30, left: 30 }}
+      >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
 
-      <Box sx={{ display: "flex", justifyContent: "center", flexGrow: 1, alignItems: "center", fontSize: "48px", fontWeight: "bold" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          flexGrow: 1,
+          alignItems: "center",
+          fontSize: "48px",
+          fontWeight: "bold",
+        }}
+      >
         Shopping List
       </Box>
 
@@ -346,32 +360,50 @@ const ShoppingList: React.FC = () => {
         {filteredShoppingListItemIngredients.length > 0 ? (
           <Box sx={{ marginTop: 2 }}>
             {filteredShoppingListItemIngredients.map((ingredient) => (
-              <Box key={ingredient.id} sx={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #ccc", alignItems: "center" }}>
+              <Box
+                key={ingredient.id}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "8px 0",
+                  borderBottom: "1px solid #ccc",
+                  alignItems: "center",
+                }}
+              >
                 {/* Checkbox to the left of each ingredient */}
                 <Checkbox
-                  checked={ingredient.checked}  // Bind to the checked state of each ingredient
-                  onChange={(e) => handleIngredientCheck(ingredient.id, e.target.checked)}  // Update checked state
+                  checked={ingredient.checked} // Bind to the checked state of each ingredient
+                  onChange={(e) =>
+                    handleIngredientCheck(ingredient.id, e.target.checked)
+                  } // Update checked state
                 />
                 <Typography
                   variant="body1"
                   sx={{
-                    textDecoration: ingredient.checked ? "line-through" : "none",  // Apply strikethrough if checked
-                    color: ingredient.checked ? "gray" : "black",  // Change color if checked
+                    textDecoration: ingredient.checked
+                      ? "line-through"
+                      : "none", // Apply strikethrough if checked
+                    color: ingredient.checked
+                      ? "gray"
+                      : isDarkMode
+                      ? "white"
+                      : "black", // Optional: change color when checked
                     flex: 1,
                   }}
                 >
                   {ingredient.ingredient_name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {ingredient.measure || "N/A"} {/* Display ingredient's measure */}
+                  {ingredient.measure || "N/A"}{" "}
+                  {/* Display ingredient's measure */}
                 </Typography>
                 <IconButton
-              onClick={() => handleRemoveSLI(ingredient.id)} // Remove ingredient when clicked
-              color="error"
-              aria-label="delete"
-            >
-              <DeleteIcon />
-            </IconButton>
+                  onClick={() => handleRemoveSLI(ingredient.id)} // Remove ingredient when clicked
+                  color="error"
+                  aria-label="delete"
+                >
+                  <DeleteIcon />
+                </IconButton>
               </Box>
             ))}
           </Box>
