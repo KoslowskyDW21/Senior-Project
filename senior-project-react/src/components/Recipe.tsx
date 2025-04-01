@@ -559,8 +559,14 @@ const IndividualRecipe: React.FC = () => {
       </Box>
       <br />
 
-      <Box>
-        {image && (<img src={image} role="presentation"/>)}
+      <Box
+        sx={{
+          objectFit: "contain",
+          maxWidth: "100%",
+          marginBottom: 2,
+        }}
+      >
+        {image && (<img src={`${config.serverUrl}/${image}`} style={{height:400, width:400}} role="presentation"/>)}
       </Box>
 
       <FormControl sx={{ width: 400 }}>
