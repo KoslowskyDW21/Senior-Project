@@ -125,7 +125,7 @@ const Groups: React.FC = () => {
 
   const fetchGroups = async () => {
     try {
-      const response = await axios.get(`${config.serverUrl}/groups`);
+      const response = await axios.get(`${config.serverUrl}/groups/`);
       if (response.status === 200) {
         const newGroups = response.data;
         setGroups((prevGroups) => [...prevGroups, ...newGroups]);
