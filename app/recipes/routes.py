@@ -285,9 +285,18 @@ def upload_review(id):
 
 @bp.route("/reviews/<int:id>/", methods=['GET'])
 def reviews(id):
-    reviews = Review.query.filter_by(recipe_id  = id).all()
+    reviews = Review.query.filter_by(recipe_id=id).all()
+    
+    # Fetch the IDs of the reviews that have been reported by the current user
+    reported_review_ids = [
+        report.review_id for report in ReviewReport.query.filter_by(user_id=current_user.id).all()
+    ]
+    
+    # Filter out the reviews that have been reported
+    unreported_reviews = [review for review in reviews if review.id not in reported_review_ids]
+    
     return jsonify({
-        "reviews": [review.to_json() for review in reviews],
+        "reviews": [review.to_json() for review in unreported_reviews],
     }), 200
 
 @bp.route("/reported_reviews", methods=["GET"])
