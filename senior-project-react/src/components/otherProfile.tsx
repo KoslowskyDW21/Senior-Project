@@ -52,6 +52,15 @@ interface FriendRequestFrom {
   friend_requests_from: [];
 }
 
+interface Achievement {
+  id: number;
+  title: string;
+  image?: string;
+  isComplete: boolean;
+  isVisible: boolean;
+  description: string;
+}
+
 const modalStyle = {
   position: "absolute",
   top: "calc(50% + 60px)",
@@ -727,7 +736,7 @@ const OtherProfile: React.FC = () => {
                   >
                     {selectedAchievement.title}
                   </Typography>
-                  <Typography id="modal-image">
+                  <Box id="modal-image">
                     <Box>
                       <img
                         src={selectedAchievement.image}
@@ -739,7 +748,7 @@ const OtherProfile: React.FC = () => {
                         alt={selectedAchievement.title}
                       />
                     </Box>
-                  </Typography>
+                  </Box>
                   <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                     {selectedAchievement.description}
                   </Typography>
