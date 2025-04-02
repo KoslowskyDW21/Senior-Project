@@ -305,99 +305,96 @@ const Recipes: React.FC = () => {
 
   return (
     <div>
-      <Header title="Recipes" />
-
-      <Box
-        mt={{ xs: 10, sm: 14, md: 14 }}
-        textAlign="center"
-        display="flex"
-        justifyContent="center"
-        sx={{ flexGrow: 1 }}
-      >
-        <TextField
-          label="Search for recipes"
-          variant="outlined"
-          fullWidth
-          value={searchQuery}
-          onChange={handleSearchChange}
-          sx={{
-            width: "100%",
-          }}
-        />
-      </Box>
-
-      <Box
-        display="flex"
-        mt={{ xs: 0, sm: 0, md: 3 }}
-        mb={{ xs: 0 }}
-        justifyContent="center"
-      >
-        <Stack direction="row" spacing={2}>
-          <Button
-            variant="contained"
-            sx={{
-              width: "75",
-              height: "40",
-            }}
-            onClick={handleGoToRecipeLists}
-          >
-            Recipe Lists
-          </Button>
-
-          <Button
-            variant="contained"
-            sx={{
-              width: "75",
-              height: "40",
-            }}
-            onClick={handleGoToShoppingList}
-          >
-            Shopping List
-          </Button>
-        </Stack>
-      </Box>
-
-      <Box mt={2} display="flex" justifyContent="center">
-        <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
-          <InputLabel id="dietary_restriction-select-label">
-            Dietary Restrictions
-          </InputLabel>
-          <Select
-            labelId="dietary_restriction-select-label"
-            multiple
-            value={selectedDietaryRestrictions}
-            onChange={handleDietaryRestrictionsChange}
-            renderValue={(selected) => selected.join(", ")}
-            displayEmpty
-          >
-            <MenuItem value="" disabled>
-              <em>Choose a dietary restriction</em>
-            </MenuItem>
-            {dietaryRestrictions.map((restriction) => (
-              <MenuItem key={restriction.id} value={restriction.name}>
-                <Checkbox
-                  checked={selectedDietaryRestrictions.includes(
-                    restriction.name
-                  )}
-                />
-                <ListItemText primary={restriction.name} />
-              </MenuItem>
-            ))}
-          </Select>
-          <FormHelperText>Filter by Dietary Restrictions</FormHelperText>
-        </FormControl>
-      </Box>
-
-      <Box
+    <Box
         id="scroll-container"
         sx={{
           overflowY: "scroll",
-          height: "calc(100vh - 60px)",
+          height: "90vh",
           mt: 0,
           width: "100%",
         }}
-      >
-        <main role="main" style={{ paddingTop: "60px" }}>
+    >
+    <Header title="Recipes" />
+
+    <Box
+      mt={{ xs: 10, sm: 14, md: 14 }}
+      textAlign="center"
+      display="flex"
+      justifyContent="center"
+      sx={{ flexGrow: 1 }}
+    >
+    <TextField
+      label="Search for recipes"
+      variant="outlined"
+      fullWidth
+      value={searchQuery}
+      onChange={handleSearchChange}
+      sx={{
+        width: "100%",
+      }}
+  / >
+    </Box>
+
+<Box mt={2} display="flex" justifyContent="center">
+  <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
+    <InputLabel id="dietary_restriction-select-label">
+      Dietary Restrictions
+    </InputLabel>
+    <Select
+      labelId="dietary_restriction-select-label"
+      multiple
+      value={selectedDietaryRestrictions}
+      onChange={handleDietaryRestrictionsChange}
+      renderValue={(selected) => selected.join(", ")}
+      displayEmpty
+    >
+      <MenuItem value="" disabled>
+        <em>Choose a dietary restriction</em>
+      </MenuItem>
+      {dietaryRestrictions.map((restriction) => (
+        <MenuItem key={restriction.id} value={restriction.name}>
+          <Checkbox
+            checked={selectedDietaryRestrictions.includes(
+              restriction.name
+            )}
+          />
+          <ListItemText primary={restriction.name} />
+        </MenuItem>
+      ))}
+    </Select>
+    <FormHelperText>Filter by Dietary Restrictions</FormHelperText>
+  </FormControl>
+  <Box
+  display="flex"
+  gap={2}
+  justifyContent="center"
+  alignItems="center"
+  mt={2}
+  >
+  <Button
+      variant="contained"
+      sx={{
+        width: "75",
+        height: "40",
+      }}
+      onClick={handleGoToRecipeLists}
+    >
+      Recipe Lists
+    </Button>
+
+    <Button
+      variant="contained"
+      sx={{
+        width: "75",
+        height: "40",
+      }}
+      onClick={handleGoToShoppingList}
+    >
+      Shopping List
+    </Button>
+    </Box>
+</Box>
+        <main role="main" /*style={{ paddingTop: "60px" }}*/>
           {noResultsFound ? (
             <Typography variant="h6" textAlign="center">
               No recipes found for "{debouncedSearch}".
@@ -444,9 +441,8 @@ const Recipes: React.FC = () => {
             </Grid2>
           )}
         </main>
-      </Box>
-
-      <Footer />
+       <Footer />
+    </Box>
     </div>
   );
 };
