@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Theme, useTheme } from "@mui/material/styles";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -27,6 +27,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import config from "../config.js";
 import Header from "./Header.js";
+import ConfirmationMessage, { ConfirmationContext } from "./ConfirmationMessage.js";
 
 const reportModalStyle = (theme: Theme) => ({
   position: "absolute",
@@ -180,7 +181,9 @@ function RecipeRemoveSelect({
 }
 
 const IndividualRecipe: React.FC = () => {
-  const [recipe_name, setRecipe_name] = React.useState<string>();
+  //const confirmation = useContext(ConfirmationContext);
+
+  const [recipe_name, setRecipe_name] = React.useState<String>();
   const [current_user, setCurrent_user] = React.useState<User>();
   const [message, setMessage] = React.useState("");
   const [lid, setLid] = React.useState("");
@@ -788,13 +791,18 @@ const IndividualRecipe: React.FC = () => {
         </Box>
       </Modal>
 
-      <Snackbar
+      {/* <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}
         onClose={handleSnackBarClose}
         message={message}
         action={action}
-      />
+      /> */}
+      <ConfirmationContext.Provider value={snackbarOpen}>
+        <ConfirmationMessage
+          message={message}
+        />
+      </ConfirmationContext.Provider>
     </>
   );
 };
