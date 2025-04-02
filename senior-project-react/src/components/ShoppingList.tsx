@@ -135,7 +135,7 @@ const ShoppingList: React.FC = () => {
 
   async function getRecipes() {
     try {
-      const response = await axios.get(`${config.serverUrl}/recipes/all`);
+      const response = await axios.get(`${config.serverUrl}/recipes/all/`);
       setRecipes(response.data.recipes);
       console.log(
         `Grabbed all recipes: ${response.data.recipes.length} recipes grabbed`
