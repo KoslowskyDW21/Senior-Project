@@ -143,8 +143,8 @@ const Challenges: React.FC = () => {
 
   const getCurrentUser = async () => {
     try {
-      const response = await axios.post(
-        `${config.serverUrl}/profile/get_profile_pic`
+      const response = await axios.get(
+        `${config.serverUrl}/profile/`
       );
       const data: User = response.data;
       setProfile_picture(data.profile_picture);
