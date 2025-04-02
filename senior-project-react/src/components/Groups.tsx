@@ -394,7 +394,7 @@ const Groups: React.FC = () => {
               </Typography>
               <Grid2 container spacing={2} columns={12}>
                 {myGroups.map((group) => (
-                  <Grid2 item xs={12} sm={6} md={4} key={group.id}>
+                  <Grid2 size={{xs: 12, sm: 6, md: 4}} key={group.id}>
                     <Group {...group} />
                   </Grid2>
                 ))}
@@ -409,7 +409,7 @@ const Groups: React.FC = () => {
               </Typography>
               <Grid2 container spacing={2} columns={12}>
                 {invitedGroups.map((group) => (
-                  <Grid2 item xs={12} sm={6} md={4} key={group.id}>
+                  <Grid2 size={{xs: 12, sm: 6, md: 4}} key={group.id}>
                     <Group {...group} />
                   </Grid2>
                 ))}
@@ -442,7 +442,7 @@ const Groups: React.FC = () => {
             </Typography>
             <Grid2 container spacing={2} columns={12}>
               {filteredGroups.map((group) => (
-                <Grid2 item xs={12} sm={6} md={4} key={group.id}>
+                <Grid2 size={{xs: 12, sm: 6, md: 4}} key={group.id}>
                   <Group {...group} />
                 </Grid2>
               ))}

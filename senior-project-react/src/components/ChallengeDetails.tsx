@@ -118,7 +118,7 @@ const ChallengeDetail: React.FC = () => {
 
       const userResponses = await Promise.all(
         participantIds.map((participant) =>
-          axios.get(`${config.serverUrl}/users/${participant.user_id}`)
+          axios.get(`${config.serverUrl}/profile/get_other_profile/${participant.user_id}`)
         )
       );
 

@@ -11,6 +11,7 @@ import {
   Checkbox,
 } from "@mui/material";
 import config from "../config.js";
+import Header from "./Header.js";
 
 interface CreateGroupResponse {
   message: string;
@@ -58,6 +59,9 @@ const CreateGroup: React.FC = () => {
 
   return (
     <Container>
+
+      <Header title="Create Challenge"/>
+
       <Box mt={4} mb={2} textAlign="center">
         <Typography variant="h4" gutterBottom>
           Create a New Group

@@ -198,7 +198,7 @@ const Achievements: React.FC = () => {
               <Typography id="modal-modal-title" variant="h6" component="h2">
                 {selectedAchievement.title}
               </Typography>
-              <Typography id="modal-image">
+              <Box id="modal-image">
                 <Box>
                   <img
                     src={`${config.serverUrl}/${selectedAchievement.image}`}
@@ -210,7 +210,7 @@ const Achievements: React.FC = () => {
                     alt={selectedAchievement.title}
                   />
                 </Box>
-              </Typography>
+              </Box>
               <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                 {selectedAchievement.description}
               </Typography>
