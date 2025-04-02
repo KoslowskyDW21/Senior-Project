@@ -143,8 +143,8 @@ const Challenges: React.FC = () => {
 
   const getCurrentUser = async () => {
     try {
-      const response = await axios.post(
-        `${config.serverUrl}/profile/get_profile_pic`
+      const response = await axios.get(
+        `${config.serverUrl}/profile/`
       );
       const data: User = response.data;
       setProfile_picture(data.profile_picture);
@@ -261,7 +261,7 @@ const Challenges: React.FC = () => {
       ></Box>
       <main role="main" style={{ paddingTop: "90px" }}>
         <Container>
-          <div
+          {/* <div
             style={{
               position: "fixed",
               bottom: 0,
@@ -294,7 +294,7 @@ const Challenges: React.FC = () => {
             >
               Community
             </Button>
-          </div>
+          </div> */}
 
           <Box mt={4} mb={2} textAlign="center">
             <Button

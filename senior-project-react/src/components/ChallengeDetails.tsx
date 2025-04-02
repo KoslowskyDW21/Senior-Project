@@ -25,6 +25,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import ChallengeParticipantsList from "./ChallengeParticipantsList";
 import config from "../config.js";
 import { set } from "date-fns";
+import Header from "./Header.js";
 
 interface Challenge {
   id: number;
@@ -330,9 +331,15 @@ const ChallengeDetail: React.FC = () => {
 
   return (
     <Container>
+
+      <Header title={challenge.name}/>
+
+      <Box mt={12}/>
       <IconButton
-        onClick={() => navigate("/challenges")}
-        style={{ position: "absolute", top: 30, left: 30 }}
+        onClick={() => navigate(-1)}
+        style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
+          left: "clamp(0px, 1vw, 100px)",
+          zIndex: 1000, }}
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
