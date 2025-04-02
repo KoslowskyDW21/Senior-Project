@@ -261,7 +261,7 @@ const Challenges: React.FC = () => {
       ></Box>
       <main role="main" style={{ paddingTop: "90px" }}>
         <Container>
-          <div
+          {/* <div
             style={{
               position: "fixed",
               bottom: 0,
@@ -294,7 +294,7 @@ const Challenges: React.FC = () => {
             >
               Community
             </Button>
-          </div>
+          </div> */}
 
           <Box mt={4} mb={2} textAlign="center">
             <Button

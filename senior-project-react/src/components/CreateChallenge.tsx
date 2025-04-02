@@ -10,10 +10,14 @@ import {
   DialogActions,
   Typography,
   Box,
+  IconButton,
 } from "@mui/material";
 import DatePicker from "react-datepicker";
+import { useNavigate } from "react-router-dom";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import "react-datepicker/dist/react-datepicker.css";
 import config from "../config.js";
+import Header from "./Header.js";
 
 interface CreateChallengeResponse {
   message: string;
@@ -30,6 +34,8 @@ const CreateChallenge: React.FC = () => {
   const [duration, setDuration] = useState<number | null>(null); // Duration in hours
   const [message, setMessage] = useState("");
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleCreateChallenge = async () => {
     const formData = new FormData();
@@ -74,15 +80,30 @@ const CreateChallenge: React.FC = () => {
 
   return (
     <Container>
-      <h2>Create a New Challenge</h2>
-      <TextField
-        label="Name"
-        variant="outlined"
-        fullWidth
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        margin="normal"
-      />
+      <Header title="Create Challenge"/>
+
+      {/* Back Button */}
+      <IconButton
+        onClick={() => navigate(-1)}
+        style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
+          left: "clamp(0px, 1vw, 100px)",
+          zIndex: 1000, }}
+      >
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+      </IconButton>
+
+      <Box
+        mt={8}
+      >
+        <TextField
+          label="Name"
+          variant="outlined"
+          fullWidth
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          margin="normal"
+        />
+      </Box>
       <TextField
         label="Theme"
         variant="outlined"
