@@ -4,7 +4,7 @@ from sqlalchemy import case, func, or_, and_
 from flask import request, jsonify, render_template, redirect, url_for, abort, flash, current_app
 from flask_login import current_user, login_required
 from app.recipes import bp
-from app.models import UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, Review, ReviewReport, Cuisine, RecipeDietaryRestriction, RecipeIngredient, db
+from app.models import Achievement, UserAchievement, Recipe, RecipeStep, RecipeCuisine, UserCuisinePreference, Review, ReviewReport, Cuisine, RecipeDietaryRestriction, RecipeIngredient, UserNotifications, db
 import os
 import uuid
 from werkzeug.utils import secure_filename
@@ -390,11 +390,19 @@ def completionAchievements(id):
             if(a.user_id == specA.user_id and a.achievement_id == specA.achievement_id):
                 run =  False
         if(run):
-            print("here")
+            aTitle = Achievement.query.filter_by(id = id).first()
             db.session.add(specA)
             db.session.flush()
             db.session.commit()
             completedAchievement()
+            notification = UserNotifications(
+                user_id = current_user.id ,#type:ignore
+                notification_text=f"You have earned a new achievement: {aTitle.title}.", #type: ignore
+                notification_type='achievement', #type: ignore
+                achievement_id=specA.achievement_id #type: ignore
+            )
+            db.session.add(notification)
+            db.session.commit()
 
 def checkLevel():
     startingLevel = current_user.user_level

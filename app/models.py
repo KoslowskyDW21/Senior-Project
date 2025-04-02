@@ -587,9 +587,10 @@ class UserNotifications(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
     notification_text = db.Column(db.Text, nullable=False)
     isRead = db.Column(db.Integer, default=0, nullable=False)
-    notification_type = db.Column(db.Enum('friend_request', 'group_message', 'challenge_reminder'), nullable=True)
+    notification_type = db.Column(db.Enum('friend_request', 'group_message', 'challenge_reminder', 'achievement'), nullable=True)
     group_id = db.Column(db.Integer, db.ForeignKey('UserGroup.id'), nullable=True)
     challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id'), nullable=True)
+    achievement_id = db.Column(db.Integer, db.ForeignKey('Achievement.id'), nullable=True)
     def to_json(self):
         return {
             "id": self.id,
@@ -599,6 +600,7 @@ class UserNotifications(db.Model):
             "notification_type": self.notification_type,
             "group_id": self.group_id,
             "challenge_id": self.challenge_id,
+            "achievement_id": self.achievement_id,
         }
 
 class FriendRequest(db.Model):
