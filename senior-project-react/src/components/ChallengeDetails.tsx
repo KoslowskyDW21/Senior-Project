@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Theme, useTheme } from "@mui/material/styles";
 import axios from "axios";
 import {
   Card,
@@ -15,6 +16,9 @@ import {
   ListItem,
   ListItemText,
   Checkbox,
+  FormControl,
+  Select,
+  InputLabel,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
@@ -63,6 +67,20 @@ interface Friend {
   username: string;
 }
 
+const reportModalStyle = (theme: Theme) => ({
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  bgcolor: theme.palette.background.default,
+  boxShadow: 24,
+  paddingTop: 3,
+  paddingLeft: 7,
+  paddingRight: 7,
+  paddingBottom: 3,
+  textAlign: "center",
+});
+
 const ChallengeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [challenge, setChallenge] = useState<Challenge | null>(null);
@@ -73,6 +91,12 @@ const ChallengeDetail: React.FC = () => {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [invited, setInvited] = useState(false);
   const [inviteMessage, setInviteMessage] = useState("");
+  const theme = useTheme();
+
+  // States for report modal
+  const [open, setOpen] = useState(false);
+  const handleOpenModal = () => setOpen(true);
+  const handleCloseModal = () => setOpen(false);
 
   const navigate = useNavigate();
 
@@ -261,6 +285,42 @@ const ChallengeDetail: React.FC = () => {
     );
   }
 
+  const handleReportChallenge = async () => {
+    let data;
+
+    await axios
+      .get(`${config.serverUrl}/challenges/${id}/reportChallenge`)
+      .then((response) => {
+        data = response.data;
+      })
+      .catch((error) => {
+        console.error("Could not get if already reported", error);
+      });
+
+    if (!data!.alreadyReported) {
+      const newData = {
+        user_id: data!.id,
+        challenge_id: id,
+      };
+
+      await axios
+        .post(`${config.serverUrl}/challenges/${id}/reportChallenge`, newData, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((response) => {
+          console.log("Challenge successfully reported.");
+          console.log(response.data.message);
+        })
+        .catch((error) => {
+          console.log("Could not report challenge", error);
+        });
+    } else {
+      console.log("Challenge already reported");
+    }
+  };
+
   const isParticipant = participants.some((p) => p.id === currentUser.id);
   const isCreator = challenge.creator === currentUser.id;
   const now = new Date();
@@ -372,6 +432,15 @@ const ChallengeDetail: React.FC = () => {
               </>
             )}
           </Box>
+          <br />
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleOpenModal}
+          >
+            Report
+          </Button>
+
           <Box mt={4}>
             <Typography variant="h5" gutterBottom>
               Participants
@@ -407,6 +476,49 @@ const ChallengeDetail: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      <Modal
+        open={open}
+        onClose={handleCloseModal}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+      >
+        <Box sx={reportModalStyle(theme)}>
+          <IconButton
+            onClick={handleCloseModal}
+            style={{ position: "absolute", top: 5, right: 5 }}
+          >
+            <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+          </IconButton>
+
+          <Typography id="modal-title" variant="h4" component="h2">
+            Report Challenge
+          </Typography>
+          <Typography id="modal-description" variant="body1" component="p">
+            {`Reporting challenge ${challenge.name}`}
+          </Typography>
+
+          <FormControl
+            variant="filled"
+            sx={{ m: 1, width: 250 }}
+            size="small"
+          >
+            <InputLabel id="reason-label">Reason</InputLabel>
+            <Select labelId="reason-label"></Select>
+          </FormControl>
+          <br />
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              handleReportChallenge();
+              handleCloseModal();
+            }}
+          >
+            Confirm Report
+          </Button>
+        </Box>
+      </Modal>
 
       <Modal
         open={inviteModalOpen}

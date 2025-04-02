@@ -429,6 +429,22 @@ class Challenge(db.Model):
             "is_complete": self.is_complete,
             "num_reports": self.num_reports,
         }
+    
+class ChallengeReport(db.Model):
+    __tablename__ = "ChallengeReport"
+    challenge_id = db.Column(db.Integer, db.ForeignKey("Challenge.id"), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("User.id"), primary_key=True)
+    reason = db.Column(db.String(255), nullable=False)
+
+    def __str__(self):
+        return f"Challenge {self.challenge_id} reported by User {self.user_id} because {self.reason}"
+    
+    def to_json(self):
+        return {
+            "challenge_id": self.challenge_id,
+            "user_id": self.user_id,
+            "reason": self.reason,
+        }
 
 class ChallengeResult(db.Model):
     __tablename__ = 'ChallengeResult'
