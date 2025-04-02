@@ -179,7 +179,7 @@ def read_notification():
             return jsonify({"message": "Notification read successfully", "redirect_url": f"/groups/{notification.group_id}/invite_response"}), 200
         elif notification.notification_type == 'challenge_reminder' and notification.challenge_id:
             return jsonify({"message": "Notification read successfully", "redirect_url": f"/challenges/{notification.challenge_id}"}), 200
-        elif notification.notification_type == 'achievement' and notification.achievement_id:
+        elif notification.notification_type == 'achievement':
             return jsonify({"message": "Notification read successfully", "redirect_url": f"/achievements"}), 200
             
         return jsonify({"message": "Notification read successfully"}), 200

@@ -195,7 +195,7 @@ def change_profile_pic():
     if not user:
         return jsonify({"message": "User not found"}), 404
     if profile_picture and allowed_file(profile_picture.filename):
-        completionAchievements(11)
+        completionAchievements(current_user.id, 11)
         upload_folder = current_app.config['UPLOAD_FOLDER']
         os.makedirs(upload_folder, exist_ok=True)
 

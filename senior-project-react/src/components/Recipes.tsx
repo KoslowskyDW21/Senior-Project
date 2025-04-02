@@ -304,14 +304,15 @@ const Recipes: React.FC = () => {
   );
 
   return (
-    <div>
+    <div style={{ margin: 0, padding: 0 }}>
     <Box
         id="scroll-container"
         sx={{
           overflowY: "scroll",
           height: "90vh",
           mt: 0,
-          width: "100%",
+          width:  "90vw",
+          paddingRight: "8vw",
         }}
     >
     <Header title="Recipes" />

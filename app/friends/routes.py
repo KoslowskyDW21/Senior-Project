@@ -1,12 +1,13 @@
 from __future__ import annotations
 from flask import jsonify, request
-from sqlalchemy import or_, and_
+from sqlalchemy import null, or_, and_
 from sqlalchemy.exc import IntegrityError
 from app.friends import bp
 from app.models import *
 from flask_login import current_user, login_required
 import random
 from enum import Enum
+from app.recipes.routes import completionAchievements
 
 class notificationType(Enum):
     send_request = 1
@@ -269,7 +270,8 @@ def accept_request(id):
         new_friendship = Friendship(user1 = request.requestFrom, user2 = request.requestTo) #type: ignore
         db.session.query(FriendRequest).filter(and_(FriendRequest.requestFrom==id, FriendRequest.requestTo==current_user.id)).delete()
         db.session.add(new_friendship)
-        checkAchievement(request.requestFrom, request.requestTo)
+        completionAchievements(request.requestFrom, 4)
+        completionAchievements(request.requestTo, 4)
 
     else:
         print("No request, heathen!")
@@ -333,20 +335,5 @@ def decline_request(id):
         db.session.rollback()
         print(f"Error declining request with user {id}: {e}")
         return jsonify({"error": "Could not decline request"}), 500
-    
-def checkAchievement(user1, user2):
-    if(UserAchievement.query.filter_by(achievement_id = 4, user_id = user1).all() == None): # type: ignore
-        a1 = UserAchievement(achievement_id = 4, user_id = user1) #type: ignore
-        db.session.add(a1)
-        db.session.flush()
-        db.session.commit()
-        
-
-    if(UserAchievement.query.filter_by(achievement_id = 4, user_id = user2).all() == None): # type: ignore
-        a2 = UserAchievement(achievement_id = 4, user_id = user2) #type: ignore
-        db.session.add(a2)
-        db.session.flush()
-        db.session.commit()
-    
     
 
