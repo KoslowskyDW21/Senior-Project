@@ -75,11 +75,21 @@ const Achievements: React.FC = () => {
 
   // Filter achievements based on the selected filter
   const filteredAchievements =
-    filter === "completed"
-      ? achievements.filter((achievement) => specAchievements.some((specAch) => specAch.id === achievement.id))
-      : filter === "notCompleted"
-      ? achievements.filter((achievement) => !specAchievements.some((specAch) => specAch.id === achievement.id))
-      : achievements;
+  filter === "completed"
+    ? achievements.filter(
+        (achievement) =>
+          (specAchievements.some((specAch) => specAch.id === achievement.id) || achievement.isVisible) // Show if earned or visible
+      )
+    : filter === "notCompleted"
+    ? achievements.filter(
+        (achievement) =>
+          (!specAchievements.some((specAch) => specAch.id === achievement.id) && achievement.isVisible) // Show if not earned but visible
+      )
+    : achievements.filter(
+        (achievement) =>
+          achievement.isVisible || specAchievements.some((specAch) => specAch.id === achievement.id) // Show if visible or earned
+      );
+
 
   return (
     <div>

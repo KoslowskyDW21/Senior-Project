@@ -14,6 +14,7 @@ import re
 
 
 
+
 @bp.post("/")
 def post_recipes():
     print("Fetching recipes")
@@ -39,6 +40,8 @@ def post_recipes():
         print("No dietary restrictions provided")
     
     if search_query != "":
+        if(search_query == "easter egg"):
+            completionAchievements(13)
         name_filter_start = Recipe.recipe_name.ilike(f"{search_query}%")
         name_filter_contains = Recipe.recipe_name.ilike(f"%{search_query}%")
         category_filter = Recipe.category.ilike(f"%{search_query}%")
@@ -188,8 +191,16 @@ def post_completed_recipe_page(id):
     db.session.add(current_user)
     db.session.flush()
     db.session.commit()
+    if(id == 229):
+        completionAchievements(5)
+    if(str(Recipe.query.filter_by(id = id).first().difficulty) == "5"): #type:ignore
+        completionAchievements(12)
     if(current_user.num_recipes_completed == 1):
         completionAchievements(1)
+    elif(current_user.num_recipes_completed >= 50):
+        completionAchievements(7)
+    elif(current_user.num_recipes_completed >= 10):
+        completionAchievements(6)
     checkLevel()
     completeCuisine(recipe)
     if recipe is not None:
@@ -253,6 +264,13 @@ def upload_review(id):
     notes = request.form.get('notes')
     image = request.files.get('image')
     difficulty = request.form.get('difficulty')
+
+    print(rating)
+
+    if(str(rating) == "0.5"):
+        completionAchievements(9)
+    elif(str(rating) == "5"):
+        completionAchievements(8)
 
     # Handle image upload
     image_path = None
@@ -427,8 +445,10 @@ def completeCuisine(recipe):
     for a in UserCuisinePreference.query.filter_by(user_id = current_user.id).all():
         if(a.numComplete > 0):
             count += 1
-    if(count == 3):
+    if(count >= 3):
         completionAchievements(2)
+    elif(count >= 29):
+        completionAchievements(10)
 
 def completedAchievement():
     current_user.xp_points = current_user.xp_points + 100

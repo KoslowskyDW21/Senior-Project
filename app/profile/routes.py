@@ -9,6 +9,7 @@ import uuid
 import os
 #TODO: Add the following imports:
 from app.friends.routes import remove_friend, revoke_request, delete_notification
+from app.recipes.routes import completionAchievements
 
 @bp.route('/<int:id>', methods=['POST'])
 def post_profile_page(id=1):
@@ -175,6 +176,7 @@ def change_profile_pic():
     if not user:
         return jsonify({"message": "User not found"}), 404
     if profile_picture and allowed_file(profile_picture.filename):
+        completionAchievements(11)
         upload_folder = current_app.config['UPLOAD_FOLDER']
         os.makedirs(upload_folder, exist_ok=True)
 
