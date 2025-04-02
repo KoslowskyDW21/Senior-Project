@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from flask_login import login_required, current_user
 from app.challenges import bp
-from app.models import User, Challenge, ChallengeParticipant, ChallengeVote, UserNotifications, db
+from app.models import User, Challenge, ChallengeParticipant, ChallengeVote, UserNotifications, ChallengeReport, db
 from flask import request, jsonify, abort, current_app
 from datetime import datetime, timedelta, UTC
 from werkzeug.utils import secure_filename
 import os
 import pytz
 import uuid
+from math import ceil
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 def allowed_file(filename):
@@ -24,7 +25,19 @@ def get_localized_time(time):
 @login_required
 @bp.route('/', methods=['GET', 'POST'])
 def challenges():
+    #the  pagining is upon us
+    #page = max(1, int(request.args.get('page', 1)))  
+    #per_page = int(request.args.get('per_page', 20))
     challenges = Challenge.query.all()
+
+    #challenges_paginated = challenges.paginate(page=page, per_page=per_page, error_out=False)  # type: ignore
+    #total_pages = ceil(challenges_paginated.total / per_page)  # type: ignore
+    #challenges = [challenge.to_json() for challenge in challenges_paginated.items]
+    #return jsonify({
+        #'challenges': challenges,
+        #'total_pages': total_pages,
+        #'current_page': page
+    #}), 200
     return jsonify([challenge.to_json() for challenge in challenges]), 200
 
 @login_required
@@ -463,3 +476,36 @@ def get_notifications():
     return jsonify({
         "notifications": [notification.to_json() for notification in notifications]
     }), 200
+
+@login_required
+@bp.route("/<int:challenge_id>/reportChallenge", methods=["GET", "POST"])
+def report_challenge(challenge_id: int):
+    if request.method == "GET":
+        user: User = current_user._get_current_object() # type: ignore
+
+        report: ChallengeReport = ChallengeReport.query.filter_by(user_id=user.id, challenge_id=challenge_id).first() # type: ignore
+
+        if report != None:
+            return jsonify({"alreadyReported": True, "id": user.id}), 200
+
+        return jsonify({"alreadyReported": False, "id": user.id}), 200
+    
+    data = request.get_json()
+    userId = data.get("user_id")
+    challengeId = data.get("challenge_id")
+
+    print("Received data - userID: " + str(userId))
+    print("Received data - challengeID: " + str(challengeId))
+
+    newReport: ChallengeReport = ChallengeReport(challenge_id=challengeId, user_id=userId, reason="N/A") # type: ignore
+    challenge: Challenge = Challenge.query.filter_by(id=challengeId).first() # type: ignore
+    challenge.num_reports += 1
+
+    try:
+        db.session.add(newReport)
+        db.session.commit()
+        return jsonify({"message": f"Challenge {challengeId} reported"}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error reporting challenge: {e}")
+        return jsonify({"message": "Error: could not report challenge"}), 500

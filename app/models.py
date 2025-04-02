@@ -429,6 +429,22 @@ class Challenge(db.Model):
             "is_complete": self.is_complete,
             "num_reports": self.num_reports,
         }
+    
+class ChallengeReport(db.Model):
+    __tablename__ = "ChallengeReport"
+    challenge_id = db.Column(db.Integer, db.ForeignKey("Challenge.id"), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("User.id"), primary_key=True)
+    reason = db.Column(db.String(255), nullable=False)
+
+    def __str__(self):
+        return f"Challenge {self.challenge_id} reported by User {self.user_id} because {self.reason}"
+    
+    def to_json(self):
+        return {
+            "challenge_id": self.challenge_id,
+            "user_id": self.user_id,
+            "reason": self.reason,
+        }
 
 class ChallengeResult(db.Model):
     __tablename__ = 'ChallengeResult'
@@ -571,9 +587,10 @@ class UserNotifications(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
     notification_text = db.Column(db.Text, nullable=False)
     isRead = db.Column(db.Integer, default=0, nullable=False)
-    notification_type = db.Column(db.Enum('friend_request', 'group_message', 'challenge_reminder'), nullable=True)
+    notification_type = db.Column(db.Enum('friend_request', 'group_message', 'challenge_reminder', 'achievement'), nullable=True)
     group_id = db.Column(db.Integer, db.ForeignKey('UserGroup.id'), nullable=True)
     challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id'), nullable=True)
+    achievement_id = db.Column(db.Integer, db.ForeignKey('Achievement.id'), nullable=True)
     def to_json(self):
         return {
             "id": self.id,
@@ -583,6 +600,7 @@ class UserNotifications(db.Model):
             "notification_type": self.notification_type,
             "group_id": self.group_id,
             "challenge_id": self.challenge_id,
+            "achievement_id": self.achievement_id,
         }
 
 class FriendRequest(db.Model):
