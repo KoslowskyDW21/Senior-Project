@@ -392,7 +392,7 @@ const Profile: React.FC = () => {
             width: "auto", // Ensure the grid only takes up as much space as needed
           }}
         >
-          {achievements.slice(0, 3).map((achievement: Achievement) => (
+          {achievements.slice(-3).map((achievement: Achievement) => (
             <div key={achievement.id}>
               <button onClick={() => handleOpenAchievementModal(achievement)}>
                 <img
