@@ -311,10 +311,8 @@ const Recipes: React.FC = () => {
           overflowY: "scroll",
           height: "90vh",
           mt: 0,
-          width:  "95vw",
-          p: 0, // Remove padding if any
-          m: 0, // Remove margin if any
-          paddingRight: "2.5vw"
+          width:  "90vw",
+          paddingRight: "8vw",
         }}
     >
     <Header title="Recipes" />
