@@ -298,16 +298,16 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           >
             <Avatar
               sx={{
-                width: "clamp(20px, 4vw, 40px)", // Avatar width scales between 40px and 70px based on screen width
-                height: "clamp(20px, 4vw, 40px)", // Avatar height scales between 40px and 70px based on screen width
+                width: "clamp(28px, 4vw, 40px)", // Avatar width scales between 40px and 70px based on screen width
+                height: "clamp(28px, 4vw, 40px)", // Avatar height scales between 40px and 70px based on screen width
                 backgroundColor: "gray",
               }}
             >
               <NotificationsIcon
                 sx={{
                   color: "white",
-                  width: "clamp(4px, 3vw, 20px)", // Notification indicator size scales between 10px and 15px
-                  height: "clamp(4px, 3vw, 20px)",
+                  width: "clamp(10px, 4vw, 20px)", // Notification indicator size scales between 10px and 15px
+                  height: "clamp(10px, 4vw, 20px)",
                 }}
               />
               {notifications.length > 0 &&
@@ -332,10 +332,10 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             open={Boolean(notificationAnchorEl)}
             onClose={handleCloseNotification}
             sx={{
-              "& .MuiPaper-root": {
-                width: "clamp(130px, 20vw, 200px)",
-                maxHeight: "clamp(80px, 40vh, 380px)",
-              },
+              fontSize: "clamp(13px, 1vw, 20px)",
+              whiteSpace: "normal", // Allows wrapping
+              wordBreak: "break-word", // Ensures long words wrap properly
+              overflowWrap: "break-word", // Alternative for better support
             }}
           >
             {notifications.length > 0 &&
@@ -393,8 +393,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                 alt="Profile Picture"
                 src={profile_picture}
                 sx={{
-                  width: "clamp(20px, 4vw, 40px)", // Avatar width scales between 40px and 70px based on screen width
-                  height: "clamp(20px, 4vw, 40px)", // Avatar height scales between 40px and 70px based on screen width
+                  width: "clamp(28px, 4vw, 40px)", // Avatar width scales between 40px and 70px based on screen width
+                  height: "clamp(28px, 4vw, 40px)", // Avatar height scales between 40px and 70px based on screen width
                   border: "1px solid #000",
                 }}
               />
