@@ -127,7 +127,10 @@ const CompletedRecipe: React.FC = () => {
       {!reviewSubmitted ? (
         <>
           <h1>Recipe completed: {recipe_name}</h1>
-          <p>Your Review</p>
+          <Button onClick ={() => navigate(-1)}>
+           Back to Recipe Page
+          </Button>
+          <p>Leave a Review</p>
 
           {/* Error message for validation */}
           {errorMessage && (

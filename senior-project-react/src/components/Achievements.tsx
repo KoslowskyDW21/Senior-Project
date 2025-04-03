@@ -9,6 +9,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Button, IconButton } from "@mui/material";
 import { CheckCircle } from "@mui/icons-material";
 import config from "../config.js";
+import Header from "./Header.js";
 
 interface Achievement {
   id: number;
@@ -75,35 +76,52 @@ const Achievements: React.FC = () => {
 
   // Filter achievements based on the selected filter
   const filteredAchievements =
-    filter === "completed"
-      ? achievements.filter((achievement) => specAchievements.some((specAch) => specAch.id === achievement.id))
-      : filter === "notCompleted"
-      ? achievements.filter((achievement) => !specAchievements.some((specAch) => specAch.id === achievement.id))
-      : achievements;
+  filter === "completed"
+    ? achievements.filter(
+        (achievement) =>
+          (specAchievements.some((specAch) => specAch.id === achievement.id)) 
+      )
+    : filter === "notCompleted"
+    ? achievements.filter(
+        (achievement) =>
+          (!specAchievements.some((specAch) => specAch.id === achievement.id) && achievement.isVisible) // Show if not earned but visible
+      )
+    : achievements.filter(
+        (achievement) =>
+          achievement.isVisible || specAchievements.some((specAch) => specAch.id === achievement.id) // Show if visible or earned
+      );
+
 
   return (
     <div>
-      <IconButton
+       <Header title={"Achievements"}/>
+
+       <IconButton
         onClick={() => navigate(-1)}
-        style={{ position: "absolute", top: 30, left: 30 }}
+        style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
+          left: "clamp(0px, 1vw, 100px)",
+          zIndex: 1000, }}
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
-      <h1>Achievements</h1>
 
       {/* Dropdown for Filtering Achievements */}
-      <FormControl fullWidth style={{ marginBottom: "16px" }}>
-        <InputLabel>Filter Achievements</InputLabel>
-        <Select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          label="Filter Achievements"
-        >
-          <MenuItem value="all">All Achievements</MenuItem>
-          <MenuItem value="completed">Completed Achievements</MenuItem>
-          <MenuItem value="notCompleted">Unearned Achievements</MenuItem>
-        </Select>
-      </FormControl>
+      <Box
+      mt={12}
+      >
+        <FormControl fullWidth style={{ marginBottom: "16px" }}>
+          <InputLabel>Filter Achievements</InputLabel>
+          <Select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            label="Filter Achievements"
+          >
+            <MenuItem value="all">All Achievements</MenuItem>
+            <MenuItem value="completed">Completed Achievements</MenuItem>
+            <MenuItem value="notCompleted">Unearned Achievements</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
 
       <div
         style={{
