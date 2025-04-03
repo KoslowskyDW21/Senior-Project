@@ -315,7 +315,7 @@ const ShoppingList: React.FC = () => {
 
       {/* Back button */}
       <IconButton
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/recipes/")}
         style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
           left: "clamp(0px, 1vw, 100px)",
           zIndex: 1000, }}

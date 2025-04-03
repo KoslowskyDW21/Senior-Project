@@ -19,6 +19,7 @@ import Icon from "@mui/material/Icon";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import config from "../config.js";
+import Header from "./Header.js";
 
 interface User {
   id: number;
@@ -301,14 +302,20 @@ export default function AdminPage() {
     return (
       <>
         <link rel="stylesheet" href="/src/AdminPage.css" />
-        <IconButton
-          onClick={() => navigate(-1)}
-          style={{ position: "fixed", top: 30, left: 30 }}
-        >
-          <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
-        </IconButton>
 
-        <h1>Admin Page</h1>
+        <Header title="Admin"/>
+
+        <IconButton
+        onClick={() => navigate("/recipes/")}
+        style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
+          left: "clamp(0px, 1vw, 100px)",
+          zIndex: 1000, }}
+      >
+        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+      </IconButton>
+
+      <Box mt={6}/>
+
         <br />
         <h2>Users</h2>
         <table>
