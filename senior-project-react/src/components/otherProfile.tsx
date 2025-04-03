@@ -659,7 +659,7 @@ const OtherProfile: React.FC = () => {
                   >
                     <img
                       src={`${config.serverUrl}/${
-                        achievement.isVisible ? achievement.image : "daQuestion.jpg"}`}
+                        achievement.isVisible ? achievement.image : "static/uploads/daQuestion.png"}`}
                       width="100"
                       alt={achievement.title}
                     />
@@ -740,7 +740,7 @@ const OtherProfile: React.FC = () => {
                   <Box id="modal-image">
                     <Box>
                       <img
-                        src={selectedAchievement.image}
+                        src={`${config.serverUrl}/${selectedAchievement.isVisible ? selectedAchievement.image : "static/uploads/daQuestion.png"}`}
                         style={{
                           width: "100%",
                           height: "100%",
