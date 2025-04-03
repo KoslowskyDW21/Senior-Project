@@ -79,7 +79,7 @@ const Achievements: React.FC = () => {
   filter === "completed"
     ? achievements.filter(
         (achievement) =>
-          (specAchievements.some((specAch) => specAch.id === achievement.id) || achievement.isVisible) // Show if earned or visible
+          (specAchievements.some((specAch) => specAch.id === achievement.id)) 
       )
     : filter === "notCompleted"
     ? achievements.filter(
