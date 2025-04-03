@@ -13,8 +13,20 @@ import config from "../config.js";
 
 interface User {
   id: number;
+  fname: string;
+  lname: string;
+  email_address: string;
   username: string;
-  profile_picture: string | null;
+  profile_picture: string;
+  xp_points: number;
+  user_level: number;
+  is_admin: boolean;
+  num_recipes_completed: number;
+  colonial_floor: string;
+  colonial_side: string;
+  date_created: Date;
+  last_logged_in: Date;
+  num_reports: number;
 }
 
 interface ChallengeParticipantsListProps {
@@ -36,9 +48,8 @@ const ChallengeParticipantsList: React.FC<ChallengeParticipantsListProps> = ({
 
   const handleKickUser = async (userId: number) => {
     try {
-      await axios.post(`${config.serverUrl}/challenges/${challengeId}/kick`, {
-        user_id: userId,
-      });
+      console.log("User ID: ", userId)
+      await axios.post(`${config.serverUrl}/challenges/${challengeId}/kick/${userId}/`);
       alert("User kicked successfully!");
     } catch (error) {
       console.error("Error kicking user:", error);
@@ -87,7 +98,7 @@ const ChallengeParticipantsList: React.FC<ChallengeParticipantsListProps> = ({
                 </Typography>
               }
             />
-            {isCreator && participant.id !== creatorId && (
+            {isCreator && (participant.id !== creatorId) && (
               <Button
                 variant="contained"
                 color="secondary"

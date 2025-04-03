@@ -458,7 +458,7 @@ const ChallengeDetail: React.FC = () => {
               Participants
             </Typography>
             <ChallengeParticipantsList
-              participants={participantIds}
+              participants={participants}
               isCreator={isCreator}
               challengeId={challenge.id}
               creatorId={challenge.creator}
