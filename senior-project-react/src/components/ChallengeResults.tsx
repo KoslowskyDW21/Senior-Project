@@ -27,7 +27,7 @@ const ChallengeResults: React.FC = () => {
     const fetchVoteResults = async () => {
       try {
         const response = await axios.get(
-          `${config.serverUrl}/challenges/${id}/vote_results`
+          `${config.serverUrl}/challenges/${id}/vote_results/`
         );
         setParticipants(response.data);
       } catch (error) {

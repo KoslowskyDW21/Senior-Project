@@ -75,7 +75,7 @@ const Challenges: React.FC = () => {
       setChallenges(validChallenges);
 
       const userResponse = await axios.get(
-        `${config.serverUrl}/challenges/current_user_id`
+        `${config.serverUrl}/challenges/current_user_id/`
       );
       const currentUserId = userResponse.data;
       setCurrentUserId(currentUserId);
@@ -95,7 +95,7 @@ const Challenges: React.FC = () => {
       const joinedChallengesList: ChallengeData[] = [];
       for (const challenge of data) {
         const participantResponse = await axios.get(
-          `${config.serverUrl}/challenges/${challenge.id}/is_participant`
+          `${config.serverUrl}/challenges/${challenge.id}/is_participant/`
         );
         participantStatus[challenge.id] =
           participantResponse.data.is_participant;
@@ -111,7 +111,7 @@ const Challenges: React.FC = () => {
 
       // Fetch challenges with invite notifications
       const notificationsResponse = await axios.get(
-        `${config.serverUrl}/challenges/notifications`
+        `${config.serverUrl}/challenges/notifications/`
       );
       const inviteNotifications =
         notificationsResponse.data.notifications.filter(
@@ -133,7 +133,7 @@ const Challenges: React.FC = () => {
   const fetchPastChallenges = async () => {
     try {
       const response = await axios.get(
-        `${config.serverUrl}/challenges/past_challenges`
+        `${config.serverUrl}/challenges/past_challenges/`
       );
       setPastChallenges(response.data);
     } catch (error) {
@@ -155,7 +155,7 @@ const Challenges: React.FC = () => {
   };
 
   const handleGoToGroups = async () => {
-    navigate(`/groups`);
+    navigate(`/groups/`);
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,7 +214,7 @@ const Challenges: React.FC = () => {
     );
 
   const handleGoToRecipes = async () => {
-    navigate("/recipes");
+    navigate("/recipes/");
   };
 
   useEffect(() => {
