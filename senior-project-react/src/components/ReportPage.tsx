@@ -214,8 +214,48 @@ function Message({ message }: {message: Message}) {
 
 // React component that lets the user see which challenges have been reported
 function Challenge({ challenge }: {challenge: Challenge}) {
-  return <></>;
-  // TODO: Implement this function
+  return (
+    <Card
+      sx={{
+        marginBottom: 2,
+        border: "1px solid #ccc",
+        borderRadius: 2,
+        boxShadow: 2,
+      }}
+    >
+      {challenge.image && (
+        <CardMedia
+          component="img"
+          height="400"
+          image={`${config.serverUrl}/${challenge.image}`}
+          alt={challenge.name}
+          sx={{ borderRadius: 2 }}
+        />
+      )}
+      <CardContent>
+        <Typography variant="h4" component="div" gutterBottom>
+          {challenge.name}
+        </Typography>
+        <Box mb={2}>
+          <Typography variant="body1">
+            <strong>Difficulty:</strong> {challenge.difficulty}/5
+          </Typography>
+          <Typography variant="body1">
+            <strong>Theme:</strong> {challenge.theme}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Location:</strong> {challenge.location}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Start Time:</strong> {challenge.start_time.toLocaleString()}
+          </Typography>
+          <Typography variant="body1">
+            <strong>End Time:</strong> {challenge.end_time.toLocaleString()}
+          </Typography>
+        </Box>
+      </CardContent>
+    </Card>
+  );
 }
 
 const modalStyle = {
@@ -356,7 +396,7 @@ export default function ReportPage() {
     await axios
     .get(`${config.serverUrl}/challenges/reports/${id}`)
     .then((response) => {
-      setMessageReports(response.data);
+      setChallengeReports(response.data);
     })
     .catch((error) => {
       console.error("Could not fetch reports", error);
@@ -759,7 +799,7 @@ export default function ReportPage() {
               <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
             </IconButton>
 
-            <Group group={group} />
+            <Group group={group!} />
 
             <Typography id="modal-title" variant="h4" component="h2">
               {group !== null ? group.name : ""}
@@ -821,7 +861,7 @@ export default function ReportPage() {
               <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
             </IconButton>
             
-            <Review review={review} />
+            <Review review={review!} />
 
             <Typography id="modal-title" variant="h4" component="h2">
               {`Review submitted by ${
@@ -885,7 +925,7 @@ export default function ReportPage() {
               <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
             </IconButton>
             
-            <Message message={message} />
+            <Message message={message!} />
 
             <Typography id="modal-title" variant="h4" component="h2">
               {`Message written by ${
