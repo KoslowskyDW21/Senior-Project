@@ -518,10 +518,55 @@ def report_challenge(challenge_id: int):
         print(f"Error reporting challenge: {e}")
         return jsonify({"message": "Error: could not report challenge"}), 500
 
-
 @login_required 
 @bp.route('/get_user/<int:user_id>/', methods=['GET'])
 def get_user(user_id):
     user = User.query.filter_by(id=user_id).first_or_404()
     return user.to_json(), 200
+    
+@login_required
+@bp.get("/reported_challenges")
+def get_reported_challenges():
+    reportedChallenges: list[Challenge] = Challenge.query.filter(Challenge.num_reports > 0).all()
+    return jsonify([challenge.to_json() for challenge in reportedChallenges]), 200
 
+@login_required
+@bp.get("/reports/<int:id>")
+def get_reports(id: int): 
+    reports: list[ChallengeReport] = ChallengeReport.query.filter_by(group_id=id).all()
+    return jsonify([report.to_json() for report in reports])
+
+@login_required
+@bp.delete("/<int:id>/delete_reports")
+def delete_reports(id: int):
+    reports: list[ChallengeReport] = ChallengeReport.query.filter_by(challenge_id=id).all()
+
+    for report in reports:
+        db.session.delete(report)
+
+    db.session.commit()
+    return jsonify({"message": "Reports successfully deleted"}), 200
+
+@login_required
+@bp.post("/<int:id>/set_reports_zero")
+def set_reports_zero(id: int):
+    challenge: Challenge = Challenge.query.get(id) # type: ignore
+    challenge.num_reports = 0
+
+    db.session.commit()
+    return jsonify({"message": "Dismissed reports successfully"}), 200
+
+@login_required
+@bp.delete("/<int:id>/delete")
+def delete(id: int):
+    challenge: Challenge = Challenge.query.get(id) # type: ignore
+
+    if not challenge:
+        return jsonify({"message": "Challenge not found"}), 404
+
+    ChallengeVote.query.filter_by(challenge_id=id).delete()
+    ChallengeParticipant.query.filter_by(challenge_id=id).delete()
+
+    db.session.delete(challenge)
+    db.session.commit()
+    return jsonify({"message": "Challenge deleted successfully"}), 200

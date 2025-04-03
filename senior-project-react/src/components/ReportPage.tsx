@@ -87,8 +87,27 @@ interface MessageReport {
   reason: string;
 }
 
+interface Challenge {
+  id: number;
+  name: string;
+  creator: string;
+  difficulty: "1" | "2" | "3" | "4" | "5";
+  theme: string;
+  location: string;
+  start_time: string;
+  end_time: string;
+  num_reports: number;
+  image?: string;
+}
+
+interface ChallengeReport {
+  user_id: number;
+  challenge_id: number;
+  reason: string;
+}
+
 // React component that lets the user see which groups have been reported
-function Group({ group }) {
+function Group({ group }: {group: UserGroup}) {
   return (
     <Card
       sx={{
@@ -129,7 +148,7 @@ function Group({ group }) {
 }
 
 // React component that lets the user see which reviews have been reported
-function Review({ review }) {
+function Review({ review }: {review: Review}) {
   return (
     <Card
       sx={{
@@ -173,7 +192,7 @@ function Review({ review }) {
 }
 
 // React component that lets the user see which messages have been reported
-function Message({ message }) {
+function Message({ message }: {message: Message}) {
   return (
     <Card
       sx={{
@@ -193,6 +212,12 @@ function Message({ message }) {
   )
 }
 
+// React component that lets the user see which challenges have been reported
+function Challenge({ challenge }: {challenge: Challenge}) {
+  return <></>;
+  // TODO: Implement this function
+}
+
 const modalStyle = {
   position: "absolute",
   top: "50%",
@@ -208,6 +233,7 @@ const modalStyle = {
 };
 
 export default function ReportPage() {
+  
   const [admin, setAdmin] = useState<boolean>(false);
   const [groups, setGroups] = useState<UserGroup[]>([]);
   const [group, setGroup] = useState<UserGroup | null>(null);
@@ -218,16 +244,22 @@ export default function ReportPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState<Message | null>(null);
   const [messageReports, setMessageReports] = useState<MessageReport[]>([]);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [challenge, setChallenge] = useState<Challenge | null>(null);
+  const [challengeReports, setChallengeReports] = useState<ChallengeReport[]>([]);
   const [users, setUsers] = useState<User[]>([]);  
-  const [openGroup, setOpenGroup] = useState(false);
+  const [openGroup, setOpenGroup] = useState<boolean>(false);
   const handleOpenGroupModal = () => setOpenGroup(true);
   const handleCloseGroupModal = () => setOpenGroup(false);
-  const [openReview, setOpenReview] = useState(false);
+  const [openReview, setOpenReview] = useState<boolean>(false);
   const handleOpenReviewModal = () => setOpenReview(true);
   const handleCloseReviewModal = () => setOpenReview(false);
-  const [openMessage, setOpenMessage] = useState(false);
+  const [openMessage, setOpenMessage] = useState<boolean>(false);
   const handleOpenMessageModal = () => setOpenMessage(true);
   const handleCloseMessageModal = () => setOpenMessage(false);
+  const [openChallenge, setOpenChallenge] = useState<boolean>(false);
+  const handleOpenChallengeModal = () => setOpenChallenge(true);
+  const handleCloseChallengeModal = () => setOpenChallenge(false);
   const navigate = useNavigate();
 
   async function isAdmin() {
@@ -276,6 +308,17 @@ export default function ReportPage() {
       });
   }
 
+  async function loadChallenges() {
+    await axios
+      .get(`${config.serverUrl}/challenges/reported_challenges`)
+      .then((response) => {
+        setChallenges(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not fetch reported challenges", error);
+      });
+  }
+
   async function loadGroupReports(id: number) {
     await axios
       .get(`${config.serverUrl}/groups/reports/${id}/`)
@@ -307,6 +350,17 @@ export default function ReportPage() {
       .catch((error) => {
         console.error("Could not fetch reports", error);
       });
+  }
+
+  async function loadChallengeReports(id: number) {
+    await axios
+    .get(`${config.serverUrl}/challenges/reports/${id}`)
+    .then((response) => {
+      setMessageReports(response.data);
+    })
+    .catch((error) => {
+      console.error("Could not fetch reports", error);
+    });
   }
 
   async function deleteGroupReports() {
@@ -456,6 +510,55 @@ export default function ReportPage() {
     setMessages(newMessages);
   }
 
+  async function deleteChallengeReports() {
+    await axios
+      .delete(`${config.serverUrl}/challenges/${challenge!.id}/delete_reports`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not delete reports", error);
+      })
+    }
+
+  async function setChallengeReportsZero() {
+    await axios
+      .post(`${config.serverUrl}/challenges/${challenge!.id}/set_reports_zero`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not set reports to zero", error);
+      });
+  }
+
+  async function deleteChallenge() {
+    await axios
+      .delete(`${config.serverUrl}/challenges/${challenge!.id}/delete`)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not delete challenge", error);
+      });
+  }
+  
+  async function handleRemoveChallenge() {
+    deleteChallengeReports();
+    deleteChallenge();
+
+    const newChallenges = challenges.filter(item => item !== challenge);
+    setChallenges(newChallenges);
+  }
+
+  async function handleRemoveChallengeReports() {
+    deleteChallengeReports();
+    setChallengeReportsZero();
+
+    const newChallenges = challenges.filter(item => item !== challenge);
+    setChallenges(newChallenges);
+  }
+
   async function loadUsers() {
     await axios
       .get(`${config.serverUrl}/admin/users/`)
@@ -472,12 +575,13 @@ export default function ReportPage() {
     return user?.username;
   }
 
-  // Checks to see if the current user is an admin and loads the reported groups, reviews, and messages
+  // Checks to see if the current user is an admin and loads the reported groups, reviews, messages, and challenges
   React.useEffect(() => {
     isAdmin();
     loadGroups();
     loadReviews();
     loadMessages();
+    loadChallenges();
     loadUsers();
   }, []);
 
@@ -603,6 +707,41 @@ export default function ReportPage() {
           </table>
         ) : (
           <p>No Messages Reported</p>
+        )}
+
+        <h2>Reported Challenges</h2>
+        {/* List each challenge that has been reported in a table */}
+        {challenges.length > 0 ? (
+          <table>
+          <thead>
+            <td>Name</td>
+            <td>Reports</td>
+            <td></td>
+          </thead>
+          <tbody>
+            {challenges.map((challenge) => (
+              <tr key={challenge.id}>
+                <td>{challenge.name}</td>
+                <td>{challenge.num_reports}</td>
+                <td>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                      setChallenge(challenge);
+                      loadChallengeReports(challenge.id);
+                      handleOpenChallengeModal();
+                    }}
+                  >
+                    View Reports
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        ) : (
+          <p>No Challenges Reported</p>
         )}
 
         {/* Modal for seeing reports associated with specific group - gives the option
@@ -790,6 +929,70 @@ export default function ReportPage() {
               }}
             >
               Dismiss Report(s)
+            </Button>
+          </Box>
+        </Modal>
+
+        {/* Modal for seeing reports associated with specific challenge - gives the option
+            to remove the challenge or dismiss the reports - also displays the challenge to
+            the user */}
+        <Modal
+          open={openChallenge}
+          onClose={handleCloseChallengeModal}
+          aria-labelledby="modal-title"
+        >
+          <Box sx={modalStyle}>
+          <IconButton
+              onClick={handleCloseMessageModal}
+              style={{ position: "absolute", top: 5, right: 5 }}
+            >
+              <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+            </IconButton>
+
+            <Challenge challenge={challenge!} />
+
+            <Typography id="modal-title" variant="h4" component="h2">
+              {`Challenge created by ${
+                challenge !== null ? challenge.creator : "null"
+              }`}
+            </Typography>
+            
+            <table>
+              <thead>
+                <tr>
+                  <td>Reported by</td>
+                  <td>Reason</td>
+                </tr>
+              </thead>
+              <tbody>
+                {challengeReports.map((report) => (
+                  <tr key={report.challenge_id}>
+                    <td>{getUserById(report.user_id)}</td>
+                    <td>{report.reason}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                handleRemoveChallenge();
+                handleCloseChallengeModal();
+              }}
+            >
+              Remove Challenge
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                handleRemoveChallengeReports();
+                handleCloseChallengeModal();
+              }}
+            >
+              Dismiss Challenge(s)
             </Button>
           </Box>
         </Modal>
