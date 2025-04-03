@@ -20,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useMsal } from "@azure/msal-react";
 import config from "../config.js";
+import Header from "./Header.js";
 
 interface DeleteResponse {
   message: string;
@@ -382,14 +383,18 @@ export default function Settings() {
 
   return (
     <>
+      <Header title="Settings"/>
+
       <IconButton
-        aria-label="back"
         onClick={() => navigate(-1)}
-        style={{ position: "absolute", top: 30, left: 30 }}
+        style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
+          left: "clamp(0px, 1vw, 100px)",
+          zIndex: 1000, }}
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
-      <h1>Settings Page</h1>
+      
+      <Box mt={12}/>
       <main role="main">
         <p>
           Name: {user.fname} {user.lname}
