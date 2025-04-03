@@ -655,13 +655,14 @@ const OtherProfile: React.FC = () => {
                 width: "auto", // Ensure the grid only takes up as much space as needed
               }}
             >
-              {achievements.slice(0, 3).map((achievement: Achievement) => (
+              {achievements.slice(-3).map((achievement: Achievement) => (
                 <div key={achievement.id}>
                   <button
                     onClick={() => handleOpenAchievementModal(achievement)}
                   >
                     <img
-                      src={`${config.serverUrl}/${achievement.image}`}
+                      src={`${config.serverUrl}/${
+                        achievement.isVisible ? achievement.image : "daQuestion.jpg"}`}
                       width="100"
                       alt={achievement.title}
                     />
@@ -737,7 +738,7 @@ const OtherProfile: React.FC = () => {
                     variant="h6"
                     component="h2"
                   >
-                    {selectedAchievement.title}
+                    {selectedAchievement.isVisible ? selectedAchievement.title : "Hidden Achievement"}
                   </Typography>
                   <Box id="modal-image">
                     <Box>
