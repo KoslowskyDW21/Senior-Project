@@ -1,18 +1,11 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { useEffect, useState } from "react";
-import React from "react";
 import {
   Button,
   IconButton,
   Modal,
-  TextField,
   Typography,
   Box,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
   Card,
   CardContent,
   CardMedia,
@@ -616,7 +609,7 @@ export default function ReportPage() {
   }
 
   // Checks to see if the current user is an admin and loads the reported groups, reviews, messages, and challenges
-  React.useEffect(() => {
+  useEffect(() => {
     isAdmin();
     loadGroups();
     loadReviews();
