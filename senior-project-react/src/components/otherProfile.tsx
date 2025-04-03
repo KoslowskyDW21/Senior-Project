@@ -420,7 +420,7 @@ const OtherProfile: React.FC = () => {
 
   return (
     <>
-      <Header title="" />
+      <Header title={`${username}`} />
       <IconButton
         onClick={() => navigate(-1)}
         style={{
@@ -439,7 +439,9 @@ const OtherProfile: React.FC = () => {
         </Typography>
       ) : (
         <>
-          <h1>{username}'s profile</h1>
+          <Typography variant="h6" fontWeight="bold" marginRight={5}>
+            {fname} {lname}
+          </Typography>
           <Box
             display="flex"
             justifyContent="center"
@@ -469,6 +471,7 @@ const OtherProfile: React.FC = () => {
               {/* If they sent you a friend request, have option to accept or decline */}
               {/* If you sent them a friend request, button should say "requested" */}
               {/* If friends, button should say "remove friend" */}
+
               {isUserBlocked ? (
                 <Button
                   variant="contained"
