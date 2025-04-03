@@ -35,7 +35,7 @@ const PastChallenges: React.FC = () => {
     const fetchPastChallenges = async () => {
       try {
         const response = await axios.get(
-          `${config.serverUrl}/challenges/past_user_participated_challenges`
+          `${config.serverUrl}/challenges/past_user_participated_challenges/`
         );
         setPastChallenges(response.data);
       } catch (error) {
@@ -59,7 +59,7 @@ const PastChallenges: React.FC = () => {
       </Box>
       <Grid2 container spacing={2}>
         {pastChallenges.map((challenge) => (
-          <Grid2 item xs={12} sm={6} md={4} key={challenge.id}>
+          <Grid2 key={challenge.id}>
             <Challenge {...challenge} />
           </Grid2>
         ))}

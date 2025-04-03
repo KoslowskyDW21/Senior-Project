@@ -51,7 +51,7 @@ const CreateChallenge: React.FC = () => {
 
     try {
       const response = await axios.post(
-        `${config.serverUrl}/challenges/create`,
+        `${config.serverUrl}/challenges/create/`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -60,7 +60,7 @@ const CreateChallenge: React.FC = () => {
       setMessage(data.message);
       if (data.message === "Challenge created successfully!") {
         const challengeId = response.data.challenge_id;
-        await axios.post(`${config.serverUrl}/challenges/${challengeId}/join`);
+        await axios.post(`${config.serverUrl}/challenges/${challengeId}/join/`);
         window.history.back();
       }
     } catch (error) {
