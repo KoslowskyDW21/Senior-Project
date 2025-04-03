@@ -37,7 +37,7 @@ const GroupMembersList: React.FC<GroupMembersListProps> = ({
 }) => {
   const handleSetTrusted = async (userId: number) => {
     try {
-      await axios.post(`${config.serverUrl}/groups/${groupId}/set_trusted`, {
+      await axios.post(`${config.serverUrl}/groups/${groupId}/set_trusted/`, {
         user_id: userId,
       });
       fetchMembers();
@@ -48,7 +48,7 @@ const GroupMembersList: React.FC<GroupMembersListProps> = ({
 
   const handleRevokeTrusted = async (userId: number) => {
     try {
-      await axios.post(`${config.serverUrl}/groups/${groupId}/revoke_trusted`, {
+      await axios.post(`${config.serverUrl}/groups/${groupId}/revoke_trusted/`, {
         user_id: userId,
       });
       fetchMembers();
@@ -59,7 +59,7 @@ const GroupMembersList: React.FC<GroupMembersListProps> = ({
 
   const handleKickUser = async (userId: number) => {
     try {
-      await axios.post(`${config.serverUrl}/groups/${groupId}/kick`, {
+      await axios.post(`${config.serverUrl}/groups/${groupId}/kick/`, {
         user_id: userId,
       });
       alert("User kicked successfully!");

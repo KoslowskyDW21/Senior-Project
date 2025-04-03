@@ -12,7 +12,7 @@ const GroupInviteResponse: React.FC = () => {
   useEffect(() => {
     const fetchGroup = async () => {
       try {
-        const response = await axios.get(`${config.serverUrl}/groups/${id}`);
+        const response = await axios.get(`${config.serverUrl}/groups/${id}/`);
         setGroup(response.data);
       } catch (error) {
         console.error("Error fetching group details:", error);
@@ -24,7 +24,7 @@ const GroupInviteResponse: React.FC = () => {
 
   const handleResponse = async (response: string) => {
     try {
-      await axios.post(`${config.serverUrl}/groups/${id}/invite_response`, {
+      await axios.post(`${config.serverUrl}/groups/${id}/invite_response/`, {
         response,
       });
       navigate(`/groups/${id}`);

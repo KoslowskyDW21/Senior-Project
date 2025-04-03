@@ -73,7 +73,7 @@ const GroupMessages: React.FC = () => {
     const fetchMessages = async () => {
       try {
         const response = await axios.get(
-          `${config.serverUrl}/groups/${id}/messages`
+          `${config.serverUrl}/groups/${id}/messages/`
         );
         setMessages(response.data);
       } catch (error) {
@@ -88,12 +88,12 @@ const GroupMessages: React.FC = () => {
     if (!newMessage.trim()) return;
 
     try {
-      await axios.post(`${config.serverUrl}/groups/${id}/messages`, {
+      await axios.post(`${config.serverUrl}/groups/${id}/messages/`, {
         text: newMessage,
       });
       setNewMessage("");
       const response = await axios.get(
-        `${config.serverUrl}/groups/${id}/messages`
+        `${config.serverUrl}/groups/${id}/messages/`
       );
       setMessages(response.data);
     } catch (error) {
@@ -105,7 +105,7 @@ const GroupMessages: React.FC = () => {
     let data;
 
     await axios
-      .get(`${config.serverUrl}/groups/${messageId}/reportMessage`)
+      .get(`${config.serverUrl}/groups/${messageId}/reportMessage/`)
       .then((response) => {
         data = response.data;
       })
@@ -121,7 +121,7 @@ const GroupMessages: React.FC = () => {
 
       await axios
         .post(
-          `${config.serverUrl}/groups/${messageId}/reportMessage`,
+          `${config.serverUrl}/groups/${messageId}/reportMessage/`,
           newData,
           {
             headers: {

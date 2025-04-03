@@ -43,7 +43,7 @@ interface Friendship {
 const Group: React.FC<UserGroup> = ({ id, name, description, image }) => {
   const navigate = useNavigate();
   const handleGoToGroup = async () => {
-    navigate(`/groups/${id}`);
+    navigate(`/groups/${id}/`);
   };
 
   return (
@@ -138,7 +138,7 @@ const Groups: React.FC = () => {
 
   const fetchMyGroups = async () => {
     try {
-      const response = await axios.get(`${config.serverUrl}/groups/my_groups`);
+      const response = await axios.get(`${config.serverUrl}/groups/my_groups/`);
       if (response.status === 200) {
         setMyGroups(response.data);
       }
@@ -150,7 +150,7 @@ const Groups: React.FC = () => {
   const fetchInvitedGroups = async () => {
     try {
       const response = await axios.get(
-        `${config.serverUrl}/groups/notifications`
+        `${config.serverUrl}/groups/notifications/`
       );
       const invitedGroupsList = response.data.invited_groups;
       setInvitedGroups(invitedGroupsList);
@@ -192,15 +192,15 @@ const Groups: React.FC = () => {
   }, [loadMoreGroups]);
 
   const handleGoToRecipes = async () => {
-    navigate(`/recipes`);
+    navigate(`/recipes/`);
   };
 
   const handleGoToChallenges = async () => {
-    navigate(`/challenges`);
+    navigate(`/challenges/`);
   };
 
   const handleGoToOtherProfile = (id: number) => {
-    navigate(`/otherProfile/${id}`);
+    navigate(`/otherProfile/${id}/`);
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -350,7 +350,7 @@ const Groups: React.FC = () => {
                   boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
                 },
               }}
-              onClick={() => navigate("/friends")}
+              onClick={() => navigate("/friends/")}
             >
               <IconButton onClick={() => console.log("Add Friend clicked")}>
                 <AddCircleIcon sx={{ fontSize: 60, color: "#1976d2" }} />
@@ -365,7 +365,7 @@ const Groups: React.FC = () => {
             <Button
               variant="contained"
               color="primary"
-              onClick={() => navigate("/friends")}
+              onClick={() => navigate("/friends/")}
             >
               View All Friends
             </Button>
@@ -382,7 +382,7 @@ const Groups: React.FC = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick={() => navigate(`/groups/create`)}
+            onClick={() => navigate(`/groups/create/`)}
           >
             Create a Group
           </Button>

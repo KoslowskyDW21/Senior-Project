@@ -12,7 +12,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS    
 
-@bp.route('/<int:id>', methods=['GET', 'POST'])
+@bp.route('/<int:id>/', methods=['GET', 'POST'])
 @login_required
 def get_group(id):
     group = UserGroup.query.get(id)
@@ -38,7 +38,7 @@ def get_reported_groups():
     reportedGroups = UserGroup.query.filter(UserGroup.num_reports > 0).all()
     return jsonify([group.to_json() for group in reportedGroups]), 200
 
-@bp.route("/reported_messages", methods=["GET"])
+@bp.route("/reported_messages/", methods=["GET"])
 @login_required
 def get_reported_messages():
     reportedMessages = Message.query.filter(Message.num_reports > 0).all()
@@ -65,7 +65,7 @@ def get_reports(id):
     print(reports)
     return jsonify([report.to_json() for report in reports]), 200
 
-@bp.route("/message_reports/<int:id>", methods=["GET"])
+@bp.route("/message_reports/<int:id>/", methods=["GET"])
 @login_required
 def get_message_reports(id):
     print(id)
@@ -73,7 +73,7 @@ def get_message_reports(id):
     print(reports)
     return jsonify([report.to_json() for report in reports]), 200
 
-@bp.route('/<int:group_id>/join', methods=['POST'])
+@bp.route('/<int:group_id>/join/', methods=['POST'])
 @login_required
 def join_group(group_id):
     group = UserGroup.query.get(group_id)
@@ -96,7 +96,7 @@ def join_group(group_id):
 
     return jsonify({"message": "Joined group successfully!"}), 200
 
-@bp.route('/<int:group_id>/leave', methods=['POST'])
+@bp.route('/<int:group_id>/leave/', methods=['POST'])
 @login_required
 def leave_group(group_id):
     group = UserGroup.query.get(group_id)
@@ -120,13 +120,13 @@ def leave_group(group_id):
 
     return jsonify({"message": "Left group successfully!"}), 200
 
-@bp.route('/<int:group_id>/is_member', methods=['GET'])
+@bp.route('/<int:group_id>/is_member/', methods=['GET'])
 @login_required
 def is_member(group_id):
     member = GroupMember.query.filter_by(group_id=group_id, member_id=current_user.id).first()
     return jsonify({"is_member": member is not None}), 200
 
-@bp.route('/<int:group_id>/members', methods=['GET'])
+@bp.route('/<int:group_id>/members/', methods=['GET'])
 @login_required
 def get_members(group_id):
     members = GroupMember.query.filter_by(group_id=group_id).all()
@@ -144,7 +144,7 @@ def get_members(group_id):
         })
     return jsonify(member_data), 200
 
-@bp.route('/my_groups', methods=['GET'])
+@bp.route('/my_groups/', methods=['GET'])
 @login_required
 def get_my_groups():
     group_memberships = GroupMember.query.filter_by(member_id=current_user.id).all()
@@ -152,7 +152,7 @@ def get_my_groups():
     groups = UserGroup.query.filter(UserGroup.id.in_(group_ids)).all()
     return jsonify([group.to_json() for group in groups]), 200
 
-@bp.route('/create', methods=['POST'])
+@bp.route('/create/', methods=['POST'])
 @login_required
 def create_group():
     name = request.form.get('name')
@@ -193,7 +193,7 @@ def create_group():
 
     return jsonify({"message": "Group created successfully!", "group_id": group.id}), 200
 
-@bp.route('/<int:group_id>/messages', methods=['GET'])
+@bp.route('/<int:group_id>/messages/', methods=['GET'])
 @login_required
 def get_messages(group_id):
     user: User = current_user._get_current_object() # type: ignore
@@ -218,7 +218,7 @@ def get_messages(group_id):
         })
     return jsonify(message_data), 200
 
-@bp.route('/<int:group_id>/messages', methods=['POST'])
+@bp.route('/<int:group_id>/messages/', methods=['POST'])
 @login_required
 def send_message(group_id):
     group = UserGroup.query.get(group_id)
@@ -239,7 +239,7 @@ def send_message(group_id):
     return jsonify({"message": "Message sent successfully!"}), 200
 
 @login_required
-@bp.get("/<int:group_id>/reportGroup")
+@bp.get("/<int:group_id>/reportGroup/")
 def get_report_group(group_id: int):
     user = current_user._get_current_object()
 
@@ -251,7 +251,7 @@ def get_report_group(group_id: int):
     return jsonify({"alreadyReported": False, "id": user.id}) # type: ignore
 
 @login_required
-@bp.post("/<int:group_id>/reportGroup")
+@bp.post("/<int:group_id>/reportGroup/")
 def post_report_group(group_id: int):
     data = request.get_json()
     userId = data.get("user_id")
@@ -274,7 +274,7 @@ def post_report_group(group_id: int):
         return jsonify({"message": "Error: could not report group"})
     
 @login_required
-@bp.get("/<int:message_id>/reportMessage")
+@bp.get("/<int:message_id>/reportMessage/")
 def get_report_message(message_id: int):
     user = current_user._get_current_object()
 
@@ -286,7 +286,7 @@ def get_report_message(message_id: int):
     return jsonify({"alreadyReported": False, "id": user.id}) # type: ignore
 
 @login_required
-@bp.post("/<int:message_id>/reportMessage")
+@bp.post("/<int:message_id>/reportMessage/")
 def post_report_message(message_id: int):
     data = request.get_json()
     userId = data.get("user_id")
@@ -309,7 +309,7 @@ def post_report_message(message_id: int):
         return jsonify({"message": "Error: could not report message"})
 
 
-@bp.route('/<int:group_id>/set_trusted', methods=['POST'])
+@bp.route('/<int:group_id>/set_trusted/', methods=['POST'])
 @login_required
 def set_trusted(group_id):
     json = request.json
@@ -332,7 +332,7 @@ def set_trusted(group_id):
     else:
         return jsonify({"message": "Member not found"}), 404
     
-@bp.route('/<int:group_id>/revoke_trusted', methods=['POST'])
+@bp.route('/<int:group_id>/revoke_trusted/', methods=['POST'])
 @login_required
 def revoke_trusted(group_id):
     json = request.json
@@ -355,7 +355,7 @@ def revoke_trusted(group_id):
         return jsonify({"message": "Member not found"}), 404
     
 @login_required
-@bp.route("/<int:message_id>/delete_message_reports", methods=["DELETE"])
+@bp.route("/<int:message_id>/delete_message_reports/", methods=["DELETE"])
 def delete_message_reports(message_id: int):
     reports = MessageReport.query.filter_by(message_id=message_id).all()
 
@@ -366,7 +366,7 @@ def delete_message_reports(message_id: int):
     return jsonify({"message": "Reports successfully deleted"}), 200
 
 @login_required
-@bp.route("/<int:message_id>/set_message_reports_zero", methods=["POST"])
+@bp.route("/<int:message_id>/set_message_reports_zero/", methods=["POST"])
 def set_message_reports_zero(message_id: int):
     message: Message = Message.query.get(message_id) # type: ignore
     message.num_reports = 0
@@ -375,7 +375,7 @@ def set_message_reports_zero(message_id: int):
     return jsonify({"message": "Dismissed reports successfully"}), 200
 
 @login_required
-@bp.route("/<int:message_id>/delete_message", methods=["DELETE"])
+@bp.route("/<int:message_id>/delete_message/", methods=["DELETE"])
 def delete_message(message_id: int):
     message = Message.query.get(message_id)
 
@@ -387,7 +387,7 @@ def delete_message(message_id: int):
 
     return jsonify({"message": "Message deleted succesffully!"}), 200
 
-@bp.route("/<int:group_id>/delete_reports", methods=["DELETE"])
+@bp.route("/<int:group_id>/delete_reports/", methods=["DELETE"])
 @login_required
 def delete_reports(group_id: int):
     reports = GroupReport.query.filter_by(group_id=group_id).all()
@@ -398,7 +398,7 @@ def delete_reports(group_id: int):
     db.session.commit()
     return jsonify({"message": "Reports succesfully deleted"}), 200
 
-@bp.route("/<int:group_id>/set_group_reports_zero", methods=["POST"])
+@bp.route("/<int:group_id>/set_group_reports_zero/", methods=["POST"])
 @login_required
 def set_group_reports_zero(group_id: int):
     group: UserGroup = UserGroup.query.get(group_id) # type: ignore
@@ -407,7 +407,7 @@ def set_group_reports_zero(group_id: int):
     db.session.commit()
     return jsonify({"message": "Dismissed reports successfully"}), 200
 
-@bp.route('/<int:group_id>/delete', methods=['DELETE'])
+@bp.route('/<int:group_id>/delete/', methods=['DELETE'])
 @login_required
 def delete_group(group_id):
     group = UserGroup.query.get(group_id)
@@ -417,16 +417,21 @@ def delete_group(group_id):
     if (group.creator != current_user.id) and (not current_user.is_admin):
         return jsonify({"message": "Permission denied"}), 403
 
-    Message.query.filter_by(group_id=group_id).delete()
+    messages = Message.query.filter_by(group_id=group_id)
+    for message in messages:
+        MessageReport.query.filter_by(message_id=message.id).delete()
+    messages.delete()
     GroupBannedMember.query.filter_by(group_id=group_id).delete()
     GroupMember.query.filter_by(group_id=group_id).delete()
+    GroupReport.query.filter_by(group_id=group_id).delete()
+    UserNotifications.query.filter_by(group_id=group_id).delete()
     db.session.delete(group)
     db.session.commit()
 
     return jsonify({"message": "Group deleted successfully!"}), 200
 
 
-@bp.route('/<int:group_id>/invite', methods=['GET', 'POST'])
+@bp.route('/<int:group_id>/invite/', methods=['GET', 'POST'])
 @login_required
 def invite_friends(group_id):
     group = UserGroup.query.get(group_id)
@@ -452,7 +457,7 @@ def invite_friends(group_id):
 
     return jsonify({"message": "Invitations sent successfully!"}), 200
 
-@bp.route('/<int:group_id>/invite_response', methods=['POST'])
+@bp.route('/<int:group_id>/invite_response/', methods=['POST'])
 @login_required
 def invite_response(group_id):
     group = UserGroup.query.get(group_id)
@@ -481,7 +486,7 @@ def invite_response(group_id):
         return jsonify({"message": "Invalid response."}), 400
     
 
-@bp.route('/<int:group_id>/kick', methods=['POST'])
+@bp.route('/<int:group_id>/kick/', methods=['POST'])
 @login_required
 def kick_user_from_group(group_id):
     data = request.get_json()
@@ -504,7 +509,7 @@ def kick_user_from_group(group_id):
     return jsonify({"message": "User kicked successfully!"}), 200
 
 
-@bp.route('/<int:group_id>/unviewed_invites', methods=['GET'])
+@bp.route('/<int:group_id>/unviewed_invites/', methods=['GET'])
 @login_required
 def get_unviewed_invites(group_id):
     group = UserGroup.query.get(group_id)
@@ -526,7 +531,7 @@ def get_unviewed_invites(group_id):
     return jsonify(invites_data), 200
 
 
-@bp.route('/<int:group_id>/invite_status', methods=['GET'])
+@bp.route('/<int:group_id>/invite_status/', methods=['GET'])
 @login_required
 def get_invite_status(group_id):
     group = UserGroup.query.get(group_id)
@@ -546,7 +551,7 @@ def get_invite_status(group_id):
     return jsonify({"isInvited": False}), 200
 
 
-@bp.route('/notifications', methods=['GET'])
+@bp.route('/notifications/', methods=['GET'])
 @login_required
 def get_notifications():
     notifications = UserNotifications.query.filter_by(
