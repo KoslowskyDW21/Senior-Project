@@ -59,8 +59,8 @@ const ChallengeParticipantsList: React.FC<ChallengeParticipantsListProps> = ({
     >
       <List>
         {participants.map((participant) => (
-          <ListItem
-            key={participant.id}
+          <ListItem 
+            key={`participant-${participant.username}`}
             sx={{ display: "flex", alignItems: "center" }}
           >
             <Avatar

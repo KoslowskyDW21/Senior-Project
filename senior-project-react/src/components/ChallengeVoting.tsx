@@ -31,7 +31,7 @@ const ChallengeVoting: React.FC = () => {
     const fetchParticipants = async () => {
       try {
         const response = await axios.get(
-          `${config.serverUrl}/challenges/${id}/participants`
+          `${config.serverUrl}/challenges/${id}/participants/`
         );
         setParticipants(response.data);
       } catch (error) {
@@ -42,7 +42,7 @@ const ChallengeVoting: React.FC = () => {
     const fetchCurrentUser = async () => {
       try {
         const response = await axios.get(
-          `${config.serverUrl}/challenges/current_user_id`
+          `${config.serverUrl}/challenges/current_user_id/`
         );
         setCurrentUserId(response.data);
       } catch (error) {
@@ -66,7 +66,7 @@ const ChallengeVoting: React.FC = () => {
           currentUserId !== thirdChoice))
     ) {
       try {
-        await axios.post(`${config.serverUrl}/challenges/${id}/vote`, {
+        await axios.post(`${config.serverUrl}/challenges/${id}/vote/`, {
           voter_id: currentUserId,
           first_choice: firstChoice,
           second_choice: secondChoice,

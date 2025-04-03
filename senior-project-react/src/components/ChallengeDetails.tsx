@@ -43,6 +43,7 @@ interface Challenge {
 
 interface Participant {
   user_id: number;
+  username: string;
 }
 
 interface User {
@@ -55,6 +56,8 @@ interface User {
   xp_points: number;
   user_level: number;
   is_admin: boolean;
+  is_banned: boolean;
+  is_super_admin: boolean;
   num_recipes_completed: number;
   colonial_floor: string;
   colonial_side: string;
@@ -93,6 +96,7 @@ const ChallengeDetail: React.FC = () => {
   const [invited, setInvited] = useState(false);
   const [inviteMessage, setInviteMessage] = useState("");
   const theme = useTheme();
+  const [participantIds, setParticipantIds] = useState<Participant[]>([]);
 
   // States for report modal
   const [open, setOpen] = useState(false);
@@ -103,7 +107,7 @@ const ChallengeDetail: React.FC = () => {
 
   const fetchChallenge = async () => {
     try {
-      const response = await axios.get(`${config.serverUrl}/challenges/${id}`);
+      const response = await axios.get(`${config.serverUrl}/challenges/${id}/`);
       setChallenge(response.data);
     } catch (error) {
       console.error("Error fetching challenge details:", error);
@@ -113,13 +117,14 @@ const ChallengeDetail: React.FC = () => {
   const fetchParticipants = async () => {
     try {
       const response = await axios.get(
-        `${config.serverUrl}/challenges/${id}/participants`
+        `${config.serverUrl}/challenges/${id}/participants/`
       );
       const participantIds: Participant[] = response.data;
+      setParticipantIds(participantIds);
 
       const userResponses = await Promise.all(
         participantIds.map((participant) =>
-          axios.get(`${config.serverUrl}/profile/get_other_profile/${participant.user_id}`)
+          axios.get(`${config.serverUrl}/challenges/get_user/${participant.user_id}/`)
         )
       );
 
@@ -133,7 +138,7 @@ const ChallengeDetail: React.FC = () => {
   const fetchCurrentUser = async () => {
     try {
       const response = await axios.get(
-        `${config.serverUrl}/login/current_user`
+        `${config.serverUrl}/login/current_user/`
       );
       setCurrentUser(response.data);
     } catch (error) {
@@ -144,7 +149,7 @@ const ChallengeDetail: React.FC = () => {
   const checkInviteStatus = async () => {
     try {
       const response = await axios.get(
-        `${config.serverUrl}/challenges/${id}/invite_status`
+        `${config.serverUrl}/challenges/${id}/invite_status/`
       );
       if (response.data) {
         setInvited(response.data.isInvited);
@@ -158,7 +163,7 @@ const ChallengeDetail: React.FC = () => {
 
   const handleAcceptInvite = async () => {
     try {
-      await axios.post(`${config.serverUrl}/challenges/${id}/invite_response`, {
+      await axios.post(`${config.serverUrl}/challenges/${id}/invite_response/`, {
         response: "accept",
       });
       fetchParticipants();
@@ -170,7 +175,7 @@ const ChallengeDetail: React.FC = () => {
 
   const handleDenyInvite = async () => {
     try {
-      await axios.post(`${config.serverUrl}/challenges/${id}/invite_response`, {
+      await axios.post(`${config.serverUrl}/challenges/${id}/invite_response/`, {
         response: "deny",
       });
       setInvited(false);
@@ -188,14 +193,14 @@ const ChallengeDetail: React.FC = () => {
 
       // Fetch participants and unviewed invites
       const participantsResponse = await axios.get(
-        `${config.serverUrl}/challenges/${id}/participants`
+        `${config.serverUrl}/challenges/${id}/participants/`
       );
       const participants = participantsResponse.data.map(
         (participant: Participant) => participant.user_id
       );
 
       const invitesResponse = await axios.get(
-        `${config.serverUrl}/challenges/${id}/unviewed_invites`
+        `${config.serverUrl}/challenges/${id}/unviewed_invites/`
       );
       const unviewedInvites = invitesResponse.data.map(
         (invite: { user_id: number }) => invite.user_id
@@ -217,7 +222,7 @@ const ChallengeDetail: React.FC = () => {
   const handleJoinChallenge = async () => {
     if (new Date(challenge!.start_time) > new Date()) {
       try {
-        await axios.post(`${config.serverUrl}/challenges/${id}/join`);
+        await axios.post(`${config.serverUrl}/challenges/${id}/join/`);
         fetchParticipants();
       } catch (error) {
         console.error("Error joining challenge:", error);
@@ -230,7 +235,7 @@ const ChallengeDetail: React.FC = () => {
   const handleLeaveChallenge = async () => {
     if (new Date(challenge!.start_time) > new Date()) {
       try {
-        await axios.post(`${config.serverUrl}/challenges/${id}/leave`);
+        await axios.post(`${config.serverUrl}/challenges/${id}/leave/`);
         fetchParticipants();
       } catch (error) {
         console.error("Error leaving challenge:", error);
@@ -242,7 +247,7 @@ const ChallengeDetail: React.FC = () => {
 
   const handleDeleteChallenge = async () => {
     try {
-      await axios.delete(`${config.serverUrl}/challenges/${id}/delete`);
+      await axios.delete(`${config.serverUrl}/challenges/${id}/delete/`);
       window.history.back();
     } catch (error) {
       console.error("Error deleting challenge:", error);
@@ -251,7 +256,7 @@ const ChallengeDetail: React.FC = () => {
 
   const handleInviteFriends = async () => {
     try {
-      await axios.post(`${config.serverUrl}/challenges/${id}/invite`, {
+      await axios.post(`${config.serverUrl}/challenges/${id}/invite/`, {
         friend_ids: selectedFriends,
       });
       setInviteModalOpen(false);
@@ -290,7 +295,7 @@ const ChallengeDetail: React.FC = () => {
     let data;
 
     await axios
-      .get(`${config.serverUrl}/challenges/${id}/reportChallenge`)
+      .get(`${config.serverUrl}/challenges/${id}/reportChallenge/`)
       .then((response) => {
         data = response.data;
       })
@@ -305,7 +310,7 @@ const ChallengeDetail: React.FC = () => {
       };
 
       await axios
-        .post(`${config.serverUrl}/challenges/${id}/reportChallenge`, newData, {
+        .post(`${config.serverUrl}/challenges/${id}/reportChallenge/`, newData, {
           headers: {
             "Content-Type": "application/json",
           },
@@ -453,7 +458,7 @@ const ChallengeDetail: React.FC = () => {
               Participants
             </Typography>
             <ChallengeParticipantsList
-              participants={participants}
+              participants={participantIds}
               isCreator={isCreator}
               challengeId={challenge.id}
               creatorId={challenge.creator}
@@ -464,7 +469,7 @@ const ChallengeDetail: React.FC = () => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => navigate(`/challenges/${id}/vote`)}
+                onClick={() => navigate(`/challenges/${id}/vote/`)}
               >
                 Vote for Winner
               </Button>
@@ -475,7 +480,7 @@ const ChallengeDetail: React.FC = () => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => navigate(`/challenges/${id}/vote_results`)}
+                onClick={() => navigate(`/challenges/${id}/vote_results/`)}
               >
                 View Vote Results
               </Button>

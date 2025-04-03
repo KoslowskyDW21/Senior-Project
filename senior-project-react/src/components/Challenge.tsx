@@ -27,7 +27,7 @@ const Challenge: React.FC<ChallengeProps> = ({
 }) => {
   const navigate = useNavigate();
   const handleGoToChallenge = async () => {
-    navigate(`/challenges/${id}`);
+    navigate(`/challenges/${id}/`);
   };
 
   return (
