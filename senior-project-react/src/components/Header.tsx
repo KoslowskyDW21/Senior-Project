@@ -317,8 +317,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                       position: "absolute",
                       top: 4,
                       right: 4,
-                      width: "clamp(4px, 1vw, 15px)", // Notification indicator size scales between 10px and 15px
-                      height: "clamp(4px, 1vw, 15px)", // Notification indicator size scales between 10px and 15px
+                      width: "clamp(4px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
+                      height: "clamp(4px, 2vw, 15px)", // Notification indicator size scales between 10px and 15px
                       backgroundColor: "red",
                       borderRadius: "50%",
                     }}
