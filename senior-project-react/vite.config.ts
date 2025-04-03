@@ -8,7 +8,9 @@ export default defineConfig({
   server: {
     cors: true, // TODO: set to a limited list of allowed origins
     port: 443,
-    hmr: false,
+    hmr: {
+      clientPort: 443
+    },
     https: true,
     proxy: {
       '/api': {
