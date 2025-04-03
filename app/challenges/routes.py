@@ -258,6 +258,15 @@ def submit_vote(challenge_id):
 @bp.route('/<int:challenge_id>/vote_results/', methods=['GET'])
 @login_required
 def get_vote_results(challenge_id):
+    challenge = Challenge.query.filter_by(id=challenge_id).first()
+    if not challenge:
+        return jsonify({"message": "Challenge not found"}), 404
+    
+    now = datetime.now(UTC)
+    end_time = get_localized_time(challenge.end_time)
+    if now < end_time + timedelta(hours=24):
+        return jsonify({"message": "Voting results are not yet available"}), 403
+
     votes = ChallengeVote.query.filter_by(challenge_id=challenge_id).all()
     participants = {participant.user_id: 0 for participant in ChallengeParticipant.query.filter_by(challenge_id=challenge_id).all()}
 
@@ -281,22 +290,24 @@ def get_vote_results(challenge_id):
         })
 
     results.sort(key=lambda x: x['points'], reverse=True)
-
+    
     #add xp to users
-    for i, result in enumerate(results):
-        uid = result["user_id"]
-        theUser = User.query.get(uid)
-        if i == 0:
-            theUser.xp_points = theUser.xp_points + 400 # type: ignore
-        elif i == 1:
-            theUser.xp_points = theUser.xp_points + 200 # type: ignore
-        elif i == 2:
-            theUser.xp_points = theUser.xp_points + 100 # type: ignore
-        else:
-            theUser.xp_points = theUser.xp_points + 50 # type: ignore
-        db.session.add(theUser)
-        db.session.flush()
-        db.session.commit()
+    if not challenge.xp_awarded:
+        for i, result in enumerate(results):
+            uid = result["user_id"]
+            theUser = User.query.get(uid)
+            if i == 0:
+                theUser.xp_points = theUser.xp_points + 400 # type: ignore
+            elif i == 1:
+                theUser.xp_points = theUser.xp_points + 200 # type: ignore
+            elif i == 2:
+                theUser.xp_points = theUser.xp_points + 100 # type: ignore
+            else:
+                theUser.xp_points = theUser.xp_points + 50 # type: ignore
+            challenge.xp_awarded = True # type: ignore
+            db.session.add(theUser)
+            db.session.flush()
+            db.session.commit()
 
 
     return jsonify(results), 200

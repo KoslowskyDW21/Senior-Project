@@ -32,6 +32,7 @@ const ChallengeResults: React.FC = () => {
         setParticipants(response.data);
       } catch (error) {
         console.error("Error fetching vote results:", error);
+        navigate(-1);
       }
     };
 
