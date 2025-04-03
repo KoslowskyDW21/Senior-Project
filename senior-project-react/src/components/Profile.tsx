@@ -273,7 +273,7 @@ const Profile: React.FC = () => {
 
   return (
     <>
-      <Header title="" />
+      <Header title={`${username}`} />
       <IconButton
         onClick={() => navigate(-1)}
         style={{
@@ -296,7 +296,9 @@ const Profile: React.FC = () => {
         />
       )}
 
-      <h1>{username}'s profile</h1>
+      <Typography variant="h6" fontWeight="bold" marginBottom={2} marginTop={2}>
+        {fname} {lname}
+      </Typography>
       <div
         style={{
           display: "flex",

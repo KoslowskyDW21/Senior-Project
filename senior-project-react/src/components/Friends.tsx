@@ -183,7 +183,7 @@ const Friends: React.FC = () => {
       >
         <Header title="Friends" />
         <IconButton
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/groups")}
           style={{
             position: "fixed",
             top: "clamp(70px, 10vw, 120px)",
