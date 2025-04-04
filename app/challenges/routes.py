@@ -533,7 +533,7 @@ def get_reported_challenges():
 @login_required
 @bp.get("/reports/<int:id>")
 def get_reports(id: int): 
-    reports: list[ChallengeReport] = ChallengeReport.query.filter_by(group_id=id).all()
+    reports: list[ChallengeReport] = ChallengeReport.query.filter_by(challenge_id=id).all()
     return jsonify([report.to_json() for report in reports])
 
 @login_required
