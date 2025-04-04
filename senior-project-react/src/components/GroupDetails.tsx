@@ -110,7 +110,7 @@ const GroupDetails: React.FC = () => {
 
   const fetchGroup = async () => {
     try {
-      const response = await axios.get(`${config.serverUrl}/groups/${id}`);
+      const response = await axios.get(`${config.serverUrl}/groups/${id}/`);
       if (response.status === 200) {
         setGroup(response.data);
       }
@@ -122,7 +122,7 @@ const GroupDetails: React.FC = () => {
   const checkMembership = async () => {
     try {
       const response = await axios.get(
-        `${config.serverUrl}/groups/${id}/is_member`
+        `${config.serverUrl}/groups/${id}/is_member/`
       );
       setIsMember(response.data.is_member);
       setIsTrusted(response.data.is_trusted);
@@ -134,7 +134,7 @@ const GroupDetails: React.FC = () => {
   const fetchMembers = async () => {
     try {
       const response = await axios.get(
-        `${config.serverUrl}/groups/${id}/members`
+        `${config.serverUrl}/groups/${id}/members/`
       );
       setMembers(response.data);
     } catch (error) {
@@ -145,7 +145,7 @@ const GroupDetails: React.FC = () => {
   const fetchCurrentUser = async () => {
     try {
       const response = await axios.get(
-        `${config.serverUrl}/login/current_user`
+        `${config.serverUrl}/login/current_user/`
       );
       setCurrentUser(response.data);
     } catch (error) {
@@ -162,7 +162,7 @@ const GroupDetails: React.FC = () => {
 
       // Fetch group members and unread notifications
       const membersResponse = await axios.get(
-        `${config.serverUrl}/groups/${id}/members`
+        `${config.serverUrl}/groups/${id}/members/`
       );
       const notificationsResponse = await axios.post(
         `${config.serverUrl}/settings/get_notifications/`
@@ -193,7 +193,7 @@ const GroupDetails: React.FC = () => {
 
   const handleJoinGroup = async () => {
     try {
-      await axios.post(`${config.serverUrl}/groups/${id}/join`);
+      await axios.post(`${config.serverUrl}/groups/${id}/join/`);
       setIsMember(true);
       fetchMembers();
     } catch (error) {
@@ -203,7 +203,7 @@ const GroupDetails: React.FC = () => {
 
   const handleLeaveGroup = async () => {
     try {
-      await axios.post(`${config.serverUrl}/groups/${id}/leave`);
+      await axios.post(`${config.serverUrl}/groups/${id}/leave/`);
       setIsMember(false);
       fetchMembers();
     } catch (error) {
@@ -213,7 +213,7 @@ const GroupDetails: React.FC = () => {
 
   const handleDeleteGroup = async () => {
     try {
-      await axios.delete(`${config.serverUrl}/groups/${id}/delete`);
+      await axios.delete(`${config.serverUrl}/groups/${id}/delete/`);
       navigate("/groups");
     } catch (error) {
       console.error("Error deleting group:", error);
@@ -225,7 +225,7 @@ const GroupDetails: React.FC = () => {
     let data;
 
     await axios
-      .get(`${config.serverUrl}/groups/${id}/reportGroup`)
+      .get(`${config.serverUrl}/groups/${id}/reportGroup/`)
       .then((response) => {
         data = response.data;
       })
@@ -240,7 +240,7 @@ const GroupDetails: React.FC = () => {
       };
 
       await axios
-        .post(`${config.serverUrl}/groups/${id}/reportGroup`, newData, {
+        .post(`${config.serverUrl}/groups/${id}/reportGroup/`, newData, {
           headers: {
             "Content-Type": "application/json",
           },
@@ -259,7 +259,7 @@ const GroupDetails: React.FC = () => {
 
   const handleInviteFriends = async () => {
     try {
-      await axios.post(`${config.serverUrl}/groups/${id}/invite`, {
+      await axios.post(`${config.serverUrl}/groups/${id}/invite/`, {
         friend_ids: selectedFriends,
       });
       setInviteModalOpen(false);
@@ -279,7 +279,7 @@ const GroupDetails: React.FC = () => {
   const checkInviteStatus = async () => {
     try {
       const response = await axios.get(
-        `${config.serverUrl}/groups/${id}/invite_status`
+        `${config.serverUrl}/groups/${id}/invite_status/`
       );
       if (response.data) {
         setIsInvited(response.data.isInvited);
@@ -292,7 +292,7 @@ const GroupDetails: React.FC = () => {
 
   const handleAcceptInvite = async () => {
     try {
-      await axios.post(`${config.serverUrl}/groups/${id}/invite_response`, {
+      await axios.post(`${config.serverUrl}/groups/${id}/invite_response/`, {
         response: "accept",
       });
       setIsInvited(false);
@@ -305,7 +305,7 @@ const GroupDetails: React.FC = () => {
 
   const handleDenyInvite = async () => {
     try {
-      await axios.post(`${config.serverUrl}/groups/${id}/invite_response`, {
+      await axios.post(`${config.serverUrl}/groups/${id}/invite_response/`, {
         response: "deny",
       });
       setIsInvited(false);

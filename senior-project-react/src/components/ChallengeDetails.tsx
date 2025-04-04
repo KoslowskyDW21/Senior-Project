@@ -341,7 +341,7 @@ const ChallengeDetail: React.FC = () => {
 
       <Box mt={12}/>
       <IconButton
-        onClick={() => navigate(-1)}
+        onClick={() => navigate(`/challenges`)}
         style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
           left: "clamp(0px, 1vw, 100px)",
           zIndex: 1000, }}
@@ -458,7 +458,7 @@ const ChallengeDetail: React.FC = () => {
               Participants
             </Typography>
             <ChallengeParticipantsList
-              participants={participantIds}
+              participants={participants}
               isCreator={isCreator}
               challengeId={challenge.id}
               creatorId={challenge.creator}

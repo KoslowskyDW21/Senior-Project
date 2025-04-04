@@ -420,7 +420,7 @@ const OtherProfile: React.FC = () => {
 
   return (
     <>
-      <Header title="" />
+      <Header title={`${username}`} />
       <IconButton
         onClick={() => navigate(-1)}
         style={{
@@ -439,7 +439,9 @@ const OtherProfile: React.FC = () => {
         </Typography>
       ) : (
         <>
-          <h1>{username}'s profile</h1>
+          <Typography variant="h6" fontWeight="bold" marginRight={5}>
+            {fname} {lname}
+          </Typography>
           <Box
             display="flex"
             justifyContent="center"
@@ -469,6 +471,7 @@ const OtherProfile: React.FC = () => {
               {/* If they sent you a friend request, have option to accept or decline */}
               {/* If you sent them a friend request, button should say "requested" */}
               {/* If friends, button should say "remove friend" */}
+
               {isUserBlocked ? (
                 <Button
                   variant="contained"
@@ -652,13 +655,14 @@ const OtherProfile: React.FC = () => {
                 width: "auto", // Ensure the grid only takes up as much space as needed
               }}
             >
-              {achievements.slice(0, 3).map((achievement: Achievement) => (
+              {achievements.slice(-3).map((achievement: Achievement) => (
                 <div key={achievement.id}>
                   <button
                     onClick={() => handleOpenAchievementModal(achievement)}
                   >
                     <img
-                      src={`${config.serverUrl}/${achievement.image}`}
+                      src={`${config.serverUrl}/${
+                        achievement.isVisible ? achievement.image : "static/uploads/daQuestion.png"}`}
                       width="100"
                       alt={achievement.title}
                     />
@@ -734,12 +738,12 @@ const OtherProfile: React.FC = () => {
                     variant="h6"
                     component="h2"
                   >
-                    {selectedAchievement.title}
+                    {selectedAchievement.isVisible ? selectedAchievement.title : "Hidden Achievement"}
                   </Typography>
                   <Box id="modal-image">
                     <Box>
                       <img
-                        src={selectedAchievement.image}
+                        src={`${config.serverUrl}/${selectedAchievement.isVisible ? selectedAchievement.image : "static/uploads/daQuestion.png"}`}
                         style={{
                           width: "100%",
                           height: "100%",

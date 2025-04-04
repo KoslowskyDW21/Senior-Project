@@ -258,6 +258,15 @@ def submit_vote(challenge_id):
 @bp.route('/<int:challenge_id>/vote_results/', methods=['GET'])
 @login_required
 def get_vote_results(challenge_id):
+    challenge = Challenge.query.filter_by(id=challenge_id).first()
+    if not challenge:
+        return jsonify({"message": "Challenge not found"}), 404
+    
+    now = datetime.now(UTC)
+    end_time = get_localized_time(challenge.end_time)
+    if now < end_time + timedelta(hours=24):
+        return jsonify({"message": "Voting results are not yet available"}), 403
+
     votes = ChallengeVote.query.filter_by(challenge_id=challenge_id).all()
     participants = {participant.user_id: 0 for participant in ChallengeParticipant.query.filter_by(challenge_id=challenge_id).all()}
 
@@ -281,22 +290,24 @@ def get_vote_results(challenge_id):
         })
 
     results.sort(key=lambda x: x['points'], reverse=True)
-
+    
     #add xp to users
-    for i, result in enumerate(results):
-        uid = result["user_id"]
-        theUser = User.query.get(uid)
-        if i == 0:
-            theUser.xp_points = theUser.xp_points + 400 # type: ignore
-        elif i == 1:
-            theUser.xp_points = theUser.xp_points + 200 # type: ignore
-        elif i == 2:
-            theUser.xp_points = theUser.xp_points + 100 # type: ignore
-        else:
-            theUser.xp_points = theUser.xp_points + 50 # type: ignore
-        db.session.add(theUser)
-        db.session.flush()
-        db.session.commit()
+    if not challenge.xp_awarded:
+        for i, result in enumerate(results):
+            uid = result["user_id"]
+            theUser = User.query.get(uid)
+            if i == 0:
+                theUser.xp_points = theUser.xp_points + 400 # type: ignore
+            elif i == 1:
+                theUser.xp_points = theUser.xp_points + 200 # type: ignore
+            elif i == 2:
+                theUser.xp_points = theUser.xp_points + 100 # type: ignore
+            else:
+                theUser.xp_points = theUser.xp_points + 50 # type: ignore
+            challenge.xp_awarded = True # type: ignore
+            db.session.add(theUser)
+            db.session.flush()
+            db.session.commit()
 
 
     return jsonify(results), 200
@@ -390,12 +401,9 @@ def handle_challenge_invite_response(challenge_id):
     return jsonify({"message": "Challenge invitation denied!"}), 200
     
 
-@bp.route('/<int:challenge_id>/kick/', methods=['POST'])
+@bp.route('/<int:challenge_id>/kick/<int:user_id>/', methods=['POST'])
 @login_required
-def kick_user_from_challenge(challenge_id):
-    data = request.get_json()
-    user_id_to_kick = data.get('user_id')
-
+def kick_user_from_challenge(challenge_id, user_id_to_kick):
     challenge = Challenge.query.get(challenge_id)
     if not challenge:
         return jsonify({"message": "Challenge not found"}), 404
@@ -510,10 +518,55 @@ def report_challenge(challenge_id: int):
         print(f"Error reporting challenge: {e}")
         return jsonify({"message": "Error: could not report challenge"}), 500
 
-
 @login_required 
 @bp.route('/get_user/<int:user_id>/', methods=['GET'])
 def get_user(user_id):
     user = User.query.filter_by(id=user_id).first_or_404()
     return user.to_json(), 200
+    
+@login_required
+@bp.get("/reported_challenges")
+def get_reported_challenges():
+    reportedChallenges: list[Challenge] = Challenge.query.filter(Challenge.num_reports > 0).all()
+    return jsonify([challenge.to_json() for challenge in reportedChallenges]), 200
 
+@login_required
+@bp.get("/reports/<int:id>")
+def get_reports(id: int): 
+    reports: list[ChallengeReport] = ChallengeReport.query.filter_by(group_id=id).all()
+    return jsonify([report.to_json() for report in reports])
+
+@login_required
+@bp.delete("/<int:id>/delete_reports")
+def delete_reports(id: int):
+    reports: list[ChallengeReport] = ChallengeReport.query.filter_by(challenge_id=id).all()
+
+    for report in reports:
+        db.session.delete(report)
+
+    db.session.commit()
+    return jsonify({"message": "Reports successfully deleted"}), 200
+
+@login_required
+@bp.post("/<int:id>/set_reports_zero")
+def set_reports_zero(id: int):
+    challenge: Challenge = Challenge.query.get(id) # type: ignore
+    challenge.num_reports = 0
+
+    db.session.commit()
+    return jsonify({"message": "Dismissed reports successfully"}), 200
+
+@login_required
+@bp.delete("/<int:id>/delete")
+def delete(id: int):
+    challenge: Challenge = Challenge.query.get(id) # type: ignore
+
+    if not challenge:
+        return jsonify({"message": "Challenge not found"}), 404
+
+    ChallengeVote.query.filter_by(challenge_id=id).delete()
+    ChallengeParticipant.query.filter_by(challenge_id=id).delete()
+
+    db.session.delete(challenge)
+    db.session.commit()
+    return jsonify({"message": "Challenge deleted successfully"}), 200

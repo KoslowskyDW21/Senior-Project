@@ -37,7 +37,7 @@ const CreateGroup: React.FC = () => {
 
     try {
       const response = await axios.post(
-        `${config.serverUrl}/groups/create`,
+        `${config.serverUrl}/groups/create/`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

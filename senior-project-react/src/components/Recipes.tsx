@@ -408,6 +408,7 @@ const Recipes: React.FC = () => {
                   size={isSmallScreen ? 4 : isMediumScreen ? 4 : 3}
                 >
                   <Box
+                  mb = {4}
                     sx={{
                       border: "2px solid rgb(172, 169, 169)",
                       borderRadius: 2,
