@@ -1,13 +1,16 @@
 import axios, { AxiosError } from "axios";
+import FolderIcon from "@mui/icons-material/Folder";
 import { useState } from "react";
 import React from "react";
 import {
+  Avatar,
   Button,
   InputLabel,
   Select,
   MenuItem,
   Modal,
   FormControl,
+  Typography,
   SelectChangeEvent,
   Box,
   FormHelperText,
@@ -110,6 +113,9 @@ export default function Settings() {
   );
   const [selectedDietaryRestrictions, setSelectedDietaryRestrictions] =
     useState<string[]>([]);
+
+  const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
+  const [openPfpModal, setOpenPfpModal] = useState(false);
 
   async function loadUser() {
     await axios
@@ -243,9 +249,101 @@ export default function Settings() {
       });
   }
 
+  const getProfilePic = async () => {
+    try {
+      const response = await axios.post(
+        `${config.serverUrl}/profile/get_profile_pic/`,
+        {},
+        { withCredentials: true }
+      );
+      const profilePicturePath = response.data.profile_picture;
+      if (profilePicturePath) {
+        console.log("profile picture profile", profilePicturePath);
+        setProfilePicUrl(`${config.serverUrl}/${profilePicturePath}`);
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response && axiosError.response.data) {
+        const errorData = axiosError.response.data;
+        setMessage(errorData.message);
+      } else {
+        setMessage("An unknown error occurred");
+      }
+    }
+  };
+
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      const formData = new FormData();
+      formData.append("profile_picture", file);
+
+      try {
+        const response = await axios.post(
+          `${config.serverUrl}/profile/change_profile_pic/`,
+          formData,
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        const updatedProfilePicUrl = response.data.profile_picture;
+        setProfilePicUrl(updatedProfilePicUrl);
+        setMessage("Profile picture updated successfully!");
+        getProfilePic();
+      } catch (error) {
+        const axiosError = error as AxiosError;
+        if (axiosError.response && axiosError.response.data) {
+          const errorData = axiosError.response.data;
+          setMessage(errorData.message);
+        } else {
+          setMessage("An error occurred while updating the profile picture.");
+        }
+      }
+    }
+  };
+
+  const handleOpenPfpModal = () => {
+    setOpenPfpModal(true);
+  };
+
+  const handleClosePfpModal = () => {
+    setOpenPfpModal(false);
+  };
+
+  const handleChangePfp = () => {
+    document.getElementById("profile-picture-input")?.click();
+    handleClosePfpModal();
+  };
+
+  const handleRemovePfp = async () => {
+    handleClosePfpModal();
+    try {
+      const response = await axios.post(
+        `${config.serverUrl}/profile/remove_profile_pic/`,
+        {},
+        { withCredentials: true }
+      );
+      setProfilePicUrl(null);
+      setMessage("Profile picture removed successfully!");
+      getProfilePic();
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response && axiosError.response.data) {
+        const errorData = axiosError.response.data;
+        setMessage(errorData.message);
+      } else {
+        setMessage("An unknown error occurred");
+      }
+    }
+  };
+
   React.useEffect(() => {
     loadUser();
     getDietaryRestrictions();
+    getProfilePic();
   }, []);
 
   React.useEffect(() => {
@@ -383,18 +481,77 @@ export default function Settings() {
 
   return (
     <>
-      <Header title="Settings"/>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          marginBottom: "16px",
+          width: "150px",
+          height: "150px",
+          borderRadius: "50%",
+          border: "2px solid #ccc",
+          marginLeft: "auto",
+          marginRight: "auto",
+          marginTop: "40px",
+          cursor: "pointer",
+        }}
+        onClick={handleOpenPfpModal}
+        onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#1976D2")}
+        onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#ccc")}
+      >
+        {profilePicUrl ? (
+          <Avatar src={profilePicUrl} sx={{ width: 120, height: 120 }} />
+        ) : (
+          <FolderIcon sx={{ fontSize: 80 }} />
+        )}
+      </div>
+      <div>
+        <Typography
+          fontStyle={"bold"}
+          sx={{ textAlign: "center", cursor: "pointer", color: "blue" }}
+          onClick={handleOpenPfpModal}
+          onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#1976D2")}
+          onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#ccc")}
+        >
+          Change profile picture
+        </Typography>
+      </div>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        style={{ display: "none" }}
+        id="profile-picture-input"
+      />
+      <Modal open={openPfpModal} onClose={handleClosePfpModal}>
+        <Box sx={modalStyle}>
+          <Typography fontStyle="italic" sx={{ textAlign: "center" }}>
+            File Types: PNG, JPG, JPEG
+          </Typography>
+          <Button onClick={handleChangePfp} fullWidth>
+            Change Profile Picture
+          </Button>
+          <Button onClick={handleRemovePfp} fullWidth color="error">
+            Remove Profile Picture
+          </Button>
+        </Box>
+      </Modal>
+      <Header title="Settings" />
 
       <IconButton
         onClick={() => navigate(-1)}
-        style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
+        style={{
+          position: "fixed",
+          top: "clamp(70px, 10vw, 120px)",
           left: "clamp(0px, 1vw, 100px)",
-          zIndex: 1000, }}
+          zIndex: 1000,
+        }}
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
-      
-      <Box mt={12}/>
+
+      <Box mt={6} />
       <main role="main">
         <p>
           Name: {user.fname} {user.lname}

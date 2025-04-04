@@ -80,7 +80,7 @@ export default function AdminPage() {
   const handleOpenReportModal = () => setOpenReports(true);
   const handleCloseReportModal = () => setOpenReports(false);
 
-  function CreateAdminButton({ user, handleAdminChange }) {
+  function CreateAdminButton({ user, handleAdminChange }: any) {
     if (superAdmin) {
       if(user.is_super_admin) {
         return <></>;

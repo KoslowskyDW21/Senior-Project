@@ -311,8 +311,11 @@ const Profile: React.FC = () => {
           border: "2px solid #ccc",
           marginLeft: "auto",
           marginRight: "auto",
+          cursor: "pointer",
         }}
         onClick={handleOpenPfpModal}
+        onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#1976D2")}
+        onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#ccc")}
       >
         {profilePicUrl ? (
           <Avatar src={profilePicUrl} sx={{ width: 120, height: 120 }} />

@@ -60,7 +60,7 @@ const ChallengeResults: React.FC = () => {
         <Card sx={{ maxWidth: 600, width: "100%", boxShadow: 3 }}>
           <CardContent>
             <Typography variant="h4" gutterBottom textAlign="center">
-              Challenge Vote Results
+              Competition Vote Results
             </Typography>
             <Typography
               variant="body1"
@@ -68,7 +68,7 @@ const ChallengeResults: React.FC = () => {
               color="textSecondary"
               mb={2}
             >
-              Here are the results of the challenge voting:
+              Here are the results of the competition voting:
             </Typography>
             <List>
               {participants.map((participant, index) => (

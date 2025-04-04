@@ -58,7 +58,7 @@ const CreateChallenge: React.FC = () => {
 
       const data: CreateChallengeResponse = response.data;
       setMessage(data.message);
-      if (data.message === "Challenge created successfully!") {
+      if (data.message === "Competition (challenge) created successfully!") {
         const challengeId = response.data.challenge_id;
         await axios.post(`${config.serverUrl}/challenges/${challengeId}/join/`);
         window.history.back();
@@ -80,7 +80,7 @@ const CreateChallenge: React.FC = () => {
 
   return (
     <Container>
-      <Header title="Create Challenge"/>
+      <Header title="Create Competition"/>
 
       {/* Back Button */}
       <IconButton
@@ -164,7 +164,7 @@ const CreateChallenge: React.FC = () => {
         color="primary"
         fullWidth
       >
-        Create Challenge
+        Create Competition
       </Button>
 
       <Dialog open={errorDialogOpen} onClose={handleCloseErrorDialog}>

@@ -39,7 +39,7 @@ const PastChallenges: React.FC = () => {
         );
         setPastChallenges(response.data);
       } catch (error) {
-        console.error("Error fetching past challenges:", error);
+        console.error("Error fetching past competitions (challenges):", error);
       }
     };
 
@@ -55,7 +55,7 @@ const PastChallenges: React.FC = () => {
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
       <Box mt={4} mb={2} textAlign="center">
-        <Typography variant="h4">Past Challenges</Typography>
+        <Typography variant="h4">Past Competitions</Typography>
       </Box>
       <Grid2 container spacing={2}>
         {pastChallenges.map((challenge) => (
@@ -70,7 +70,7 @@ const PastChallenges: React.FC = () => {
           color="primary"
           onClick={() => navigate(-1)}
         >
-          Back to Challenge Details
+          Back to Competition Details
         </Button>
       </Box>
     </Container>

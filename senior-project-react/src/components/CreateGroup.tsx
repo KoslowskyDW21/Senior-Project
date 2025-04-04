@@ -60,7 +60,7 @@ const CreateGroup: React.FC = () => {
   return (
     <Container>
 
-      <Header title="Create Challenge"/>
+      <Header title="Create Group"/>
 
       <Box mt={4} mb={2} textAlign="center">
         <Typography variant="h4" gutterBottom>
