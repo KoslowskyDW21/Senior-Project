@@ -219,7 +219,7 @@ function Challenge({ challenge }: {challenge: Challenge}) {
       {challenge.image && (
         <CardMedia
           component="img"
-          height="400"
+          height="200"
           image={`${config.serverUrl}/${challenge.image}`}
           alt={challenge.name}
           sx={{ borderRadius: 2 }}
@@ -1025,7 +1025,7 @@ export default function ReportPage() {
                 handleCloseChallengeModal();
               }}
             >
-              Dismiss Challenge(s)
+              Dismiss Report(s)
             </Button>
           </Box>
         </Modal>
