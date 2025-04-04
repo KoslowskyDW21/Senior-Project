@@ -8,8 +8,12 @@ import {
   List,
   ListItem,
   ListItemText,
-  Button,
+  Card,
+  CardContent,
+  IconButton,
+  Divider,
 } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import config from "../config.js";
 
 interface Participant {
@@ -32,6 +36,7 @@ const ChallengeResults: React.FC = () => {
         setParticipants(response.data);
       } catch (error) {
         console.error("Error fetching vote results:", error);
+        navigate(-1);
       }
     };
 
@@ -40,29 +45,53 @@ const ChallengeResults: React.FC = () => {
 
   return (
     <Container>
-      <Box mt={4}>
-        <Typography variant="h4" gutterBottom>
-          Challenge Vote Results
-        </Typography>
-        <List>
-          {participants.map((participant, index) => (
-            <ListItem key={participant.user_id}>
-              <ListItemText
-                primary={`${index + 1}. ${participant.username}`}
-                secondary={`Points: ${participant.points}`}
-              />
-            </ListItem>
-          ))}
-        </List>
-        <Box mt={2}>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => navigate(-1)}
-          >
-            Back to Challenge Details
-          </Button>
-        </Box>
+      <Box mt={4} display="flex" justifyContent="center">
+        <IconButton
+          onClick={() => navigate(`/challenges/${id}`)}
+          style={{
+            position: "fixed",
+            top: "clamp(70px, 10vw, 120px)",
+            left: "clamp(0px, 1vw, 100px)",
+            zIndex: 1000,
+          }}
+        >
+          <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+        </IconButton>
+        <Card sx={{ maxWidth: 600, width: "100%", boxShadow: 3 }}>
+          <CardContent>
+            <Typography variant="h4" gutterBottom textAlign="center">
+              Challenge Vote Results
+            </Typography>
+            <Typography
+              variant="body1"
+              textAlign="center"
+              color="textSecondary"
+              mb={2}
+            >
+              Here are the results of the challenge voting:
+            </Typography>
+            <List>
+              {participants.map((participant, index) => (
+                <React.Fragment key={participant.user_id}>
+                  <ListItem>
+                    <ListItemText
+                      primary={
+                        <Typography
+                          variant="h6"
+                          color={index === 0 ? "primary" : "textPrimary"}
+                        >
+                          {`${index + 1}. ${participant.username}`}
+                        </Typography>
+                      }
+                      secondary={`Points: ${participant.points}`}
+                    />
+                  </ListItem>
+                  {index < participants.length - 1 && <Divider />}
+                </React.Fragment>
+              ))}
+            </List>
+          </CardContent>
+        </Card>
       </Box>
     </Container>
   );

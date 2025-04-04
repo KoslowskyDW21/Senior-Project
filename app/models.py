@@ -414,6 +414,7 @@ class Challenge(db.Model):
     end_time = db.Column(db.DateTime, nullable=False)
     is_complete = db.Column(db.Boolean, nullable=False)
     num_reports = db.Column(db.Integer, nullable=False)
+    xp_awarded = db.Column(db.Boolean, default=False)
 
     def to_json(self):
         return {
