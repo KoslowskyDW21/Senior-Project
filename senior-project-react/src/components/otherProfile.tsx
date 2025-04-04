@@ -540,56 +540,101 @@ const OtherProfile: React.FC = () => {
                 </MenuItem>
               </Menu>
 
-              <Modal open={openBlockModal} onClose={handleCloseBlockModal}>
-                <Box sx={modalStyle}>
-                  <TextField
-                    fullWidth
-                    id="reason-for-blocking"
-                    label="Why are you blocking this user?"
-                    variant="outlined"
-                  />
-                  <h2>Are you sure you want to block this user?</h2>
+              <Modal
+                open={openBlockModal}
+                onClose={handleCloseBlockModal}
+                aria-labelledby="modal-title"
+              >
+                <Box sx={reportModalStyle(theme)}>
+                  <IconButton
+                    onClick={handleCloseBlockModal}
+                    style={{ position: "absolute", top: 5, right: 5 }}
+                  >
+                    <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+                  </IconButton>
+
+                  <Typography id="modal-title" variant="h6" component="h2">
+                    Are you sure you want to block {username}?
+                  </Typography>
+
+                  <br />
                   <Button
-                    onClick={() => blockUser(numericId)}
                     variant="contained"
                     color="error"
-                    sx={{ marginRight: 2 }}
+                    onClick={() => {
+                      blockUser(numericId);
+                    }}
+                    sx={{
+                      width: "100%",
+                      textAlign: "center",
+                    }}
                   >
-                    Block User
+                    Block {username}
                   </Button>
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={handleCloseBlockModal}
+                    onClick={() => {
+                      handleCloseBlockModal();
+                    }}
+                    sx={{
+                      width: "100%",
+                      textAlign: "center",
+                      marginTop: 2,
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              </Modal>
+              <Modal
+                open={openRemoveFriendModal}
+                onClose={handleCloseRemoveFriendModal}
+                aria-labelledby="modal-title"
+              >
+                <Box sx={reportModalStyle(theme)}>
+                  <IconButton
+                    onClick={handleCloseRemoveFriendModal}
+                    style={{ position: "absolute", top: 5, right: 5 }}
+                  >
+                    <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+                  </IconButton>
+
+                  <Typography id="modal-title" variant="h6" component="h2">
+                    Are you sure you want to unfriend {username}?
+                  </Typography>
+
+                  <br />
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={() => {
+                      removeFriend(numericId);
+                    }}
+                    sx={{
+                      width: "100%",
+                      textAlign: "center",
+                    }}
+                  >
+                    Unfriend {username}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                      handleCloseRemoveFriendModal();
+                    }}
+                    sx={{
+                      width: "100%",
+                      textAlign: "center",
+                      marginTop: 2,
+                    }}
                   >
                     Cancel
                   </Button>
                 </Box>
               </Modal>
 
-              <Modal
-                open={openRemoveFriendModal}
-                onClose={handleCloseRemoveFriendModal}
-              >
-                <Box sx={modalStyle}>
-                  <h2>Are you sure you want to unfriend this user?</h2>
-                  <Button
-                    onClick={() => removeFriend(numericId)}
-                    variant="contained"
-                    color="error"
-                    sx={{ marginRight: 2 }}
-                  >
-                    Unfriend
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleCloseRemoveFriendModal}
-                  >
-                    Cancel
-                  </Button>
-                </Box>
-              </Modal>
               <IconButton onClick={handleClickEllipsis}>
                 <MoreVertIcon />
               </IconButton>
@@ -662,7 +707,10 @@ const OtherProfile: React.FC = () => {
                   >
                     <img
                       src={`${config.serverUrl}/${
-                        achievement.isVisible ? achievement.image : "static/uploads/daQuestion.png"}`}
+                        achievement.isVisible
+                          ? achievement.image
+                          : "static/uploads/daQuestion.png"
+                      }`}
                       width="100"
                       alt={achievement.title}
                     />
@@ -738,12 +786,18 @@ const OtherProfile: React.FC = () => {
                     variant="h6"
                     component="h2"
                   >
-                    {selectedAchievement.isVisible ? selectedAchievement.title : "Hidden Achievement"}
+                    {selectedAchievement.isVisible
+                      ? selectedAchievement.title
+                      : "Hidden Achievement"}
                   </Typography>
                   <Box id="modal-image">
                     <Box>
                       <img
-                        src={`${config.serverUrl}/${selectedAchievement.isVisible ? selectedAchievement.image : "static/uploads/daQuestion.png"}`}
+                        src={`${config.serverUrl}/${
+                          selectedAchievement.isVisible
+                            ? selectedAchievement.image
+                            : "static/uploads/daQuestion.png"
+                        }`}
                         style={{
                           width: "100%",
                           height: "100%",
