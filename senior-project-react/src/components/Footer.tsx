@@ -37,7 +37,7 @@ const Footer = () => {
         color="primary"
         sx={{ flex: 1 }}
       >
-        Challenges
+        Competitions
       </Button>
       <Button
         onClick={() => navigate("/groups")}

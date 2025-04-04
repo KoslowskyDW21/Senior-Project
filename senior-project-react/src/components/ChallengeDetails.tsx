@@ -110,7 +110,7 @@ const ChallengeDetail: React.FC = () => {
       const response = await axios.get(`${config.serverUrl}/challenges/${id}/`);
       setChallenge(response.data);
     } catch (error) {
-      console.error("Error fetching challenge details:", error);
+      console.error("Error fetching competition (challenge) details:", error);
     }
   };
 
@@ -225,10 +225,10 @@ const ChallengeDetail: React.FC = () => {
         await axios.post(`${config.serverUrl}/challenges/${id}/join/`);
         fetchParticipants();
       } catch (error) {
-        console.error("Error joining challenge:", error);
+        console.error("Error joining competition (challenge):", error);
       }
     } else {
-      alert("You cannot join the challenge after it has started.");
+      alert("You cannot join the competition after it has started.");
     }
   };
 
@@ -238,10 +238,10 @@ const ChallengeDetail: React.FC = () => {
         await axios.post(`${config.serverUrl}/challenges/${id}/leave/`);
         fetchParticipants();
       } catch (error) {
-        console.error("Error leaving challenge:", error);
+        console.error("Error leaving competition (challenge):", error);
       }
     } else {
-      alert("You cannot leave the challenge after it has started.");
+      alert("You cannot leave the competition after it has started.");
     }
   };
 
@@ -250,7 +250,7 @@ const ChallengeDetail: React.FC = () => {
       await axios.delete(`${config.serverUrl}/challenges/${id}/delete/`);
       window.history.back();
     } catch (error) {
-      console.error("Error deleting challenge:", error);
+      console.error("Error deleting competition (challenge):", error);
     }
   };
 
@@ -316,14 +316,14 @@ const ChallengeDetail: React.FC = () => {
           },
         })
         .then((response) => {
-          console.log("Challenge successfully reported.");
+          console.log("Competiton (challenge) successfully reported.");
           console.log(response.data.message);
         })
         .catch((error) => {
           console.log("Could not report challenge", error);
         });
     } else {
-      console.log("Challenge already reported");
+      console.log("Competition (challenge) already reported");
     }
   };
 
@@ -410,7 +410,7 @@ const ChallengeDetail: React.FC = () => {
                     onClick={handleDeleteChallenge}
                     sx={{ mr: 2 }}
                   >
-                    Delete Challenge
+                    Delete Competition
                   </Button>
                 )}
                 {isParticipant && now < startTime && (
@@ -429,7 +429,7 @@ const ChallengeDetail: React.FC = () => {
                     color="primary"
                     onClick={handleJoinChallenge}
                   >
-                    Join Challenge
+                    Join Competition
                   </Button>
                 )}
                 {!isCreator && isParticipant && now < startTime && (
@@ -438,7 +438,7 @@ const ChallengeDetail: React.FC = () => {
                     color="secondary"
                     onClick={handleLeaveChallenge}
                   >
-                    Leave Challenge
+                    Leave Competition
                   </Button>
                 )}
               </>
@@ -504,7 +504,7 @@ const ChallengeDetail: React.FC = () => {
           </IconButton>
 
           <Typography id="modal-title" variant="h4" component="h2">
-            Report Challenge
+            Report Competition
           </Typography>
           <Typography id="modal-description" variant="body1" component="p">
             {`Reporting challenge ${challenge.name}`}

@@ -205,7 +205,7 @@ function Message({ message }: {message: Message}) {
   )
 }
 
-// React component that lets the user see which challenges have been reported
+// React component that lets the user see which competitions (challenges) have been reported
 function Challenge({ challenge }: {challenge: Challenge}) {
   return (
     <Card
@@ -348,7 +348,7 @@ export default function ReportPage() {
         setChallenges(response.data);
       })
       .catch((error) => {
-        console.error("Could not fetch reported challenges", error);
+        console.error("Could not fetch reported competitions (challenges)", error);
       });
   }
 
@@ -572,7 +572,7 @@ export default function ReportPage() {
         console.log(response.data);
       })
       .catch((error) => {
-        console.error("Could not delete challenge", error);
+        console.error("Could not delete competition (challenge)", error);
       });
   }
   
@@ -608,7 +608,7 @@ export default function ReportPage() {
     return user?.username;
   }
 
-  // Checks to see if the current user is an admin and loads the reported groups, reviews, messages, and challenges
+  // Checks to see if the current user is an admin and loads the reported groups, reviews, messages, and competitions (challenges)
   useEffect(() => {
     isAdmin();
     loadGroups();
@@ -742,8 +742,8 @@ export default function ReportPage() {
           <p>No Messages Reported</p>
         )}
 
-        <h2>Reported Challenges</h2>
-        {/* List each challenge that has been reported in a table */}
+        <h2>Reported Competitions</h2>
+        {/* List each competition (challenge) that has been reported in a table */}
         {challenges.length > 0 ? (
           <table>
           <thead>
@@ -774,7 +774,7 @@ export default function ReportPage() {
           </tbody>
         </table>
         ) : (
-          <p>No Challenges Reported</p>
+          <p>No Competitions Reported</p>
         )}
 
         {/* Modal for seeing reports associated with specific group - gives the option
@@ -966,8 +966,8 @@ export default function ReportPage() {
           </Box>
         </Modal>
 
-        {/* Modal for seeing reports associated with specific challenge - gives the option
-            to remove the challenge or dismiss the reports - also displays the challenge to
+        {/* Modal for seeing reports associated with specific competition (challenge) - gives the option
+            to remove the competition (challenge) or dismiss the reports - also displays the competition (challenge) to
             the user */}
         <Modal
           open={openChallenge}
@@ -1015,7 +1015,7 @@ export default function ReportPage() {
                 handleCloseChallengeModal();
               }}
             >
-              Remove Challenge
+              Remove Competition
             </Button>
             <Button
               variant="contained"
