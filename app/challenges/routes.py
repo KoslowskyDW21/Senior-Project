@@ -25,10 +25,16 @@ def get_localized_time(time):
 @login_required
 @bp.route('/', methods=['GET', 'POST'])
 def challenges():
+    user: User = current_user._get_current_object() # type: ignore
     #the  pagining is upon us
     #page = max(1, int(request.args.get('page', 1)))  
     #per_page = int(request.args.get('per_page', 20))
-    challenges = Challenge.query.all()
+    challenges: list[Challenge] = Challenge.query.all()
+
+    if not user.is_admin:
+        reports: list[ChallengeReport] = ChallengeReport.query.filter_by(user_id=user.id).all()
+        reportedChallenges: list[int] = [report.challenge_id for report in reports]
+        challenges = [challenge for challenge in challenges if not challenge.id in reportedChallenges]
 
     #challenges_paginated = challenges.paginate(page=page, per_page=per_page, error_out=False)  # type: ignore
     #total_pages = ceil(challenges_paginated.total / per_page)  # type: ignore
