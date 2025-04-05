@@ -27,7 +27,8 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import config from "../config.js";
 import Header from "./Header.js";
-import ConfirmationMessage, { ConfirmationContext } from "./ConfirmationMessage.js";
+import ConfirmationMessage from "./ConfirmationMessage.js";
+import { ConfirmationProvider, useConfirmation } from "./ConfirmationHelper.js";
 
 const reportModalStyle = (theme: Theme) => ({
   position: "absolute",
@@ -208,6 +209,25 @@ const IndividualRecipe: React.FC = () => {
   const [image, setImage] = React.useState<string | undefined>("");
 
   const navigate = useNavigate();
+
+  // React component necessary for contexts
+  function ReportButton() {
+    const {open, toggleOpen} = useConfirmation();
+  
+    return (
+      <Button
+        variant="contained"
+        color="error"
+        onClick={() => {
+          toggleOpen();
+          handleReportReview();
+          handleCloseModal();
+        }}
+      >
+        Confirm Report
+      </Button>
+    )
+  }
 
   const handleGoToCompletedRecipe = async () => {
     console.log("Navigating to completed recipe page");
@@ -508,7 +528,7 @@ const IndividualRecipe: React.FC = () => {
   }, []);
 
   return (
-    <>
+    <ConfirmationProvider>
       <IconButton
         onClick={() => navigate(-1)}
         style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
@@ -781,7 +801,8 @@ const IndividualRecipe: React.FC = () => {
             <Select labelId="reason-label"></Select>
           </FormControl>
           <br />
-          <Button
+          <ReportButton />
+          {/* <Button
             variant="contained"
             color="error"
             onClick={() => {
@@ -790,7 +811,7 @@ const IndividualRecipe: React.FC = () => {
             }}
           >
             Confirm Report
-          </Button>
+          </Button> */}
         </Box>
       </Modal>
 
@@ -801,12 +822,12 @@ const IndividualRecipe: React.FC = () => {
         message={message}
         action={action}
       /> */}
-      <ConfirmationContext.Provider value={snackbarOpen}>
-        <ConfirmationMessage
-          message={message}
-        />
-      </ConfirmationContext.Provider>
-    </>
+      {/* <ConfirmationContext.Provider value={snackbarOpen}> */}
+      <ConfirmationMessage
+        message={message}
+      />
+      {/* </ConfirmationContext.Provider> */}
+    </ConfirmationProvider>
   );
 };
 

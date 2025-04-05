@@ -1,15 +1,30 @@
-// import { createContext } from "react";
+import React, { createContext, useContext, useState } from "react";
 
-// export const ConfirmationContext = createContext(false);
+interface ConfirmationContextType {
+  open: boolean;
+  toggleOpen: () => void;
+}
 
-// function confirmationMessageOpen(initialVal: boolean) {
-//   const [open, setOpen] = useState<boolean>(initialVal);
+const ConfirmationContext = createContext<ConfirmationContextType | undefined>(undefined);
 
-//   const updateOpen = (newVal: boolean) => {
-//     setOpen(newVal);
-//   }
+export function ConfirmationProvider({ children }: {children: React.ReactNode}) {
+  const [open, setOpen] = useState<boolean>(false);
 
-//   return { open, updateOpen };
-// }
+  const toggleOpen = () => {
+    setOpen(!open);
+  }
 
-// export default confirmationMessageOpen;
+  return (
+    <ConfirmationContext.Provider value={{ open, toggleOpen }}>
+      {children}
+    </ConfirmationContext.Provider>
+  );
+}
+
+export function useConfirmation(): ConfirmationContextType {
+  const context = useContext(ConfirmationContext);
+  if(context === undefined) {
+    throw new Error();
+  }
+  return context;
+}

@@ -2,6 +2,7 @@ import React, { useState, createContext, useContext } from "react";
 import { IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Snackbar from "@mui/material/Snackbar";
+import { useConfirmation } from "./ConfirmationHelper";
 // import confirmationMessageOpen from "./ConfirmationHelper";
 
 // export const [messageOpen, setMessageOpen] = useState<boolean>(true);
@@ -10,13 +11,14 @@ import Snackbar from "@mui/material/Snackbar";
 //   confirmation = open;
 // }
 
-export const ConfirmationContext = createContext(false);
+// export const ConfirmationContext = createContext(false);
+
+
 
 export default function ConfirmationMessage({ message }: {message: String;}) {
-  const temp = useContext(ConfirmationContext)
-  const [open, setOpen] = useState<boolean>(temp);
-
-  const handleClose = () => setOpen(false);
+  // const temp = useContext(ConfirmationContext)
+  // const [open, setOpen] = useState<boolean>(temp);
+  const { open, toggleOpen } = useConfirmation();
 
   const action = (
     <React.Fragment>
@@ -24,7 +26,7 @@ export default function ConfirmationMessage({ message }: {message: String;}) {
         size="small"
         aria-label="close"
         color="inherit"
-        onClick={handleClose}
+        onClick={toggleOpen}
       >
         <CloseIcon fontSize="small" />
       </IconButton>
@@ -32,14 +34,12 @@ export default function ConfirmationMessage({ message }: {message: String;}) {
   )
 
   return (
-    <ConfirmationContext.Provider value={open}>
-      <Snackbar
-        open={temp}
-        autoHideDuration={6000}
-        onClose={handleClose}
-        message={message}
-        action={action}
-      />
-    </ConfirmationContext.Provider>
+    <Snackbar
+      open={open}
+      autoHideDuration={6000}
+      onClose={toggleOpen}
+      message={message}
+      action={action}
+    />
   );
 }
