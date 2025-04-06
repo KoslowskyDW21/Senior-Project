@@ -30,17 +30,16 @@ interface ProfileResponse {
 
 const modalStyle = {
   position: "absolute",
-  top: "calc(50% + 60px)",
+  top: "50%",
   left: "50%",
-  transform: "translateX(-50%)",
-  width: 250,
+  transform: "translate(-50%, -50%)",
+  width: 400,
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
   pt: 2,
   px: 4,
   pb: 3,
-  borderRadius: 2,
 };
 
 const Profile: React.FC = () => {
