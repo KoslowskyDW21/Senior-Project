@@ -1,4 +1,5 @@
 import axios, { AxiosError } from "axios";
+import { useThemeContext } from "./ThemeContext";
 import FolderIcon from "@mui/icons-material/Folder";
 import { useState } from "react";
 import React from "react";
@@ -11,6 +12,8 @@ import {
   Modal,
   FormControl,
   Typography,
+  Switch,
+  FormControlLabel,
   SelectChangeEvent,
   Box,
   FormHelperText,
@@ -116,6 +119,8 @@ export default function Settings() {
 
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
   const [openPfpModal, setOpenPfpModal] = useState(false);
+
+  const { isDarkMode, toggleDarkMode } = useThemeContext();
 
   async function loadUser() {
     await axios
@@ -726,6 +731,16 @@ export default function Settings() {
         <br />
         <br />
 
+        <FormControlLabel
+          control={
+            <Switch
+              checked={isDarkMode}
+              onChange={toggleDarkMode}
+              color="primary"
+            />
+          }
+          label="Dark Mode"
+        />
         <Box mt={4} display="flex" flexDirection="column" gap={2}>
           <Button variant="contained" color="error" onClick={handleOpenModal}>
             Delete Account
