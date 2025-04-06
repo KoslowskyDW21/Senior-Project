@@ -155,6 +155,8 @@ function RecipeRemoveSelect({
   handleRemoveRecipeFromList,
   recipeListsIn,
 }: any) {
+  const {open, toggleOpen} = useConfirmation();
+
   if (recipeListsIn.length === 0) {
     return (
       <FormControl sx={{ width: 400, opacity: 0.5 }}>
@@ -171,7 +173,10 @@ function RecipeRemoveSelect({
         id="remove-from-list-select"
         label="Remove from a list"
         value={lid}
-        onChange={handleRemoveRecipeFromList}
+        onChange={(event) => {
+          handleRemoveRecipeFromList(event);
+          toggleOpen();
+        }}
       >
         {recipeListsIn.map((recipeList: any) => (
           <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
@@ -211,21 +216,41 @@ const IndividualRecipe: React.FC = () => {
   const navigate = useNavigate();
 
   // React component necessary for contexts
-  function ReportButton() {
+  function ButtonWithConfirmation({ color, handler, text }: any) {
     const {open, toggleOpen} = useConfirmation();
   
     return (
       <Button
         variant="contained"
-        color="error"
+        color={color}
         onClick={() => {
+          handler();
           toggleOpen();
-          handleReportReview();
-          handleCloseModal();
         }}
       >
-        Confirm Report
+        {text}
       </Button>
+    )
+  }
+
+  function SelectRecipeToAdd() {
+    const {open, toggleOpen} = useConfirmation();
+
+    return (
+      <Select
+        labelId="add-to-list-select-label"
+        id="add-to-list-select"
+        label="Add to a list"
+        value={lid}
+        onChange={(event) => {
+          handleAddRecipeToList(event);
+          toggleOpen();
+        }}
+      >
+        {recipeLists.map((recipeList) => (
+          <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
+        ))}
+      </Select>
     )
   }
 
@@ -592,17 +617,7 @@ const IndividualRecipe: React.FC = () => {
       >
         <FormControl sx={{ width: 400 }}>
           <InputLabel id="demo-simple-select-label">Add to a list</InputLabel>
-          <Select
-            labelId="add-to-list-select-label"
-            id="add-to-list-select"
-            label="Add to a list"
-            value={lid}
-            onChange={handleAddRecipeToList}
-          >
-            {recipeLists.map((recipeList) => (
-              <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
-            ))}
-          </Select>
+          <SelectRecipeToAdd/>
         </FormControl>
       </Box>
 
@@ -619,7 +634,12 @@ const IndividualRecipe: React.FC = () => {
         mt={2}
       >
         <FormControl>
-          <Button
+          <ButtonWithConfirmation
+            color="primary"
+            handler={handleAddIngredientsOfRecipe}
+            text="Add to shopping list"
+          />
+          {/* <Button
             sx={{ width: 250, height: 45 }}
             variant="contained"
             onClick={() => {
@@ -627,7 +647,7 @@ const IndividualRecipe: React.FC = () => {
             }}
           >
             Add to shopping list
-          </Button>
+          </Button> */}
         </FormControl>
       </Box>
 
@@ -801,32 +821,20 @@ const IndividualRecipe: React.FC = () => {
             <Select labelId="reason-label"></Select>
           </FormControl>
           <br />
-          <ReportButton />
-          {/* <Button
-            variant="contained"
+          <ButtonWithConfirmation
             color="error"
-            onClick={() => {
+            handler={() => {
               handleReportReview();
               handleCloseModal();
             }}
-          >
-            Confirm Report
-          </Button> */}
+            text="Confirm Report"
+          />
         </Box>
       </Modal>
 
-      {/* <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackBarClose}
-        message={message}
-        action={action}
-      /> */}
-      {/* <ConfirmationContext.Provider value={snackbarOpen}> */}
       <ConfirmationMessage
         message={message}
       />
-      {/* </ConfirmationContext.Provider> */}
     </ConfirmationProvider>
   );
 };
