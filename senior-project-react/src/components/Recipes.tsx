@@ -42,7 +42,11 @@ interface DietaryRestrictions {
   userDietaryRestrictions: [];
 }
 
-function Difficulty({ difficulty }) {
+interface DifficultyType {
+  difficulty: number
+}
+
+function Difficulty({ difficulty }: DifficultyType) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
   const diamondStyle = {
@@ -53,7 +57,8 @@ function Difficulty({ difficulty }) {
     marginRight: "clamp(4px, 1vw, 8px)",
   };
 
-  const renderDiamonds = (num) => {
+  const renderDiamonds = (num: number) => {
+    
     return Array.from({ length: 5 }, (_, i) => (
       <Box key={i} sx={{ ...diamondStyle, opacity: i < num ? 1 : 0.1 }} />
     ));
@@ -128,7 +133,7 @@ const Recipes: React.FC = () => {
   const getSearchQuery = () =>
     new URLSearchParams(location.search).get("search") || "";
 
-  const [dietaryRestrictions, setDietaryRestrictions] = useState<[]>([]);
+  const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>([]);
   const [userDietaryRestrictions, setUserDietaryRestrictions] = useState<[]>(
     []
   );
@@ -336,7 +341,7 @@ const Recipes: React.FC = () => {
   / >
     </Box>
 
-<Box mt={2} display="flex" justifyContent="center">
+<Box mt={2} mb={2} display="flex" flexWrap="wrap" justifyContent="center">
   <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
     <InputLabel id="dietary_restriction-select-label">
       Dietary Restrictions

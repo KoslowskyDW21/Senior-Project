@@ -9,9 +9,11 @@ import {
   Typography,
   FormControlLabel,
   Checkbox,
+  IconButton,
 } from "@mui/material";
 import config from "../config.js";
 import Header from "./Header.js";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 interface CreateGroupResponse {
   message: string;
@@ -61,6 +63,18 @@ const CreateGroup: React.FC = () => {
     <Container>
 
       <Header title="Create Group"/>
+
+      <IconButton
+          onClick={() => navigate("/groups")}
+          style={{
+            position: "fixed",
+            top: "clamp(70px, 10vw, 120px)",
+            left: "clamp(0px, 1vw, 100px)",
+            zIndex: 1000,
+          }}
+        >
+          <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+        </IconButton>
 
       <Box mt={4} mb={2} textAlign="center">
         <Typography variant="h4" gutterBottom>
