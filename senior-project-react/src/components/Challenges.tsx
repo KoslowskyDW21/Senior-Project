@@ -90,7 +90,7 @@ const Challenges: React.FC = () => {
       );
       setChallenges(otherChallenges);
 
-      // Fetch participant status for each challenge
+      // Fetch participant status for each competition (challenge)
       const participantStatus: { [key: number]: boolean } = {};
       const joinedChallengesList: ChallengeData[] = [];
       for (const challenge of data) {
@@ -126,7 +126,7 @@ const Challenges: React.FC = () => {
       );
       setInvitedChallenges(invitedChallengesList);
     } catch (error) {
-      console.error("Error fetching challenges:", error);
+      console.error("Error fetching competitions (challenges):", error);
     }
   };
 
@@ -137,7 +137,7 @@ const Challenges: React.FC = () => {
       );
       setPastChallenges(response.data);
     } catch (error) {
-      console.error("Error fetching past challenges:", error);
+      console.error("Error fetching past competitions (challenges):", error);
     }
   };
 
@@ -229,7 +229,7 @@ const Challenges: React.FC = () => {
 
   return (
     <div>
-      <Header title="Challenges" />
+      <Header title="Competitions" />
       <Box
         mt={{ xs: 10, sm: 14, md: 14 }}
         textAlign="center"
@@ -238,7 +238,7 @@ const Challenges: React.FC = () => {
         sx={{ flexGrow: 1 }}
       >
         <TextField
-          label="Search for challenges"
+          label="Search for competitions"
           variant="outlined"
           fullWidth
           value={searchQuery}
@@ -256,7 +256,7 @@ const Challenges: React.FC = () => {
               color="primary"
               onClick={() => navigate("/past-challenges")}
             >
-              View Past Challenges
+              View Past Competitions
             </Button>
           </Box>
 
@@ -266,14 +266,14 @@ const Challenges: React.FC = () => {
               color="primary"
               onClick={() => navigate(`/challenges/create`)}
             >
-              Create a Challenge
+              Create a Competition
             </Button>
           </Box>
 
           {filteredMyChallenges.length > 0 && (
             <Box mt={4}>
               <Typography variant="h5" gutterBottom>
-                My Challenges
+                My Competitions
               </Typography>
               <Box>
                 <Grid2
@@ -306,7 +306,7 @@ const Challenges: React.FC = () => {
           {filteredInvitedChallenges.length > 0 && (
             <Box mt={4}>
               <Typography variant="h5" gutterBottom>
-                Invited Challenges
+                Invited Competitions
               </Typography>
               <Box>
                 <Grid2
@@ -327,7 +327,7 @@ const Challenges: React.FC = () => {
           {filteredJoinedChallenges.length > 0 && (
             <Box mt={4}>
               <Typography variant="h5" gutterBottom>
-                Joined Challenges
+                Joined Competitions
               </Typography>
               <Box>
                 <Grid2
@@ -359,7 +359,7 @@ const Challenges: React.FC = () => {
 
           <Box mt={4}>
             <Typography variant="h5" gutterBottom>
-              All Challenges
+              All Competitions
             </Typography>
             <Grid2
               container

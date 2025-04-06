@@ -27,7 +27,8 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import config from "../config.js";
 import Header from "./Header.js";
-import ConfirmationMessage, { ConfirmationContext } from "./ConfirmationMessage.js";
+import ConfirmationMessage from "./ConfirmationMessage.js";
+import { ConfirmationProvider, useConfirmation } from "./ConfirmationHelper.js";
 
 const reportModalStyle = (theme: Theme) => ({
   position: "absolute",
@@ -154,6 +155,8 @@ function RecipeRemoveSelect({
   handleRemoveRecipeFromList,
   recipeListsIn,
 }: any) {
+  const {open, toggleOpen} = useConfirmation();
+
   if (recipeListsIn.length === 0) {
     return (
       <FormControl sx={{ width: 400, opacity: 0.5 }}>
@@ -170,7 +173,10 @@ function RecipeRemoveSelect({
         id="remove-from-list-select"
         label="Remove from a list"
         value={lid}
-        onChange={handleRemoveRecipeFromList}
+        onChange={(event) => {
+          handleRemoveRecipeFromList(event);
+          toggleOpen();
+        }}
       >
         {recipeListsIn.map((recipeList: any) => (
           <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
@@ -208,6 +214,45 @@ const IndividualRecipe: React.FC = () => {
   const [image, setImage] = React.useState<string | undefined>("");
 
   const navigate = useNavigate();
+
+  // React component necessary for contexts
+  function ButtonWithConfirmation({ color, handler, text }: any) {
+    const {open, toggleOpen} = useConfirmation();
+  
+    return (
+      <Button
+        variant="contained"
+        color={color}
+        onClick={() => {
+          handler();
+          toggleOpen();
+        }}
+      >
+        {text}
+      </Button>
+    )
+  }
+
+  function SelectRecipeToAdd() {
+    const {open, toggleOpen} = useConfirmation();
+
+    return (
+      <Select
+        labelId="add-to-list-select-label"
+        id="add-to-list-select"
+        label="Add to a list"
+        value={lid}
+        onChange={(event) => {
+          handleAddRecipeToList(event);
+          toggleOpen();
+        }}
+      >
+        {recipeLists.map((recipeList) => (
+          <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
+        ))}
+      </Select>
+    )
+  }
 
   const handleGoToCompletedRecipe = async () => {
     console.log("Navigating to completed recipe page");
@@ -508,7 +553,7 @@ const IndividualRecipe: React.FC = () => {
   }, []);
 
   return (
-    <>
+    <ConfirmationProvider>
       <IconButton
         onClick={() => navigate(-1)}
         style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
@@ -572,17 +617,7 @@ const IndividualRecipe: React.FC = () => {
       >
         <FormControl sx={{ width: 400 }}>
           <InputLabel id="demo-simple-select-label">Add to a list</InputLabel>
-          <Select
-            labelId="add-to-list-select-label"
-            id="add-to-list-select"
-            label="Add to a list"
-            value={lid}
-            onChange={handleAddRecipeToList}
-          >
-            {recipeLists.map((recipeList) => (
-              <MenuItem value={recipeList.id}>{recipeList.name}</MenuItem>
-            ))}
-          </Select>
+          <SelectRecipeToAdd/>
         </FormControl>
       </Box>
 
@@ -599,7 +634,12 @@ const IndividualRecipe: React.FC = () => {
         mt={2}
       >
         <FormControl>
-          <Button
+          <ButtonWithConfirmation
+            color="primary"
+            handler={handleAddIngredientsOfRecipe}
+            text="Add to shopping list"
+          />
+          {/* <Button
             sx={{ width: 250, height: 45 }}
             variant="contained"
             onClick={() => {
@@ -607,7 +647,7 @@ const IndividualRecipe: React.FC = () => {
             }}
           >
             Add to shopping list
-          </Button>
+          </Button> */}
         </FormControl>
       </Box>
 
@@ -781,32 +821,21 @@ const IndividualRecipe: React.FC = () => {
             <Select labelId="reason-label"></Select>
           </FormControl>
           <br />
-          <Button
-            variant="contained"
+          <ButtonWithConfirmation
             color="error"
-            onClick={() => {
+            handler={() => {
               handleReportReview();
               handleCloseModal();
             }}
-          >
-            Confirm Report
-          </Button>
+            text="Confirm Report"
+          />
         </Box>
       </Modal>
 
-      {/* <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackBarClose}
+      <ConfirmationMessage
         message={message}
-        action={action}
-      /> */}
-      <ConfirmationContext.Provider value={snackbarOpen}>
-        <ConfirmationMessage
-          message={message}
-        />
-      </ConfirmationContext.Provider>
-    </>
+      />
+    </ConfirmationProvider>
   );
 };
 

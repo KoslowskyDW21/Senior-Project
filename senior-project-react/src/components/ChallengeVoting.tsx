@@ -117,10 +117,10 @@ const ChallengeVoting: React.FC = () => {
         <Card sx={{ maxWidth: 600, width: "100%", boxShadow: 3 }}>
           <CardContent>
             <Typography variant="h4" gutterBottom textAlign="center">
-              Vote for Challenge Winner
+              Vote for Competition Winner
             </Typography>
             <Typography variant="body1" textAlign="center" color="textSecondary" mb={2}>
-              Select your top choices for the challenge winner. You cannot vote for yourself.
+              Select your top choices for the competition winner. You cannot vote for yourself.
             </Typography>
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel id="first-choice-label">First Choice</InputLabel>
@@ -189,7 +189,7 @@ const ChallengeVoting: React.FC = () => {
               Submit Vote
             </Button>
             <Button variant="contained" color="secondary" onClick={() => navigate(-1)}>
-              Back to Challenge Details
+              Back to Competition Details
             </Button>
           </CardActions>
         </Card>
