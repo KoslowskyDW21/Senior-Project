@@ -38,6 +38,7 @@ def challenges():
         challenges = [challenge for challenge in challenges if not challenge.id in reportedChallenges]
         # Filter out challenges made by blocked users
         blockedUsers: list[UserBlock] = UserBlock.query.filter_by(blocked_by=user.id).all()
+        print("Blocked users: ", blockedUsers)
         for challenge in challenges:
             if challenge.creator in [blockedUser.blocked_user for blockedUser in blockedUsers]:
                 challenges.remove(challenge)

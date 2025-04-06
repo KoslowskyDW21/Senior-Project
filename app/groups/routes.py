@@ -33,11 +33,8 @@ def get_groups():
         # Filter out groups where the user is banned
         blockedUsers: list[UserBlock] = UserBlock.query.filter_by(blocked_by = user.id).all()
         for group in groups:
-            groupMembers: list[GroupMember] = GroupMember.query.filter_by(group_id = group.id).all()
-            for member in groupMembers:
-                if member.member_id in [blockedUser.blocked_user for blockedUser in blockedUsers]:
-                    groups.remove(group)
-                    break
+            if group.creator in [blockedUser.blocked_user for blockedUser in blockedUsers]:
+                groups.remove(group)
 
     return jsonify([group.to_json() for group in groups]), 200
 
