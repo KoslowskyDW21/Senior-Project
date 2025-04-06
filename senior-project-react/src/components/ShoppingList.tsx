@@ -98,6 +98,7 @@ const ShoppingList: React.FC = () => {
         `${config.serverUrl}/shopping_lists/items/${shopping_list.id}`
       );
       const shopping_list_items: ShoppingListItem[] = response.data;
+
       setShoppingListItems(shopping_list_items);
       // console.log(`Shopping list items now set: ${shopping_list_items}`);
 
@@ -125,6 +126,7 @@ const ShoppingList: React.FC = () => {
         shoppingListItemIngredient.measure = shopping_list_item.measure;
         shoppingListItemIngredient.ingredient_name =
           corresponding_ingredient.ingredient_name;
+        shoppingListItemIngredient.checked = false;
         shopping_list_item_ingredients.push(shoppingListItemIngredient);
       }
       setShoppingListItemIngredients(shopping_list_item_ingredients);
