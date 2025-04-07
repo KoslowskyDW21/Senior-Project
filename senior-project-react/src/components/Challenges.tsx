@@ -72,31 +72,26 @@ const Challenges: React.FC = () => {
   // This useEffect listens to searchQuery and currentPage changes
   useEffect(() => {
     if (searchQuery === "" && currentPage === 1) {
-      setChallenges([]);
+      setChallenges([]); // Clear the challenges when query is empty and page is reset
     }
 
-    // Fetch challenges whenever searchQuery or currentPage changes
     fetchChallenges(currentPage, searchQuery);
   }, [currentPage, searchQuery]);
 
   // Handle search query change
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNoResultsFound(false);
-    setChallenges([])
+    setChallenges([]);
     setCurrentPage(1);
-    console.log("Search query changing:", event.target.value);
-    setTotalPagesAll(1)
+    setTotalPagesAll(1);
     const query = event.target.value;
-    setSearchQuery(query); // Update search query immediately
+    setSearchQuery(query);
 
-    // Update URL with the new search query
     if (query) {
-      fetchChallenges(1, query)
+      fetchChallenges(1, query);
     } else {
-      fetchChallenges(1, "")
+      fetchChallenges(1, "");
     }
-
-    
   };
 
   // Scroll handler to load next page
@@ -132,41 +127,56 @@ const Challenges: React.FC = () => {
           mt: 0,
           width: "90vw",
           paddingRight: "8vw",
+          paddingBottom: "4vw"
         }}
       >
         <Header title="Competitions" />
+        
+        {/* Search bar */}
         <Box mt={10} textAlign="center" display="flex" justifyContent="center">
           <TextField
             label="Search for competitions"
             variant="outlined"
             value={searchQuery}
-            onChange={handleSearchChange} // Ensure this is being called every time
+            onChange={handleSearchChange}
             sx={{ width: "1200px" }}
           />
         </Box>
+
         <main role="main">
           <Container>
+            {/* Button to view past challenges */}
             <Box mt={4} mb={2} textAlign="center">
               <Button variant="contained" color="primary" onClick={() => navigate("/past-challenges")}>
                 View Past Competitions
               </Button>
             </Box>
 
+            {/* Button to create a new competition */}
             <Box mt={4} mb={2} textAlign="center">
               <Button variant="contained" color="primary" onClick={() => navigate(`/challenges/create`)}>
                 Create a Competition
               </Button>
             </Box>
 
+            {/* Invited Challenges Section */}
             {invitedChallenges.length > 0 && (
               <Box mt={4}>
                 <Typography variant="h5" gutterBottom>
                   Invited Competitions
                 </Typography>
                 <Box>
-                  <Grid2 container spacing={2} columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 4}>
+                  <Grid2 container spacing={2} columns={12}>
                     {invitedChallenges.map((challenge) => (
-                      <Grid2 key={challenge.id}>
+                      <Grid2
+                        key={challenge.id}
+                        size={{ xs: 12, sm: 6, md: 4 }}
+                        sx={{
+                          maxWidth: '100%',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
                         <Challenge {...challenge} />
                       </Grid2>
                     ))}
@@ -175,15 +185,24 @@ const Challenges: React.FC = () => {
               </Box>
             )}
 
+            {/* Joined Challenges Section */}
             {joinedChallenges.length > 0 && (
               <Box mt={4}>
                 <Typography variant="h5" gutterBottom>
                   Joined Competitions
                 </Typography>
                 <Box>
-                  <Grid2 container spacing={2} columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 4}>
+                  <Grid2 container spacing={2} columns={12}>
                     {joinedChallenges.map((challenge) => (
-                      <Grid2 key={challenge.id}>
+                      <Grid2
+                        key={challenge.id}
+                        size={{ xs: 12, sm: 6, md: 4 }}
+                        sx={{
+                          maxWidth: '100%',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
                         <Challenge {...challenge} />
                       </Grid2>
                     ))}
@@ -192,6 +211,7 @@ const Challenges: React.FC = () => {
               </Box>
             )}
 
+            {/* All Competitions Section */}
             <Box mt={4}>
               <Typography variant="h5" gutterBottom>
                 All Competitions
@@ -201,9 +221,17 @@ const Challenges: React.FC = () => {
                   No competitions found for this search.
                 </Typography>
               ) : (
-                <Grid2 container spacing={2} columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 4}>
+                <Grid2 container spacing={2} columns={12}>
                   {challenges.map((challenge) => (
-                    <Grid2 key={challenge.id}>
+                    <Grid2
+                      key={challenge.id}
+                      size={{ xs: 12, sm: 6, md: 4 }}
+                      sx={{
+                        maxWidth: '100%',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
                       <Challenge {...challenge} />
                     </Grid2>
                   ))}
@@ -212,6 +240,7 @@ const Challenges: React.FC = () => {
             </Box>
           </Container>
 
+          {/* Loader */}
           {loading && currentPage === 1 && (
             <Box display="flex" justifyContent="center" mt={4}>
               <CircularProgress />

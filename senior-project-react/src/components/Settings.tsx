@@ -27,6 +27,8 @@ import {
   RadioGroup,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import Snackbar, { SnackbarCloseReason } from "@mui/material/Snackbar";
+import CloseIcon from "@mui/icons-material/Close";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useMsal } from "@azure/msal-react";
 import config from "../config.js";
@@ -132,11 +134,45 @@ export default function Settings() {
     username: "",
   });
 
+  const [newUsername, setNewUsername] = useState<string>("");
+
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMode(
       (event.target as HTMLInputElement).value as "auto" | "light" | "dark"
     );
   };
+
+  const handleSnackBarClose = (
+    event: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setSnackbarOpen(false);
+  };
+
+  {
+    /* More copy/pasted snackbar stuff */
+  }
+  const action = (
+    <React.Fragment>
+      {/* <Button color="secondary" size="small" onClick={handleSnackBarClose}>
+        Close
+      </Button> */}
+      <IconButton
+        size="small"
+        aria-label="close"
+        color="inherit"
+        onClick={handleSnackBarClose}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </React.Fragment>
+  );
 
   async function loadUser() {
     await axios
@@ -263,11 +299,24 @@ export default function Settings() {
       })
       .then((response) => {
         console.log(response.data.message);
+        console.log(response.data.username);
         setUsernameTaken(response.data.alreadyTaken);
+        if (
+          response.data.alreadyTaken &&
+          response.data.username === user.username
+        ) {
+          setMessage("Same username or already taken");
+        } else if (response.data.alreadyTaken) {
+          setMessage("Username already taken");
+        } else {
+          setMessage("Username updated successfully!");
+        }
       })
       .catch((error) => {
         console.error("Could not update username", error);
+        setMessage("Username already taken");
       });
+    setSnackbarOpen(true);
   }
 
   const getProfilePic = async () => {
@@ -670,12 +719,12 @@ export default function Settings() {
             error
             aria-label="username-textfield"
             size="small"
-            helperText="Error: Username already taken"
             value={user.username}
             variant="filled"
             onChange={(e) => {
               const newUsername = e.target.value;
 
+              setNewUsername(newUsername);
               setUsernameTaken(false);
               setUsername(newUsername);
               setUser((prevUser) => ({
@@ -694,6 +743,13 @@ export default function Settings() {
         >
           Save
         </Button>
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
+          onClose={handleSnackBarClose}
+          message={message}
+          action={action}
+        />
 
         <br />
         <br />
