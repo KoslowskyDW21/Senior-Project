@@ -116,6 +116,11 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
       location.pathname !== "/challenges"
     ) {
       navigate(`/challenges/${challenge_id}`);
+    } else if (
+      notification_type === "achievement" &&
+      location.pathname !== "/achievements"
+    ) {
+      navigate(`/achievements`);
     }
   };
 
@@ -352,7 +357,9 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                 </MenuItem>
                 <Divider />
                 {notifications
-                  .filter((notification: Notification) => notification.isRead === 0)
+                  .filter(
+                    (notification: Notification) => notification.isRead === 0
+                  )
                   .map((notification: Notification, index: number) => (
                     <MenuItem
                       key={index}
