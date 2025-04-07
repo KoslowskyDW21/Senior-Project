@@ -588,6 +588,5 @@ export default function AdminPage() {
         </Button>
       </>
     );
-    navigate(`/recipes`);
   }
 }
