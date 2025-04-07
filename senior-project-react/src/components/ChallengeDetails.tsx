@@ -26,6 +26,8 @@ import ChallengeParticipantsList from "./ChallengeParticipantsList";
 import config from "../config.js";
 import { set } from "date-fns";
 import Header from "./Header.js";
+import ConfirmationMessage from "./ConfirmationMessage.js";
+import { ConfirmationProvider, useConfirmation } from "./ConfirmationHelper.js";
 
 interface Challenge {
   id: number;
@@ -94,6 +96,7 @@ const ChallengeDetail: React.FC = () => {
   const [selectedFriends, setSelectedFriends] = useState<number[]>([]);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [invited, setInvited] = useState(false);
+  const [message, setMessage] = useState<string>("");
   const [inviteMessage, setInviteMessage] = useState("");
   const theme = useTheme();
   const [participantIds, setParticipantIds] = useState<Participant[]>([]);
@@ -104,6 +107,23 @@ const ChallengeDetail: React.FC = () => {
   const handleCloseModal = () => setOpen(false);
 
   const navigate = useNavigate();
+
+  function ButtonWithConfirmation({ color, handler, text }: any) {
+    const {open, toggleOpen} = useConfirmation();
+  
+    return (
+      <Button
+        variant="contained"
+        color={color}
+        onClick={() => {
+          handler();
+          toggleOpen();
+        }}
+      >
+        {text}
+      </Button>
+    )
+  }
 
   const fetchChallenge = async () => {
     try {
@@ -316,6 +336,7 @@ const ChallengeDetail: React.FC = () => {
           },
         })
         .then((response) => {
+          setMessage("Competition sucessfully reported");
           console.log("Competiton (challenge) successfully reported.");
           console.log(response.data.message);
         })
@@ -323,6 +344,7 @@ const ChallengeDetail: React.FC = () => {
           console.log("Could not report challenge", error);
         });
     } else {
+      setMessage("Competition already reported");
       console.log("Competition (challenge) already reported");
     }
   };
@@ -335,257 +357,259 @@ const ChallengeDetail: React.FC = () => {
   const votingEndTime = new Date(endTime.getTime() + 24 * 60 * 60 * 1000);
 
   return (
-    <Container>
+    <ConfirmationProvider>
+      <Container>
 
-      <Header title={challenge.name}/>
+        <Header title={challenge.name}/>
 
-      <Box mt={12}/>
-      <IconButton
-        onClick={() => navigate(`/challenges`)}
-        style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
-          left: "clamp(0px, 1vw, 100px)",
-          zIndex: 1000, }}
-      >
-        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
-      </IconButton>
-      <Card sx={{ maxWidth: 800, margin: "20px auto", padding: 2 }}>
-        {challenge.image && (
-          <CardMedia
-            component="img"
-            height="400"
-            image={`${config.serverUrl}/${challenge.image}`}
-            alt={challenge.name}
-            sx={{ borderRadius: 2 }}
-          />
-        )}
-        <CardContent>
-          <Typography variant="h4" component="div" gutterBottom>
-            {challenge.name}
-          </Typography>
-          <Box mb={2}>
-            <Typography variant="body1">
-              <strong>Difficulty:</strong> {challenge.difficulty}/5
+        <Box mt={12}/>
+        <IconButton
+          onClick={() => navigate(`/challenges`)}
+          style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
+            left: "clamp(0px, 1vw, 100px)",
+            zIndex: 1000, }}
+        >
+          <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+        </IconButton>
+        <Card sx={{ maxWidth: 800, margin: "20px auto", padding: 2 }}>
+          {challenge.image && (
+            <CardMedia
+              component="img"
+              height="400"
+              image={`${config.serverUrl}/${challenge.image}`}
+              alt={challenge.name}
+              sx={{ borderRadius: 2 }}
+            />
+          )}
+          <CardContent>
+            <Typography variant="h4" component="div" gutterBottom>
+              {challenge.name}
             </Typography>
-            <Typography variant="body1">
-              <strong>Theme:</strong> {challenge.theme}
-            </Typography>
-            <Typography variant="body1">
-              <strong>Location:</strong> {challenge.location}
-            </Typography>
-            <Typography variant="body1">
-              <strong>Start Time:</strong> {startTime.toLocaleString()}
-            </Typography>
-            <Typography variant="body1">
-              <strong>End Time:</strong> {endTime.toLocaleString()}
-            </Typography>
-          </Box>
-          <Box textAlign="center" mt={3}>
-            {invited === true ? (
-              <>
-                <Typography variant="body1" gutterBottom>
-                  {inviteMessage}
-                </Typography>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleAcceptInvite}
-                  sx={{ mr: 2 }}
-                >
-                  Accept
-                </Button>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={handleDenyInvite}
-                >
-                  Deny
-                </Button>
-              </>
-            ) : (
-              <>
-                {(isCreator || currentUser.is_admin) && (
-                  <Button
-                    variant="contained"
-                    color="error"
-                    onClick={handleDeleteChallenge}
-                    sx={{ mr: 2 }}
-                  >
-                    Delete Competition
-                  </Button>
-                )}
-                {isParticipant && now < startTime && (
+            <Box mb={2}>
+              <Typography variant="body1">
+                <strong>Difficulty:</strong> {challenge.difficulty}/5
+              </Typography>
+              <Typography variant="body1">
+                <strong>Theme:</strong> {challenge.theme}
+              </Typography>
+              <Typography variant="body1">
+                <strong>Location:</strong> {challenge.location}
+              </Typography>
+              <Typography variant="body1">
+                <strong>Start Time:</strong> {startTime.toLocaleString()}
+              </Typography>
+              <Typography variant="body1">
+                <strong>End Time:</strong> {endTime.toLocaleString()}
+              </Typography>
+            </Box>
+            <Box textAlign="center" mt={3}>
+              {invited === true ? (
+                <>
+                  <Typography variant="body1" gutterBottom>
+                    {inviteMessage}
+                  </Typography>
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => setInviteModalOpen(true)}
+                    onClick={handleAcceptInvite}
                     sx={{ mr: 2 }}
                   >
-                    Invite Friend
+                    Accept
                   </Button>
-                )}
-                {!isCreator && !isParticipant && now < startTime && (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleJoinChallenge}
-                  >
-                    Join Competition
-                  </Button>
-                )}
-                {!isCreator && isParticipant && now < startTime && (
                   <Button
                     variant="contained"
                     color="secondary"
-                    onClick={handleLeaveChallenge}
+                    onClick={handleDenyInvite}
                   >
-                    Leave Competition
+                    Deny
                   </Button>
-                )}
-              </>
-            )}
-          </Box>
-          <br />
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleOpenModal}
-          >
-            Report
-          </Button>
+                </>
+              ) : (
+                <>
+                  {(isCreator || currentUser.is_admin) && (
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={handleDeleteChallenge}
+                      sx={{ mr: 2 }}
+                    >
+                      Delete Competition
+                    </Button>
+                  )}
+                  {isParticipant && now < startTime && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => setInviteModalOpen(true)}
+                      sx={{ mr: 2 }}
+                    >
+                      Invite Friend
+                    </Button>
+                  )}
+                  {!isCreator && !isParticipant && now < startTime && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleJoinChallenge}
+                    >
+                      Join Competition
+                    </Button>
+                  )}
+                  {!isCreator && isParticipant && now < startTime && (
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={handleLeaveChallenge}
+                    >
+                      Leave Competition
+                    </Button>
+                  )}
+                </>
+              )}
+            </Box>
+            <br />
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleOpenModal}
+            >
+              Report
+            </Button>
 
-          <Box mt={4}>
-            <Typography variant="h5" gutterBottom>
-              Participants
+            <Box mt={4}>
+              <Typography variant="h5" gutterBottom>
+                Participants
+              </Typography>
+              <ChallengeParticipantsList
+                participants={participants}
+                isCreator={isCreator}
+                challengeId={challenge.id}
+                creatorId={challenge.creator}
+              />
+            </Box>
+            {isParticipant && now >= startTime && now <= votingEndTime && (
+              <Box textAlign="center" mt={3}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => navigate(`/challenges/${id}/vote/`)}
+                >
+                  Vote for Winner
+                </Button>
+              </Box>
+            )}
+            {now > votingEndTime && (
+              <Box textAlign="center" mt={3}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => navigate(`/challenges/${id}/vote_results/`)}
+                >
+                  View Vote Results
+                </Button>
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+
+        <Modal
+          open={open}
+          onClose={handleCloseModal}
+          aria-labelledby="modal-title"
+          aria-describedby="modal-description"
+        >
+          <Box sx={reportModalStyle(theme)}>
+            <IconButton
+              onClick={handleCloseModal}
+              style={{ position: "absolute", top: 5, right: 5 }}
+            >
+              <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+            </IconButton>
+
+            <Typography id="modal-title" variant="h4" component="h2">
+              Report Competition
             </Typography>
-            <ChallengeParticipantsList
-              participants={participants}
-              isCreator={isCreator}
-              challengeId={challenge.id}
-              creatorId={challenge.creator}
+            <Typography id="modal-description" variant="body1" component="p">
+              {`Reporting challenge ${challenge.name}`}
+            </Typography>
+
+            <FormControl
+              variant="filled"
+              sx={{ m: 1, width: 250 }}
+              size="small"
+            >
+              <InputLabel id="reason-label">Reason</InputLabel>
+              <Select labelId="reason-label"></Select>
+            </FormControl>
+            <br />
+            <ButtonWithConfirmation
+              color="error"
+              handler={() => {
+                handleReportChallenge();
+                handleCloseModal();
+              }}
+              text="Confirm Report"
             />
           </Box>
-          {isParticipant && now >= startTime && now <= votingEndTime && (
-            <Box textAlign="center" mt={3}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => navigate(`/challenges/${id}/vote/`)}
-              >
-                Vote for Winner
-              </Button>
-            </Box>
-          )}
-          {now > votingEndTime && (
-            <Box textAlign="center" mt={3}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => navigate(`/challenges/${id}/vote_results/`)}
-              >
-                View Vote Results
-              </Button>
-            </Box>
-          )}
-        </CardContent>
-      </Card>
+        </Modal>
 
-      <Modal
-        open={open}
-        onClose={handleCloseModal}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
-      >
-        <Box sx={reportModalStyle(theme)}>
-          <IconButton
-            onClick={handleCloseModal}
-            style={{ position: "absolute", top: 5, right: 5 }}
-          >
-            <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
-          </IconButton>
-
-          <Typography id="modal-title" variant="h4" component="h2">
-            Report Competition
-          </Typography>
-          <Typography id="modal-description" variant="body1" component="p">
-            {`Reporting challenge ${challenge.name}`}
-          </Typography>
-
-          <FormControl
-            variant="filled"
-            sx={{ m: 1, width: 250 }}
-            size="small"
-          >
-            <InputLabel id="reason-label">Reason</InputLabel>
-            <Select labelId="reason-label"></Select>
-          </FormControl>
-          <br />
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => {
-              handleReportChallenge();
-              handleCloseModal();
+        <Modal
+          open={inviteModalOpen}
+          onClose={() => setInviteModalOpen(false)}
+          aria-labelledby="invite-modal-title"
+          aria-describedby="invite-modal-description"
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              bgcolor: "#ffffff",
+              boxShadow: 24,
+              padding: 4,
+              borderRadius: 2,
             }}
           >
-            Confirm Report
-          </Button>
-        </Box>
-      </Modal>
+            <IconButton
+              onClick={() => setInviteModalOpen(false)}
+              style={{ position: "absolute", top: 5, right: 5 }}
+            >
+              <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+            </IconButton>
 
-      <Modal
-        open={inviteModalOpen}
-        onClose={() => setInviteModalOpen(false)}
-        aria-labelledby="invite-modal-title"
-        aria-describedby="invite-modal-description"
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            bgcolor: "#ffffff",
-            boxShadow: 24,
-            padding: 4,
-            borderRadius: 2,
-          }}
-        >
-          <IconButton
-            onClick={() => setInviteModalOpen(false)}
-            style={{ position: "absolute", top: 5, right: 5 }}
-          >
-            <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
-          </IconButton>
+            <Typography id="invite-modal-title" variant="h4" component="h2">
+              Invite Friends
+            </Typography>
+            <List>
+              {friends.map((friend) => (
+                <ListItem
+                  key={friend.id}
+                  button
+                  onClick={() => handleToggleFriend(friend.id)}
+                >
+                  <Checkbox
+                    checked={selectedFriends.includes(friend.id)}
+                    tabIndex={-1}
+                    disableRipple
+                  />
+                  <ListItemText primary={friend.username} />
+                </ListItem>
+              ))}
+            </List>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleInviteFriends}
+            >
+              Send Invites
+            </Button>
+          </Box>
+        </Modal>
+      </Container>
 
-          <Typography id="invite-modal-title" variant="h4" component="h2">
-            Invite Friends
-          </Typography>
-          <List>
-            {friends.map((friend) => (
-              <ListItem
-                key={friend.id}
-                button
-                onClick={() => handleToggleFriend(friend.id)}
-              >
-                <Checkbox
-                  checked={selectedFriends.includes(friend.id)}
-                  tabIndex={-1}
-                  disableRipple
-                />
-                <ListItemText primary={friend.username} />
-              </ListItem>
-            ))}
-          </List>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleInviteFriends}
-          >
-            Send Invites
-          </Button>
-        </Box>
-      </Modal>
-    </Container>
+      <ConfirmationMessage message={message}/>
+    </ConfirmationProvider>
   );
 };
 

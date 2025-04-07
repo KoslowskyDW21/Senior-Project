@@ -10,6 +10,9 @@ const ProtectedRoute = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isBanned, setBanned] = useState(false);
+  const [user, setUser] = useState({
+    id: null,
+  });
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -28,10 +31,11 @@ const ProtectedRoute = () => {
             localStorage.setItem("idToken", response.idToken);
             setIsAuthenticated(true);
 
-            await axios.get(`${config.serverUrl}/admin/ban`)
-            .then((response) => {
-              setBanned(response.data.banned)
-            })
+            await axios
+              .get(`${config.serverUrl}/admin/ban`)
+              .then((response) => {
+                setBanned(response.data.banned);
+              });
           } catch (error) {
             console.warn("Silent token refresh failed:", error);
             setIsAuthenticated(false);
