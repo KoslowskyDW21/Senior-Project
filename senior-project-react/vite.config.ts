@@ -20,10 +20,4 @@ export default defineConfig({
       }
     }
   }
-  // server: {
-  //   https: {
-  //     key: fs.readFileSync("key.pem"),
-  //     cert: fs.readFileSync("cert.pem"),
-  //   }
-  // },
 })
