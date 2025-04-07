@@ -128,6 +128,10 @@ export default function Settings() {
 
   const { isDarkMode } = useThemeContext();
 
+  const [errors, setErrors] = useState({
+    username: "",
+  });
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMode(
       (event.target as HTMLInputElement).value as "auto" | "light" | "dark"
@@ -498,9 +502,7 @@ export default function Settings() {
 
   return (
     <>
-    <Box
-      mt={12}
-    >
+      <Box mt={12}>
         <div
           style={{
             display: "flex",
@@ -645,18 +647,23 @@ export default function Settings() {
           <TextField
             aria-label="username-textfield"
             size="small"
-            helperText="Username"
             value={user.username}
             variant="filled"
             onChange={(e) => {
               const newUsername = e.target.value;
-
-              setUsername(newUsername);
-              setUser((prevUser) => ({
-                ...prevUser,
-                username: newUsername,
-              }));
+              if (newUsername.length <= 16) {
+                setUsername(newUsername);
+                setUser((prevUser) => ({
+                  ...prevUser,
+                  username: newUsername,
+                }));
+              }
             }}
+            error={!!errors.username}
+            helperText={
+              errors.username ||
+              `${16 - user.username.length} characters remaining`
+            }
           />
         ) : (
           <TextField
