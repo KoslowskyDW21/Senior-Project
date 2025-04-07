@@ -1,22 +1,16 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {
-  Card,
-  CardMedia,
-  Typography,
   Box,
   Container,
   Button,
-  IconButton,
-  Avatar,
-  TextField,
-  CardActionArea,
-  CardHeader,
-  useMediaQuery,
+  Typography,
   Grid2,
+  TextField,
+  Avatar,
+  IconButton,
 } from "@mui/material";
-import PersonIcon from "@mui/icons-material/Person";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import config from "../config.js";
 
@@ -32,14 +26,6 @@ interface UserGroup {
   image?: string;
 }
 
-interface User {
-  profile_picture: string;
-}
-
-interface Friendship {
-  friends: [];
-}
-
 const Group: React.FC<UserGroup> = ({ id, name, description, image }) => {
   const navigate = useNavigate();
   const handleGoToGroup = async () => {
@@ -47,417 +33,226 @@ const Group: React.FC<UserGroup> = ({ id, name, description, image }) => {
   };
 
   return (
-    <Card
-      variant="outlined"
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        transition: "all 0.3s ease",
-        "&:hover": {
-          borderColor: "#1976d2",
-          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-        },
-      }}
-    >
-      <CardActionArea onClick={handleGoToGroup}>
-        <CardHeader
-          title={
-            <Typography
-              variant="h5"
-              sx={{ fontSize: "clamp(1rem, 1.5vw, 2rem)", textAlign: "center" }}
-            >
-              {name}
-            </Typography>
-          }
-          subheader={
-            <Typography
-              variant="body2"
-              sx={{
-                fontSize: "clamp(0.8rem, 1.2vw, 1.5rem)",
-                textAlign: "center",
-              }}
-            >
-              {description}
-            </Typography>
-          }
-          sx={{
-            justifyContent: "center",
-            alignItems: "center",
-            flexShrink: 0,
-            width: "90%",
-          }}
-        />
-        {image && (
-          <CardMedia
-            component="img"
-            image={`${config.serverUrl}/${image}`}
-            sx={{
-              height: "auto",
-              objectFit: "contain",
-              width: "100%",
-              maxHeight: { xs: 150, sm: 200 }, // Adjust max height for different screen sizes
-            }}
-          />
-        )}
-      </CardActionArea>
-    </Card>
+    <div onClick={handleGoToGroup} style={{ cursor: "pointer" }}>
+      <Typography variant="h6">{name}</Typography>
+      <Typography variant="body2">{description}</Typography>
+      {image && <img src={`${config.serverUrl}/${image}`} alt="group" width="100%" />}
+    </div>
   );
 };
 
 const Groups: React.FC = () => {
-  const [groups, setGroups] = useState<UserGroup[]>([]);
-  const [myGroups, setMyGroups] = useState<UserGroup[]>([]);
-  const [invitedGroups, setInvitedGroups] = useState<UserGroup[]>([]);
+  const [groups, setGroups] = useState<UserGroup[]>([]); // All public groups
+  const [myGroups, setMyGroups] = useState<UserGroup[]>([]); // User's groups
+  const [invitedGroups, setInvitedGroups] = useState<UserGroup[]>([]); // Groups user is invited to
+  const [friends, setFriends] = useState<[]>([]); // For storing friends
+  const [searchQuery, setSearchQuery] = useState<string>(""); 
   const [loading, setLoading] = useState<boolean>(false);
-  const [page, setPage] = useState<number>(1);
-  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [noResultsFound, setNoResultsFound] = useState<boolean>(false);
+  const [totalPagesAll, setTotalPagesAll] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const groupsPerPage = 8;
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [profile_picture, setProfile_picture] = useState<string>();
-  const [friends, setFriends] = useState<[]>([]);
-  const [searchLabel, setSearchLabel] = useState<string>("");
 
-  const isSmallScreen = useMediaQuery("(max-width:600px)");
-  const isMediumScreen = useMediaQuery(
-    "(min-width:600px) and (max-width:900px)"
-  );
+  // Fetching all groups, my groups, and invited groups
+  const fetchGroups = async (page: number, query: string) => {
+    if (loading) return;
 
-  const fetchGroups = async () => {
+    setLoading(true);
     try {
-      const response = await axios.get(`${config.serverUrl}/groups/`);
-      if (response.status === 200) {
-        const newGroups = response.data;
-        setGroups((prevGroups) => [...prevGroups, ...newGroups]);
-        setHasMore(newGroups.length > 0);
+      const response = await axios.get(`${config.serverUrl}/groups/`, {
+        params: {
+          search: query, // Pass the search query to the backend
+          page: page,
+          per_page: groupsPerPage,
+        },
+      });
+      const data = response.data;
+
+      console.log("Fetched groups:", data);  // Log the response data to verify the result
+
+      // Append new groups to the existing groups list
+      if (page === 1) {
+        // For the first page, replace all groups (no append)
+        setGroups(data.all_groups);
+      } else {
+        // For subsequent pages, append the new groups to the existing list
+        setGroups((prevGroups) => [...prevGroups, ...data.all_groups]);
       }
+
+      setMyGroups(data.my_groups); // User's groups
+      setInvitedGroups(data.invited_groups); // Groups the user is invited to
+      setTotalPagesAll(data.total_pages || 1); // Get total pages for pagination
+      setNoResultsFound(data.all_groups.length === 0); // Check if no groups are found
     } catch (error) {
       console.error("Error fetching groups:", error);
-    }
-  };
-
-  const fetchMyGroups = async () => {
-    try {
-      const response = await axios.get(`${config.serverUrl}/groups/my_groups/`);
-      if (response.status === 200) {
-        setMyGroups(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching my groups:", error);
-    }
-  };
-
-  const fetchInvitedGroups = async () => {
-    try {
-      const response = await axios.get(
-        `${config.serverUrl}/groups/notifications/`
-      );
-      const invitedGroupsList = response.data.invited_groups;
-      setInvitedGroups(invitedGroupsList);
-      console.log("Invited Groups:", invitedGroupsList);
-    } catch (error) {
-      console.error("Error fetching invited groups:", error);
-    }
-  };
-
-  const loadMoreGroups = useCallback(() => {
-    if (loading || !hasMore) return;
-    setLoading(true);
-    fetchGroups(page).then(() => {
-      setPage((prevPage) => prevPage + 1);
+    } finally {
       setLoading(false);
-    });
-  }, [loading, hasMore, page]);
+    }
+  };
+
+  // Fetch friends
+  const fetchFriends = async () => {
+    try {
+      const response = await axios.post(`${config.serverUrl}/friends/get_friends/`, {}, { withCredentials: true });
+      setFriends(response.data.friends); // Update the friends list state
+    } catch (error) {
+      console.log("Error fetching friends:", error);
+    }
+  };
 
   useEffect(() => {
-    loadMoreGroups();
-    fetchMyGroups();
-    fetchInvitedGroups();
-    getCurrentUser();
-    getFriends();
-  }, []);
+    fetchGroups(1, ""); // Fetch groups when the component mounts
+    fetchFriends(); // Fetch friends when the component mounts
+  }, []);  // This will run once when the component mounts
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (
-        window.innerHeight + document.documentElement.scrollTop >=
-        document.documentElement.offsetHeight - 500
-      ) {
-        loadMoreGroups();
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [loadMoreGroups]);
-
-  const handleGoToRecipes = async () => {
-    navigate(`/recipes/`);
-  };
-
-  const handleGoToChallenges = async () => {
-    navigate(`/challenges/`);
-  };
-
-  const handleGoToOtherProfile = (id: number) => {
-    navigate(`/otherProfile/${id}/`);
-  };
+    // When the searchQuery or currentPage changes, fetch the groups
+    fetchGroups(currentPage, searchQuery);
+  }, [searchQuery, currentPage]); // Trigger fetch when searchQuery or currentPage changes
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNoResultsFound(false);
+    setCurrentPage(1); // Reset to page 1 when search query changes
+    setTotalPagesAll(1);
     const query = event.target.value;
-    setSearchQuery(query);
+    setSearchQuery(query); // Update search query immediately
 
+    // Update URL with the new search query
     if (query) {
-      navigate({
-        pathname: location.pathname,
-        search: `?search=${query}`,
-      });
+      fetchGroups(1, query);  // Fetch the first page of groups with the new query
     } else {
-      navigate({
-        pathname: location.pathname,
-        search: "",
-      });
+      fetchGroups(1, ""); // If empty, fetch all groups
     }
   };
 
-  const getCurrentUser = async () => {
-    try {
-      const response = await axios.post(
-        `${config.serverUrl}/profile/get_profile_pic/`
-      );
-      const data: User = response.data;
-      setProfile_picture(data.profile_picture);
-      console.log(profile_picture);
-    } catch (error) {
-      console.error("Error fetching user: ", error);
+  const handleScroll = () => {
+    if (loading || currentPage >= totalPagesAll) return;
+
+    const container = document.getElementById("scroll-container");
+    if (container) {
+      const nearBottom =
+        container.scrollHeight - container.scrollTop <= container.clientHeight + 10;
+      if (nearBottom) {
+        setCurrentPage((prev) => prev + 1); // Increment the page when reaching the bottom
+      }
     }
   };
 
-  const getFriends = async () => {
-    try {
-      const response = await axios.post(
-        `${config.serverUrl}/friends/get_friends/`,
-        {},
-        { withCredentials: true }
-      );
-      const data: Friendship = response.data;
-      console.log("data:");
-      console.log(data);
-      setFriends(data.friends);
-      console.log("Friends", data.friends);
-    } catch (error) {
-      console.log("Error fetching friends: ", error);
-    }
-  };
+  useEffect(() => {
+    const container = document.getElementById("scroll-container");
+    if (container) container.addEventListener("scroll", handleScroll);
 
-  const filteredGroups = groups.filter(
-    (group) =>
-      group.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !myGroups.some((myGroup) => myGroup.id === group.id)
-  );
+    return () => {
+      if (container) container.removeEventListener("scroll", handleScroll);
+    };
+  }, [loading, currentPage, totalPagesAll]);
 
   return (
     <div>
-      <Header title="Community" />
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-start",
-          alignItems: "center",
-          fontSize: "24px",
-          fontWeight: "bold",
-          textAlign: "center",
-          mt: 4,
-        }}
-      ></Box>
-      <main role="main" style={{ paddingTop: "90px" }}>
+      <Box id="scroll-container" sx={{ overflowY: "scroll", height: "90vh", mt: 0, width: "90vw", paddingRight: "8vw" }}>
+        <Header title="Community" />
         <Container>
+          {/* Friends Section */}
           <Box mt={4} mb={2} textAlign="center">
-            <Typography variant="h4" gutterBottom>
-              Friends
-            </Typography>
+            <Typography variant="h4" gutterBottom>Friends</Typography>
           </Box>
-        </Container>
 
-        <main role="main" style={{ paddingTop: "50px" }}>
-          <Box
-            sx={{
-              display: "flex",
-              flexWrap: "wrap", // Prevents overlapping on smaller screens
-              justifyContent: "center",
-              gap: 2, // Adds spacing between boxes
-            }}
-          >
-            {friends.slice(0, 6).map((friend) => (
-              <Box
-                key={friend.id}
-                sx={{
-                  width: "100px",
-                  minHeight: "100px",
-                  border: "2px solid rgb(172, 169, 169)",
-                  borderRadius: 2,
-                  boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
-                  transition: "all 0.3s ease",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  p: 1,
-                  height: "100%",
-                  "&:hover": {
-                    borderColor: "#1976d2",
-                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-                  },
-                }}
-                onClick={() => handleGoToOtherProfile(friend.id)}
-              >
-                {friend.profile_picture ? (
-                  <Avatar
-                    alt="Profile Picture"
-                    src={`${config.serverUrl}/${friend.profile_picture}`}
-                    sx={{ width: 70, height: 70, border: "1px solid #000" }}
-                  />
-                ) : (
-                  <Avatar
-                    sx={{ width: 70, height: 70, backgroundColor: "gray" }}
-                  >
-                    <PersonIcon sx={{ color: "white" }} />
-                  </Avatar>
-                )}
-                <Typography variant="body2" mt={1}>
-                  {friend.username}
-                </Typography>
+          <Box display="flex" flexWrap="wrap" justifyContent="center" gap={2}>
+            {friends.slice(0, 6).map((friend: any) => (
+              <Box key={friend.id} onClick={() => navigate(`/otherProfile/${friend.id}/`)} style={{ cursor: "pointer" }}>
+                <Avatar alt="Profile Picture" src={`${config.serverUrl}/${friend.profile_picture || "default-profile.png"}`} />
+                <Typography variant="body2">{friend.username}</Typography>
               </Box>
             ))}
-
-            {/* Add Friend Button placed as the last item */}
-            <Box
-              sx={{
-                width: "100px",
-                minHeight: "100px",
-                border: "2px solid rgb(172, 169, 169)",
-                borderRadius: 2,
-                boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
-                transition: "all 0.3s ease",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                p: 1,
-                height: "100%",
-                "&:hover": {
-                  borderColor: "#1976d2",
-                  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-                },
-              }}
-              onClick={() => navigate("/friends/")}
-            >
-              <IconButton onClick={() => console.log("Add Friend clicked")}>
+            <Box onClick={() => navigate("/friends/")}>
+              <IconButton>
                 <AddCircleIcon sx={{ fontSize: 60, color: "#1976d2" }} />
               </IconButton>
-              <Typography variant="body1" sx={{ color: "#1976d2" }}>
-                Add Friend
-              </Typography>
+              <Typography variant="body1" sx={{ color: "#1976d2" }}>Add Friend</Typography>
             </Box>
           </Box>
 
           <Box mt={10} textAlign="center">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => navigate("/friends/")}
-            >
+            <Button variant="contained" color="primary" onClick={() => navigate("/friends/")}>
               View All Friends
             </Button>
           </Box>
-        </main>
 
-        <Container>
-          <Box mt={4} mb={2} textAlign="center">
-            <Typography variant="h4" gutterBottom>
-              User Groups
-            </Typography>
-          </Box>
-
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => navigate(`/groups/create/`)}
-          >
-            Create a Group
-          </Button>
-
-          {myGroups.length > 0 && (
-            <Box mt={4}>
-              <Typography variant="h5" gutterBottom>
-                My Groups
-              </Typography>
-              <Grid2 container spacing={2} columns={12}>
-                {myGroups.map((group) => (
-                  <Grid2 size={{xs: 12, sm: 6, md: 4}} key={group.id}>
-                    <Group {...group} />
-                  </Grid2>
-                ))}
-              </Grid2>
+          {/* Groups Section */}
+          <Box mt={10} textAlign="center">
+            <Box mt={4} mb={2} textAlign="center">
+              <Typography variant="h4" gutterBottom>Groups</Typography>
             </Box>
-          )}
-
-          {invitedGroups.length > 0 && (
-            <Box mt={4}>
-              <Typography variant="h5" gutterBottom>
-                Invited Groups
-              </Typography>
-              <Grid2 container spacing={2} columns={12}>
-                {invitedGroups.map((group) => (
-                  <Grid2 size={{xs: 12, sm: 6, md: 4}} key={group.id}>
-                    <Group {...group} />
-                  </Grid2>
-                ))}
-              </Grid2>
-            </Box>
-          )}
-
-          <Box
-            mt={{ xs: 10, sm: 14, md: 14 }}
-            textAlign="center"
-            display="flex"
-            justifyContent="center"
-            sx={{ flexGrow: 1 }}
-          >
+            <Button variant="contained" color="primary" onClick={() => navigate("/groups/create/")}>
+              Create a Group
+            </Button>
             <TextField
               label="Search for groups"
               variant="outlined"
               fullWidth
               value={searchQuery}
               onChange={handleSearchChange}
-              sx={{
-                width: "100%",
-              }}
             />
           </Box>
 
+          {/* Display no results message */}
+          {noResultsFound && !loading && (
+            <Box textAlign="center" mt={4}>
+              <Typography variant="body2" color="textSecondary">No results found</Typography>
+            </Box>
+          )}
+
+          {/* My Groups */}
+          {myGroups.length > 0 && (
+            <Box mt={4}>
+              <Typography variant="h5" gutterBottom>My Groups</Typography>
+              <Grid2 container spacing={2} columns={12}>
+                {myGroups.map((group) => (
+                  <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={group.id}>
+                    <Group {...group} />
+                  </Grid2>
+                ))}
+              </Grid2>
+            </Box>
+          )}
+
+          {/* Invited Groups */}
+          {invitedGroups.length > 0 && (
+            <Box mt={4}>
+              <Typography variant="h5" gutterBottom>Invited Groups</Typography>
+              <Grid2 container spacing={2} columns={12}>
+                {invitedGroups.map((group) => (
+                  <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={group.id}>
+                    <Group {...group} />
+                  </Grid2>
+                ))}
+              </Grid2>
+            </Box>
+          )}
+
+          {/* All Groups */}
           <Box mt={4}>
-            <Typography variant="h5" gutterBottom>
-              All Groups
-            </Typography>
+            <Typography variant="h5" gutterBottom>All Groups</Typography>
             <Grid2 container spacing={2} columns={12}>
-              {filteredGroups.map((group) => (
-                <Grid2 size={{xs: 12, sm: 6, md: 4}} key={group.id}>
+              {groups.map((group) => (
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={group.id}>
                   <Group {...group} />
                 </Grid2>
               ))}
             </Grid2>
           </Box>
+
           {loading && (
             <Box textAlign="center" mt={4}>
-              <Typography variant="body2" color="textSecondary">
-                Loading...
-              </Typography>
+              <Typography variant="body2" color="textSecondary">Loading...</Typography>
             </Box>
           )}
         </Container>
+
         <Footer />
-      </main>
+      </Box>
     </div>
   );
 };
