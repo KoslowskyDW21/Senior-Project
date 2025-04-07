@@ -11,6 +11,7 @@ import {
   Avatar,
   IconButton,
 } from "@mui/material";
+import PersonIcon from "@mui/icons-material/Person";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import config from "../config.js";
 
@@ -92,6 +93,10 @@ const Groups: React.FC = () => {
     }
   };
 
+  const handleGoToOtherProfile = (id: number) => {
+    navigate(`/otherProfile/${id}/`);
+  };
+
   // Fetch friends
   const fetchFriends = async () => {
     try {
@@ -151,33 +156,62 @@ const Groups: React.FC = () => {
 
   return (
     <div>
-      <Box id="scroll-container" sx={{ overflowY: "scroll", height: "90vh", mt: 0, width: "90vw", paddingRight: "8vw" }}>
+      <Box id="scroll-container" sx={{ overflowY: "scroll", height: "90vh", mt: 0, width: "90vw", paddingRight: "13vw" }}>
         <Header title="Community" />
         <Container>
           {/* Friends Section */}
-          <Box mt={4} mb={2} textAlign="center">
+          <Box mt={10} mb={2} textAlign="center">
             <Typography variant="h4" gutterBottom>Friends</Typography>
           </Box>
 
           <Box display="flex" flexWrap="wrap" justifyContent="center" gap={2}>
-            {friends.slice(0, 6).map((friend: any) => (
-              <Box key={friend.id} onClick={() => navigate(`/otherProfile/${friend.id}/`)} style={{ cursor: "pointer" }}>
-                <Avatar alt="Profile Picture" src={`${config.serverUrl}/${friend.profile_picture || "default-profile.png"}`} />
-                <Typography variant="body2">{friend.username}</Typography>
+          {friends.slice(0, 6).map((friend) => (
+              <Box
+                key={friend.id}
+                sx={{
+                  width: "100px",
+                  minHeight: "100px",
+                  border: "2px solid rgb(172, 169, 169)",
+                  borderRadius: 2,
+                  boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.3s ease",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  p: 1,
+                  height: "100%",
+                  "&:hover": {
+                    borderColor: "#1976d2",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                  },
+                }}
+                onClick={() => handleGoToOtherProfile(friend.id)}
+              >
+                {friend.profile_picture ? (
+                  <Avatar
+                    alt="Profile Picture"
+                    src={`${config.serverUrl}/${friend.profile_picture}`}
+                    sx={{ width: 70, height: 70, border: "1px solid #000" }}
+                  />
+                ) : (
+                  <Avatar
+                    sx={{ width: 70, height: 70, backgroundColor: "gray" }}
+                  >
+                    <PersonIcon sx={{ color: "white" }} />
+                  </Avatar>
+                )}
+                <Typography variant="body2" mt={1}>
+                  {friend.username}
+                </Typography>
               </Box>
             ))}
             <Box onClick={() => navigate("/friends/")}>
               <IconButton>
                 <AddCircleIcon sx={{ fontSize: 60, color: "#1976d2" }} />
               </IconButton>
-              <Typography variant="body1" sx={{ color: "#1976d2" }}>Add Friend</Typography>
+              <Typography variant="body1" sx={{ color: "#1976d2" }}>More Friends</Typography>
             </Box>
-          </Box>
-
-          <Box mt={10} textAlign="center">
-            <Button variant="contained" color="primary" onClick={() => navigate("/friends/")}>
-              View All Friends
-            </Button>
           </Box>
 
           {/* Groups Section */}
@@ -185,7 +219,7 @@ const Groups: React.FC = () => {
             <Box mt={4} mb={2} textAlign="center">
               <Typography variant="h4" gutterBottom>Groups</Typography>
             </Box>
-            <Button variant="contained" color="primary" onClick={() => navigate("/groups/create/")}>
+            <Button variant="contained" color="primary"  onClick={() => navigate("/groups/create/")}  sx={{ marginBottom: 2 }}>
               Create a Group
             </Button>
             <TextField
