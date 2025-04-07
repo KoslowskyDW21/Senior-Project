@@ -34,13 +34,54 @@ const Group: React.FC<UserGroup> = ({ id, name, description, image }) => {
   };
 
   return (
-    <div onClick={handleGoToGroup} style={{ cursor: "pointer" }}>
-      <Typography variant="h6">{name}</Typography>
-      <Typography variant="body2">{description}</Typography>
-      {image && <img src={`${config.serverUrl}/${image}`} alt="group" width="100%" />}
+    <div onClick={handleGoToGroup} style={{ cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      {/* Title with overflow handling */}
+      <Typography
+        variant="h6"
+        sx={{
+          width: "100%",                 // Make the title take up full width of the container
+          whiteSpace: "nowrap",          // Prevent wrapping of the title
+          overflow: "hidden",            // Hide overflowed text
+          textOverflow: "ellipsis",      // Add "..." when the text is too long
+          textAlign: "center",           // Center align the title text
+          fontWeight: "bold",            // Optional: Make the title bold
+        }}
+      >
+        {name}
+      </Typography>
+
+      {/* Description */}
+      <Typography variant="body2" sx={{ textAlign: "center" }}>
+        {description}
+      </Typography>
+
+      {/* Fixed size for image */}
+      {image && (
+        <Box
+          sx={{
+            width: "100%",        // Make the image container take up full width of its grid item
+            height: 200,          // Fixed height
+            overflow: "hidden",   // Prevent overflow if the image is larger than the container
+            borderRadius: 2,      // Optional: rounded corners for the image
+            boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)", // Optional: slight shadow for image
+            marginTop: 1,         // Add a small margin between the title/description and the image
+          }}
+        >
+          <img
+            src={`${config.serverUrl}/${image}`}
+            alt="group"
+            style={{
+              width: "100%",       // Make the image take full width of the container
+              height: "100%",      // Make the image fill the container's height
+              objectFit: "cover",  // Ensure the image covers the box without stretching
+            }}
+          />
+        </Box>
+      )}
     </div>
   );
 };
+
 
 const Groups: React.FC = () => {
   const [groups, setGroups] = useState<UserGroup[]>([]); // All public groups
@@ -156,7 +197,7 @@ const Groups: React.FC = () => {
 
   return (
     <div>
-      <Box id="scroll-container" sx={{ overflowY: "scroll", height: "90vh", mt: 0, width: "90vw", paddingRight: "13vw" }}>
+      <Box id="scroll-container" sx={{ overflowY: "scroll", height: "90vh", mt: 0, width: "90vw", paddingRight: "13vw", paddingBottom: "4vw" }}>
         <Header title="Community" />
         <Container>
           {/* Friends Section */}
