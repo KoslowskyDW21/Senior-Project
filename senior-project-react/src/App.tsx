@@ -3,6 +3,7 @@ import { ThemeProvider, CssBaseline } from "@mui/material";
 import { lightTheme, darkTheme } from "./theme";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { RegistrationProvider } from "./components/RegistrationContext";
+import config from "./config.js";
 import Login from "./components/Login";
 import RegistrationOne from "./components/RegistrationOne";
 import RegistrationTwo from "./components/RegistrationTwo";
@@ -41,6 +42,7 @@ import Friends from "./components/Friends";
 import ReportPage from "./components/ReportPage";
 import { PublicClientApplication } from "@azure/msal-browser";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Unregistered from "./components/Unregistered";
 import useIdTokenRefresher from "./hooks/refresh";
 import {
   useThemeContext,
@@ -99,10 +101,15 @@ function AppContent() {
             {/* Default route (login page) */}
             <Route path="/" element={<Login />} />
             {/* Registration pages */}
-            <Route path="/registration-one" element={<RegistrationOne />} />
-            <Route path="/registration-two" element={<RegistrationTwo />} />
-            <Route path="/registration-three" element={<RegistrationThree />} />
-            <Route path="/registration-four" element={<RegistrationFour />} />
+            <Route element={<Unregistered />}>
+              <Route path="/registration-one" element={<RegistrationOne />} />
+              <Route path="/registration-two" element={<RegistrationTwo />} />
+              <Route
+                path="/registration-three"
+                element={<RegistrationThree />}
+              />
+              <Route path="/registration-four" element={<RegistrationFour />} />
+            </Route>
             {/* Protected Routes for Authenticated Users */}
             <Route element={<ProtectedRoute />}>
               {/* recipes */}

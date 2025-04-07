@@ -69,6 +69,12 @@ class User(UserMixin, db.Model):
     user_notifications = relationship('UserNotifications', backref='user', cascade="all, delete-orphan")
     friend_requests_sent = relationship('FriendRequest', foreign_keys="[FriendRequest.requestFrom]", cascade="all, delete-orphan")
     friend_requests_received = relationship('FriendRequest', foreign_keys="[FriendRequest.requestTo]", cascade="all, delete-orphan")
+    challenges = relationship(
+        "Challenge",
+        back_populates="creator_user",
+        cascade="all, delete-orphan"
+    )
+
 
     @property
     def password(self):
@@ -372,6 +378,11 @@ class Review(db.Model):
     num_reports = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id', ondelete="CASCADE"), nullable=False)
     username = db.Column(db.Text)
+    review_reports = relationship(
+        "ReviewReport",
+        back_populates="review",
+        cascade="all, delete-orphan"
+    )
     def to_json(self):
         return {
             "id": self.id,
@@ -388,6 +399,7 @@ class Review(db.Model):
 class ReviewReport(db.Model):
     __tablename__ = "ReviewReport"
     review_id = db.Column(db.Integer, db.ForeignKey("Review.id"), primary_key=True)
+    review = relationship("Review", back_populates="review_reports")
     user_id = db.Column(db.Integer, db.ForeignKey("User.id"), primary_key=True)
     reason = db.Column(db.String(255), nullable=False)
 
@@ -405,7 +417,8 @@ class Challenge(db.Model):
     __tablename__ = 'Challenge'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.Text, nullable=False)
-    creator = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    creator = db.Column(db.Integer, db.ForeignKey('User.id', ondelete="CASCADE"), nullable=False)
+    creator_user = relationship("User", back_populates="challenges")
     image = db.Column(db.Text)
     difficulty = db.Column(db.Enum('1', '2', '3', '4', '5'), nullable=False)
     theme = db.Column(db.Text, nullable=False)
@@ -415,6 +428,16 @@ class Challenge(db.Model):
     is_complete = db.Column(db.Boolean, nullable=False)
     num_reports = db.Column(db.Integer, nullable=False)
     xp_awarded = db.Column(db.Boolean, default=False)
+    participants = relationship(
+        "ChallengeParticipant",
+        back_populates="challenge",
+        cascade="all, delete-orphan"
+    )
+    votes = relationship(
+        "ChallengeVote",
+        back_populates="challenge",
+        cascade="all, delete-orphan"
+    )
 
     def to_json(self):
         return {
@@ -461,11 +484,12 @@ class ChallengeResult(db.Model):
 
 class ChallengeVote(db.Model):
     __tablename__ = 'ChallengeVote'
-    challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id'), primary_key=True)
-    first_choice = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
-    second_choice = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=True)
-    third_choice = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=True)
-    given_by = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id', ondelete="CASCADE"), primary_key=True)
+    first_choice = db.Column(db.Integer, db.ForeignKey('User.id', ondelete="CASCADE"), nullable=False)
+    second_choice = db.Column(db.Integer, db.ForeignKey('User.id', ondelete="CASCADE"), nullable=True)
+    third_choice = db.Column(db.Integer, db.ForeignKey('User.id', ondelete="CASCADE"), nullable=True)
+    given_by = db.Column(db.Integer, db.ForeignKey('User.id', ondelete="CASCADE"), primary_key=True)
+    challenge = relationship("Challenge", back_populates="votes")
 
     def to_json(self):
         return {
@@ -478,8 +502,9 @@ class ChallengeVote(db.Model):
 
 class ChallengeParticipant(db.Model):
     __tablename__ = 'ChallengeParticipant'
-    challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id'), primary_key=True)
+    challenge_id = db.Column(db.Integer, db.ForeignKey('Challenge.id', ondelete="CASCADE"), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True)
+    challenge = relationship("Challenge", back_populates="participants")
     def to_json(self):
         return {
             "challenge_id": self.challenge_id,

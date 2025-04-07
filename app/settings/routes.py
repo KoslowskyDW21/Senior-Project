@@ -5,7 +5,6 @@ from app.models import *
 from flask_login import current_user, login_required
 
 
-@login_required
 @bp.route('/', methods=['GET'])
 def post_settings_page():
     print("Current User:")
