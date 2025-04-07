@@ -12,11 +12,11 @@ import {
   Tooltip,
   IconButton,
 } from "@mui/material";
-import Achievement from "./Achievements";
 import Confetti from "react-confetti";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Header from "./Header";
 import config from "../config.js";
+import { Achievement } from "./Achievements.js"
 
 interface ProfileResponse {
   lname: string;
@@ -61,7 +61,7 @@ const Profile: React.FC = () => {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
   const [openPfpModal, setOpenPfpModal] = useState(false);
-  const [message, setMessage] = useState("");
+  const [, setMessage] = useState("");
   const [user_level, setLevel] = useState<number>(0);
   const [xp_points, setXp_points] = useState<number>(0);
   const [hasLeveled, setHasLeveled] = useState<boolean>(false);
@@ -135,16 +135,12 @@ const Profile: React.FC = () => {
     } catch (error) {
       const axiosError = error as AxiosError;
       if (axiosError.response && axiosError.response.data) {
-        const errorData = axiosError.response.data;
+        const errorData: any = axiosError.response.data;
         setMessage(errorData.message);
       } else {
         setMessage("An unknown error occurred");
       }
     }
-  };
-
-  const handleGoToRecipes = async () => {
-    navigate(`/recipes`);
   };
 
   const handleGoToAchievements = () => {
@@ -175,7 +171,7 @@ const Profile: React.FC = () => {
       } catch (error) {
         const axiosError = error as AxiosError;
         if (axiosError.response && axiosError.response.data) {
-          const errorData = axiosError.response.data;
+          const errorData: any = axiosError.response.data;
           setMessage(errorData.message);
         } else {
           setMessage("An error occurred while updating the profile picture.");
@@ -200,18 +196,13 @@ const Profile: React.FC = () => {
   const handleRemovePfp = async () => {
     handleClosePfpModal();
     try {
-      const response = await axios.post(
-        `${config.serverUrl}/profile/remove_profile_pic/`,
-        {},
-        { withCredentials: true }
-      );
       setProfilePicUrl(null);
       setMessage("Profile picture removed successfully!");
       getProfilePic();
     } catch (error) {
       const axiosError = error as AxiosError;
       if (axiosError.response && axiosError.response.data) {
-        const errorData = axiosError.response.data;
+        const errorData: any = axiosError.response.data;
         setMessage(errorData.message);
       } else {
         setMessage("An unknown error occurred");
@@ -238,17 +229,20 @@ const Profile: React.FC = () => {
 
   const [confettiVisible, setConfettiVisible] = useState(false);
   const [confettiOpacity, setConfettiOpacity] = useState(1);
-  const [confettiSource, setConfettiSource] = useState({ x: 0, y: 0 });
+  const [confettiSource, setConfettiSource] = useState({ x: 0, y: 0, w: 0, h: 0 });
 
   const xpBarRef = useRef<HTMLDivElement | null>(null);
+  const pfpRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (hasLeveled) {
-      if (xpBarRef.current) {
-        const rect = xpBarRef.current.getBoundingClientRect();
+      if (pfpRef.current) {
+        const rect = pfpRef.current.getBoundingClientRect();
         setConfettiSource({
           x: rect.left + rect.width / 2,
           y: rect.top + rect.height / 2,
+          w: 0,
+          h: 0,
         });
       }
 
@@ -305,6 +299,7 @@ const Profile: React.FC = () => {
         {fname} {lname}
       </Typography>
       <div
+        ref={pfpRef}
         style={{
           display: "flex",
           justifyContent: "center",

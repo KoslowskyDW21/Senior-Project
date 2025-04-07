@@ -1,8 +1,8 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import FolderIcon from "@mui/icons-material/Folder";
 import { Theme, useTheme } from "@mui/material/styles";
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect, ChangeEvent, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Header from "./Header.js";
 import {
   Avatar,
@@ -18,7 +18,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  TextField,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -38,10 +37,6 @@ interface ProfileResponse {
 
 interface Friendship {
   friends: [];
-}
-
-interface User {
-  users: [];
 }
 
 interface FriendRequestTo {
@@ -112,7 +107,7 @@ const OtherProfile: React.FC = () => {
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
   const [user_level, setLevel] = useState<number>(0);
   const [xp_points, setXp_points] = useState<number>(0);
-  const [hasLeveled, setHasLeveled] = useState<boolean>(false);
+  const [, setHasLeveled] = useState<boolean>(false);
   const [friends, setFriends] = useState<[]>([]);
   const [friendRequestsTo, setFriendRequestsTo] = useState<[]>([]);
   const [friendRequestsFrom, setFriendRequestsFrom] = useState<[]>([]);
