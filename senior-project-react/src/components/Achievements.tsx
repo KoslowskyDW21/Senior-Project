@@ -24,11 +24,19 @@ const style = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 400,
+  width: "80vw",  // Set width relative to viewport width
+  height: "60vh",  // Set height relative to viewport height
+  maxWidth: "60vh",
+  maxHeight: "75vh",  // Max height to limit the modal's height on large screens
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
   p: 4,
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  overflow: "hidden", // Prevent overflow
 };
 
 const Achievements: React.FC = () => {
@@ -213,23 +221,36 @@ const Achievements: React.FC = () => {
         <Box sx={style}>
           {selectedAchievement && (
             <>
-              <Typography id="modal-modal-title" variant="h6" component="h2">
+              {/* Achievement Title */}
+              <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ textAlign: "center", marginBottom: "10px" }}>
                 {selectedAchievement.title}
               </Typography>
-              <Box id="modal-image">
-                <Box>
-                  <img
-                    src={`${config.serverUrl}/${selectedAchievement.image}`}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                    alt={selectedAchievement.title}
-                  />
-                </Box>
+
+              {/* Image */}
+              <Box 
+                sx={{
+                  width: "100%",  // Full width of the modal container
+                  height: "auto", // Allow the image to adjust height based on its width
+                  display: "flex", 
+                  justifyContent: "center", // Center the image horizontally
+                  alignItems: "center",  // Center the image vertically
+                  maxHeight: "50%",  // Limit the height of the image to 50% of the modal's height
+                }}
+              >
+                <img
+                  src={`${config.serverUrl}/${selectedAchievement.image}`}
+                  alt={selectedAchievement.title}
+                  style={{
+                    width: "100%", // Image takes full width
+                    height: "auto", // Maintain aspect ratio
+                    maxHeight: "100%", // Ensure the image doesn't exceed the container's height
+                    objectFit: "contain",  // Ensure image fits within the container while maintaining aspect ratio
+                  }}
+                />
               </Box>
-              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+
+              {/* Achievement Description */}
+              <Typography id="modal-modal-description" sx={{ mt: 2, textAlign: "center", fontSize: "1rem", maxHeight: "30%", overflow: "auto" }}>
                 {selectedAchievement.description}
               </Typography>
             </>

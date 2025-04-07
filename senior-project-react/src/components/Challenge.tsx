@@ -10,7 +10,6 @@ import {
 import Difficulty from "./Difficulty";
 import config from "../config.js";
 
-
 interface ChallengeProps {
   id: number;
   name: string;
@@ -31,21 +30,27 @@ const Challenge: React.FC<ChallengeProps> = ({
 
   return (
     <Card
-      variant="outlined"
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        flexShrink: 1,
-        maxHeight: 400, // Set a fixed height for all cards
-      }}
-    >
+    variant="outlined"
+    sx={{
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
+    flexShrink: 1,
+    maxWidth: 400, // Set a max width to the card to prevent it from stretching too wide
+  }}
+>
       <CardActionArea onClick={handleGoToChallenge}>
         <CardHeader
           title={
             <Typography
               variant="h5"
-              sx={{ fontSize: "clamp(1rem, 1.5vw, 2rem)", textAlign: "center" }}
+              sx={{ fontSize: "clamp(1rem, 1.5vw, 2rem)", 
+                textAlign: "center" ,
+                whiteSpace: "nowrap",        // Prevent wrapping
+                overflow: "hidden",          // Hide overflowing text
+                textOverflow: "ellipsis",    // Add ellipsis (...) for overflowing text
+                width: "100%", maxWidth: "100%",            // Prevent the title from stretching beyond the card
+               }}
             >
               {name}
             </Typography>
@@ -63,10 +68,9 @@ const Challenge: React.FC<ChallengeProps> = ({
             component="img"
             image={`${config.serverUrl}/${image}`}
             sx={{
-              height: "auto",
-              objectFit: "contain",
-              width: "100%",
-              maxHeight: 200,
+              height: 200, // Ensure all images have the same height
+              objectFit: "contain", // Ensure the image covers the area without distorting
+              width: "100%", // Stretch the image to fill the card width
             }}
           />
         )}

@@ -58,17 +58,22 @@ interface Achievement {
 
 const modalStyle = {
   position: "absolute",
-  top: "calc(50% + 60px)",
+  top: "50%",
   left: "50%",
-  transform: "translateX(-50%)",
-  width: 250,
+  transform: "translate(-50%, -50%)",
+  width: "80vw",  // Set width relative to viewport width
+  height: "60vh",  // Set height relative to viewport height
+  maxWidth: "60vh",
+  maxHeight: "75vh",  // Max height to limit the modal's height on large screens
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
-  pt: 2,
-  px: 4,
-  pb: 3,
-  borderRadius: 2,
+  p: 4,
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  overflow: "hidden", // Prevent overflow
 };
 
 const reportModalStyle = (theme: Theme) => ({
@@ -768,47 +773,50 @@ const OtherProfile: React.FC = () => {
           </Modal>
 
           <Modal
-            open={openAchievementModal}
-            onClose={handleCloseAchievementModal}
-            aria-labelledby="modal-modal-title"
-            aria-describedby="modal-modal-description"
-          >
-            <Box sx={modalStyle}>
-              {selectedAchievement && (
-                <>
-                  <Typography
-                    id="modal-modal-title"
-                    variant="h6"
-                    component="h2"
-                  >
-                    {selectedAchievement.isVisible
-                      ? selectedAchievement.title
-                      : "Hidden Achievement"}
-                  </Typography>
-                  <Box id="modal-image">
-                    <Box>
-                      <img
-                        src={`${config.serverUrl}/${
-                          selectedAchievement.isVisible
-                            ? selectedAchievement.image
-                            : "static/uploads/daQuestion.png"
-                        }`}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                        alt={selectedAchievement.title}
-                      />
-                    </Box>
-                  </Box>
-                  <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                    {selectedAchievement.description}
-                  </Typography>
-                </>
-              )}
-            </Box>
-          </Modal>
+        open={openAchievementModal}
+        onClose={handleCloseAchievementModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={modalStyle}>
+          {selectedAchievement && (
+            <>
+              {/* Achievement Title */}
+              <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ textAlign: "center", marginBottom: "10px" }}>
+                {selectedAchievement.title}
+              </Typography>
+
+              {/* Image */}
+              <Box 
+                sx={{
+                  width: "100%",  // Full width of the modal container
+                  height: "auto", // Allow the image to adjust height based on its width
+                  display: "flex", 
+                  justifyContent: "center", // Center the image horizontally
+                  alignItems: "center",  // Center the image vertically
+                  maxHeight: "50%",  // Limit the height of the image to 50% of the modal's height
+                }}
+              >
+                <img
+                  src={`${config.serverUrl}/${selectedAchievement.image}`}
+                  alt={selectedAchievement.title}
+                  style={{
+                    width: "100%", // Image takes full width
+                    height: "auto", // Maintain aspect ratio
+                    maxHeight: "100%", // Ensure the image doesn't exceed the container's height
+                    objectFit: "contain",  // Ensure image fits within the container while maintaining aspect ratio
+                  }}
+                />
+              </Box>
+
+              {/* Achievement Description */}
+              <Typography id="modal-modal-description" sx={{ mt: 2, textAlign: "center", fontSize: "1rem", maxHeight: "30%", overflow: "auto" }}>
+                {selectedAchievement.description}
+              </Typography>
+            </>
+          )}
+        </Box>
+      </Modal>
         </>
       )}
     </>
