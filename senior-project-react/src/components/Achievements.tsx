@@ -11,7 +11,7 @@ import { CheckCircle } from "@mui/icons-material";
 import config from "../config.js";
 import Header from "./Header.js";
 
-interface Achievement {
+export interface Achievement {
   id: number;
   title: string;
   image?: string;

@@ -19,7 +19,6 @@ import {
   ListItem,
   ListItemText,
   Checkbox,
-  Snackbar,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
@@ -96,7 +95,6 @@ const GroupDetails: React.FC = () => {
   const [confirmation, setConfirmation] = useState<boolean>(false);
   const navigate = useNavigate();
   const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
 
   // States for report modal
   const [open, setOpen] = useState(false);
@@ -541,7 +539,6 @@ const GroupDetails: React.FC = () => {
                 {friends.map((friend) => (
                   <ListItem
                     key={friend.id}
-                    button
                     onClick={() => handleToggleFriend(friend.id)}
                   >
                     <Checkbox

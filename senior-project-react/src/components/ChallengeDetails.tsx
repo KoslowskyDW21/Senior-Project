@@ -24,7 +24,6 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import ChallengeParticipantsList from "./ChallengeParticipantsList";
 import config from "../config.js";
-import { set } from "date-fns";
 import Header from "./Header.js";
 
 interface Challenge {
@@ -96,7 +95,7 @@ const ChallengeDetail: React.FC = () => {
   const [invited, setInvited] = useState(false);
   const [inviteMessage, setInviteMessage] = useState("");
   const theme = useTheme();
-  const [participantIds, setParticipantIds] = useState<Participant[]>([]);
+  const [, setParticipantIds] = useState<Participant[]>([]);
 
   // States for report modal
   const [open, setOpen] = useState(false);
@@ -544,7 +543,7 @@ const ChallengeDetail: React.FC = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            bgcolor: "#ffffff",
+            bgcolor: theme.palette.background.default,
             boxShadow: 24,
             padding: 4,
             borderRadius: 2,
@@ -564,7 +563,7 @@ const ChallengeDetail: React.FC = () => {
             {friends.map((friend) => (
               <ListItem
                 key={friend.id}
-                button
+                // button
                 onClick={() => handleToggleFriend(friend.id)}
               >
                 <Checkbox

@@ -56,10 +56,9 @@ const GroupMessages: React.FC = () => {
   const [confirmation, setConfirmation] = useState<boolean>(false);
   const handleOpenModal = () => setOpen(true);
   const handleCloseModal = () => setOpen(false);
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const navigate = useNavigate();
   const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
