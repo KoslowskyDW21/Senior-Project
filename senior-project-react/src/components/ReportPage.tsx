@@ -11,6 +11,8 @@ import {
   CardMedia,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useThemeContext } from "./ThemeContext";
+import "../AdminPage.css";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import config from "../config.js";
@@ -100,7 +102,7 @@ interface ChallengeReport {
 }
 
 // React component that lets the user see which groups have been reported
-function Group({ group }: {group: UserGroup}) {
+function Group({ group }: { group: UserGroup }) {
   return (
     <Card
       sx={{
@@ -116,11 +118,7 @@ function Group({ group }: {group: UserGroup}) {
           {group.description}
         </Typography>
 
-        <a
-          href={`/groups/${group.id}`}
-        >
-          {`Go to ${group.name}`}
-        </a>
+        <a href={`/groups/${group.id}`}>{`Go to ${group.name}`}</a>
 
         {group.image != "NULL" && (
           <CardMedia
@@ -141,7 +139,7 @@ function Group({ group }: {group: UserGroup}) {
 }
 
 // React component that lets the user see which reviews have been reported
-function Review({ review }: {review: Review}) {
+function Review({ review }: { review: Review }) {
   return (
     <Card
       sx={{
@@ -181,11 +179,11 @@ function Review({ review }: {review: Review}) {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // React component that lets the user see which messages have been reported
-function Message({ message }: {message: Message}) {
+function Message({ message }: { message: Message }) {
   return (
     <Card
       sx={{
@@ -193,7 +191,7 @@ function Message({ message }: {message: Message}) {
         border: "1px solid #ccc",
         borderRadius: 2,
         boxShadow: 2,
-      }}    
+      }}
     >
       <CardContent>
         <Typography variant="h6">{message.username}</Typography>
@@ -202,11 +200,11 @@ function Message({ message }: {message: Message}) {
         </Typography>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // React component that lets the user see which competitions (challenges) have been reported
-function Challenge({ challenge }: {challenge: Challenge}) {
+function Challenge({ challenge }: { challenge: Challenge }) {
   return (
     <Card
       sx={{
@@ -256,7 +254,7 @@ const modalStyle = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  bgcolor: "#ffffff",
+  bgcolor: "background.paper",
   boxShadow: 24,
   paddingTop: 3,
   paddingLeft: 7,
@@ -266,7 +264,6 @@ const modalStyle = {
 };
 
 export default function ReportPage() {
-  
   const [admin, setAdmin] = useState<boolean>(false);
   const [groups, setGroups] = useState<UserGroup[]>([]);
   const [group, setGroup] = useState<UserGroup | null>(null);
@@ -279,8 +276,10 @@ export default function ReportPage() {
   const [messageReports, setMessageReports] = useState<MessageReport[]>([]);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [challenge, setChallenge] = useState<Challenge | null>(null);
-  const [challengeReports, setChallengeReports] = useState<ChallengeReport[]>([]);
-  const [users, setUsers] = useState<User[]>([]);  
+  const [challengeReports, setChallengeReports] = useState<ChallengeReport[]>(
+    []
+  );
+  const [users, setUsers] = useState<User[]>([]);
   const [openGroup, setOpenGroup] = useState<boolean>(false);
   const handleOpenGroupModal = () => setOpenGroup(true);
   const handleCloseGroupModal = () => setOpenGroup(false);
@@ -294,6 +293,7 @@ export default function ReportPage() {
   const handleOpenChallengeModal = () => setOpenChallenge(true);
   const handleCloseChallengeModal = () => setOpenChallenge(false);
   const navigate = useNavigate();
+  const { mode } = useThemeContext();
 
   async function isAdmin() {
     await axios
@@ -348,7 +348,10 @@ export default function ReportPage() {
         setChallenges(response.data);
       })
       .catch((error) => {
-        console.error("Could not fetch reported competitions (challenges)", error);
+        console.error(
+          "Could not fetch reported competitions (challenges)",
+          error
+        );
       });
   }
 
@@ -387,13 +390,13 @@ export default function ReportPage() {
 
   async function loadChallengeReports(id: number) {
     await axios
-    .get(`${config.serverUrl}/challenges/reports/${id}`)
-    .then((response) => {
-      setChallengeReports(response.data);
-    })
-    .catch((error) => {
-      console.error("Could not fetch reports", error);
-    });
+      .get(`${config.serverUrl}/challenges/reports/${id}`)
+      .then((response) => {
+        setChallengeReports(response.data);
+      })
+      .catch((error) => {
+        console.error("Could not fetch reports", error);
+      });
   }
 
   async function deleteGroupReports() {
@@ -433,7 +436,7 @@ export default function ReportPage() {
     deleteGroupReports();
     deleteGroup();
 
-    const newGroups = groups.filter(item => item !== group);
+    const newGroups = groups.filter((item) => item !== group);
     setGroups(newGroups);
   }
 
@@ -441,7 +444,7 @@ export default function ReportPage() {
     deleteGroupReports();
     setGroupReportsZero();
 
-    const newGroups = groups.filter(item => item !== group);
+    const newGroups = groups.filter((item) => item !== group);
     setGroups(newGroups);
   }
 
@@ -456,7 +459,7 @@ export default function ReportPage() {
       });
   }
 
-  async function setReviewReportsZero() {   
+  async function setReviewReportsZero() {
     await axios
       .post(`${config.serverUrl}/recipes/${review!.id}/set_reports_zero`)
       .then((response) => {
@@ -482,7 +485,7 @@ export default function ReportPage() {
     deleteReviewReports();
     deleteReview();
 
-    const newReviews = reviews.filter(item => item !== review);
+    const newReviews = reviews.filter((item) => item !== review);
     setReviews(newReviews);
   }
 
@@ -490,13 +493,15 @@ export default function ReportPage() {
     deleteReviewReports();
     setReviewReportsZero();
 
-    const newReviews = reviews.filter(item => item !== review);
+    const newReviews = reviews.filter((item) => item !== review);
     setReviews(newReviews);
   }
 
   async function deleteMessageReports() {
     await axios
-      .delete(`${config.serverUrl}/groups/${message!.id}/delete_message_reports`)
+      .delete(
+        `${config.serverUrl}/groups/${message!.id}/delete_message_reports`
+      )
       .then((response) => {
         console.log(response.data);
       })
@@ -507,7 +512,9 @@ export default function ReportPage() {
 
   async function setMessageReportsZero() {
     await axios
-      .post(`${config.serverUrl}/groups/${message!.id}/set_message_reports_zero`)
+      .post(
+        `${config.serverUrl}/groups/${message!.id}/set_message_reports_zero`
+      )
       .then((response) => {
         console.log(response.data);
       })
@@ -527,11 +534,11 @@ export default function ReportPage() {
       });
   }
 
-  function handleRemoveMessage(){
+  function handleRemoveMessage() {
     deleteMessageReports();
     deleteMessage();
 
-    const newMessages = messages.filter(item => item !== message);
+    const newMessages = messages.filter((item) => item !== message);
     setMessages(newMessages);
   }
 
@@ -539,7 +546,7 @@ export default function ReportPage() {
     deleteMessageReports();
     setMessageReportsZero();
 
-    const newMessages = messages.filter(item => item !== message);
+    const newMessages = messages.filter((item) => item !== message);
     setMessages(newMessages);
   }
 
@@ -551,8 +558,8 @@ export default function ReportPage() {
       })
       .catch((error) => {
         console.error("Could not delete reports", error);
-      })
-    }
+      });
+  }
 
   async function setChallengeReportsZero() {
     await axios
@@ -575,12 +582,12 @@ export default function ReportPage() {
         console.error("Could not delete competition (challenge)", error);
       });
   }
-  
+
   async function handleRemoveChallenge() {
     deleteChallengeReports();
     deleteChallenge();
 
-    const newChallenges = challenges.filter(item => item !== challenge);
+    const newChallenges = challenges.filter((item) => item !== challenge);
     setChallenges(newChallenges);
   }
 
@@ -588,7 +595,7 @@ export default function ReportPage() {
     deleteChallengeReports();
     setChallengeReportsZero();
 
-    const newChallenges = challenges.filter(item => item !== challenge);
+    const newChallenges = challenges.filter((item) => item !== challenge);
     setChallenges(newChallenges);
   }
 
@@ -604,9 +611,9 @@ export default function ReportPage() {
   }
 
   const getUserById = (id: number) => {
-    const user = users.find(user => user.id === id)
+    const user = users.find((user) => user.id === id);
     return user?.username;
-  }
+  };
 
   // Checks to see if the current user is an admin and loads the reported groups, reviews, messages, and competitions (challenges)
   useEffect(() => {
@@ -617,6 +624,38 @@ export default function ReportPage() {
     loadChallenges();
     loadUsers();
   }, []);
+
+  useEffect(() => {
+    const applyTheme = (theme: "light" | "dark") => {
+      if (theme === "dark") {
+        document.body.classList.add("dark");
+      } else {
+        document.body.classList.remove("dark");
+      }
+    };
+
+    if (mode === "auto") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+      // Initial setting based on system
+      applyTheme(mediaQuery.matches ? "dark" : "light");
+
+      // Listen for changes to system preference
+      const handleChange = (e: MediaQueryListEvent) => {
+        applyTheme(e.matches ? "dark" : "light");
+      };
+
+      mediaQuery.addEventListener("change", handleChange);
+
+      // Cleanup on unmount
+      return () => {
+        mediaQuery.removeEventListener("change", handleChange);
+      };
+    } else {
+      // Manually set dark/light if not in auto
+      applyTheme(mode);
+    }
+  }, [mode]);
 
   if (admin) {
     return (
@@ -746,33 +785,33 @@ export default function ReportPage() {
         {/* List each competition (challenge) that has been reported in a table */}
         {challenges.length > 0 ? (
           <table>
-          <thead>
-            <td>Name</td>
-            <td>Reports</td>
-            <td></td>
-          </thead>
-          <tbody>
-            {challenges.map((challenge) => (
-              <tr key={challenge.id}>
-                <td>{challenge.name}</td>
-                <td>{challenge.num_reports}</td>
-                <td>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => {
-                      setChallenge(challenge);
-                      loadChallengeReports(challenge.id);
-                      handleOpenChallengeModal();
-                    }}
-                  >
-                    View Reports
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            <thead>
+              <td>Name</td>
+              <td>Reports</td>
+              <td></td>
+            </thead>
+            <tbody>
+              {challenges.map((challenge) => (
+                <tr key={challenge.id}>
+                  <td>{challenge.name}</td>
+                  <td>{challenge.num_reports}</td>
+                  <td>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => {
+                        setChallenge(challenge);
+                        loadChallengeReports(challenge.id);
+                        handleOpenChallengeModal();
+                      }}
+                    >
+                      View Reports
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         ) : (
           <p>No Competitions Reported</p>
         )}
@@ -837,7 +876,7 @@ export default function ReportPage() {
             </Button>
           </Box>
         </Modal>
-        
+
         {/* Modal for seeing reports associated with specific review - gives the option
             to remove the review or dismiss the reports - also displays the review to 
             the user */}
@@ -853,7 +892,7 @@ export default function ReportPage() {
             >
               <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
             </IconButton>
-            
+
             <Review review={review!} />
 
             <Typography id="modal-title" variant="h4" component="h2">
@@ -917,7 +956,7 @@ export default function ReportPage() {
             >
               <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
             </IconButton>
-            
+
             <Message message={message!} />
 
             <Typography id="modal-title" variant="h4" component="h2">
@@ -975,7 +1014,7 @@ export default function ReportPage() {
           aria-labelledby="modal-title"
         >
           <Box sx={modalStyle}>
-          <IconButton
+            <IconButton
               onClick={handleCloseMessageModal}
               style={{ position: "absolute", top: 5, right: 5 }}
             >
@@ -989,7 +1028,7 @@ export default function ReportPage() {
                 challenge !== null ? challenge.creator : "null"
               }`}
             </Typography>
-            
+
             <table>
               <thead>
                 <tr>

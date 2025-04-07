@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from flask_login import login_required, current_user
 from app.challenges import bp
-from app.models import User, Challenge, ChallengeParticipant, ChallengeVote, UserNotifications, ChallengeReport, db
+from app.models import User, Challenge, ChallengeParticipant, ChallengeVote, UserNotifications, ChallengeReport, db, UserBlock
 from flask import request, jsonify, abort, current_app
 from datetime import datetime, timedelta, UTC
 from werkzeug.utils import secure_filename
@@ -34,7 +34,14 @@ def challenges():
     if not user.is_admin:
         reports: list[ChallengeReport] = ChallengeReport.query.filter_by(user_id=user.id).all()
         reportedChallenges: list[int] = [report.challenge_id for report in reports]
+        # Filter out challenges that the user has reported
         challenges = [challenge for challenge in challenges if not challenge.id in reportedChallenges]
+        # Filter out challenges made by blocked users
+        blockedUsers: list[UserBlock] = UserBlock.query.filter_by(blocked_by=user.id).all()
+        print("Blocked users: ", blockedUsers)
+        for challenge in challenges:
+            if challenge.creator in [blockedUser.blocked_user for blockedUser in blockedUsers]:
+                challenges.remove(challenge)
 
     #challenges_paginated = challenges.paginate(page=page, per_page=per_page, error_out=False)  # type: ignore
     #total_pages = ceil(challenges_paginated.total / per_page)  # type: ignore

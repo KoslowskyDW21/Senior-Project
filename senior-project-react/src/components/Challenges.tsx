@@ -14,6 +14,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import Challenge from "./Challenge";
 import config from "../config.js";
+import CircularProgress from "@mui/material/CircularProgress";
 
 interface UserId {
   id: number;
@@ -61,6 +62,7 @@ const Challenges: React.FC = () => {
   const isMediumScreen = useMediaQuery(
     "(min-width:600px) and (max-width:900px)"
   );
+  const [loading, setLoading] = useState<boolean>(true);
 
   const getResponse = async () => {
     try {
@@ -127,6 +129,8 @@ const Challenges: React.FC = () => {
       setInvitedChallenges(invitedChallengesList);
     } catch (error) {
       console.error("Error fetching competitions (challenges):", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -152,10 +156,6 @@ const Challenges: React.FC = () => {
     } catch (error) {
       console.error("Error fetching user: ", error);
     }
-  };
-
-  const handleGoToGroups = async () => {
-    navigate(`/groups/`);
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -213,9 +213,6 @@ const Challenges: React.FC = () => {
       challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-  const handleGoToRecipes = async () => {
-    navigate("/recipes/");
-  };
 
   useEffect(() => {
     getResponse();
@@ -226,6 +223,23 @@ const Challenges: React.FC = () => {
   React.useEffect(() => {
     filterChallenges();
   }, [location.search, challenges, pastChallenges]);
+
+  if (loading) {
+    // Show loading spinner while loading is true
+    return (
+      <div>
+      <Header title="Competitions" />
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <CircularProgress />
+      </Box>
+      </div>
+    );
+  }
 
   return (
     <div>

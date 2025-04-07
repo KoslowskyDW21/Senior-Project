@@ -1,19 +1,24 @@
 :root {
-  --dark: #d0d0d0;
-  --light: #f0f0f0;
+  --color-dark: #d0d0d0;
+  --color-light: #f0f0f0;
+  --table-light-bg: #ffffff;
+}
+
+/* Dark mode overrides */
+body.dark {
+  --color-dark: #1e1e1e;
+  --color-light: #2a2a2a;
+  --table-light-bg: #333333;
 }
 
 table {
   min-width: 1000px;
   margin: auto;
-  /* background-color: #000000;
-  /* border-style: solid;
-  border-color: var(--dark); */
 }
 
 thead {
   font-weight: bold;
-  background-color: var(--dark);
+  background-color: var(--color-dark);
 }
 
 tbody {
@@ -21,14 +26,14 @@ tbody {
 }
 
 tbody tr:nth-child(even) {
-  background-color: var(--dark);
+  background-color: var(--color-dark);
 }
 
 tbody tr:nth-child(odd) {
-  background-color: var(--light);
+  background-color: var(--color-light);
 }
 
 table tr td:nth-child(n+5) {
   text-align: center;
-  background-color: #ffffff;
+  background-color: var(--table-light-bg);
 }

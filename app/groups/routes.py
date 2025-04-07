@@ -1,6 +1,6 @@
 from __future__ import annotations
 from app.groups import bp
-from app.models import User, UserGroup, GroupMember, GroupBannedMember, Message, GroupReport, UserNotifications, MessageReport, db
+from app.models import User, UserGroup, GroupMember, GroupBannedMember, Message, GroupReport, UserNotifications, MessageReport, UserBlock, db
 from flask import jsonify, request, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
@@ -28,7 +28,13 @@ def get_groups():
     if not user.is_admin:
         reports: list[GroupReport] = GroupReport.query.filter_by(user_id = user.id).all()
         reportedGroups: list[int] = [report.group_id for report in reports]
+        # Filter out groups that the user has reported
         groups = [group for group in groups if not group.id in reportedGroups]
+        # Filter out groups where the user is banned
+        blockedUsers: list[UserBlock] = UserBlock.query.filter_by(blocked_by = user.id).all()
+        for group in groups:
+            if group.creator in [blockedUser.blocked_user for blockedUser in blockedUsers]:
+                groups.remove(group)
 
     return jsonify([group.to_json() for group in groups]), 200
 

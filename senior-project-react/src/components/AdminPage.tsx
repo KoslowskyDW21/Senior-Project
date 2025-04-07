@@ -1,5 +1,7 @@
 import axios, { AxiosError } from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useThemeContext } from "./ThemeContext";
+import "../AdminPage.css";
 import React from "react";
 import {
   Button,
@@ -52,7 +54,7 @@ const modalStyle = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  bgcolor: "#ffffff",
+  bgcolor: "background.paper",
   boxShadow: 24,
   paddingTop: 3,
   paddingLeft: 7,
@@ -79,13 +81,13 @@ export default function AdminPage() {
   const [openReports, setOpenReports] = useState<boolean>(false);
   const handleOpenReportModal = () => setOpenReports(true);
   const handleCloseReportModal = () => setOpenReports(false);
+  const { mode } = useThemeContext();
 
   function CreateAdminButton({ user, handleAdminChange }: any) {
     if (superAdmin) {
-      if(user.is_super_admin) {
+      if (user.is_super_admin) {
         return <></>;
-      }
-      else {
+      } else {
         return (
           <Button
             onClick={() => {
@@ -141,7 +143,40 @@ export default function AdminPage() {
   React.useEffect(() => {
     isAdmin();
     loadUsers();
+    console.log(mode);
   }, []);
+
+  useEffect(() => {
+    const applyTheme = (theme: "light" | "dark") => {
+      if (theme === "dark") {
+        document.body.classList.add("dark");
+      } else {
+        document.body.classList.remove("dark");
+      }
+    };
+
+    if (mode === "auto") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+      // Initial setting based on system
+      applyTheme(mediaQuery.matches ? "dark" : "light");
+
+      // Listen for changes to system preference
+      const handleChange = (e: MediaQueryListEvent) => {
+        applyTheme(e.matches ? "dark" : "light");
+      };
+
+      mediaQuery.addEventListener("change", handleChange);
+
+      // Cleanup on unmount
+      return () => {
+        mediaQuery.removeEventListener("change", handleChange);
+      };
+    } else {
+      // Manually set dark/light if not in auto
+      applyTheme(mode);
+    }
+  }, [mode]);
 
   async function updateUser(isAnAdmin: boolean, userId: number) {
     const data = {
@@ -224,7 +259,6 @@ export default function AdminPage() {
     const newUsers = users.map((oldUser) => changeBan(oldUser, id));
     setUsers(newUsers);
 
-    
     banUser(id, true, banTimes[indexOfLength !== -1 ? indexOfLength : 6]);
 
     setUserToBan(null);
@@ -266,7 +300,9 @@ export default function AdminPage() {
 
   async function deleteReports() {
     await axios
-      .delete(`${config.serverUrl}/admin/reports/${userReport!.id}/delete_reports`)
+      .delete(
+        `${config.serverUrl}/admin/reports/${userReport!.id}/delete_reports`
+      )
       .then((response) => {
         console.log(response.data);
       })
@@ -277,13 +313,15 @@ export default function AdminPage() {
 
   async function setReportsZero() {
     await axios
-      .post(`${config.serverUrl}/admin/reports/${userReport!.id}/set_reports_zero`)
+      .post(
+        `${config.serverUrl}/admin/reports/${userReport!.id}/set_reports_zero`
+      )
       .then((response) => {
         console.log(response.data);
       })
       .catch((error) => {
         console.error("Could not set reports to zero", error);
-      })
+      });
   }
 
   async function handleRemoveReports() {
@@ -292,29 +330,30 @@ export default function AdminPage() {
 
     location.reload();
   }
-  
+
   function getUserById(id: number) {
-    const user = users.find(user => user.id === id)
+    const user = users.find((user) => user.id === id);
     return user?.username;
   }
 
   if (admin) {
     return (
       <>
-        <link rel="stylesheet" href="/src/AdminPage.css" />
-
-        <Header title="Admin"/>
+        <Header title="Admin" />
 
         <IconButton
-        onClick={() => navigate("/recipes/")}
-        style={{ position: "fixed", top: "clamp(70px, 10vw, 120px)",
-          left: "clamp(0px, 1vw, 100px)",
-          zIndex: 1000, }}
-      >
-        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
-      </IconButton>
+          onClick={() => navigate("/recipes/")}
+          style={{
+            position: "fixed",
+            top: "clamp(70px, 10vw, 120px)",
+            left: "clamp(0px, 1vw, 100px)",
+            zIndex: 1000,
+          }}
+        >
+          <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+        </IconButton>
 
-      <Box mt={6}/>
+        <Box mt={6} />
 
         <br />
         <h2>Users</h2>
@@ -410,9 +449,7 @@ export default function AdminPage() {
             </IconButton>
 
             <Typography id="modal-title" variant="h4" component="h2">
-              {`Reports pertaining to ${
-                userReport?.username
-              }`}
+              {`Reports pertaining to ${userReport?.username}`}
             </Typography>
 
             <table>
@@ -551,6 +588,5 @@ export default function AdminPage() {
         </Button>
       </>
     );
-    navigate(`/recipes`);
   }
 }

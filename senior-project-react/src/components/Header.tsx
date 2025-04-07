@@ -449,7 +449,14 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
               Log Out
             </MenuItem>
             {admin ? (
-              <MenuItem onClick={handleGoToAdmin}>Admin Controls</MenuItem>
+              <MenuItem
+                onClick={handleGoToAdmin}
+                sx={{
+                  fontSize: "clamp(14px, 1vw, 20px)",
+                }}
+              >
+                Admin Controls
+              </MenuItem>
             ) : (
               <></>
             )}

@@ -1,6 +1,7 @@
 import axios, { AxiosError } from "axios";
+import { useThemeContext } from "./ThemeContext";
 import FolderIcon from "@mui/icons-material/Folder";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import React from "react";
 import {
   Avatar,
@@ -11,6 +12,8 @@ import {
   Modal,
   FormControl,
   Typography,
+  Switch,
+  FormControlLabel,
   SelectChangeEvent,
   Box,
   FormHelperText,
@@ -18,6 +21,10 @@ import {
   ListItemText,
   IconButton,
   TextField,
+  FormLabel,
+  Paper,
+  Radio,
+  RadioGroup,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -116,6 +123,16 @@ export default function Settings() {
 
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
   const [openPfpModal, setOpenPfpModal] = useState(false);
+
+  const { mode, setMode } = useThemeContext();
+
+  const { isDarkMode } = useThemeContext();
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setMode(
+      (event.target as HTMLInputElement).value as "auto" | "light" | "dark"
+    );
+  };
 
   async function loadUser() {
     await axios
@@ -509,7 +526,11 @@ export default function Settings() {
       <div>
         <Typography
           fontStyle={"bold"}
-          sx={{ textAlign: "center", cursor: "pointer", color: "blue" }}
+          sx={{
+            textAlign: "center",
+            cursor: "pointer",
+            color: isDarkMode ? "#90caf9" : "blue",
+          }}
           onClick={handleOpenPfpModal}
           onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#1976D2")}
           onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#ccc")}
@@ -726,6 +747,30 @@ export default function Settings() {
         <br />
         <br />
 
+        <Box display="flex" justifyContent="center" mt={4}>
+          <Paper sx={{ p: 4, width: 400 }}>
+            <FormControl component="fieldset">
+              <FormLabel component="legend">Theme Preference</FormLabel>
+              <RadioGroup value={mode} onChange={handleChange}>
+                <FormControlLabel
+                  value="auto"
+                  control={<Radio />}
+                  label="Auto (System Default)"
+                />
+                <FormControlLabel
+                  value="light"
+                  control={<Radio />}
+                  label="Light Mode"
+                />
+                <FormControlLabel
+                  value="dark"
+                  control={<Radio />}
+                  label="Dark Mode"
+                />
+              </RadioGroup>
+            </FormControl>
+          </Paper>
+        </Box>
         <Box mt={4} display="flex" flexDirection="column" gap={2}>
           <Button variant="contained" color="error" onClick={handleOpenModal}>
             Delete Account
