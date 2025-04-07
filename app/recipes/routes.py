@@ -374,11 +374,13 @@ def post_report_review(review_id: int):
     data = request.get_json()
     userId = data.get("user_id")
     reviewId = data.get("review_id")
+    reason = data.get("reason")
 
     print("Received data - userID: " + str(userId))
     print("Received data - reviewID: " + str(review_id))
+    print("Received data - reason: " + str(reason))
 
-    newReport: ReviewReport = ReviewReport(review_id=reviewId, user_id=userId, reason="N/A") # type: ignore
+    newReport: ReviewReport = ReviewReport(review_id=reviewId, user_id=userId, reason=reason) # type: ignore
     print(newReport)
     review: Review = Review.query.filter_by(id=reviewId).first() # type: ignore
     review.num_reports += 1

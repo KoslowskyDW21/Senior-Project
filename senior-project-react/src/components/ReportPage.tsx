@@ -520,7 +520,7 @@ export default function ReportPage() {
   async function deleteMessageReports() {
     await axios
       .delete(
-        `${config.serverUrl}/groups/${message!.id}/delete_message_reports`
+        `${config.serverUrl}/groups/${message!.id}/delete_message_reports/`
       )
       .then((response) => {
         console.log(response.data);
@@ -533,7 +533,7 @@ export default function ReportPage() {
   async function setMessageReportsZero() {
     await axios
       .post(
-        `${config.serverUrl}/groups/${message!.id}/set_message_reports_zero`
+        `${config.serverUrl}/groups/${message!.id}/set_message_reports_zero/`
       )
       .then((response) => {
         console.log(response.data);
@@ -545,7 +545,7 @@ export default function ReportPage() {
 
   async function deleteMessage() {
     await axios
-      .delete(`${config.serverUrl}/groups/${message!.id}/delete_message`)
+      .delete(`${config.serverUrl}/groups/${message!.id}/delete_message/`)
       .then((response) => {
         console.log(response.data);
       })

@@ -217,6 +217,7 @@ const IndividualRecipe: React.FC = () => {
   const [, setRating] = useState<string | undefined>();
   const [displayRating, setDisplayRating] = useState<string | undefined>();
   const [ingredients, setIngredients] = React.useState<RecipeIngredient[]>([]);
+  const [reason, setReason] = useState<string>("N/A");
   const [open, setOpen] = useState(false);
   const handleOpenModal = () => setOpen(true);
   const handleCloseModal = () => setOpen(false);
@@ -526,6 +527,7 @@ const IndividualRecipe: React.FC = () => {
       const newData = {
         user_id: data!.id,
         review_id: reviewId,
+        reason: reason,
       };
 
       await axios
@@ -817,7 +819,19 @@ const IndividualRecipe: React.FC = () => {
 
           <FormControl variant="filled" sx={{ m: 1, width: 250 }} size="small">
             <InputLabel id="reason-label">Reason</InputLabel>
-            <Select labelId="reason-label"></Select>
+            <Select
+              labelId="reason-label"
+              onChange={(event: SelectChangeEvent) => {
+                setReason(event.target.value);
+              }}
+            >
+              <MenuItem value="Sexual Content">Sexual Content</MenuItem>
+              <MenuItem value="Violent Content">Violent Content</MenuItem>
+              <MenuItem value="Hateful Content">Hateful Content</MenuItem>
+              <MenuItem value="Harrassment or Bullying">Harrassment or Bullying</MenuItem>
+              <MenuItem value="Spam">Spam</MenuItem>
+              <MenuItem value="Irrelevant">Irrelevant</MenuItem>
+            </Select>
           </FormControl>
           <br />
           <ButtonWithConfirmation

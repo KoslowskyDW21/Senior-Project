@@ -584,12 +584,14 @@ def report_challenge(challenge_id: int):
     
     data = request.get_json()
     userId = data.get("user_id")
+    reason = data.get("reason")
     challengeId = data.get("challenge_id")
 
     print("Received data - userID: " + str(userId))
+    print("Received data - reason: " + str(reason))
     print("Received data - challengeID: " + str(challengeId))
 
-    newReport: ChallengeReport = ChallengeReport(challenge_id=challengeId, user_id=userId, reason="N/A") # type: ignore
+    newReport: ChallengeReport = ChallengeReport(challenge_id=challengeId, user_id=userId, reason=reason) # type: ignore
     challenge: Challenge = Challenge.query.filter_by(id=challengeId).first() # type: ignore
     challenge.num_reports += 1
 

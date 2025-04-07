@@ -18,6 +18,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  SelectChangeEvent,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -120,6 +121,7 @@ const OtherProfile: React.FC = () => {
   const [profileNotFound, setProfileNotFound] = useState(false);
   const [isUserBlocked, setIsUserBlocked] = useState(false);
   const [isCurrentUserBlocked, setIsCurrentUserBlocked] = useState(false);
+  const [reason, setReason] = useState<string>("N/A");
   const handleOpenReportModal = () => setOpenReportModal(true);
   const handleCloseReportModal = () => setOpenReportModal(false);
   const handleOpenRemoveFriendModal = () => setOpenRemoveFriendModal(true);
@@ -422,6 +424,7 @@ const OtherProfile: React.FC = () => {
   const handleReportUser = async () => {
     const data = {
       report_id: numericId,
+      reason: reason,
     };
 
     await axios
@@ -781,7 +784,17 @@ const OtherProfile: React.FC = () => {
                 size="small"
               >
                 <InputLabel id="reason-label">Reason</InputLabel>
-                <Select labelId="reason-label"></Select>
+                <Select
+                  labelId="reason-label"
+                  onChange={(event: SelectChangeEvent) => {
+                    setReason(event.target.value);
+                  }}
+                >
+                  <MenuItem value="Inappropriate Profile Picture">Inappropriate Profile Picture</MenuItem>
+                  <MenuItem value="Inappropriate Username">Inappropriate Username</MenuItem>
+                  <MenuItem value="Creation of Inappropriate Content">Creation of Inappropriate Content</MenuItem>
+                  <MenuItem value="Harrassment or Bullying">Harrassment or Bullying</MenuItem>
+                </Select>
               </FormControl>
               <br />
               <ButtonWithConfirmation
