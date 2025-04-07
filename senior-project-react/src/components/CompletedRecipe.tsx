@@ -14,6 +14,7 @@ import axios from "axios";
 import { PhotoCamera, NoPhotography } from "@mui/icons-material";
 import config from "../config.js";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ConfirmationMessage from "./ConfirmationMessage";  // Import the ConfirmationMessage component
 
 interface Recipe {
   id: string;
@@ -122,13 +123,10 @@ const CompletedRecipe: React.FC = () => {
       >
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
-
-      {/* Show this content only if review is not submitted */}
-      {!reviewSubmitted ? (
         <>
           <h1>Recipe completed: {recipe_name}</h1>
-          <Button onClick ={() => navigate(-1)}>
-           Back to Recipe Page
+          <Button onClick={() => navigate(-1)} variant="contained" color="primary">
+            Back to Recipe Page
           </Button>
           <p>Leave a Review</p>
 
@@ -138,31 +136,6 @@ const CompletedRecipe: React.FC = () => {
               {errorMessage}
             </Alert>
           )}
-
-          {/* <div>
-            {imagePreview ? (
-              <img
-                src={imagePreview}
-                alt="Recipe"
-                style={{
-                  width: "200px",
-                  height: "200px",
-                  objectFit: "cover",
-                  borderRadius: "8px",
-                }}
-              />
-            ) : (
-              <IconButton component="label" color="primary">
-                <input
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={handleImageChange}
-                />
-                <PhotoCamera />
-              </IconButton>
-            )}
-          </div> */}
 
           <div>
             {imagePreview && (
@@ -189,7 +162,7 @@ const CompletedRecipe: React.FC = () => {
           </div>
 
           <div>
-          <Typography gutterBottom>Rating</Typography>
+            <Typography gutterBottom>Rating</Typography>
             <Rating
               name="recipe-rating"
               value={rating}
@@ -227,12 +200,9 @@ const CompletedRecipe: React.FC = () => {
             Submit Review
           </Button>
         </>
-      ) : (
-        <div>
-          <h1>
-            Review Submitted Successfully!
-          </h1>
-        </div>
+        {/* Snackbar confirmation message */}
+      {reviewSubmitted && (
+        <ConfirmationMessage message="Your review has been submitted successfully!" />
       )}
     </>
   );

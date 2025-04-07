@@ -37,7 +37,7 @@ const AchievementSpecific: React.FC = () => {
     <div>
       <h1>{achievement.title}</h1>
       <button>
-        <img src={achievement.image} />
+        <img src={achievement.image} alt={achievement.title}/>
       </button>
       <p>{achievement.description}</p>
       <p>Completed: {achievement.isComplete.toString()}</p>

@@ -67,6 +67,18 @@ interface RecipeIngredient {
   measure: "measure";
 }
 
+interface Review {
+  id: number;
+  recipe_id: number;
+  text: string;
+  image: string;
+  rating: string;
+  difficulty: string;
+  num_reports: number;
+  user_id: number;
+  username: string;
+}
+
 interface User {
   id: string;
   fname: string;
@@ -192,19 +204,18 @@ const IndividualRecipe: React.FC = () => {
   const [recipe_name, setRecipe_name] = React.useState<String>();
   const [current_user, setCurrent_user] = React.useState<User>();
   const [message, setMessage] = React.useState("");
-  const [lid, setLid] = React.useState("");
+  const [lid, ] = React.useState("");
   const [recipeLists, setRecipeLists] = React.useState<RecipeList[]>([]);
   const [recipeListsIn, setRecipeListsIn] = React.useState<RecipeList[]>([]);
   const [steps, setSteps] = React.useState<Step[]>([]);
-  const [snackbarOpen, setSnackBarOpen] = React.useState(false);
+  const [, setSnackBarOpen] = React.useState(false);
   const { id } = useParams<{ id: string }>();
   const [reviews, setReviews] = React.useState<Review[]>([]);
-  const [userReview, setUserReview] = useState<Review | null>(null); // Store the user's review here
+  const [, setUserReview] = useState<Review | null>(null); // Store the user's review here
   const [reviewId, setReviewId] = useState<number | null>(null);
   const [difficulty, setDifficulty] = useState<string | undefined>();
-  const [rating, setRating] = useState<string | undefined>();
+  const [, setRating] = useState<string | undefined>();
   const [displayRating, setDisplayRating] = useState<string | undefined>();
-  const [userId, setUserId] = useState<string>();
   const [ingredients, setIngredients] = React.useState<RecipeIngredient[]>([]);
   const [open, setOpen] = useState(false);
   const handleOpenModal = () => setOpen(true);
@@ -418,15 +429,12 @@ const IndividualRecipe: React.FC = () => {
       }
       setReviews(response.data.reviews);
       const userReview = response.data.reviews.find(
-        (review: Review) => review.user_id === myId
+        (review: Review) => review.user_id.toString() === myId
       );
       if (userReview) {
-        console.log("should be working");
         setUserReview(userReview); // Set the current user's review if they have one
         setDisplayRating(userReview.rating);
-      } else {
-        console.log("didnt find nothing");
-      }
+      } 
     } catch (error) {
       console.error("Error fetching reviews: ", error);
     }
@@ -563,7 +571,7 @@ const IndividualRecipe: React.FC = () => {
         <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
       </IconButton>
 
-      <Header title={recipe_name ? recipe_name : "loading..."}></Header>
+      <Header title={recipe_name ? recipe_name.toString() : "loading...".toString()}></Header>
 
       <Box
         sx={{
@@ -639,15 +647,6 @@ const IndividualRecipe: React.FC = () => {
             handler={handleAddIngredientsOfRecipe}
             text="Add to shopping list"
           />
-          {/* <Button
-            sx={{ width: 250, height: 45 }}
-            variant="contained"
-            onClick={() => {
-              handleAddIngredientsOfRecipe();
-            }}
-          >
-            Add to shopping list
-          </Button> */}
         </FormControl>
       </Box>
 
@@ -661,7 +660,7 @@ const IndividualRecipe: React.FC = () => {
         <Typography sx={{ fontWeight: "bold" }}>Ingredients:</Typography>
         {ingredients.length > 0 ? (
           <Box sx={{ marginTop: 2 }}>
-            {ingredients.map((ingredient) => (
+            {ingredients.map((ingredient: any) => (
               <Box
                 key={ingredient.ingredient_id}
                 sx={{

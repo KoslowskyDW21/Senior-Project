@@ -39,9 +39,6 @@ def get_all_groups():
     per_page = int(request.args.get('per_page', 10))  # Default to 10 groups per page
     search_query = request.args.get('search', "").strip().lower()  # Get the search query (empty string if not provided)
 
-    print("the query is as follows my liege")
-    print(search_query)
-
     # 1. Fetch all public groups (with pagination and search filter if query is present)
     public_groups_query = UserGroup.query.filter_by(is_public=True)
 
