@@ -431,10 +431,14 @@ const OtherProfile: React.FC = () => {
         },
       })
       .then((response) => {
-        setMessage("Tried to report user"); // TODO: Change this
-        console.log(response.data.message);
+        setMessage(response.data.message);
+        console.log(response.data);
       })
       .catch((error) => {
+        if(error.response.status === 405) {
+          setMessage(error.response.data.message);
+        }
+        console.log(error.response.data);
         console.error("Could not report user", error);
       });
   };

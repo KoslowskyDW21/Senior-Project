@@ -203,7 +203,7 @@ const IndividualRecipe: React.FC = () => {
 
   const [recipe_name, setRecipe_name] = React.useState<String>();
   const [current_user, setCurrent_user] = React.useState<User>();
-  const [message, setMessage] = React.useState("");
+  const [message, setMessage] = React.useState<string>("");
   const [lid, ] = React.useState("");
   const [recipeLists, setRecipeLists] = React.useState<RecipeList[]>([]);
   const [recipeListsIn, setRecipeListsIn] = React.useState<RecipeList[]>([]);

@@ -56,7 +56,7 @@ def delete_reports(id):
     return jsonify({"message": "Reports successfully deleted"}), 200
 
 @login_required
-@bp.get("/reports/<int:id>/set_reports_zero")
+@bp.post("/reports/<int:id>/set_reports_zero")
 def set_reports_zero(id):
     user: User = User.query.get(id) # type: ignore
     user.num_reports = 0
