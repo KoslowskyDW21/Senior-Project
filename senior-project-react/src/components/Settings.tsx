@@ -498,31 +498,35 @@ export default function Settings() {
 
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          marginBottom: "16px",
-          width: "150px",
-          height: "150px",
-          borderRadius: "50%",
-          border: "2px solid #ccc",
-          marginLeft: "auto",
-          marginRight: "auto",
-          marginTop: "40px",
-          cursor: "pointer",
-        }}
-        onClick={handleOpenPfpModal}
-        onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#1976D2")}
-        onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#ccc")}
-      >
-        {profilePicUrl ? (
-          <Avatar src={profilePicUrl} sx={{ width: 120, height: 120 }} />
-        ) : (
-          <FolderIcon sx={{ fontSize: 80 }} />
-        )}
-      </div>
+    <Box
+      mt={12}
+    >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: "16px",
+            width: "150px",
+            height: "150px",
+            borderRadius: "50%",
+            border: "2px solid #ccc",
+            marginLeft: "auto",
+            marginRight: "auto",
+            marginTop: "40px",
+            cursor: "pointer",
+          }}
+          onClick={handleOpenPfpModal}
+          onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#1976D2")}
+          onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#ccc")}
+        >
+          {profilePicUrl ? (
+            <Avatar src={profilePicUrl} sx={{ width: 120, height: 120 }} />
+          ) : (
+            <FolderIcon sx={{ fontSize: 80 }} />
+          )}
+        </div>
+      </Box>
       <div>
         <Typography
           fontStyle={"bold"}

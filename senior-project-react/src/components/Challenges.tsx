@@ -1,27 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import {
-  Button,
-  Typography,
-  Box,
-  Container,
-  TextField,
-  useMediaQuery,
-  Grid2,
-} from "@mui/material";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Button, Typography, Box, Container, TextField, useMediaQuery, Grid2, CircularProgress } from "@mui/material";
 import Header from "./Header";
 import Footer from "./Footer";
 import Challenge from "./Challenge";
 import config from "../config.js";
-
-interface UserId {
-  id: number;
-}
-
-interface User {
-  profile_picture: string;
-}
 
 interface ChallengeData {
   id: number;
@@ -39,343 +23,204 @@ interface ChallengeData {
 
 const Challenges: React.FC = () => {
   const [challenges, setChallenges] = useState<ChallengeData[]>([]);
-  const [myChallenges, setMyChallenges] = useState<ChallengeData[]>([]);
   const [joinedChallenges, setJoinedChallenges] = useState<ChallengeData[]>([]);
-  const [invitedChallenges, setInvitedChallenges] = useState<ChallengeData[]>(
-    []
-  );
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  const [participants, setParticipants] = useState<{ [key: number]: boolean }>(
-    {}
-  );
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [showMoreMyChallenges, setShowMoreMyChallenges] =
-    useState<boolean>(false);
-  const [showMoreJoinedChallenges, setShowMoreJoinedChallenges] =
-    useState<boolean>(false);
+  const [invitedChallenges, setInvitedChallenges] = useState<ChallengeData[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [noResultsFound, setNoResultsFound] = useState(false);
+  const [totalPagesAll, setTotalPagesAll] = useState<number>(1);
+
   const navigate = useNavigate();
-  const [profile_picture, setProfile_picture] = useState<string>();
-  const [pastChallenges, setPastChallenges] = useState<ChallengeData[]>([]);
+  const location = useLocation();
 
   const isSmallScreen = useMediaQuery("(max-width:600px)");
-  const isMediumScreen = useMediaQuery(
-    "(min-width:600px) and (max-width:900px)"
-  );
+  const isMediumScreen = useMediaQuery("(min-width:600px) and (max-width:900px)");
 
-  const getResponse = async () => {
+  const challengesPerPage = 8;
+
+  // Fetch challenges function
+  const fetchChallenges = async (page: number, query: string) => {
+    if (loading || page > totalPagesAll) return;
+    setLoading(true);
+
     try {
-      const response = await axios.get(`${config.serverUrl}/challenges/`);
-      const data: ChallengeData[] = response.data;
-      const now = new Date();
-      const validChallenges = data.filter(
-        (challenge) =>
-          new Date(challenge.end_time).getTime() + 24 * 60 * 60 * 1000 >
-          now.getTime()
-      );
-      setChallenges(validChallenges);
+      const response = await axios.get(`${config.serverUrl}/challenges/`, {
+        params: { page, per_page: challengesPerPage, search: query },
+      });
+      const data = response.data;
 
-      const userResponse = await axios.get(
-        `${config.serverUrl}/challenges/current_user_id/`
-      );
-      const currentUserId = userResponse.data;
-      setCurrentUserId(currentUserId);
-
-      const userChallenges = data.filter(
-        (challenge) => challenge.creator === currentUserId
-      );
-      setMyChallenges(userChallenges);
-
-      const otherChallenges = data.filter(
-        (challenge) => challenge.creator !== currentUserId
-      );
-      setChallenges(otherChallenges);
-
-      // Fetch participant status for each competition (challenge)
-      const participantStatus: { [key: number]: boolean } = {};
-      const joinedChallengesList: ChallengeData[] = [];
-      for (const challenge of data) {
-        const participantResponse = await axios.get(
-          `${config.serverUrl}/challenges/${challenge.id}/is_participant/`
-        );
-        participantStatus[challenge.id] =
-          participantResponse.data.is_participant;
-        if (
-          participantResponse.data.is_participant &&
-          challenge.creator !== currentUserId
-        ) {
-          joinedChallengesList.push(challenge);
-        }
+      if (page === 1) {
+        setChallenges(data.all_challenges.challenges);
+      } else {
+        setChallenges((prev) => [...prev, ...data.all_challenges.challenges]);
       }
-      setParticipants(participantStatus);
-      setJoinedChallenges(joinedChallengesList);
 
-      // Fetch challenges with invite notifications
-      const notificationsResponse = await axios.get(
-        `${config.serverUrl}/challenges/notifications/`
-      );
-      const inviteNotifications =
-        notificationsResponse.data.notifications.filter(
-          (notification: any) =>
-            notification.notification_type === "challenge_reminder"
-        );
-      const invitedChallengeIds = inviteNotifications.map(
-        (notification: any) => notification.challenge_id
-      );
-      const invitedChallengesList = data.filter((challenge) =>
-        invitedChallengeIds.includes(challenge.id)
-      );
-      setInvitedChallenges(invitedChallengesList);
+      setJoinedChallenges(data.joined_challenges.challenges);
+      setInvitedChallenges(data.invited_challenges.challenges);
+      setTotalPagesAll(data.all_challenges.total_pages);
+
+      // Set noResultsFound flag based on the result
+      setNoResultsFound(data.all_challenges.challenges.length === 0);
     } catch (error) {
-      console.error("Error fetching competitions (challenges):", error);
+      console.error("Error fetching challenges:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const fetchPastChallenges = async () => {
-    try {
-      const response = await axios.get(
-        `${config.serverUrl}/challenges/past_challenges/`
-      );
-      setPastChallenges(response.data);
-    } catch (error) {
-      console.error("Error fetching past competitions (challenges):", error);
+  // This useEffect listens to searchQuery and currentPage changes
+  useEffect(() => {
+    if (searchQuery === "" && currentPage === 1) {
+      setChallenges([]);
     }
-  };
 
-  const getCurrentUser = async () => {
-    try {
-      const response = await axios.get(
-        `${config.serverUrl}/profile/`
-      );
-      const data: User = response.data;
-      setProfile_picture(data.profile_picture);
-      console.log(profile_picture);
-    } catch (error) {
-      console.error("Error fetching user: ", error);
-    }
-  };
+    // Fetch challenges whenever searchQuery or currentPage changes
+    fetchChallenges(currentPage, searchQuery);
+  }, [currentPage, searchQuery]);
 
-  const handleGoToGroups = async () => {
-    navigate(`/groups/`);
-  };
-
+  // Handle search query change
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNoResultsFound(false);
+    setChallenges([])
+    setCurrentPage(1);
+    console.log("Search query changing:", event.target.value);
+    setTotalPagesAll(1)
     const query = event.target.value;
-    setSearchQuery(query);
+    setSearchQuery(query); // Update search query immediately
 
+    // Update URL with the new search query
     if (query) {
-      navigate({
-        pathname: location.pathname,
-        search: `?search=${query}`,
-      });
+      fetchChallenges(1, query)
     } else {
-      navigate({
-        pathname: location.pathname,
-        search: "",
-      });
+      fetchChallenges(1, "")
     }
+
+    
   };
 
-  const filterChallenges = () => {
-    const urlParams = new URLSearchParams(location.search);
-    const searchQuery = urlParams.get("search")?.toLowerCase() || "";
-    if (searchQuery) {
-      setSearchQuery(searchQuery);
-    } else {
-      setSearchQuery("");
+  // Scroll handler to load next page
+  const handleScroll = () => {
+    if (loading || currentPage >= totalPagesAll) return;
+
+    const container = document.getElementById("scroll-container");
+    if (container) {
+      const nearBottom =
+        container.scrollHeight - container.scrollTop <= container.clientHeight + 10;
+      if (nearBottom) {
+        setCurrentPage((prev) => prev + 1);
+      }
     }
-  };
-
-  const filteredMyChallenges = myChallenges
-    .filter(
-      (challenge) => !pastChallenges.some((past) => past.id === challenge.id)
-    )
-    .filter((challenge) =>
-      challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-  const filteredJoinedChallenges = joinedChallenges
-    .filter(
-      (challenge) => !pastChallenges.some((past) => past.id === challenge.id)
-    )
-    .filter((challenge) =>
-      challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-  const filteredInvitedChallenges = invitedChallenges.filter((challenge) =>
-    challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const filteredAllChallenges = challenges
-    .filter(
-      (challenge) => !pastChallenges.some((past) => past.id === challenge.id)
-    )
-    .filter((challenge) =>
-      challenge.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-  const handleGoToRecipes = async () => {
-    navigate("/recipes/");
   };
 
   useEffect(() => {
-    getResponse();
-    getCurrentUser();
-    fetchPastChallenges();
-  }, []);
+    const container = document.getElementById("scroll-container");
+    if (container) container.addEventListener("scroll", handleScroll);
 
-  React.useEffect(() => {
-    filterChallenges();
-  }, [location.search, challenges, pastChallenges]);
+    return () => {
+      if (container) container.removeEventListener("scroll", handleScroll);
+    };
+  }, [loading, currentPage, totalPagesAll]);
 
   return (
     <div>
-      <Header title="Competitions" />
       <Box
-        mt={{ xs: 10, sm: 14, md: 14 }}
-        textAlign="center"
-        display="flex"
-        justifyContent="center"
-        sx={{ flexGrow: 1 }}
+        id="scroll-container"
+        sx={{
+          overflowY: "scroll",
+          height: "90vh",
+          mt: 0,
+          width: "90vw",
+          paddingRight: "8vw",
+        }}
       >
-        <TextField
-          label="Search for competitions"
-          variant="outlined"
-          fullWidth
-          value={searchQuery}
-          onChange={handleSearchChange}
-          sx={{
-            width: "100%",
-          }}
-        />
+        <Header title="Competitions" />
+        <Box mt={10} textAlign="center" display="flex" justifyContent="center">
+          <TextField
+            label="Search for competitions"
+            variant="outlined"
+            value={searchQuery}
+            onChange={handleSearchChange} // Ensure this is being called every time
+            sx={{ width: "1200px" }}
+          />
+        </Box>
+        <main role="main">
+          <Container>
+            <Box mt={4} mb={2} textAlign="center">
+              <Button variant="contained" color="primary" onClick={() => navigate("/past-challenges")}>
+                View Past Competitions
+              </Button>
+            </Box>
+
+            <Box mt={4} mb={2} textAlign="center">
+              <Button variant="contained" color="primary" onClick={() => navigate(`/challenges/create`)}>
+                Create a Competition
+              </Button>
+            </Box>
+
+            {invitedChallenges.length > 0 && (
+              <Box mt={4}>
+                <Typography variant="h5" gutterBottom>
+                  Invited Competitions
+                </Typography>
+                <Box>
+                  <Grid2 container spacing={2} columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 4}>
+                    {invitedChallenges.map((challenge) => (
+                      <Grid2 key={challenge.id}>
+                        <Challenge {...challenge} />
+                      </Grid2>
+                    ))}
+                  </Grid2>
+                </Box>
+              </Box>
+            )}
+
+            {joinedChallenges.length > 0 && (
+              <Box mt={4}>
+                <Typography variant="h5" gutterBottom>
+                  Joined Competitions
+                </Typography>
+                <Box>
+                  <Grid2 container spacing={2} columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 4}>
+                    {joinedChallenges.map((challenge) => (
+                      <Grid2 key={challenge.id}>
+                        <Challenge {...challenge} />
+                      </Grid2>
+                    ))}
+                  </Grid2>
+                </Box>
+              </Box>
+            )}
+
+            <Box mt={4}>
+              <Typography variant="h5" gutterBottom>
+                All Competitions
+              </Typography>
+              {noResultsFound ? (
+                <Typography variant="h6" color="textSecondary">
+                  No competitions found for this search.
+                </Typography>
+              ) : (
+                <Grid2 container spacing={2} columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 4}>
+                  {challenges.map((challenge) => (
+                    <Grid2 key={challenge.id}>
+                      <Challenge {...challenge} />
+                    </Grid2>
+                  ))}
+                </Grid2>
+              )}
+            </Box>
+          </Container>
+
+          {loading && currentPage === 1 && (
+            <Box display="flex" justifyContent="center" mt={4}>
+              <CircularProgress />
+            </Box>
+          )}
+
+          <Footer />
+        </main>
       </Box>
-      <main role="main" style={{ paddingBottom: "90px" }}>
-        <Container>
-          <Box mt={4} mb={2} textAlign="center">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => navigate("/past-challenges")}
-            >
-              View Past Competitions
-            </Button>
-          </Box>
-
-          <Box mt={4} mb={2} textAlign="center">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => navigate(`/challenges/create`)}
-            >
-              Create a Competition
-            </Button>
-          </Box>
-
-          {filteredMyChallenges.length > 0 && (
-            <Box mt={4}>
-              <Typography variant="h5" gutterBottom>
-                My Competitions
-              </Typography>
-              <Box>
-                <Grid2
-                  container
-                  spacing={2}
-                  columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
-                >
-                  {filteredMyChallenges.map((challenge) => (
-                    <Grid2 key={challenge.id}>
-                      <Challenge {...challenge} />
-                    </Grid2>
-                  ))}
-                </Grid2>
-              </Box>
-              {filteredMyChallenges.length > 3 && (
-                <Box textAlign="center" mt={2}>
-                  <Button
-                    variant="contained"
-                    onClick={() =>
-                      setShowMoreMyChallenges(!showMoreMyChallenges)
-                    }
-                  >
-                    {showMoreMyChallenges ? "Show Less" : "Show More"}
-                  </Button>
-                </Box>
-              )}
-            </Box>
-          )}
-
-          {filteredInvitedChallenges.length > 0 && (
-            <Box mt={4}>
-              <Typography variant="h5" gutterBottom>
-                Invited Competitions
-              </Typography>
-              <Box>
-                <Grid2
-                  container
-                  spacing={2}
-                  columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
-                >
-                  {filteredInvitedChallenges.map((challenge) => (
-                    <Grid2 key={challenge.id}>
-                      <Challenge {...challenge} />
-                    </Grid2>
-                  ))}
-                </Grid2>
-              </Box>
-            </Box>
-          )}
-
-          {filteredJoinedChallenges.length > 0 && (
-            <Box mt={4}>
-              <Typography variant="h5" gutterBottom>
-                Joined Competitions
-              </Typography>
-              <Box>
-                <Grid2
-                  container
-                  spacing={2}
-                  columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
-                >
-                  {filteredJoinedChallenges.map((challenge) => (
-                    <Grid2 key={challenge.id}>
-                      <Challenge {...challenge} />
-                    </Grid2>
-                  ))}
-                </Grid2>
-              </Box>
-              {filteredJoinedChallenges.length > 3 && (
-                <Box textAlign="center" mt={2}>
-                  <Button
-                    variant="contained"
-                    onClick={() =>
-                      setShowMoreJoinedChallenges(!showMoreJoinedChallenges)
-                    }
-                  >
-                    {showMoreJoinedChallenges ? "Show Less" : "Show More"}
-                  </Button>
-                </Box>
-              )}
-            </Box>
-          )}
-
-          <Box mt={4}>
-            <Typography variant="h5" gutterBottom>
-              All Competitions
-            </Typography>
-            <Grid2
-              container
-              spacing={2}
-              columns={isSmallScreen ? 1 : isMediumScreen ? 2 : 3}
-            >
-              {filteredAllChallenges.map((challenge) => (
-                <Grid2 key={challenge.id}>
-                  <Challenge {...challenge} />
-                </Grid2>
-              ))}
-            </Grid2>
-          </Box>
-        </Container>
-        <Footer />
-      </main>
     </div>
   );
 };

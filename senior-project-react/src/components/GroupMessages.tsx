@@ -24,6 +24,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import config from "../config.js";
 import ConfirmationMessage from "./ConfirmationMessage.js";
+import { ConfirmationProvider, useConfirmation } from "./ConfirmationHelper.js";
 
 const reportModalStyle = (theme: Theme) => ({
   position: "absolute",
@@ -53,13 +54,30 @@ const GroupMessages: React.FC = () => {
   const [newMessage, setNewMessage] = useState<string>("");
   const [messageId, setMessageId] = useState<number>(-1);
   const [open, setOpen] = useState<boolean>(false);
-  const [confirmation, setConfirmation] = useState<boolean>(false);
+  const [confirmation, setConfirmation] = useState<string>("");
   const handleOpenModal = () => setOpen(true);
   const handleCloseModal = () => setOpen(false);
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
+
+  function ButtonWithConfirmation({ color, handler, text }: any) {
+        const {open, toggleOpen} = useConfirmation();
+      
+        return (
+          <Button
+            variant="contained"
+            color={color}
+            onClick={() => {
+              handler();
+              toggleOpen();
+            }}
+          >
+            {text}
+          </Button>
+        )
+      }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -130,124 +148,123 @@ const GroupMessages: React.FC = () => {
           }
         )
         .then((response) => {
+          setConfirmation("Message successfully reported")
           console.log(response.data.messsage);
         })
         .catch((error) => {
           console.error("Could not report message", error);
         });
     } else {
-      console.log("Review already reported");
+      setConfirmation("Message already reported")
+      console.log("Message already reported");
     }
   };
 
   return (
-    <Container>
-      <IconButton
-        onClick={() => navigate(-1)}
-        style={{ position: "absolute", top: 30, left: 30 }}
-      >
-        <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
-      </IconButton>
-      <Box mt={4} mb={2} textAlign="center">
-        <Typography variant="h4" gutterBottom>
-          Group Messages
-        </Typography>
-      </Box>
-      <Box mt={4} mb={2}>
-        <Paper style={{ maxHeight: 300, overflow: "auto" }}>
-          <List>
-            {messages.map((message) => (
-              <React.Fragment key={message.id}>
-                <ListItem alignItems="flex-start">
-                  <ListItemText
-                    primary={message.username}
-                    secondary={message.text}
-                  />
-                  {message.num_reports !== -1 ? (
-                    <Button
-                      variant="contained"
-                      color="error"
-                      onClick={() => {
-                        setMessageId(message.id);
-                        handleOpenModal();
-                      }}
-                    >
-                      Report
-                    </Button>
-                  ) : (
-                    <></>
-                  )}
-                </ListItem>
-                <Divider variant="inset" component="li" />
-              </React.Fragment>
-            ))}
-            <div ref={messagesEndRef} />
-          </List>
-        </Paper>
-
-        <Modal
-          open={open}
-          onClose={handleCloseModal}
-          aria-labelledby="modal-title"
+    <ConfirmationProvider>
+      <Container>
+        <IconButton
+          onClick={() => navigate(-1)}
+          style={{ position: "absolute", top: 30, left: 30 }}
         >
-          <Box sx={reportModalStyle(theme)}>
-            <IconButton
-              onClick={handleCloseModal}
-              style={{ position: "absolute", top: 5, right: 5 }}
-            >
-              <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
-            </IconButton>
+          <ArrowBackIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+        </IconButton>
+        <Box mt={4} mb={2} textAlign="center">
+          <Typography variant="h4" gutterBottom>
+            Group Messages
+          </Typography>
+        </Box>
+        <Box mt={4} mb={2}>
+          <Paper style={{ maxHeight: 300, overflow: "auto" }}>
+            <List>
+              {messages.map((message) => (
+                <React.Fragment key={message.id}>
+                  <ListItem alignItems="flex-start">
+                    <ListItemText
+                      primary={message.username}
+                      secondary={message.text}
+                    />
+                    {message.num_reports !== -1 ? (
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => {
+                          setMessageId(message.id);
+                          handleOpenModal();
+                        }}
+                      >
+                        Report
+                      </Button>
+                    ) : (
+                      <></>
+                    )}
+                  </ListItem>
+                  <Divider variant="inset" component="li" />
+                </React.Fragment>
+              ))}
+              <div ref={messagesEndRef} />
+            </List>
+          </Paper>
 
-            <Typography id="modal-title" variant="h4" component="h2">
-              Report Message
-            </Typography>
+          <Modal
+            open={open}
+            onClose={handleCloseModal}
+            aria-labelledby="modal-title"
+          >
+            <Box sx={reportModalStyle(theme)}>
+              <IconButton
+                onClick={handleCloseModal}
+                style={{ position: "absolute", top: 5, right: 5 }}
+              >
+                <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+              </IconButton>
 
-            <FormControl
-              variant="filled"
-              sx={{ m: 1, width: 250 }}
-              size="small"
-            >
-              <InputLabel id="reason-label">Reason</InputLabel>
-              <Select labelId="reason-label"></Select>
-            </FormControl>
-            <br />
+              <Typography id="modal-title" variant="h4" component="h2">
+                Report Message
+              </Typography>
+
+              <FormControl
+                variant="filled"
+                sx={{ m: 1, width: 250 }}
+                size="small"
+              >
+                <InputLabel id="reason-label">Reason</InputLabel>
+                <Select labelId="reason-label"></Select>
+              </FormControl>
+              <br />
+              <ButtonWithConfirmation
+                color="error"
+                handler={() => {
+                  handleReportMessage();
+                  handleCloseModal();
+                }}
+                text="Confirm Report"
+              />
+            </Box>
+          </Modal>
+
+          <Box mt={2} display="flex">
+            <TextField
+              label="Type a message"
+              variant="outlined"
+              fullWidth
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+            />
             <Button
               variant="contained"
-              color="error"
-              onClick={() => {
-                handleReportMessage();
-                handleCloseModal();
-                setConfirmation(true);
-              }}
+              color="primary"
+              onClick={sendMessage}
+              style={{ marginLeft: "10px" }}
             >
-              Confirm Report
+              Send
             </Button>
           </Box>
-        </Modal>
-
-        <Box mt={2} display="flex">
-          <TextField
-            label="Type a message"
-            variant="outlined"
-            fullWidth
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={sendMessage}
-            style={{ marginLeft: "10px" }}
-          >
-            Send
-          </Button>
         </Box>
-      </Box>
 
-      {confirmation && (
-        <ConfirmationMessage message={"Message Successfully Reported"} />
-      )}
-    </Container>
+        <ConfirmationMessage message={confirmation} />
+      </Container>
+    </ConfirmationProvider>
   );
 };
 

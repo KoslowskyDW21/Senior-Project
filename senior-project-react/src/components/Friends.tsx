@@ -176,7 +176,7 @@ const Friends: React.FC = () => {
         sx={{
           display: "flex",
           flexDirection: "column",
-          height: "100vh",
+          height: "100%",
           paddingTop: "150px",
           backgroundColor: theme.palette.background.default,
         }}
@@ -200,7 +200,6 @@ const Friends: React.FC = () => {
               position: "relative",
               width: "50vw",
               margin: "auto",
-              backgroundColor: theme.palette.background.default,
             }}
           >
             <TextField
@@ -217,7 +216,6 @@ const Friends: React.FC = () => {
                   top: "100%",
                   left: 0,
                   width: "100%",
-                  backgroundColor: theme.palette.background.default,
                   boxShadow: isDarkMode
                     ? "0px 2px 5px rgba(255, 255, 255, 0.1)"
                     : "0px 2px 5px rgba(0, 0, 0, 0.1)",
@@ -236,7 +234,6 @@ const Friends: React.FC = () => {
                       alignItems: "center",
                       cursor: "pointer",
                       "&:hover": {
-                        backgroundColor: theme.palette.background.default,
                       },
                     }}
                     onClick={() => navigate(`/OtherProfile/${user.id}`)}
@@ -272,7 +269,6 @@ const Friends: React.FC = () => {
               flexWrap: "wrap",
               justifyContent: "flex-start",
               gap: 2,
-              backgroundColor: theme.palette.background.default,
             }}
           >
             {friends.map((friend) => (
@@ -284,7 +280,6 @@ const Friends: React.FC = () => {
                   minHeight: "100px",
                   border: "2px solid rgb(172, 169, 169)",
                   borderRadius: 2,
-                  backgroundColor: theme.palette.background.default,
                   boxShadow: isDarkMode
                     ? "0px 2px 5px rgba(255, 255, 255, 0.1)"
                     : "0px 2px 5px rgba(0, 0, 0, 0.1)",
@@ -340,7 +335,6 @@ const Friends: React.FC = () => {
                 flexWrap: "wrap",
                 justifyContent: "flex-start",
                 gap: 2,
-                backgroundColor: theme.palette.background.default,
               }}
             >
               {friendRequestsFrom.map((friend) => (
@@ -352,7 +346,6 @@ const Friends: React.FC = () => {
                     minHeight: "100px",
                     border: "2px solid rgb(172, 169, 169)",
                     borderRadius: 2,
-                    backgroundColor: theme.palette.background.default,
                     boxShadow: isDarkMode
                       ? "0px 2px 5px rgba(255, 255, 255, 0.1)"
                       : "0px 2px 5px rgba(0, 0, 0, 0.1)",
@@ -404,7 +397,6 @@ const Friends: React.FC = () => {
                 flexWrap: "wrap",
                 justifyContent: "flex-start",
                 gap: 2,
-                backgroundColor: theme.palette.background.default,
               }}
             >
               {friendRequestsTo.map((friend) => (
@@ -457,7 +449,7 @@ const Friends: React.FC = () => {
           </Box>
           {suggestedFriends.length > 0 && (
             <Box>
-              <Typography variant="h4" mt={7} sx={{ fontWeight: "bold" }}>
+              <Typography variant="h4" mt={7} sx={{ fontWeight: "bold"}}>
                 Suggested Friends
               </Typography>
               <Box

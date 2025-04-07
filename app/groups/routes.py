@@ -1,6 +1,6 @@
 from __future__ import annotations
 from app.groups import bp
-from app.models import User, UserGroup, GroupMember, GroupBannedMember, Message, GroupReport, UserNotifications, MessageReport, db
+from app.models import User, UserGroup, GroupMember, GroupBannedMember, Message, GroupReport, UserNotifications, MessageReport, UserBlock, db
 from flask import jsonify, request, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
@@ -21,16 +21,116 @@ def get_group(id):
     return jsonify(group.to_json()), 200
 
 @bp.route('/', methods=['GET'])
-def get_groups():
-    user: User = current_user._get_current_object() # type: ignore
-    groups: list[UserGroup] = UserGroup.query.filter_by(is_public=True).all()
+@login_required
+def get_all_groups():
+    user: User = current_user._get_current_object()  # type: ignore
 
-    if not user.is_admin:
-        reports: list[GroupReport] = GroupReport.query.filter_by(user_id = user.id).all()
-        reportedGroups: list[int] = [report.group_id for report in reports]
-        groups = [group for group in groups if not group.id in reportedGroups]
+    # Initialize the response structure
+    response_data = {
+        "my_groups": [],
+        "invited_groups": [],
+        "all_groups": [],
+        "total_pages": 1,
+        "current_page": 1,
+    }
 
+    # Get the page, per_page, and search query parameters from the request (default to page 1, per_page 10, and empty search)
+    page = max(1, int(request.args.get('page', 1)))  # Ensure page is at least 1
+    per_page = int(request.args.get('per_page', 10))  # Default to 10 groups per page
+    search_query = request.args.get('search', "").strip().lower()  # Get the search query (empty string if not provided)
+
+    print("the query is as follows my liege")
+    print(search_query)
+
+    # 1. Fetch all public groups (with pagination and search filter if query is present)
+    public_groups_query = UserGroup.query.filter_by(is_public=True)
+
+    # If there is a search query, filter public groups by name (case insensitive)
+    if search_query:
+        public_groups_query = public_groups_query.filter(UserGroup.name.ilike(f"%{search_query}%"))
+
+    # Fetch the filtered public groups (no pagination yet)
+    public_groups_filtered = public_groups_query.all()
+
+    # 2. Fetch the private groups the user is part of (with pagination and search filter if query is present)
+    my_group_ids = {membership.group_id for membership in GroupMember.query.filter_by(member_id=user.id).all()}
+    private_groups_query = UserGroup.query.filter(
+        UserGroup.id.in_(my_group_ids),
+        UserGroup.is_public == False
+    )
+
+    # If there is a search query, filter private groups by name (case insensitive)
+    if search_query:
+        private_groups_query = private_groups_query.filter(UserGroup.name.ilike(f"%{search_query}%"))
+
+    # Fetch the filtered private groups (no pagination yet)
+    private_groups_filtered = private_groups_query.all()
+
+    # Combine public and private groups
+    all_groups_filtered = public_groups_filtered + private_groups_filtered
+
+    # Get the total number of pages based on the filtered result
+    total_groups_count = len(all_groups_filtered)
+    total_pages_all = (total_groups_count // per_page) + (1 if total_groups_count % per_page else 0)
+
+    # For My Groups (the groups the user is a member of), apply search query if present
+    if search_query:
+        my_groups_query = UserGroup.query.filter(
+            UserGroup.id.in_(my_group_ids),
+            UserGroup.name.ilike(f"%{search_query}%")
+        )
+    else:
+        my_groups_query = UserGroup.query.filter(UserGroup.id.in_(my_group_ids))
+
+    my_groups = my_groups_query.all()
+    response_data['my_groups'] = [group.to_json() for group in my_groups]
+
+    # 3. Get invited groups (groups the user has been invited to)
+    notifications = UserNotifications.query.filter_by(user_id=user.id, notification_type='group_message').all()
+    invited_group_ids = {notification.group_id for notification in notifications}
+    response_data['invited_groups'] = [
+        group.to_json() for group in all_groups_filtered if group.id in invited_group_ids
+    ]
+
+    # 4. Paginate the combined filtered groups for the "all_groups" section
+    start_idx = (page - 1) * per_page
+    end_idx = start_idx + per_page
+    paginated_groups = all_groups_filtered[start_idx:end_idx]
+
+    response_data['all_groups'] = [group.to_json() for group in paginated_groups]
+
+    # Pagination data
+    response_data['total_pages'] = total_pages_all
+    response_data['current_page'] = page
+
+    return jsonify(response_data), 200
+
+
+@bp.route('/my_groups/', methods=['GET'])
+@login_required
+def get_my_groups():
+    group_memberships = GroupMember.query.filter_by(member_id=current_user.id).all()
+    group_ids = [membership.group_id for membership in group_memberships]
+    groups = UserGroup.query.filter(UserGroup.id.in_(group_ids)).all()
     return jsonify([group.to_json() for group in groups]), 200
+
+@bp.route('/notifications/', methods=['GET'])
+@login_required
+def get_notifications():
+    notifications = UserNotifications.query.filter_by(
+            user_id=current_user.id,  # type: ignore
+            notification_type='group_message'
+        )
+    
+    invited_groups = []
+    for notification in notifications:
+        group = UserGroup.query.get(notification.group_id)
+        if group:
+            invited_groups.append(group.to_json())
+
+    return jsonify({
+        "invited_groups": invited_groups
+    }), 200
 
 @bp.route('/reported/', methods=["GET"])
 @login_required
@@ -144,13 +244,6 @@ def get_members(group_id):
         })
     return jsonify(member_data), 200
 
-@bp.route('/my_groups/', methods=['GET'])
-@login_required
-def get_my_groups():
-    group_memberships = GroupMember.query.filter_by(member_id=current_user.id).all()
-    group_ids = [membership.group_id for membership in group_memberships]
-    groups = UserGroup.query.filter(UserGroup.id.in_(group_ids)).all()
-    return jsonify([group.to_json() for group in groups]), 200
 
 @bp.route('/create/', methods=['POST'])
 @login_required
@@ -549,22 +642,3 @@ def get_invite_status(group_id):
         return jsonify({"isInvited": True, "notificationText": invite.notification_text}), 200
 
     return jsonify({"isInvited": False}), 200
-
-
-@bp.route('/notifications/', methods=['GET'])
-@login_required
-def get_notifications():
-    notifications = UserNotifications.query.filter_by(
-            user_id=current_user.id,  # type: ignore
-            notification_type='group_message'
-        )
-    
-    invited_groups = []
-    for notification in notifications:
-        group = UserGroup.query.get(notification.group_id)
-        if group:
-            invited_groups.append(group.to_json())
-
-    return jsonify({
-        "invited_groups": invited_groups
-    }), 200

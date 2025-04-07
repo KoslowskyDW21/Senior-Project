@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from flask_login import login_required, current_user
 from app.challenges import bp
-from app.models import User, Challenge, ChallengeParticipant, ChallengeVote, UserNotifications, ChallengeReport, db
+from app.models import User, Challenge, ChallengeParticipant, ChallengeVote, UserNotifications, ChallengeReport, db, UserBlock
 from flask import request, jsonify, abort, current_app
 from datetime import datetime, timedelta, UTC
 from werkzeug.utils import secure_filename
@@ -10,6 +10,8 @@ import os
 import pytz
 import uuid
 from math import ceil
+
+
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 def allowed_file(filename):
@@ -22,29 +24,105 @@ def get_localized_time(time):
         time = pytz.utc.localize(time)
     return time
 
-@login_required
+from datetime import datetime
+from flask import jsonify, request
+from math import ceil
+from app.models import Challenge, ChallengeParticipant, ChallengeReport, UserNotifications, UserBlock, User
+
+# Helper function to filter expired challenges
+def filter_expired_challenges(challenges):
+    now = datetime.now()
+    return [challenge for challenge in challenges if challenge.end_time > now]
+
 @bp.route('/', methods=['GET', 'POST'])
 def challenges():
-    user: User = current_user._get_current_object() # type: ignore
-    #the  pagining is upon us
-    #page = max(1, int(request.args.get('page', 1)))  
-    #per_page = int(request.args.get('per_page', 20))
-    challenges: list[Challenge] = Challenge.query.all()
+    user: User = current_user._get_current_object()  # type: ignore
 
+    # Get search query
+    search_query = request.args.get('search', "").lower()
+
+    # Base query for challenges
+    challenges_query = Challenge.query
+
+    # Apply search filtering if a search query exists (for all challenges)
+    if search_query:
+        challenges_query = challenges_query.filter(Challenge.name.ilike(f"%{search_query}%"))
+
+    # Fetch all challenges (no pagination for this one)
+    all_challenges = challenges_query.all()
+
+    # Filter out expired challenges
+    all_challenges = filter_expired_challenges(all_challenges)
+
+    # Fetch Joined Challenges (Challenges the user is a participant in)
+    joined_challenges_query = Challenge.query.join(ChallengeParticipant, ChallengeParticipant.challenge_id == Challenge.id) \
+        .filter(ChallengeParticipant.user_id == user.id)
+
+    # Apply search filtering for joined challenges if search query exists
+    if search_query:
+        joined_challenges_query = joined_challenges_query.filter(Challenge.name.ilike(f"%{search_query}%"))
+
+    # Fetch Invited Challenges from Notifications (no pagination for this one)
+    invited_challenges_query = Challenge.query.filter(Challenge.id.in_(
+        db.session.query(UserNotifications.challenge_id)
+        .filter(UserNotifications.user_id == user.id)
+        .filter(UserNotifications.notification_type == 'challenge_reminder')
+    ))
+
+    # Apply search filtering for invited challenges if search query exists
+    if search_query:
+        invited_challenges_query = invited_challenges_query.filter(Challenge.name.ilike(f"%{search_query}%"))
+
+    # Apply the additional filters for non-admin users (reported challenges, blocked users, etc.)
     if not user.is_admin:
-        reports: list[ChallengeReport] = ChallengeReport.query.filter_by(user_id=user.id).all()
-        reportedChallenges: list[int] = [report.challenge_id for report in reports]
-        challenges = [challenge for challenge in challenges if not challenge.id in reportedChallenges]
+        reports = ChallengeReport.query.filter_by(user_id=user.id).all()
+        reported_challenges = [report.challenge_id for report in reports]
+        all_challenges = [challenge for challenge in all_challenges if challenge.id not in reported_challenges]
+        joined_challenges_query = joined_challenges_query.filter(Challenge.id.notin_(reported_challenges))
+        invited_challenges_query = invited_challenges_query.filter(Challenge.id.notin_(reported_challenges))
 
-    #challenges_paginated = challenges.paginate(page=page, per_page=per_page, error_out=False)  # type: ignore
-    #total_pages = ceil(challenges_paginated.total / per_page)  # type: ignore
-    #challenges = [challenge.to_json() for challenge in challenges_paginated.items]
-    #return jsonify({
-        #'challenges': challenges,
-        #'total_pages': total_pages,
-        #'current_page': page
-    #}), 200
-    return jsonify([challenge.to_json() for challenge in challenges]), 200
+        blocked_users = UserBlock.query.filter_by(blocked_by=user.id).all()
+        blocked_user_ids = [blocked_user.blocked_user for blocked_user in blocked_users]
+        all_challenges = [challenge for challenge in all_challenges if challenge.creator not in blocked_user_ids]
+        joined_challenges_query = joined_challenges_query.filter(Challenge.creator.notin_(blocked_user_ids))
+        invited_challenges_query = invited_challenges_query.filter(Challenge.creator.notin_(blocked_user_ids))
+
+    # Filter out expired challenges from the joined and invited challenges as well
+    joined_challenges_query = filter_expired_challenges(joined_challenges_query.all())
+    invited_challenges_query = filter_expired_challenges(invited_challenges_query.all())
+
+    # Paginate the results for All Challenges only
+    page = max(1, int(request.args.get('page', 1)))  
+    per_page = int(request.args.get('per_page', 20))
+
+    all_challenges_paginated = Challenge.query.filter(Challenge.id.in_([challenge.id for challenge in all_challenges])) \
+        .paginate(page=page, per_page=per_page, error_out=False)
+
+    total_pages_all = ceil(all_challenges_paginated.total / per_page)  # type: ignore # Correct calculation of total pages
+
+    # Get the challenges for Joined and Invited categories (no pagination here)
+    joined_challenges = [challenge.to_json() for challenge in joined_challenges_query]
+    invited_challenges = [challenge.to_json() for challenge in invited_challenges_query]
+
+    # Convert challenges to JSON format
+    all_challenges_json = [challenge.to_json() for challenge in all_challenges_paginated.items]
+
+    return jsonify({
+        'all_challenges': {
+            'challenges': all_challenges_json,
+            'total_pages': total_pages_all,
+            'current_page': page
+        },
+        'joined_challenges': {
+            'challenges': joined_challenges,
+        },
+        'invited_challenges': {
+            'challenges': invited_challenges,
+        }
+    }), 200
+
+
+
 
 @login_required
 @bp.route('/<int:id>/', methods=['GET'])
@@ -135,7 +213,7 @@ def create_challenge():
     db.session.add(challenge)
     db.session.commit()
 
-    return jsonify({"message": "Challenge created successfully!",
+    return jsonify({"message": "Competition (challenge) created successfully!",
                     "challenge_id": challenge.id}), 200
 
 @bp.route('/current_user_id/', methods=['GET', 'POST'])

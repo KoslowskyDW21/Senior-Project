@@ -25,6 +25,9 @@ def post_update_username():
 
     if username in [user.username for user in User.query.all()]:
         return jsonify({"message": "Username already taken", "alreadyTaken": True}), 200
+    
+    if username.strip() == "":
+        return jsonify({"message": "Cannot choose an empty username"}), 400
 
     user = current_user._get_current_object()
     user.username = username # type: ignore
