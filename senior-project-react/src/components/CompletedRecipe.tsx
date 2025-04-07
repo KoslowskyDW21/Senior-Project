@@ -15,6 +15,8 @@ import { PhotoCamera, NoPhotography } from "@mui/icons-material";
 import config from "../config.js";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ConfirmationMessage from "./ConfirmationMessage";  // Import the ConfirmationMessage component
+import { ConfirmationProvider, useConfirmation } from "./ConfirmationHelper.js";
+
 
 interface Recipe {
   id: string;
@@ -37,9 +39,28 @@ const CompletedRecipe: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
+  const [message, setMessage] = React.useState<string>("");
+
+  function ButtonWithConfirmation({color, handler, text}: any){
+    const{open, toggleOpen} = useConfirmation();
+
+    return(
+      <Button
+        variant="contained"
+        color={color}
+        onClick={() =>{
+          handler()
+          toggleOpen()
+        }}
+        >
+          {text}
+        </Button>
+    )
+  }
+
   const handleGoToReview = async () => {
     if (!rating && !notes && !image && !difficulty) {
-      setErrorMessage("At least one field must be filled out to submit the review.");
+      setMessage("At least one field must be filled in")
       return; 
     }
 
@@ -65,8 +86,9 @@ const CompletedRecipe: React.FC = () => {
           },
         }
       );
-      console.log("Data successfully submitted:", response.data);
+      setMessage("Review successfully posted")
       setReviewSubmitted(true); // Set the review as submitted
+
     } catch (error) {
       console.error("Error submitting review:", error);
     }
@@ -116,7 +138,7 @@ const CompletedRecipe: React.FC = () => {
   }, []);
 
   return (
-    <>
+    <ConfirmationProvider>
       <IconButton
         onClick={() => navigate(-1)}
         style={{ position: "fixed", top: 30, left: 30 }}
@@ -196,15 +218,11 @@ const CompletedRecipe: React.FC = () => {
               <ToggleButton value="5">5</ToggleButton>
             </ToggleButtonGroup>
           </div>
-          <Button onClick={handleGoToReview} variant="contained" color="primary">
-            Submit Review
-          </Button>
+          <ButtonWithConfirmation color="primary" handler={handleGoToReview} text={"Submit Review"}/>
         </>
         {/* Snackbar confirmation message */}
-      {reviewSubmitted && (
-        <ConfirmationMessage message="Your review has been submitted successfully!" />
-      )}
-    </>
+      <ConfirmationMessage message={message} />
+    </ConfirmationProvider>
   );
 };
 

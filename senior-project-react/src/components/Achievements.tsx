@@ -233,18 +233,18 @@ const Achievements: React.FC = () => {
                   height: "auto", // Allow the image to adjust height based on its width
                   display: "flex", 
                   justifyContent: "center", // Center the image horizontally
-                  alignItems: "center",  // Center the image vertically
-                  maxHeight: "50%",  // Limit the height of the image to 50% of the modal's height
+                  alignItems: "center", 
+                  maxHeight: "50%",  
                 }}
               >
                 <img
                   src={`${config.serverUrl}/${selectedAchievement.image}`}
                   alt={selectedAchievement.title}
                   style={{
-                    width: "100%", // Image takes full width
-                    height: "auto", // Maintain aspect ratio
-                    maxHeight: "100%", // Ensure the image doesn't exceed the container's height
-                    objectFit: "contain",  // Ensure image fits within the container while maintaining aspect ratio
+                    width: "100%", 
+                    height: "auto", 
+                    maxHeight: "100%", 
+                    objectFit: "contain",  
                   }}
                 />
               </Box>
