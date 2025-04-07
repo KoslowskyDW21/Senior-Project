@@ -57,10 +57,9 @@ const GroupMessages: React.FC = () => {
   const [confirmation, setConfirmation] = useState<string>("");
   const handleOpenModal = () => setOpen(true);
   const handleCloseModal = () => setOpen(false);
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const navigate = useNavigate();
   const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
 
   function ButtonWithConfirmation({ color, handler, text }: any) {
         const {open, toggleOpen} = useConfirmation();

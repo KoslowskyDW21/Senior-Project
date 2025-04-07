@@ -19,7 +19,6 @@ import {
   ListItem,
   ListItemText,
   Checkbox,
-  Snackbar,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
@@ -98,7 +97,6 @@ const GroupDetails: React.FC = () => {
   const [confirmation, setConfirmation] = useState<boolean>(false);
   const navigate = useNavigate();
   const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
 
   // States for report modal
   const [open, setOpen] = useState(false);
@@ -564,34 +562,33 @@ const GroupDetails: React.FC = () => {
                   <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
                 </IconButton>
 
-                <Typography id="invite-modal-title" variant="h4" component="h2">
-                  Invite Friends
-                </Typography>
-                <List>
-                  {friends.map((friend) => (
-                    <ListItem
-                      key={friend.id}
-                      button
-                      onClick={() => handleToggleFriend(friend.id)}
-                    >
-                      <Checkbox
-                        checked={selectedFriends.includes(friend.id)}
-                        tabIndex={-1}
-                        disableRipple
-                      />
-                      <ListItemText primary={friend.username} />
-                    </ListItem>
-                  ))}
-                </List>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleInviteFriends}
-                >
-                  Send Invites
-                </Button>
-              </Box>
-            </Modal>
+              <Typography id="invite-modal-title" variant="h4" component="h2">
+                Invite Friends
+              </Typography>
+              <List>
+                {friends.map((friend) => (
+                  <ListItem
+                    key={friend.id}
+                    onClick={() => handleToggleFriend(friend.id)}
+                  >
+                    <Checkbox
+                      checked={selectedFriends.includes(friend.id)}
+                      tabIndex={-1}
+                      disableRipple
+                    />
+                    <ListItemText primary={friend.username} />
+                  </ListItem>
+                ))}
+              </List>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleInviteFriends}
+              >
+                Send Invites
+              </Button>
+            </Box>
+          </Modal>
 
             <Modal
               open={deleteModalOpen}

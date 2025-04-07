@@ -5,7 +5,6 @@ import {
   CardActionArea,
   CardHeader,
   CardMedia,
-  CardContent,
   Typography,
 } from "@mui/material";
 import Difficulty from "./Difficulty";

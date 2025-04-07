@@ -34,10 +34,19 @@ interface UserNotifications {
   }[];
 }
 
+interface Notification {
+  id: number;
+  notification_text: string;
+  isRead: number;
+  notification_type: string;
+  group_id?: number;
+  challenge_id: number;
+}
+
 const Header: React.FC<HeaderProps> = ({ title }) => {
   const [admin, setAdmin] = useState<boolean>(false);
   const [profile_picture, setProfile_picture] = useState<string>();
-  const [notifications, setNotifications] = useState<[]>([]);
+  const [notifications, setNotifications] = useState<any>([]);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,10 +59,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     navigate(`/achievements`);
   };
 
-  const handleGoToRecipeLists = async () => {
-    navigate(`/recipe-lists/`);
-  };
-
   const handleGoToSettings = async () => {
     navigate("/settings");
   };
@@ -64,10 +69,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
 
   const handleGoToRecipes = async () => {
     navigate("/recipes");
-  };
-
-  const handleGoToShoppingList = async () => {
-    navigate("/shopping-list");
   };
 
   const [avatarAnchorEl, setAvatarAnchorEl] = useState<null | HTMLElement>(
@@ -90,7 +91,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   };
 
   const handleReadNotification = (
-    event: React.MouseEvent<HTMLElement>,
     id: number,
     notification_type: string,
     group_id?: number,
@@ -311,7 +311,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                 }}
               />
               {notifications.length > 0 &&
-                notifications.some((n) => n.isRead === 0) && (
+                notifications.some((n: Notification) => n.isRead === 0) && (
                   <Box
                     sx={{
                       position: "absolute",
@@ -339,7 +339,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             }}
           >
             {notifications.length > 0 &&
-            notifications.some((n) => n.isRead === 0) ? (
+            notifications.some((n: Notification) => n.isRead === 0) ? (
               <>
                 <MenuItem
                   onClick={clearNotifications}
@@ -352,16 +352,15 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                 </MenuItem>
                 <Divider />
                 {notifications
-                  .filter((notification) => notification.isRead === 0)
-                  .map((notification, index) => (
+                  .filter((notification: Notification) => notification.isRead === 0)
+                  .map((notification: Notification, index: number) => (
                     <MenuItem
                       key={index}
                       sx={{
                         fontSize: "clamp(13px, 1vw, 20px)",
                       }}
-                      onClick={(event) =>
+                      onClick={() =>
                         handleReadNotification(
-                          event,
                           notification.id,
                           notification.notification_type,
                           notification.group_id,

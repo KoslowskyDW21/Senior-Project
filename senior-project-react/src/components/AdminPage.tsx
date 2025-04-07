@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { useState, useEffect } from "react";
 import { useThemeContext } from "./ThemeContext";
 import "../AdminPage.css";
@@ -17,7 +17,6 @@ import {
   SelectChangeEvent,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import Icon from "@mui/material/Icon";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import config from "../config.js";

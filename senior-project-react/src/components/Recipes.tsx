@@ -22,6 +22,8 @@ import {
   Stack,
 } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
+import { List as ListIcon } from "@mui/icons-material";
+import { ShoppingCart as ShoppingCartIcon } from "@mui/icons-material"; 
 import Header from "./Header";
 import Footer from "./Footer.js";
 import debounce from "lodash.debounce";
@@ -384,6 +386,7 @@ const Recipes: React.FC = () => {
         height: "40",
       }}
       onClick={handleGoToRecipeLists}
+      startIcon={<ListIcon />}
     >
       Recipe Lists
     </Button>
@@ -395,6 +398,7 @@ const Recipes: React.FC = () => {
         height: "40",
       }}
       onClick={handleGoToShoppingList}
+      startIcon={<ShoppingCartIcon />} 
     >
       Shopping List
     </Button>

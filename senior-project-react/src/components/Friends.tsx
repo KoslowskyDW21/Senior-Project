@@ -23,8 +23,14 @@ interface suggestedFriends {
   suggested_friends: [];
 }
 
-interface User {
+interface Users {
   users: [];
+}
+
+interface User {
+  id: number;
+  profile_picture: string;
+  username: string;
 }
 
 interface FriendRequestTo {
@@ -65,7 +71,7 @@ const Friends: React.FC = () => {
             headers: { "Content-Type": "application/json" },
           }
         );
-        const data: User = response.data;
+        const data: Users = response.data;
         setSearchResults(data.users);
       } catch (error) {
         console.error("Error fetching search results:", error);
@@ -225,7 +231,7 @@ const Friends: React.FC = () => {
                   zIndex: 1001,
                 }}
               >
-                {searchResults.map((user) => (
+                {searchResults.map((user: User) => (
                   <Box
                     key={user.id}
                     sx={{
@@ -271,7 +277,7 @@ const Friends: React.FC = () => {
               gap: 2,
             }}
           >
-            {friends.map((friend) => (
+            {friends.map((friend: User) => (
               <Box
                 key={friend.id}
                 mt={10}
@@ -337,7 +343,7 @@ const Friends: React.FC = () => {
                 gap: 2,
               }}
             >
-              {friendRequestsFrom.map((friend) => (
+              {friendRequestsFrom.map((friend: User) => (
                 <Box
                   key={friend.id}
                   mt={5}
@@ -399,7 +405,7 @@ const Friends: React.FC = () => {
                 gap: 2,
               }}
             >
-              {friendRequestsTo.map((friend) => (
+              {friendRequestsTo.map((friend: User) => (
                 <Box
                   key={friend.id}
                   mt={5}
@@ -462,7 +468,7 @@ const Friends: React.FC = () => {
                   mb: 3,
                 }}
               >
-                {suggestedFriends.map((friend) => (
+                {suggestedFriends.map((friend: User) => (
                   <Box
                     key={friend.id}
                     mt={5}

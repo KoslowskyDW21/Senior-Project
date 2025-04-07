@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import axios from "axios";
-import { Theme, useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import config from "../config.js";
 
 interface GroupMember {

@@ -24,7 +24,6 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import ChallengeParticipantsList from "./ChallengeParticipantsList";
 import config from "../config.js";
-import { set } from "date-fns";
 import Header from "./Header.js";
 import ConfirmationMessage from "./ConfirmationMessage.js";
 import { ConfirmationProvider, useConfirmation } from "./ConfirmationHelper.js";
@@ -99,7 +98,7 @@ const ChallengeDetail: React.FC = () => {
   const [message, setMessage] = useState<string>("");
   const [inviteMessage, setInviteMessage] = useState("");
   const theme = useTheme();
-  const [participantIds, setParticipantIds] = useState<Participant[]>([]);
+  const [, setParticipantIds] = useState<Participant[]>([]);
 
   // States for report modal
   const [open, setOpen] = useState(false);
@@ -553,60 +552,60 @@ const ChallengeDetail: React.FC = () => {
           </Box>
         </Modal>
 
-        <Modal
-          open={inviteModalOpen}
-          onClose={() => setInviteModalOpen(false)}
-          aria-labelledby="invite-modal-title"
-          aria-describedby="invite-modal-description"
+      <Modal
+        open={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        aria-labelledby="invite-modal-title"
+        aria-describedby="invite-modal-description"
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            bgcolor: theme.palette.background.default,
+            boxShadow: 24,
+            padding: 4,
+            borderRadius: 2,
+          }}
         >
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              bgcolor: "#ffffff",
-              boxShadow: 24,
-              padding: 4,
-              borderRadius: 2,
-            }}
+          <IconButton
+            onClick={() => setInviteModalOpen(false)}
+            style={{ position: "absolute", top: 5, right: 5 }}
           >
-            <IconButton
-              onClick={() => setInviteModalOpen(false)}
-              style={{ position: "absolute", top: 5, right: 5 }}
-            >
-              <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
-            </IconButton>
+            <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
+          </IconButton>
 
-            <Typography id="invite-modal-title" variant="h4" component="h2">
-              Invite Friends
-            </Typography>
-            <List>
-              {friends.map((friend) => (
-                <ListItem
-                  key={friend.id}
-                  button
-                  onClick={() => handleToggleFriend(friend.id)}
-                >
-                  <Checkbox
-                    checked={selectedFriends.includes(friend.id)}
-                    tabIndex={-1}
-                    disableRipple
-                  />
-                  <ListItemText primary={friend.username} />
-                </ListItem>
-              ))}
-            </List>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleInviteFriends}
-            >
-              Send Invites
-            </Button>
-          </Box>
-        </Modal>
-      </Container>
+          <Typography id="invite-modal-title" variant="h4" component="h2">
+            Invite Friends
+          </Typography>
+          <List>
+            {friends.map((friend) => (
+              <ListItem
+                key={friend.id}
+                // button
+                onClick={() => handleToggleFriend(friend.id)}
+              >
+                <Checkbox
+                  checked={selectedFriends.includes(friend.id)}
+                  tabIndex={-1}
+                  disableRipple
+                />
+                <ListItemText primary={friend.username} />
+              </ListItem>
+            ))}
+          </List>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleInviteFriends}
+          >
+            Send Invites
+          </Button>
+        </Box>
+      </Modal>
+    </Container>
 
       <ConfirmationMessage message={message}/>
     </ConfirmationProvider>
