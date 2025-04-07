@@ -401,7 +401,7 @@ export default function ReportPage() {
 
   async function deleteGroupReports() {
     await axios
-      .delete(`${config.serverUrl}/groups/${group!.id}/delete_reports`)
+      .delete(`${config.serverUrl}/groups/${group!.id}/delete_reports/`)
       .then((response) => {
         console.log(response.data);
       })
@@ -412,7 +412,7 @@ export default function ReportPage() {
 
   async function setGroupReportsZero() {
     await axios
-      .post(`${config.serverUrl}/groups/${group!.id}/set_group_reports_zero`)
+      .post(`${config.serverUrl}/groups/${group!.id}/set_group_reports_zero/`)
       .then((response) => {
         console.log(response.data);
       })
@@ -423,7 +423,7 @@ export default function ReportPage() {
 
   async function deleteGroup() {
     await axios
-      .delete(`${config.serverUrl}/groups/${group!.id}/delete`)
+      .delete(`${config.serverUrl}/groups/${group!.id}/delete/`)
       .then((response) => {
         console.log(response.data);
       })
