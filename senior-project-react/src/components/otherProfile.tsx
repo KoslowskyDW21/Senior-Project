@@ -24,6 +24,8 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import config from "../config.js";
+import ConfirmationMessage from "./ConfirmationMessage.js";
+import { ConfirmationProvider, useConfirmation } from "./ConfirmationHelper.js";
 
 interface ProfileResponse {
   lname: string;
@@ -108,6 +110,7 @@ const OtherProfile: React.FC = () => {
   const [user_level, setLevel] = useState<number>(0);
   const [xp_points, setXp_points] = useState<number>(0);
   const [hasLeveled, setHasLeveled] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
   const [friends, setFriends] = useState<[]>([]);
   const [friendRequestsTo, setFriendRequestsTo] = useState<[]>([]);
   const [friendRequestsFrom, setFriendRequestsFrom] = useState<[]>([]);
@@ -123,6 +126,23 @@ const OtherProfile: React.FC = () => {
   const handleCloseRemoveFriendModal = () => setOpenRemoveFriendModal(false);
   const handleOpenBlockModal = () => setOpenBlockModal(true);
   const handleCloseBlockModal = () => setOpenBlockModal(false);
+
+  function ButtonWithConfirmation({ color, handler, text }: any) {
+        const {open, toggleOpen} = useConfirmation();
+      
+        return (
+          <Button
+            variant="contained"
+            color={color}
+            onClick={() => {
+              handler();
+              toggleOpen();
+            }}
+          >
+            {text}
+          </Button>
+        )
+      }
 
   const [ellipsisAnchorEl, setEllipsisAnchorEl] = useState<null | HTMLElement>(
     null
@@ -411,6 +431,7 @@ const OtherProfile: React.FC = () => {
         },
       })
       .then((response) => {
+        setMessage("Tried to report user"); // TODO: Change this
         console.log(response.data.message);
       })
       .catch((error) => {
@@ -419,7 +440,7 @@ const OtherProfile: React.FC = () => {
   };
 
   return (
-    <>
+    <ConfirmationProvider>
       <Header title={`${username}`} />
       <IconButton
         onClick={() => navigate(-1)}
@@ -759,16 +780,14 @@ const OtherProfile: React.FC = () => {
                 <Select labelId="reason-label"></Select>
               </FormControl>
               <br />
-              <Button
-                variant="contained"
+              <ButtonWithConfirmation
                 color="error"
-                onClick={() => {
+                handler={() => {
                   handleReportUser();
                   handleCloseReportModal();
                 }}
-              >
-                Confirm Report
-              </Button>
+                text="Confirm Report"
+              />
             </Box>
           </Modal>
 
@@ -816,7 +835,8 @@ const OtherProfile: React.FC = () => {
           </Modal>
         </>
       )}
-    </>
+      <ConfirmationMessage message={message} />
+    </ConfirmationProvider>
   );
 };
 
