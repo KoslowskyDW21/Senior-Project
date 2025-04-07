@@ -421,12 +421,9 @@ const IndividualRecipe: React.FC = () => {
         (review: Review) => review.user_id === myId
       );
       if (userReview) {
-        console.log("should be working");
         setUserReview(userReview); // Set the current user's review if they have one
         setDisplayRating(userReview.rating);
-      } else {
-        console.log("didnt find nothing");
-      }
+      } 
     } catch (error) {
       console.error("Error fetching reviews: ", error);
     }
