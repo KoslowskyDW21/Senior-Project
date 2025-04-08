@@ -132,7 +132,7 @@ def get_notifications():
 @bp.route('/reported/', methods=["GET"])
 @login_required
 def get_reported_groups():
-    reportedGroups = UserGroup.query.filter(UserGroup.num_reports > 0).all()
+    reportedGroups: list[UserGroup] = UserGroup.query.filter(UserGroup.num_reports > 0).all()
     return jsonify([group.to_json() for group in reportedGroups]), 200
 
 @bp.route("/reported_messages/", methods=["GET"])
