@@ -87,19 +87,24 @@ def ban_user():
     isBanned = data.get("ban")
     print("Received data - ID: " + str(userId))
     print("Received data - banned: " + str(isBanned))
-    user = User.query.filter_by(id=userId).first()
+    user: User = User.query.filter_by(id=userId).first() # type: ignore
     if not user:
         return jsonify({"message": "User not found"}), 404
 
-    user.is_banned = isBanned  # type: ignore
+    user.is_banned = isBanned
 
     if isBanned:
         days = data.get("days")
         print("Received data - days: " + str(days))
         banTime = datetime.now(UTC) + timedelta(days=days)
-        user.banned_until = banTime  # type: ignore
+        user.banned_until = banTime 
+
+        reason = data.get("reason")
+        print("Received data - reason: " + str(reason))
+        user.reason_for_ban = reason
     else:
-        user.banned_until = None  # type: ignore
+        user.banned_until = None 
+        user.reason_for_ban = None
 
     try:
         db.session.commit()
@@ -122,6 +127,7 @@ def still_banned():
     if now > banTime:
         user.is_banned = False # type: ignore
         user.banned_until = None # type: ignore
+        user.reason_for_ban = None # type: ignore
     else:
         return jsonify({"message": "User is still banned", "banned": True}), 200
 
