@@ -160,3 +160,9 @@ def delete_recipe(id):
             db.session.rollback() 
             return jsonify({"message": "Error; Could not delete recipe", "error": str(e)}), 500
     return jsonify({"message": "Error; Could not delete recipe"}), 500
+
+@bp.get("/reasons")
+def get_reasons():
+    user: User = current_user._get_current_object() # type: ignore
+    reason: str = user.reason_for_ban
+    return jsonify({"reasons": reason})
