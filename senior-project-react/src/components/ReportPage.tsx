@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useThemeContext } from "./ThemeContext";
-import "../AdminPage.css";
+import "../ReportPage.css";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import config from "../config.js";
@@ -39,6 +39,7 @@ interface User {
 
 interface UserGroup {
   id: number;
+  user_id: number;
   name: string;
   description: string;
   is_public: boolean;
@@ -851,11 +852,15 @@ export default function ReportPage() {
               <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
             </IconButton>
 
-            <Group group={group!} />
-
             <Typography id="modal-title" variant="h4" component="h2">
               {group !== null ? group.name : ""}
             </Typography>
+            <Typography id="modal-title" variant="h5" component="h2">
+              {`Group created by 
+              ${group !== null ? getUserById(group.user_id) : ""}`}
+            </Typography>
+
+            {group && <a href={`/groups/${group.id}`}>{`Go to ${group.name}`}</a>}
 
             <table>
               <thead>
@@ -1041,13 +1046,16 @@ export default function ReportPage() {
               <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
             </IconButton>
 
-            <Challenge challenge={challenge!} />
-
             <Typography id="modal-title" variant="h4" component="h2">
+              {challenge !== null ? challenge.name : "null"}       
+            </Typography>
+            <Typography id="modal-title" variant="h5" component="h2">
               {`Challenge created by ${
-                challenge !== null ? challenge.creator : "null"
+                challenge !== null ? getUserById(+challenge.creator) : "null"
               }`}
             </Typography>
+
+            {challenge && <a href={`/challenges/${challenge.id}`}>{`Go to ${challenge.name}`}</a>}
 
             <table>
               <thead>
