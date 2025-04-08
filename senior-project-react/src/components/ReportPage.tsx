@@ -263,6 +263,26 @@ const modalStyle = {
   textAlign: "center",
 };
 
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "80vw",  // Set width relative to viewport width
+  height: "60vh",  // Set height relative to viewport height
+  maxWidth: "60vh",
+  maxHeight: "75vh",  // Max height to limit the modal's height on large screens
+  bgcolor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  p: 4,
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  overflow: "hidden", // Prevent overflow
+};
+
 export default function ReportPage() {
   const [admin, setAdmin] = useState<boolean>(false);
   const [groups, setGroups] = useState<UserGroup[]>([]);
@@ -500,7 +520,7 @@ export default function ReportPage() {
   async function deleteMessageReports() {
     await axios
       .delete(
-        `${config.serverUrl}/groups/${message!.id}/delete_message_reports`
+        `${config.serverUrl}/groups/${message!.id}/delete_message_reports/`
       )
       .then((response) => {
         console.log(response.data);
@@ -513,7 +533,7 @@ export default function ReportPage() {
   async function setMessageReportsZero() {
     await axios
       .post(
-        `${config.serverUrl}/groups/${message!.id}/set_message_reports_zero`
+        `${config.serverUrl}/groups/${message!.id}/set_message_reports_zero/`
       )
       .then((response) => {
         console.log(response.data);
@@ -525,7 +545,7 @@ export default function ReportPage() {
 
   async function deleteMessage() {
     await axios
-      .delete(`${config.serverUrl}/groups/${message!.id}/delete_message`)
+      .delete(`${config.serverUrl}/groups/${message!.id}/delete_message/`)
       .then((response) => {
         console.log(response.data);
       })
@@ -1015,7 +1035,7 @@ export default function ReportPage() {
         >
           <Box sx={modalStyle}>
             <IconButton
-              onClick={handleCloseMessageModal}
+              onClick={handleCloseChallengeModal}
               style={{ position: "absolute", top: 5, right: 5 }}
             >
               <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />

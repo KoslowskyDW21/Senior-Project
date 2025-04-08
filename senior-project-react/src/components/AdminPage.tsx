@@ -74,6 +74,7 @@ export default function AdminPage() {
   const [indexOfLength, setIndexOfLength] = useState<number>(-1);
   const [userReport, setUserReport] = useState<User | null>(null);
   const [reports, setReports] = useState<Report[]>([]);
+  const [reason, setReason] = useState<string>("N/A");
   const [open, setOpen] = useState(false);
   const handleOpenModal = () => setOpen(true);
   const handleCloseModal = () => setOpen(false);
@@ -225,6 +226,7 @@ export default function AdminPage() {
       id: userId,
       ban: banUser,
       days: days,
+      reason: reason,
     };
 
     await axios
@@ -526,6 +528,22 @@ export default function AdminPage() {
                 <MenuItem value={4}>1 Month</MenuItem>
                 <MenuItem value={5}>2 Months</MenuItem>
                 <MenuItem value={6}>Indefinite</MenuItem>
+              </Select>
+            </FormControl>
+            <br />
+            <FormControl
+              variant="filled"
+              sx={{ m: 1, width: 250 }}
+              size="small"
+            >
+            <InputLabel id="reason-label">Reason</InputLabel>
+              <Select labelId="reason-label" onChange={(event: SelectChangeEvent) => {
+                setReason(event.target.value);
+              }}>
+                <MenuItem value="Inappropriate Profile Picture">Inappropriate Profile Picture</MenuItem>
+                <MenuItem value="Inappropriate Username">Inappropriate Username</MenuItem>
+                <MenuItem value="Creation of Inappropriate Content">Creation of Inappropriate Content</MenuItem>
+                <MenuItem value="Harrassment or Bullying">Harrassment or Bullying</MenuItem>
               </Select>
             </FormControl>
 
