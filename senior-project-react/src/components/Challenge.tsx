@@ -49,7 +49,8 @@ const Challenge: React.FC<ChallengeProps> = ({
                 whiteSpace: "nowrap",        // Prevent wrapping
                 overflow: "hidden",          // Hide overflowing text
                 textOverflow: "ellipsis",    // Add ellipsis (...) for overflowing text
-                width: "100%", maxWidth: "100%",            // Prevent the title from stretching beyond the card
+                width: "100%", 
+                maxWidth: "100%",            // Prevent the title from stretching beyond the card
                }}
             >
               {name}
