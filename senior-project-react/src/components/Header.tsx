@@ -268,7 +268,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             sx={{
               width: "clamp(40px, 6vw, 70px)", // Width will scale between 50px and 70px
               height: "clamp(40px, 6vw, 70px)", // Same for height
-              backgroundColor: "lightgray",
+              backgroundColor: "transparent",
               borderRadius: 2,
               display: "flex",
               justifyContent: "center",
@@ -277,9 +277,9 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             }}
           >
             <img
-              src={`${config.serverUrl}/static/uploads/2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg`}
+              src={`${config.serverUrl}/static/logos/altLogo1.jpg`}
               alt="Image"
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: "transparent" }}
             />
           </Box>
         </ButtonBase>

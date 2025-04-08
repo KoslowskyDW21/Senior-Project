@@ -106,7 +106,7 @@ const Login = () => {
         sx={{
           width: 300,
           height: 300,
-          backgroundColor: "lightgray",
+          backgroundColor: "transparent",
           borderRadius: 1,
           display: "flex",
           justifyContent: "center",
@@ -114,9 +114,9 @@ const Login = () => {
         }}
       >
         <img
-          src={`${config.serverUrl}/static/uploads/2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg`}
+          src={`${config.serverUrl}/static/logos/altLogo2.jpg`}
           alt="Image"
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          style={{ width: "100%", height: "100%", objectFit: "contain" }}
         />
       </Box>
       <br />
