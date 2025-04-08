@@ -14,7 +14,6 @@ import re
 
 
 
-
 @bp.post("/")
 def post_recipes():
     print("Fetching recipes")
@@ -82,71 +81,80 @@ def post_recipes():
             user_cuisine_alias, user_cuisine_alias.cuisine_id == RecipeCuisine.cuisine_id
         )
 
-
         user_rating_weight = case(
-            (review_alias.user_id == current_user.id, 
-              case(
-                  (review_alias.rating >= 3, 0),  
-                   (review_alias.rating < 3, 0), 
-                  else_=0
-              )),
-            else_=0
+        (review_alias.user_id == current_user.id, 
+        case(
+          (review_alias.rating >= 0, -20), 
+          else_=2)
+         ),
+        else_=0
         )
 
         recipe_rating_weight = case(
-            (Recipe.rating >= 3, 0),  
-             (Recipe.rating < 3, 0),  
+            (Recipe.rating >= 2.5, 2),
             else_=0
         )
 
         cuisine_preference_weight = case(
-            (user_cuisine_alias.user_id == current_user.id, 0),  
+            (user_cuisine_alias.user_id == current_user.id, 5),
             else_=0
         )
 
         completion_weight = case(
-            (user_cuisine_alias.numComplete > 20, 0),  
-             (user_cuisine_alias.numComplete > 5, 0),  
-             (user_cuisine_alias.numComplete > 0, 0),  
-            else_=0
+            (user_cuisine_alias.numComplete > 20, 10),  
+            (user_cuisine_alias.numComplete > 5, 5),  
+            (user_cuisine_alias.numComplete > 0, 1),
+        else_=0
         )
 
+        total_weight = (user_rating_weight + recipe_rating_weight + cuisine_preference_weight + completion_weight)
 
-        total_weight = (user_rating_weight +
-                        recipe_rating_weight +
-                        cuisine_preference_weight +
-                        completion_weight)
-
-
-        recipes_query = recipes_query.add_columns(
+        featured_recipes_query = recipes_query.add_columns(
             Recipe.id, 
             Recipe.recipe_name, 
-            func.sum(total_weight).label('total_weight') 
+            func.sum(func.coalesce(total_weight, 0)).label('total_weight')
         )
-
 
         recipes_query = recipes_query.group_by(Recipe.id)
         recipes_query = recipes_query.order_by(
-            func.sum(total_weight).desc(),
             Recipe.recipe_name.asc()
         )
 
+    # Now ensure featured_recipes_query is always defined
+    if 'featured_recipes_query' in locals():
+        # Query for featured recipes (top 4)
+        featured_recipes_query = featured_recipes_query.group_by(Recipe.id)
+        featured_recipes_query = featured_recipes_query.order_by(
+            func.sum(total_weight).desc()
+        )
 
-    # Paginate the results
+        featured_recipes_query = featured_recipes_query.limit(4)
+        for recipe in featured_recipes_query:
+            print(recipe)
+
+        # Execute the query to fetch featured recipes
+        featured_recipes = [recipe[0].to_json() for recipe in featured_recipes_query.all()]
+    else:
+        featured_recipes = []
+
+    # Paginate the main recipes
     recipes_paginated = recipes_query.paginate(page=page, per_page=per_page, error_out=False)  # type: ignore
     total_pages = ceil(recipes_paginated.total / per_page)  # type: ignore
 
     # Convert the results to JSON using `to_json()`
     if not search_query:
-        recipes = [recipe[0].to_json() for recipe in recipes_paginated.items]
+        recipes = [recipe.to_json() for recipe in recipes_paginated.items]
     else:
         recipes = [recipe.to_json() for recipe in recipes_paginated.items]
 
+    # Return both featured and paginated recipes
     return jsonify({
+        'featured_recipes': featured_recipes,
         'recipes': recipes,
         'total_pages': total_pages,
         'current_page': page
     }), 200
+
 
 @bp.post("/user")
 def getUserId():
