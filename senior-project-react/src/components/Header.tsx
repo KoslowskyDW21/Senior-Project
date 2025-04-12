@@ -7,6 +7,7 @@ import {
   Menu,
   MenuItem,
   Divider,
+  Typography,
   IconButton,
   Avatar,
   Box,
@@ -279,23 +280,50 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             <img
               src={`${config.serverUrl}/static/logos/altLogo1.jpg`}
               alt="Image"
-              style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: "transparent" }}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                backgroundColor: "transparent",
+              }}
             />
           </Box>
         </ButtonBase>
         <Box
           sx={{
             display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
             justifyContent: "center",
             flexGrow: 1,
-            alignItems: "center",
-            fontSize: "clamp(8px, 1vw, 20px)", // Scales based on screen width, between 16px and 24px
-            fontWeight: "bold",
+            textAlign: "center",
+            paddingX: 1,
+            overflow: "visible",
+            whiteSpace: "normal",
+            wordBreak: "break-word",
           }}
         >
-          <h1>{title}</h1>
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            sx={{
+              fontSize: "clamp(16px, 2vw, 40px)",
+              lineHeight: 1.2,
+            }}
+          >
+            {title}
+          </Typography>
         </Box>
-        <Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            width: "fit-content",
+            minWidth: "110px",
+            gap: 1,
+          }}
+        >
           {/* Notification Icon */}
           <IconButton
             onClick={handleClickNotification}
