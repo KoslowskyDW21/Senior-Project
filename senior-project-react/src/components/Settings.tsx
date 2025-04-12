@@ -308,6 +308,10 @@ export default function Settings() {
           setMessage("Same username or already taken");
         } else if (response.data.alreadyTaken) {
           setMessage("Username already taken");
+        } else if (
+          response.data.message === "Cannot choose an empty username"
+        ) {
+          setMessage("Cannot choose an empty username");
         } else {
           setMessage("Username updated successfully!");
         }
@@ -701,6 +705,7 @@ export default function Settings() {
             onChange={(e) => {
               const newUsername = e.target.value;
               if (newUsername.length <= 16) {
+                setNewUsername(newUsername);
                 setUsername(newUsername);
                 setUser((prevUser) => ({
                   ...prevUser,
