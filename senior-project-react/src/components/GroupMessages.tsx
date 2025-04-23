@@ -18,6 +18,8 @@ import {
   FormControl,
   InputLabel,
   Select,
+  SelectChangeEvent,
+  MenuItem,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
@@ -54,6 +56,7 @@ const GroupMessages: React.FC = () => {
   const [newMessage, setNewMessage] = useState<string>("");
   const [messageId, setMessageId] = useState<number>(-1);
   const [open, setOpen] = useState<boolean>(false);
+  const [reason, setReason] = useState<string>("N/A");
   const [confirmation, setConfirmation] = useState<string>("");
   const handleOpenModal = () => setOpen(true);
   const handleCloseModal = () => setOpen(false);
@@ -134,6 +137,7 @@ const GroupMessages: React.FC = () => {
       const newData = {
         user_id: data!.id,
         message_id: messageId,
+        reason: reason,
       };
 
       await axios
@@ -228,7 +232,19 @@ const GroupMessages: React.FC = () => {
                 size="small"
               >
                 <InputLabel id="reason-label">Reason</InputLabel>
-                <Select labelId="reason-label"></Select>
+                <Select
+                  labelId="reason-label"
+                  onChange={(event: SelectChangeEvent) => {
+                    setReason(event.target.value);
+                  }}
+                >
+                  <MenuItem value="Sexual Content">Sexual Content</MenuItem>
+                  <MenuItem value="Violent Content">Violent Content</MenuItem>
+                  <MenuItem value="Hateful Content">Hateful Content</MenuItem>
+                  <MenuItem value="Harrassment or Bullying">Harrassment or Bullying</MenuItem>
+                  <MenuItem value="Spam">Spam</MenuItem>
+                  <MenuItem value="Irrelevant">Irrelevant</MenuItem>
+                </Select>
               </FormControl>
               <br />
               <ButtonWithConfirmation

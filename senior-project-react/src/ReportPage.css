@@ -22,7 +22,7 @@ thead {
 }
 
 tbody {
-  text-align: left;
+  text-align: center;
 }
 
 tbody tr:nth-child(even) {
@@ -33,7 +33,7 @@ tbody tr:nth-child(odd) {
   background-color: var(--color-light);
 }
 
-table tr td:nth-child(n+5) {
+table tr td:nth-child(n+3) {
   text-align: center;
   background-color: var(--table-light-bg);
 }

@@ -34,6 +34,7 @@ class User(UserMixin, db.Model):
     num_reports = db.Column(db.Integer, nullable=False)
     is_banned = db.Column(db.Boolean, nullable=False)
     banned_until = db.Column(db.DateTime, nullable=True)
+    reason_for_ban = db.Column(db.String(50), nullable=True)
     hasLeveled = db.Column(db.Boolean, nullable = False)
 
     blocks = relationship('UserBlock', foreign_keys="[UserBlock.blocked_user]", cascade="all, delete-orphan")

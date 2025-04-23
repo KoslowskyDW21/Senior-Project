@@ -14,6 +14,8 @@ import {
   Modal,
   FormControl,
   Select,
+  SelectChangeEvent,
+  MenuItem,
   InputLabel,
   List,
   ListItem,
@@ -27,6 +29,7 @@ import GroupMembersList from "./GroupMembersList";
 import config from "../config.js";
 import ConfirmationMessage from "./ConfirmationMessage.js";
 import { ConfirmationProvider, useConfirmation } from "./ConfirmationHelper.js";
+import ReportReasons from "./ReportReasons.js";
 
 interface UserGroup {
   id: number;
@@ -94,7 +97,7 @@ const GroupDetails: React.FC = () => {
   const [isInvited, setIsInvited] = useState(false);
   const [inviteMessage, setInviteMessage] = useState("");
   const [message, setMessage] = useState<string>("");
-  const [confirmation, setConfirmation] = useState<boolean>(false);
+  const [reason, setReason] = useState<string>("N/A");
   const navigate = useNavigate();
   const theme = useTheme();
 
@@ -259,6 +262,7 @@ const GroupDetails: React.FC = () => {
     if (!data!.alreadyReported) {
       const newData = {
         user_id: data!.id,
+        reason: reason,
         group_id: id,
       };
 
@@ -529,20 +533,22 @@ const GroupDetails: React.FC = () => {
                   size="small"
                 >
                   <InputLabel id="reason-label">Reason</InputLabel>
-                  <Select labelId="reason-label"></Select>
+                  <Select
+                    labelId="reason-label"
+                    onChange={(event: SelectChangeEvent) => {
+                      setReason(event.target.value);
+                    }}
+                  >
+                    <MenuItem value="Sexual Content">Sexual Content</MenuItem>
+                    <MenuItem value="Violent Content">Violent Content</MenuItem>
+                    <MenuItem value="Hateful Content">Hateful Content</MenuItem>
+                    <MenuItem value="Harrassment or Bullying">Harrassment or Bullying</MenuItem>
+                    <MenuItem value="Spam">Spam</MenuItem>
+                    <MenuItem value="Irrelevant">Irrelevant</MenuItem>
+                  </Select>
+
                 </FormControl>
                 <br />
-                {/* <Button
-                  variant="contained"
-                  color="error"
-                  onClick={() => {
-                    handleReportGroup();
-                    handleCloseModal();
-                    setConfirmation(true);
-                  }}
-                >
-                  Confirm Report
-                </Button> */}
                 <ButtonWithConfirmation
                   color="error"
                   handler={() => {

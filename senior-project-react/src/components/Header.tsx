@@ -7,6 +7,7 @@ import {
   Menu,
   MenuItem,
   Divider,
+  Typography,
   IconButton,
   Avatar,
   Box,
@@ -116,6 +117,11 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
       location.pathname !== "/challenges"
     ) {
       navigate(`/challenges/${challenge_id}`);
+    } else if (
+      notification_type === "achievement" &&
+      location.pathname !== "/achievements"
+    ) {
+      navigate(`/achievements`);
     }
   };
 
@@ -263,7 +269,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             sx={{
               width: "clamp(40px, 6vw, 70px)", // Width will scale between 50px and 70px
               height: "clamp(40px, 6vw, 70px)", // Same for height
-              backgroundColor: "lightgray",
+              backgroundColor: "transparent",
               borderRadius: 2,
               display: "flex",
               justifyContent: "center",
@@ -272,25 +278,52 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             }}
           >
             <img
-              src={`${config.serverUrl}/static/uploads/2cc38bfefa3a4e26b89ac081ff6cf7df_cook.jpg`}
+              src={`${config.serverUrl}/static/logos/altLogo1.jpg`}
               alt="Image"
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                backgroundColor: "transparent",
+              }}
             />
           </Box>
         </ButtonBase>
         <Box
           sx={{
             display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
             justifyContent: "center",
             flexGrow: 1,
-            alignItems: "center",
-            fontSize: "clamp(8px, 1vw, 20px)", // Scales based on screen width, between 16px and 24px
-            fontWeight: "bold",
+            textAlign: "center",
+            paddingX: 1,
+            overflow: "visible",
+            whiteSpace: "normal",
+            wordBreak: "break-word",
           }}
         >
-          <h1>{title}</h1>
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            sx={{
+              fontSize: "clamp(16px, 2vw, 40px)",
+              lineHeight: 1.2,
+            }}
+          >
+            {title}
+          </Typography>
         </Box>
-        <Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            width: "fit-content",
+            minWidth: "110px",
+            gap: 1,
+          }}
+        >
           {/* Notification Icon */}
           <IconButton
             onClick={handleClickNotification}
@@ -352,7 +385,9 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                 </MenuItem>
                 <Divider />
                 {notifications
-                  .filter((notification: Notification) => notification.isRead === 0)
+                  .filter(
+                    (notification: Notification) => notification.isRead === 0
+                  )
                   .map((notification: Notification, index: number) => (
                     <MenuItem
                       key={index}

@@ -146,7 +146,7 @@ def get_notifications():
 @bp.route('/reported/', methods=["GET"])
 @login_required
 def get_reported_groups():
-    reportedGroups = UserGroup.query.filter(UserGroup.num_reports > 0).all()
+    reportedGroups: list[UserGroup] = UserGroup.query.filter(UserGroup.num_reports > 0).all()
     return jsonify([group.to_json() for group in reportedGroups]), 200
 
 @bp.route("/reported_messages/", methods=["GET"])
@@ -360,11 +360,13 @@ def post_report_group(group_id: int):
     data = request.get_json()
     userId = data.get("user_id")
     groupId = data.get("group_id")
+    reason = data.get("reason")
 
     print("Received data - userID: " + str(userId))
     print("Received data - groupID: " + str(groupId))
+    print("Received data - reason: " + str(reason))
 
-    newReport: GroupReport = GroupReport(group_id=groupId, user_id=userId, reason="N/A") # type: ignore
+    newReport: GroupReport = GroupReport(group_id=groupId, user_id=userId, reason=reason) # type: ignore
     group: UserGroup = UserGroup.query.filter_by(id=groupId).first() # type: ignore
     group.num_reports += 1
 
@@ -392,14 +394,16 @@ def get_report_message(message_id: int):
 @login_required
 @bp.post("/<int:message_id>/reportMessage/")
 def post_report_message(message_id: int):
-    data = request.get_json()
+    data: dict = request.get_json()
     userId = data.get("user_id")
     messageId = data.get("message_id")
+    reason = data.get("reason")
 
     print("Received data - userID: " + str(userId))
     print("Received data - messageId: " + str(messageId))
+    print("Received data - reason: " + str(reason))
 
-    newReport: MessageReport = MessageReport(message_id=messageId, user_id=userId, reason="N/A") # type: ignore
+    newReport: MessageReport = MessageReport(message_id=messageId, user_id=userId, reason=reason) # type: ignore
     message: Message = Message.query.filter_by(id=messageId).first() # type: ignore
     message.num_reports += 1
 

@@ -256,24 +256,26 @@ def report():
     user = current_user._get_current_object()
     data = request.get_json()
     reportedId = data.get("report_id")
+    reason = data.get("reason")
 
     print("Received data - reportedId: " + str(reportedId))
+    print("Received data - reason: " + str(reason))
 
     report = UserReport.query.filter_by(reported_by=user.id, reported_user=reportedId).first() # type: ignore
 
     print(report)
 
     if report != None:
-        return jsonify({"message": "You already reported this user"}), 405
+        return jsonify({"message": "User already reported"}), 405
 
-    newReport: UserReport = UserReport(reported_user=reportedId, reported_by=user.id, reason="N/A") # type: ignore
+    newReport: UserReport = UserReport(reported_user=reportedId, reported_by=user.id, reason=reason) # type: ignore
     otherUser: User = User.query.filter_by(id=reportedId).first() # type: ignore
     otherUser.num_reports += 1
 
     try:
         db.session.add(newReport)
         db.session.commit()
-        return jsonify({"message": f"User {reportedId} reported"}), 200
+        return jsonify({"message": "User successfully reported", "id": reportedId}), 200
     except Exception as e:
         db.session.rollback()
         print(f"Error reporting user: {e}")

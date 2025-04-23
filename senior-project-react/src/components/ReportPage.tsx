@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useThemeContext } from "./ThemeContext";
-import "../AdminPage.css";
+import "../ReportPage.css";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import config from "../config.js";
@@ -39,6 +39,7 @@ interface User {
 
 interface UserGroup {
   id: number;
+  user_id: number;
   name: string;
   description: string;
   is_public: boolean;
@@ -261,6 +262,26 @@ const modalStyle = {
   paddingRight: 7,
   paddingBottom: 3,
   textAlign: "center",
+};
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "80vw",  // Set width relative to viewport width
+  height: "60vh",  // Set height relative to viewport height
+  maxWidth: "60vh",
+  maxHeight: "75vh",  // Max height to limit the modal's height on large screens
+  bgcolor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  p: 4,
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  overflow: "hidden", // Prevent overflow
 };
 
 export default function ReportPage() {
@@ -500,7 +521,7 @@ export default function ReportPage() {
   async function deleteMessageReports() {
     await axios
       .delete(
-        `${config.serverUrl}/groups/${message!.id}/delete_message_reports`
+        `${config.serverUrl}/groups/${message!.id}/delete_message_reports/`
       )
       .then((response) => {
         console.log(response.data);
@@ -513,7 +534,7 @@ export default function ReportPage() {
   async function setMessageReportsZero() {
     await axios
       .post(
-        `${config.serverUrl}/groups/${message!.id}/set_message_reports_zero`
+        `${config.serverUrl}/groups/${message!.id}/set_message_reports_zero/`
       )
       .then((response) => {
         console.log(response.data);
@@ -525,7 +546,7 @@ export default function ReportPage() {
 
   async function deleteMessage() {
     await axios
-      .delete(`${config.serverUrl}/groups/${message!.id}/delete_message`)
+      .delete(`${config.serverUrl}/groups/${message!.id}/delete_message/`)
       .then((response) => {
         console.log(response.data);
       })
@@ -831,11 +852,15 @@ export default function ReportPage() {
               <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
             </IconButton>
 
-            <Group group={group!} />
-
             <Typography id="modal-title" variant="h4" component="h2">
               {group !== null ? group.name : ""}
             </Typography>
+            <Typography id="modal-title" variant="h5" component="h2">
+              {`Group created by 
+              ${group !== null ? getUserById(group.user_id) : ""}`}
+            </Typography>
+
+            {group && <a href={`/groups/${group.id}`}>{`Go to ${group.name}`}</a>}
 
             <table>
               <thead>
@@ -1015,19 +1040,22 @@ export default function ReportPage() {
         >
           <Box sx={modalStyle}>
             <IconButton
-              onClick={handleCloseMessageModal}
+              onClick={handleCloseChallengeModal}
               style={{ position: "absolute", top: 5, right: 5 }}
             >
               <CloseIcon sx={{ fontSize: 30, fontWeight: "bold" }} />
             </IconButton>
 
-            <Challenge challenge={challenge!} />
-
             <Typography id="modal-title" variant="h4" component="h2">
+              {challenge !== null ? challenge.name : "null"}       
+            </Typography>
+            <Typography id="modal-title" variant="h5" component="h2">
               {`Challenge created by ${
-                challenge !== null ? challenge.creator : "null"
+                challenge !== null ? getUserById(+challenge.creator) : "null"
               }`}
             </Typography>
+
+            {challenge && <a href={`/challenges/${challenge.id}`}>{`Go to ${challenge.name}`}</a>}
 
             <table>
               <thead>

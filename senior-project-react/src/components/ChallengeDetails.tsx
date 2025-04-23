@@ -18,6 +18,8 @@ import {
   Checkbox,
   FormControl,
   Select,
+  SelectChangeEvent,
+  MenuItem,
   InputLabel,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -97,6 +99,7 @@ const ChallengeDetail: React.FC = () => {
   const [invited, setInvited] = useState(false);
   const [message, setMessage] = useState<string>("");
   const [inviteMessage, setInviteMessage] = useState("");
+  const [reason, setReason] = useState<string>("N/A");
   const theme = useTheme();
   const [, setParticipantIds] = useState<Participant[]>([]);
 
@@ -325,6 +328,7 @@ const ChallengeDetail: React.FC = () => {
     if (!data!.alreadyReported) {
       const newData = {
         user_id: data!.id,
+        reason: reason,
         challenge_id: id,
       };
 
@@ -538,7 +542,20 @@ const ChallengeDetail: React.FC = () => {
               size="small"
             >
               <InputLabel id="reason-label">Reason</InputLabel>
-              <Select labelId="reason-label"></Select>
+              <Select
+                labelId="reason-label"
+                onChange={(event: SelectChangeEvent) => {
+                  setReason(event.target.value);
+                }}
+              >
+                <MenuItem value="Sexual Content">Sexual Content</MenuItem>
+                <MenuItem value="Violent Content">Violent Content</MenuItem>
+                <MenuItem value="Hateful Content">Hateful Content</MenuItem>
+                <MenuItem value="Harrassment or Bullying">Harrassment or Bullying</MenuItem>
+                <MenuItem value="Spam">Spam</MenuItem>
+                <MenuItem value="Irrelevant">Irrelevant</MenuItem>
+              </Select>
+
             </FormControl>
             <br />
             <ButtonWithConfirmation

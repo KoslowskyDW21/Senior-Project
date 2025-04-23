@@ -308,6 +308,10 @@ export default function Settings() {
           setMessage("Same username or already taken");
         } else if (response.data.alreadyTaken) {
           setMessage("Username already taken");
+        } else if (
+          response.data.message === "Cannot choose an empty username"
+        ) {
+          setMessage("Cannot choose an empty username");
         } else {
           setMessage("Username updated successfully!");
         }
@@ -653,10 +657,10 @@ export default function Settings() {
             <MenuItem disabled value="">
               {user.colonial_floor}
             </MenuItem>
-            <MenuItem value={1}>One</MenuItem>
-            <MenuItem value={2}>Two</MenuItem>
-            <MenuItem value={3}>Three</MenuItem>
-            <MenuItem value={4}>Four</MenuItem>
+            <MenuItem value={1}>1</MenuItem>
+            <MenuItem value={2}>2</MenuItem>
+            <MenuItem value={3}>3</MenuItem>
+            <MenuItem value={4}>4</MenuItem>
           </Select>
           <FormHelperText>Colonial Floor</FormHelperText>
         </FormControl>
@@ -701,6 +705,7 @@ export default function Settings() {
             onChange={(e) => {
               const newUsername = e.target.value;
               if (newUsername.length <= 16) {
+                setNewUsername(newUsername);
                 setUsername(newUsername);
                 setUser((prevUser) => ({
                   ...prevUser,

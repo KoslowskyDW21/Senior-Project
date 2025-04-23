@@ -18,11 +18,14 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  SelectChangeEvent,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import config from "../config.js";
+import ConfirmationMessage from "./ConfirmationMessage.js";
+import { ConfirmationProvider, useConfirmation } from "./ConfirmationHelper.js";
 
 interface ProfileResponse {
   lname: string;
@@ -107,6 +110,7 @@ const OtherProfile: React.FC = () => {
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
   const [user_level, setLevel] = useState<number>(0);
   const [xp_points, setXp_points] = useState<number>(0);
+  const [message, setMessage] = useState<string>("");
   const [, setHasLeveled] = useState<boolean>(false);
   const [friends, setFriends] = useState<[]>([]);
   const [friendRequestsTo, setFriendRequestsTo] = useState<[]>([]);
@@ -117,12 +121,30 @@ const OtherProfile: React.FC = () => {
   const [profileNotFound, setProfileNotFound] = useState(false);
   const [isUserBlocked, setIsUserBlocked] = useState(false);
   const [isCurrentUserBlocked, setIsCurrentUserBlocked] = useState(false);
+  const [reason, setReason] = useState<string>("N/A");
   const handleOpenReportModal = () => setOpenReportModal(true);
   const handleCloseReportModal = () => setOpenReportModal(false);
   const handleOpenRemoveFriendModal = () => setOpenRemoveFriendModal(true);
   const handleCloseRemoveFriendModal = () => setOpenRemoveFriendModal(false);
   const handleOpenBlockModal = () => setOpenBlockModal(true);
   const handleCloseBlockModal = () => setOpenBlockModal(false);
+
+  function ButtonWithConfirmation({ color, handler, text }: any) {
+        const {open, toggleOpen} = useConfirmation();
+      
+        return (
+          <Button
+            variant="contained"
+            color={color}
+            onClick={() => {
+              handler();
+              toggleOpen();
+            }}
+          >
+            {text}
+          </Button>
+        )
+      }
 
   const [ellipsisAnchorEl, setEllipsisAnchorEl] = useState<null | HTMLElement>(
     null
@@ -402,6 +424,7 @@ const OtherProfile: React.FC = () => {
   const handleReportUser = async () => {
     const data = {
       report_id: numericId,
+      reason: reason,
     };
 
     await axios
@@ -411,15 +434,20 @@ const OtherProfile: React.FC = () => {
         },
       })
       .then((response) => {
-        console.log(response.data.message);
+        setMessage(response.data.message);
+        console.log(response.data);
       })
       .catch((error) => {
+        if(error.response.status === 405) {
+          setMessage(error.response.data.message);
+        }
+        console.log(error.response.data);
         console.error("Could not report user", error);
       });
   };
 
   return (
-    <>
+    <ConfirmationProvider>
       <Header title={`${username}`} />
       <IconButton
         onClick={() => navigate(-1)}
@@ -756,19 +784,27 @@ const OtherProfile: React.FC = () => {
                 size="small"
               >
                 <InputLabel id="reason-label">Reason</InputLabel>
-                <Select labelId="reason-label"></Select>
+                <Select
+                  labelId="reason-label"
+                  onChange={(event: SelectChangeEvent) => {
+                    setReason(event.target.value);
+                  }}
+                >
+                  <MenuItem value="Inappropriate Profile Picture">Inappropriate Profile Picture</MenuItem>
+                  <MenuItem value="Inappropriate Username">Inappropriate Username</MenuItem>
+                  <MenuItem value="Creation of Inappropriate Content">Creation of Inappropriate Content</MenuItem>
+                  <MenuItem value="Harrassment or Bullying">Harrassment or Bullying</MenuItem>
+                </Select>
               </FormControl>
               <br />
-              <Button
-                variant="contained"
+              <ButtonWithConfirmation
                 color="error"
-                onClick={() => {
+                handler={() => {
                   handleReportUser();
                   handleCloseReportModal();
                 }}
-              >
-                Confirm Report
-              </Button>
+                text="Confirm Report"
+              />
             </Box>
           </Modal>
 
@@ -819,7 +855,8 @@ const OtherProfile: React.FC = () => {
       </Modal>
         </>
       )}
-    </>
+      <ConfirmationMessage message={message} />
+    </ConfirmationProvider>
   );
 };
 

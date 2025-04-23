@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import axios from "axios";
+import { useTheme } from "@mui/material/styles";
 import config from "../config.js";
 
 interface User {
@@ -48,8 +49,10 @@ const ChallengeParticipantsList: React.FC<ChallengeParticipantsListProps> = ({
 
   const handleKickUser = async (userId: number) => {
     try {
-      console.log("User ID: ", userId)
-      await axios.post(`${config.serverUrl}/challenges/${challengeId}/kick/${userId}/`);
+      console.log("User ID: ", userId);
+      await axios.post(
+        `${config.serverUrl}/challenges/${challengeId}/kick/${userId}/`
+      );
       alert("User kicked successfully!");
     } catch (error) {
       console.error("Error kicking user:", error);
@@ -57,6 +60,9 @@ const ChallengeParticipantsList: React.FC<ChallengeParticipantsListProps> = ({
     }
     window.location.reload();
   };
+
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   return (
     <Box
@@ -70,7 +76,7 @@ const ChallengeParticipantsList: React.FC<ChallengeParticipantsListProps> = ({
     >
       <List>
         {participants.map((participant) => (
-          <ListItem 
+          <ListItem
             key={`participant-${participant.username}`}
             sx={{ display: "flex", alignItems: "center" }}
           >
@@ -83,14 +89,24 @@ const ChallengeParticipantsList: React.FC<ChallengeParticipantsListProps> = ({
               primary={
                 <Typography
                   sx={{
-                    color: participant.id === creatorId ? "blue" : "black",
+                    color:
+                      participant.id === creatorId
+                        ? isDarkMode
+                          ? "lightblue"
+                          : "blue"
+                        : isDarkMode
+                        ? "white"
+                        : "black",
                   }}
                 >
                   {participant.username}
                   {participant.id === creatorId && (
                     <Typography
                       component="span"
-                      sx={{ color: "blue", marginLeft: 1 }}
+                      sx={{
+                        color: isDarkMode ? "lightblue" : "blue",
+                        marginLeft: 1,
+                      }}
                     >
                       (Creator)
                     </Typography>
@@ -98,7 +114,7 @@ const ChallengeParticipantsList: React.FC<ChallengeParticipantsListProps> = ({
                 </Typography>
               }
             />
-            {isCreator && (participant.id !== creatorId) && (
+            {isCreator && participant.id !== creatorId && (
               <Button
                 variant="contained"
                 color="secondary"

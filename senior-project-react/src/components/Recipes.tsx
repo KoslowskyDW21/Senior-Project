@@ -131,6 +131,8 @@ const Recipes: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [featuredRecipes, setFeaturedRecipes] = useState<Recipe[]>([]);
+
 
   const getSearchQuery = () =>
     new URLSearchParams(location.search).get("search") || "";
@@ -166,6 +168,7 @@ const Recipes: React.FC = () => {
 
   useEffect(() => {
     // If dietary restrictions or page change, reload recipes
+    setFeaturedRecipes([])
     setRecipes([]); // Clear previous recipes
     setPage(1); // Reset page to 1
     setTotalPages(1); // Reset total pages
@@ -222,8 +225,10 @@ const Recipes: React.FC = () => {
         },
       });
 
-      const { recipes: newRecipes, total_pages } = response.data;
-
+      const { recipes: newRecipes, total_pages, featured_recipes } = response.data;
+      if (featured_recipes) {
+        setFeaturedRecipes(featured_recipes);
+      }
       if (newRecipes.length === 0) {
         setNoResultsFound(true);
       } else {
@@ -403,6 +408,58 @@ const Recipes: React.FC = () => {
       Shopping List
     </Button>
     </Box>
+</Box>
+<Box
+  mt={4}
+  textAlign="center"
+  display="flex"
+  flexDirection="column"
+  alignItems="center"
+>
+  {/* Only display Featured Recipes if searchQuery is empty */}
+  {searchQuery === "" && (
+    <>
+      <Typography variant="h4" mb={2}>
+        Featured Recipes
+      </Typography>
+      <Grid2 container spacing={3}>
+        {featuredRecipes.map((recipe) => (
+          <Grid2
+            key={recipe.id}
+            size={isSmallScreen ? 4 : isMediumScreen ? 4 : 3}
+          >
+            <Box
+              mb={4}
+              sx={{
+                border: "2px solid rgb(172, 169, 169)",
+                borderRadius: 2,
+                boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  borderColor: "#1976d2",
+                  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                },
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+                minHeight: "200px", // Base minimum height
+              }}
+            >
+              <Recipe
+                id={recipe.id}
+                name={recipe.recipe_name}
+                difficulty={recipe.difficulty}
+                image={`${config.serverUrl}/${recipe.image}`}
+              />
+            </Box>
+          </Grid2>
+        ))}
+      </Grid2>
+      <Typography variant="h4" mb={2} mt={2}>
+                All Recipes
+      </Typography>
+    </>
+  )}
 </Box>
         <main role="main" /*style={{ paddingTop: "60px" }}*/>
           {noResultsFound ? (
