@@ -131,8 +131,14 @@ const GroupDetails: React.FC = () => {
       if (response.status === 200) {
         setGroup(response.data);
       }
-    } catch (error) {
-      console.error("Error fetching group details:", error);
+    } catch (error: any) {
+      if (error.response && error.response.status === 403) {
+        // Notify the user and redirect them if they don't have permission
+        alert("You do not have permission to view this group.");
+        navigate("/groups");
+      } else {
+        console.error("Error fetching group details:", error);
+      }
     }
   };
 

@@ -18,6 +18,20 @@ def get_group(id):
     group = UserGroup.query.get(id)
     if not group:
         return jsonify({"message": "Group not found"}), 404
+    
+    # Check if the group is public or if the user is a member or invited
+    if not group.is_public:
+        is_member = GroupMember.query.filter_by(group_id=id, member_id=current_user.id).first()
+        is_invited = UserNotifications.query.filter_by(
+            group_id=id,
+            user_id=current_user.id,  # type: ignore
+            notification_type='group_message'
+        ).first()
+
+        if not is_member and not is_invited:
+            return jsonify({"message": "You are not allowed to view this group"}), 403
+
+
     return jsonify(group.to_json()), 200
 
 @bp.route('/', methods=['GET'])
